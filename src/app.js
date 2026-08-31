@@ -15,7 +15,7 @@
  */
 
 import { EngineError } from './data/errors.js';
-import { DEFAULT_SCENARIO } from './data/constants.js';
+import { DEFAULT_SCENARIO, HISTORICAL_DIR, SOURCE_LEDGER_REQUIRED } from './data/constants.js';
 
 /**
  * Attribute marking a tab navigation control.
@@ -46,12 +46,6 @@ const ACTIVE_ATTRIBUTE = 'data-active';
  * @type {string}
  */
 const TAB_EVENT = 'click';
-
-/**
- * Recalculated in Phase 5; the initial value comes from the project constants
- * (`DEFAULT_SCENARIO`) so the app and the engine agree on the neutral case.
- * @type {string}
- */
 
 /**
  * Recursively freezes a value so no consumer can mutate model state through a
@@ -134,6 +128,66 @@ function markActive(element, isActive, exposeToAria = false) {
  * @property {object} root DOM root element (or a stub in headless tests).
  * @property {() => number|string|Date} now Injected clock.
  */
+
+/**
+ * @typedef {object} BootDependencies
+ * @property {object} data Data-layer module exposing `loadHistorical`.
+ * @property {object} engine Calculation-engine module namespace.
+ * @property {object} root DOM root element (or a stub in headless tests).
+ * @property {() => number|string|Date} now Injected clock.
+ * @property {Set<string>|Array<string|{url: string}>} ledger Citation URLs from
+ *   `docs/sources/sources.md`. Required whenever ledger enforcement is on, which
+ *   is always — the gate fails closed rather than passing an unverified citation.
+ * @property {(location: string) => Promise<string>} [readText] Injected file
+ *   reader; the browser default (`fetch`) applies when omitted.
+ * @property {string} [dir] Directory prefix for dataset files.
+ */
+
+/**
+ * @typedef {object} BootResult
+ * @property {App} app The constructed application controller.
+ * @property {Object.<string, unknown>} dataset The audited historical corpus.
+ */
+
+/**
+ * Boots the app: load the historical corpus through the Accuracy Gate, then
+ * construct the controller on top of it.
+ *
+ * This is the production `loadHistorical()` call site, so it is where ledger
+ * enforcement is wired: `requireLedger` comes from `SOURCE_LEDGER_REQUIRED` and
+ * the ledger set is injected by the caller (parsed from
+ * `docs/sources/sources.md`). A citation whose URL is absent from the ledger
+ * raises `DataValidationError` before `createApp` ever runs — the app refuses to
+ * boot on out-of-ledger data rather than rendering uncited figures.
+ *
+ * Data loading stays a separate step from construction because
+ * `loadHistorical()` is async (frozen in P0.3) while `createApp()` is
+ * synchronous and returns the frozen four-member App interface.
+ *
+ * @param {BootDependencies} dependencies
+ * @returns {Promise<BootResult>}
+ * @throws {EngineError} `invalid_dependency` when `data.loadHistorical` is absent.
+ * @throws {import('./data/errors.js').DataValidationError} When any record fails
+ *   schema validation or the Accuracy Gate.
+ */
+export async function bootApp({ data, engine, root, now, ledger, readText, dir } = {}) {
+  if (data === null || data === undefined || typeof data.loadHistorical !== 'function') {
+    throw new EngineError(
+      'invalid_dependency',
+      'bootApp requires an injected `data` dependency exposing `loadHistorical()`.',
+      'data',
+    );
+  }
+
+  const dataset = await data.loadHistorical({
+    dir: dir ?? HISTORICAL_DIR,
+    readText,
+    requireLedger: SOURCE_LEDGER_REQUIRED,
+    ledger,
+  });
+
+  return { app: createApp({ data, engine, root, now }), dataset };
+}
 
 /**
  * Creates the application controller.

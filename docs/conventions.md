@@ -85,9 +85,11 @@ This specification is domain-neutral. Projects may append language-specific rule
 ### Project-Specific Rules — Duolingo FM (Static Browser Financial Model)
 
 #### Runtime & Dependencies
-- Zero runtime dependencies. No build step, no bundler, no CDN fetches at runtime.
+- **Zero network dependencies** (supersedes the earlier "zero runtime dependencies" wording, Director-approved 2026-08-31): no CDN fetches, no external origin requests at runtime, no build step, no bundler.
+- Vendored, version-pinned local files are permitted **only** through the Vendor Policy (`docs/spec.md` §2.1): stored under `vendor/`, recorded in `docs/vendor/manifest.md` (project, version, license, source URL, local path, SHA-256), audited by OP at every gate touching them. Current approved set: Tabulator (MIT) — the sole vendor file.
 - Native ESM modules (`import`/`export`) with explicit `.js` extensions in relative imports.
 - Node built-ins only for tooling/tests (`node:test`, `node:assert/strict`, `fs`, `path`).
+- Runtime test: with the network disconnected, the deployed app must behave identically — any vendor or data fetch from an external origin is a rejection condition.
 
 #### Financial Data Integrity (Project-Critical — overrides everything else)
 - Every historical record in `src/data/historical/*.json` MUST carry a full `source` object (filing type, period, statement, URL, accessedAt). The `audit.js` gate makes the app refuse to run otherwise.
@@ -102,6 +104,14 @@ This specification is domain-neutral. Projects may append language-specific rule
 - Cross-check fixtures (`tests/fixtures/duolingo_facts.js`) pin known anchor figures; any change to historical data that breaks a fixture is a rejection condition.
 - **Balance gate:** projected balance sheets must satisfy `assets = liabilities + equity` per year — engine invariant and automated test. An unbalanced projection is a blocking failure, never a warning.
 - **Mechanical recommendation only:** the Summary output's valuation label is computed from fixed thresholds in `constants.js` (upside % → Undervalued/Fair/Overvalued). No editorial language anywhere.
+- **Driver-based input model (Director-confirmed):** no free-form cell editing anywhere in the model. Every input is a named, schema-clamped driver on the Assumptions tab. Grid cells are read-only displays; Tabulator formatter callbacks only map model semantics to CSS classes.
+
+#### Vendored Table Layer (Tabulator)
+- Financial-model tables (Historicals, Schedules, Projections, Valuation, Sensitivity) render through the vendored Tabulator file at `vendor/tabulator/`; small summary tables (≤ 5 rows) may remain semantic `<table>`s.
+- Frozen first column + header row across 10-year column spans; keyboard cell navigation; range selection with clipboard copy-out to Excel.
+- **No editing modules** — Tabulator is used strictly as a grid/viewer. Any writable cell is a rejection condition.
+- Cell color-coding classes (`cell-input`, `cell-formula`, `cell-link`) are emitted only from render functions via Tabulator formatter callbacks — the same universal rule, same audit condition.
+- The vendor file is never modified. Version pinning and SHA-256 recorded in `docs/vendor/manifest.md`; drift between manifest hash and file content is a rejection condition.
 
 #### Cell Color-Coding (Model Standard)
 - **Blue** = hardcoded input cell; **black** = formula/computed cell; **green** = cross-statement link cell.

@@ -12,7 +12,9 @@
 
 ## Active Learnings & Bug Prevention
 
-<!-- DS appends real accumulated learnings below during development -->
+- [P1.2] [Workflow] BUG: Forgot to arm watcher after submission — Director escalation "ARM WATCHER DUMBASS" -> Permanent Rule: After EVERY `SUBMISSION` or `RESUBMISSION` (and after every `PASS` wake that resets `status_op.json` to `idle`), immediately arm `node tools/watch_ds_inbox.mjs` with its native 2h watchdog (`WORKFLOW_WATCHER_TIMEOUT_MS=7200000`). Never use a short bash `timeout` that kills the watcher early (10s probe is not arming); never skip arming. Baseline is `status_ds.json.seq` at arm time; watcher wakes only on `seq > baseline`. Document baseline in `DSmemory.md` checklist every turn.
+- [P1.2] [Transcription] BUG: `findInMap` used substring `includes` and fell through on dash → bottom-line total 661,311 mis-mapped to `convertible_preferred_stock` and `total_liabilities_and_stockholders_equity` left missing for FY2021 -> Permanent Rule: Anchor matches to row-start (`label === key || label.startsWith(key+' ')`), prefer longest key, normalize hyphens/apostrophes/commas in `normLabel`, preserve column positions (null for dash) and terminate on dash — never fall through to another row. Verbatim re-check must be column-pinned (`rawRow[column+1]` value AND printed form), not `table.text.includes`.
+- [P1.2] [Testing] PATTERN: Hardened per-period expected-set "no phantom metrics" test (FY2021 22, FY2022 24, FY2023 25, FY2024 29, FY2025 29, Q2 30) catches phantom rows that identity tests cannot (preferred participated in no sum). Use this pattern for all future balance/CF/KPI transcriptions.
 
 ---
 

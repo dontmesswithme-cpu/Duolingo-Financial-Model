@@ -48,16 +48,17 @@
 - `P4.3`: Sensitivity grids (WACC × terminal growth), Bear/Base/Bull per-share ranges; mechanical recommendation (`recommend.evaluate`) with MKT snapshot price.
 
 ### Phase 5: Interactive UI — 8-Tab Model Interface
+- `P5.0`: Vendor onboarding: download pinned Tabulator release (single file + CSS) into `vendor/tabulator/`, create `docs/vendor/manifest.md` (version, license, source URL, SHA-256), wire ESM import; OP audits manifest + integrity hash.
 - `P5.1`: App controller (DI, clamped drivers, synchronous recalc < 16ms, dispose) + tab shell navigation + Cover/TOC (version from git tags, disclaimer, EST/MKT legend).
-- `P5.2`: Assumptions tab (blue-input color-coding, schema-clamped controls) + Historicals tab (5-year + quarterly + TTM tables, citation superscripts, source expansion, `computed` labels).
-- `P5.3`: Schedules + Projections tabs (balance-check indicators, hybrid-year split display) + cell color-coding audit.
-- `P5.4`: Valuation tab (WACC build table, DCF schedule, bridge waterfall) + Summary/Output tab (mechanical recommendation, upside %, KPI headline cards, Rule of 40) + Sensitivity tab (data tables, scenario ranges).
+- `P5.2`: Assumptions tab (blue-input color-coding, schema-clamped controls) + Historicals tab (Tabulator grid: 5-year + quarterly + TTM columns, frozen label column + header, citation superscripts, source expansion, `computed` labels).
+- `P5.3`: Schedules + Projections tabs (Tabulator grids with frozen labels across 10-year column spans, balance-check indicators, hybrid-year split display) + cell color-coding audit (formatter callbacks emit `cell-input`/`cell-formula`/`cell-link` classes).
+- `P5.4`: Valuation tab (WACC build table, DCF schedule, bridge waterfall) + Summary/Output tab (mechanical recommendation, upside %, KPI headline cards, Rule of 40) + Sensitivity tab (Tabulator data tables, scenario ranges).
 - `P5.5`: Custom SVG charts (revenue/FCF actual-vs-forecast lines, margin bars, DCF waterfall); versioned screenshots for visual audit.
 
 ### Phase 6: End-to-End Verification, Performance & Release
-- `P6.1`: Full accuracy audit: OP re-verifies 100% of historical figures against cited sources; EST/MKT/computed marks verified present in every rendered view.
+- `P6.1`: Full accuracy audit: OP re-verifies 100% of historical figures against cited sources (direct EDGAR re-pull + Bigdata.com independent lane per spec §4.7); EST/MKT/computed marks verified present in every rendered view.
 - `P6.2`: Performance budgets (recalc < 16ms incl. balance gate + DCF, initial render < 500ms, heap < 50MB), responsiveness (390px–1280px), keyboard accessibility.
-- `P6.3`: Production verification (static hosting smoke test), README + model methodology documentation, Director release sign-off.
+- `P6.3`: Production verification & portfolio release: GitHub Actions Pages workflow + Vercel auto-deploy (Vercel URL primary, Pages mirror), offline smoke test (no network requests at runtime — vendor manifest URLs never fetched), **README as portfolio deliverable** (live links, architecture diagram, accuracy-gate pitch, screenshots), screen-recording of live driver-slider recalc for the LinkedIn post, Director release sign-off.
 
 ---
 

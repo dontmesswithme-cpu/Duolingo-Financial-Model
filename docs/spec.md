@@ -7,7 +7,7 @@
 ## 1. Executive Summary & Project Goal
 
 - **Project Name**: Duolingo FM — Duolingo, Inc. (NASDAQ: DUOL) Financial Model
-- **Target Platform**: Static browser application (HTML/CSS/JS, ESM modules, zero backend, zero build step, zero runtime dependencies). Runs fully offline once loaded.
+- **Target Platform**: Static browser application (HTML/CSS/JS, ESM modules, zero backend, zero build step, **zero network dependencies**). Runs fully offline once loaded. Vendored, version-pinned local files are permitted per the Vendor Policy (§2.1).
 - **Core Value Proposition**: A rigorous, fully-cited browser financial model for Duolingo structured as a professional 3-statement model: **Cover/TOC → Assumptions → Historicals → Supporting Schedules → 3-Statement Projections → Valuation (DCF) → Summary/Output → Sensitivity/Scenarios**. Historical financials and KPIs are transcribed **verbatim from SEC filings (10-K, 10-Q) and investor releases** — every historical figure carries a source citation. On top of the verified historical base: a **driver-based forecast engine** with full IS→BS→CF linkage (balance-checked), **Bear/Base/Bull scenarios**, **DCF valuation with WACC build**, sensitivity grids, and a **mechanical recommendation output**.
 
 ### Guiding Principle — Accuracy Gate (#1 Non-Negotiable)
@@ -22,9 +22,20 @@
 ## 2. System Architecture & Tech Stack
 
 - **Primary Language & Runtime**: JavaScript (ES2022+, native ESM). Node.js >= 20 for tooling/tests only.
-- **Frameworks & Core Libraries**: None at runtime (vanilla DOM + custom SVG charts). Dev-only: Node built-in test runner.
+- **Frameworks & Core Libraries**: None fetched from the network at runtime. Custom SVG charts. Tables in the financial-model views (Historicals, Schedules, Projections, Valuation, Sensitivity) are rendered with **Tabulator** (MIT), vendored per §2.1. Dev-only: Node built-in test runner.
 - **Storage / Database**: None. Static JSON data files (`src/data/historical/*.json`) served alongside the app.
 - **Testing Framework**: Node Test Runner (`node:test`), fully headless.
+
+### 2.1 Vendor Policy (Director-approved 2026-08-31)
+
+The original "zero runtime dependencies" line was stricter than the actual constraint ("static HTML/CSS/JS, no backend"). The governing rule is:
+
+> **Zero network dependencies** — nothing is fetched from a CDN or any external origin at runtime. Vendored, version-pinned local files are permitted, recorded in a vendor manifest (`docs/vendor/manifest.md`) audited by OP.
+
+- **Tabulator** is the sole approved vendor file: single pinned JS file (+ optional CSS), stored at `vendor/tabulator/`, imported via relative ESM path. No bundler, no build step, no CDN — the stack principles survive.
+- Why Tabulator over alternatives (Director decision log §7): MIT license with no ambiguity, ~50KB single file, minimal audit surface, covers frozen rows/columns + keyboard navigation + range copy to Excel via formatter callbacks → `cell-*` classes. AG Grid Community rejected as overkill (multi-file vendoring for unused capabilities); Handsontable rejected (non-commercial license gray zone + Excel-style free-form editing conflicts with the driver-based input model, Director-confirmed).
+- Cell color-coding (§3.4) is emitted only by render functions into Tabulator formatter callbacks — never hand-set.
+- **Vendor manifest rule**: any vendored file must record source project, exact version, license, source URL, local path, and an integrity hash (SHA-256). OP audits the manifest at every phase gate touching vendored files.
 
 ```
 +-------------------------------------------------------------+
@@ -140,7 +151,8 @@
 | 6 | **Valuation** | DCF: WACC build table (CAPM components labeled MKT/EST), explicit-period PV schedule, terminal value, EV → equity → per-share bridge (waterfall). Comps/precedent/LBO: **excluded by Director decision** — shown as marked N/A lines on Cover TOC only. |
 | 7 | **Summary / Output** | Key outputs: DCF/share vs MKT price, upside %, mechanical recommendation label, valuation bridge, Rule of 40, KPI headline cards (dashboard role lives here). |
 | 8 | **Sensitivity / Scenarios** | Data tables: WACC × terminal growth per-share grid; Bear/Base/Bull output ranges; price-per-share ranges. |
-- **Cell color-coding (universal rule)**: **blue** = hardcoded input; **black** = formula/computed; **green** = cross-statement link. Enforced via CSS classes emitted only by render functions — OP audits that any input cell lacking the blue class is a rejection condition.
+- **Cell color-coding (universal rule)**: **blue** = hardcoded input; **black** = formula/computed; **green** = cross-statement link. Enforced via CSS classes emitted only by render functions (including Tabulator formatter callbacks) — OP audits that any input cell lacking the blue class is a rejection condition.
+- **Tables**: financial-model tables rendered with vendored Tabulator (frozen first column + header, arrow-key cell navigation, range selection, clipboard copy-out to Excel). Small semantic `<table>`s (≤ 5 rows, e.g. Summary cards) remain vanilla. No free-form cell editing anywhere — all inputs flow through the blue driver controls on the Assumptions tab (driver-based model, Director-confirmed).
 - **Charts**: custom SVG (line: revenue/FCF actual-solid vs forecast-dashed; bar: margins; waterfall: DCF bridge). No chart library.
 - **Sources footer**: present on Historicals/Valuation; full filing list with URLs.
 
@@ -158,6 +170,21 @@
 4. **Quarterly & TTM Mechanics**: 10-Q income statements present discrete 3-month columns → transcribed directly (cited). 10-Q cash flow statements are **year-to-date** → transcribed as `ytd` rows (cited as such); the engine derives discrete quarters by differencing consecutive YTD values (`computed`); TTM = sum of 4 discrete quarters (`computed`). Q4 discrete = FY − 9M-YTD. KPI quarterly values from IR letters (cited). Underlying cited values are always displayed alongside or accessible via the source expansion — a `computed` value never replaces its cited constituents.
 5. **Verification Workflow (per data sub-phase)**: DS transcribes → `npm test` (fixtures + audit) → cites every record. OP **independently re-pulls cited sources and re-verifies every single value** — blind approvals prohibited; verification method recorded in audit log.
 6. **EST/MKT Policy**: forecast/scenario/DCF outputs `isEstimate: true`; market inputs (rf, beta, ERP, share price, share count for per-share) marked `MKT` with as-of dates. `format.estSuffix` guarantees visible marking.
+
+### 4.7 Retrieval Tools (Director-approved 2026-08-31)
+
+Bigdata.com (remote MCP) is a **retrieval tool, never a source**. It indexes the same SEC filings the model cites, and slots into the protocol as follows:
+
+| Role | Tool | Rule |
+|---|---|---|
+| Primary source (citation target) | SEC filings on EDGAR + Duolingo IR | Unchanged. Citations always name the SEC filing/IR release — never "Bigdata". |
+| DS transcription aid | Bigdata smart/fast search | Faster lookup of exact statement tables and XBRL-rendered figures; values still land as cited records pointing at the canonical sec.gov URL. |
+| OP independent verification lane | Bigdata smart/fast search | A genuinely independent second ingestion pipeline over the same sec.gov documents. Reproducible filter lanes (e.g. `reporting_entities: ["493F45"]`, `reporting_periods: [{fiscal_year: 2025}]`, `document_type: SEC_10_K`) are pinned in the OP audit procedure and recorded in `docs/logs/op/`. |
+| Secondary context | Bigdata-indexed earnings-call transcripts | KPI color only; KPI citations still go to the primary IR/8-K versions. |
+
+- Duolingo, Inc. resolves to entity id `493F45` (verified 2026-08-31).
+- Bigdata is **agent-time only**: used during transcription and at quality gates. The runtime app and `npm test` stay fully offline/deterministic — no network anywhere near CI.
+- OP verification via Bigdata is an *additional* lane, not a replacement for the direct EDGAR re-pull required by §4.5 — the canonical filing document remains the authority in any discrepancy.
 
 ---
 
@@ -194,3 +221,7 @@
 | 6 | Comparables | Excluded per Director (2026-08-31). Revisit only on explicit Director instruction. |
 | 7 | UI structure | Director-defined 8 tabs (§3.4). Dashboard concept merged into Summary/Output tab. |
 | 8 | Version control | Git repo initialized at P0.1; Cover tab version reads git tags produced by Gate Pass archiver. |
+| 9 | Table layer | **Tabulator (MIT), vendored locally** — single pinned file, vendor manifest audited by OP (2026-08-31). AG Grid rejected (overkill); Handsontable rejected (license + free-form editing conflicts with driver-based model). Spec §2 amended: "zero network dependencies" supersedes "zero runtime dependencies". |
+| 10 | Input model | **Driver-based control confirmed** — no free-form cell editing. All inputs are named, schema-clamped drivers on the Assumptions tab (2026-08-31). |
+| 11 | Deployment | **GitHub Pages (Actions workflow) + Vercel auto-deploy** from the same repo (2026-08-31). Vercel URL is the primary public link; GitHub Pages is the permanent mirror. README is a portfolio deliverable (P6.3). |
+| 12 | Retrieval tooling | Bigdata.com admitted as retrieval tool / OP verification lane only — never a citation source (§4.7, 2026-08-31). |
