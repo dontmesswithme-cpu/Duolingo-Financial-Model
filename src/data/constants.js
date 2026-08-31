@@ -2,15 +2,13 @@
  * Project constants — the single source of truth for shared values.
  *
  * `docs/conventions.md` requires every constant used in `src/data/` and
- * `src/engine/` to originate here, and the P0.3 grep gate forbids bare numeric
- * literals elsewhere. Scale factors below are the documented exception that the
- * gate explicitly allows, and they live here rather than at the call sites.
- *
- * NOTE ON PHASE SCOPE: this file is formally a P0.3 deliverable. `UNITS` is
- * implemented now because P0.2's `BAD_UNITS` audit rule is unimplementable
- * without the canonical unit -> scale mapping. Everything else still owed by
- * P0.3 (fiscal calendar notes, EST badge label, scenario names,
- * `SOURCE_LEDGER_REQUIRED`) remains deferred and is not defined here.
+ * `src/engine/` to originate here, and the P0.3 grep gate (scoped per the
+ * reviewer's binding ruling in `docs/inbox_ds.md` 2026-08-31) forbids bare
+ * configuration values elsewhere: thresholds, scale factors, limits, URL
+ * fragments, scenario names. Structural literals — array indices, `.length`
+ * comparisons, `index + 1` row numbering, regex quantifiers — are exempt.
+ * Scale factors below are the documented exception that lives here rather
+ * than at the call sites.
  *
  * @module src/data/constants
  */
@@ -52,3 +50,72 @@ export const KLASS_VALUES = Object.freeze(['flow', 'stock', 'kpi']);
  * @type {ReadonlyArray<string>}
  */
 export const PERIOD_TYPE_VALUES = Object.freeze(['fiscal_year', 'quarter', 'ytd']);
+
+/**
+ * The three scenario names, per the Assumptions/Drivers tab contract
+ * (`docs/spec.md` §3.4). Rendered as the bear/base/bull selector in Phase 5.
+ * @type {ReadonlyArray<string>}
+ */
+export const SCENARIO_NAMES = Object.freeze(['bear', 'base', 'bull']);
+
+/**
+ * Scenario applied until the user selects one (initial model state in
+ * `src/app.js` and the neutral case of every scenario-dependent pipeline).
+ * @type {string}
+ */
+export const DEFAULT_SCENARIO = 'base';
+
+/**
+ * Visible marking appended to every estimate/forecast value. `docs/conventions.md`
+ * requires the mark to flow through `format.estSuffix` — this constant is the
+ * canonical label text so the UI can never render an unmarked estimate.
+ * @type {string}
+ */
+export const EST_BADGE_LABEL = 'EST';
+
+/**
+ * Fiscal calendar notes — the transcription-honesty facts the data layer is
+ * built on (`docs/spec.md` §4.4). Recorded here so the loader, the engine, and
+ * the UI render pipeline share one description instead of re-deriving it.
+ * @type {Readonly<Record<string, string>>}
+ */
+export const FISCAL_CALENDAR_NOTES = Object.freeze({
+  fiscalYearEnd:
+    "Duolingo's fiscal year is the calendar year ending December 31.",
+  annualFilings:
+    'FY2021–FY2025 annuals come from 10-K filings; FY2026 is a hybrid year (H1 actual + H2 estimate).',
+  quarterlyIncome:
+    '10-Q income statements present discrete 3-month columns and are transcribed directly (cited).',
+  quarterlyCashFlow:
+    '10-Q cash-flow statements are year-to-date; transcribed as periodType "ytd" exactly as filed. Discrete quarters are derived by differencing (computed); Q4 discrete = FY minus 9M YTD.',
+  ttm:
+    'TTM = sum of 4 discrete quarters (computed). A computed value never replaces its cited constituents.',
+});
+
+/**
+ * Ledger enforcement flag: when `true`, citation URLs must exist in
+ * `docs/sources/sources.md` (`SOURCE_NOT_IN_LEDGER`). Consumed via dependency
+ * injection — `loadHistorical({ requireLedger, ledger })` — so the audit engine
+ * never imports project configuration and can be tested in an explicit
+ * ledger-free mode (contract B, P0.3). From P0.3 on, the app boots with this
+ * flag enabled.
+ * @type {boolean}
+ */
+export const SOURCE_LEDGER_REQUIRED = true;
+
+/**
+ * Directory containing the historical dataset JSON files. Relative to the
+ * document root when served statically. A URL fragment, so it is a
+ * configuration value and lives here per the grep gate.
+ * @type {string}
+ */
+export const HISTORICAL_DIR = 'src/data/historical/';
+
+/**
+ * The known historical datasets, per `docs/spec.md` §3.1. Discovery is an
+ * explicit manifest rather than a directory scan: a browser cannot enumerate a
+ * directory, so the file list is the single source of truth in both Node and
+ * the browser.
+ * @type {ReadonlyArray<string>}
+ */
+export const HISTORICAL_DATASETS = Object.freeze(['income', 'balance', 'cashflow', 'kpis']);

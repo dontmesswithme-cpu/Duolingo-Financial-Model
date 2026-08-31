@@ -15,6 +15,7 @@
  */
 
 import { EngineError } from './data/errors.js';
+import { DEFAULT_SCENARIO } from './data/constants.js';
 
 /**
  * Attribute marking a tab navigation control.
@@ -47,10 +48,10 @@ const ACTIVE_ATTRIBUTE = 'data-active';
 const TAB_EVENT = 'click';
 
 /**
- * Scenario applied until the scenario pipeline is wired in Phase 5.
+ * Recalculated in Phase 5; the initial value comes from the project constants
+ * (`DEFAULT_SCENARIO`) so the app and the engine agree on the neutral case.
  * @type {string}
  */
-const DEFAULT_SCENARIO = 'base';
 
 /**
  * Recursively freezes a value so no consumer can mutate model state through a

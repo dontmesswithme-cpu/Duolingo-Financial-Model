@@ -20,22 +20,7 @@
 import { DataValidationError, EngineError } from './errors.js';
 import { SCHEMAS, extractRows, validateRecord } from './schema.js';
 import { auditDataset } from './audit.js';
-
-/**
- * Default directory containing the historical dataset JSON files.
- * Relative to the document root when served statically.
- * @type {string}
- */
-const HISTORICAL_DIR = 'src/data/historical/';
-
-/**
- * The known historical datasets, per `docs/spec.md` §3.1.
- * Discovery is an explicit manifest rather than a directory scan: a browser
- * cannot enumerate a directory, so the file list is the single source of truth
- * in both Node and the browser.
- * @type {ReadonlyArray<string>}
- */
-const DATASET_FILES = Object.freeze(['income', 'balance', 'cashflow', 'kpis']);
+import { HISTORICAL_DIR, HISTORICAL_DATASETS } from './constants.js';
 
 /**
  * Which record schema governs each dataset file.
@@ -178,7 +163,7 @@ export async function loadHistorical(options = {}) {
    */
   const auditable = {};
 
-  for (const name of DATASET_FILES) {
+  for (const name of HISTORICAL_DATASETS) {
     const location = `${dir}${name}.json`;
 
     let text;
@@ -252,11 +237,11 @@ export async function loadHistorical(options = {}) {
 }
 
 /**
- * The canonical dataset manifest. Exported so the audit layer and tests share
- * a single source of truth for which datasets must exist.
+ * The canonical dataset manifest (re-exported from `constants.js`) so the audit
+ * layer and tests share a single source of truth for which datasets must exist.
  * @type {ReadonlyArray<string>}
  */
-export const HISTORICAL_DATASETS = DATASET_FILES;
+export { HISTORICAL_DATASETS };
 
 /**
  * Which schema governs each dataset. Exported so tests and tooling can assert

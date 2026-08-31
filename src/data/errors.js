@@ -94,3 +94,33 @@ export class EngineError extends Error {
     };
   }
 }
+
+/**
+ * Raised when a configuration value is missing or invalid: a required constant
+ * is absent, an injected option has the wrong shape, or a scenario/flag name is
+ * unknown. Distinct from `EngineError` because the fault is in static
+ * configuration rather than a runtime calculation invariant.
+ */
+export class ConfigError extends Error {
+  /**
+   * @param {string} message Human-readable description naming the offending entry.
+   * @param {string} [key] Dotted path or name of the configuration value at fault.
+   */
+  constructor(message, key) {
+    super(message);
+    this.name = 'ConfigError';
+    if (key !== undefined) {
+      /** @type {string | undefined} */
+      this.key = key;
+    }
+  }
+
+  /**
+   * Deterministic serialization for test assertions.
+   * `key` is omitted from JSON output when undefined.
+   * @returns {{ name: string, message: string, key?: string }}
+   */
+  toJSON() {
+    return { name: this.name, message: this.message, key: this.key };
+  }
+}
