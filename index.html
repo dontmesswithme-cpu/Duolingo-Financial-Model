@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Duolingo FM — Duolingo, Inc. (NASDAQ: DUOL) Financial Model</title>
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --color-page: #f7f8fa;
+      --color-surface: #ffffff;
+      --color-border: #d8dce3;
+      --color-text: #1c1f23;
+      --color-muted: #5c6570;
+      --color-accent: #1a4fd6;
+      --color-accent-soft: #e8edfb;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--color-page);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .app-header {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 20px 24px 0;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .app-subtitle {
+      margin: 4px 0 0;
+      color: var(--color-muted);
+      font-size: 13px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-top: 16px;
+    }
+
+    .tab-link {
+      appearance: none;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: var(--radius) var(--radius) 0 0;
+      color: var(--color-muted);
+      cursor: pointer;
+      font: inherit;
+      padding: 8px 14px;
+      position: relative;
+      top: 1px;
+    }
+
+    .tab-link:hover { color: var(--color-text); }
+
+    .tab-link:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: -2px;
+    }
+
+    .tab-link[data-active] {
+      background: var(--color-surface);
+      border-color: var(--color-border);
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    main {
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      min-height: 60vh;
+      padding: 24px;
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane[data-active] { display: block; }
+
+    .tab-pane h2 {
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+
+    .placeholder {
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius);
+      color: var(--color-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .app-footer {
+      border-top: 1px solid var(--color-border);
+      color: var(--color-muted);
+      font-size: 12px;
+      padding: 16px 24px 32px;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">Duolingo FM — Duolingo, Inc. (NASDAQ: DUOL)</h1>
+    <p class="app-subtitle">Cited 3-statement financial model · Phase 0 foundation scaffold</p>
+
+    <nav class="tabs" role="tablist" aria-label="Model sections">
+      <button class="tab-link" type="button" role="tab" id="tab-control-cover"
+              data-tab-link data-tab="cover" aria-controls="tab-cover" aria-selected="false">Cover &amp; TOC</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-assumptions"
+              data-tab-link data-tab="assumptions" aria-controls="tab-assumptions" aria-selected="false">Assumptions / Drivers</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-historicals"
+              data-tab-link data-tab="historicals" aria-controls="tab-historicals" aria-selected="false">Historicals</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-schedules"
+              data-tab-link data-tab="schedules" aria-controls="tab-schedules" aria-selected="false">Supporting Schedules</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-projections"
+              data-tab-link data-tab="projections" aria-controls="tab-projections" aria-selected="false">Projections (3-Statement)</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-valuation"
+              data-tab-link data-tab="valuation" aria-controls="tab-valuation" aria-selected="false">Valuation</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-summary"
+              data-tab-link data-tab="summary" aria-controls="tab-summary" aria-selected="false">Summary / Output</button>
+      <button class="tab-link" type="button" role="tab" id="tab-control-sensitivity"
+              data-tab-link data-tab="sensitivity" aria-controls="tab-sensitivity" aria-selected="false">Sensitivity / Scenarios</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="tab-pane" role="tabpanel" id="tab-cover" data-tab-pane data-tab="cover" aria-labelledby="tab-control-cover">
+      <h2>Cover &amp; TOC</h2>
+      <p class="placeholder">Phase 5 — title, as-of date, preparer (DS/OP, Protocol 1.0), version (git tag), disclaimer, EST/MKT marking legend, table of contents.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-assumptions" data-tab-pane data-tab="assumptions" aria-labelledby="tab-control-assumptions">
+      <h2>Assumptions / Drivers</h2>
+      <p class="placeholder">Phase 5 — revenue drivers, margins, tax rate, WACC components, terminal growth, market snapshot. All input cells rendered blue.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-historicals" data-tab-pane data-tab="historicals" aria-labelledby="tab-control-historicals">
+      <h2>Historicals</h2>
+      <p class="placeholder">Phase 1 — FY2021–FY2025 income statement, balance sheet, cash flow statement, quarterly TTM window, and KPIs, every row cited.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-schedules" data-tab-pane data-tab="schedules" aria-labelledby="tab-control-schedules">
+      <h2>Supporting Schedules</h2>
+      <p class="placeholder">Phase 2 — working capital, PP&amp;E roll-forward, debt, stock-based compensation, intangible amortization.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-projections" data-tab-pane data-tab="projections" aria-labelledby="tab-control-projections">
+      <h2>Projections (3-Statement)</h2>
+      <p class="placeholder">Phase 3 — linked income statement → balance sheet → cash flow, FY2026–FY2030, with the per-year balance check indicator.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-valuation" data-tab-pane data-tab="valuation" aria-labelledby="tab-control-valuation">
+      <h2>Valuation</h2>
+      <p class="placeholder">Phase 4 — WACC build, explicit-period PV schedule, terminal value, enterprise value → equity → per-share bridge.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-summary" data-tab-pane data-tab="summary" aria-labelledby="tab-control-summary">
+      <h2>Summary / Output</h2>
+      <p class="placeholder">Phase 5 — DCF per share vs market price, upside %, mechanical recommendation label, valuation bridge, Rule of 40, KPI headline cards.</p>
+    </section>
+
+    <section class="tab-pane" role="tabpanel" id="tab-sensitivity" data-tab-pane data-tab="sensitivity" aria-labelledby="tab-control-sensitivity">
+      <h2>Sensitivity / Scenarios</h2>
+      <p class="placeholder">Phase 5 — WACC × terminal growth per-share grid, Bear/Base/Bull output ranges, price-per-share ranges.</p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Static browser model — zero build step, zero runtime dependencies. Not investment advice. All forward-looking values are marked EST; market inputs are marked MKT.</p>
+  </footer>
+
+  <script type="module">
+    // Phase 0.1 bootstrap scaffold.
+    //
+    // Establishes the real module boundary (index.html -> src/app.js -> src/data/*)
+    // with placeholder adapters for the layers that later phases deliver. Phase 5
+    // replaces `engineStub` with the live engine namespace; `createApp`'s
+    // signature is frozen now, so no bootstrap change is required then.
+    import { createApp } from './src/app.js';
+    import * as dataLayer from './src/data/loader.js';
+
+    const engineStub = Object.freeze({});
+
+    const app = createApp({
+      data: dataLayer,
+      engine: engineStub,
+      root: document,
+      now: () => Date.now(),
+    });
+
+    // Exposed for manual console verification during Phase 0 review.
+    globalThis.duolingoFM = { app };
+  </script>
+</body>
+</html>
