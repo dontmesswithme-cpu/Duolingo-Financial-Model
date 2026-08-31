@@ -1,0 +1,20 @@
+{
+  "name": "duolingo-fm",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Duolingo FM — Universal Asynchronous Multi-Agent Engineering & Quality Verification Framework (Protocol v1.0)",
+  "scripts": {
+    "test": "node --expose-gc --test --test-concurrency=1",
+    "watch:ds": "node tools/watch_ds_inbox.mjs",
+    "watch:op": "node tools/watch_op_inbox.mjs",
+    "archive:phase": "node tools/archive_phase.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "playwright": "^1.40.0"
+  }
+}
