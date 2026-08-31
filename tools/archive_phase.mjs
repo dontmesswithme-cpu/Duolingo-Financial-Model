@@ -45,7 +45,7 @@ if (fs.existsSync(inboxDs)) {
   fs.copyFileSync(inboxDs, path.join(archiveDir, 'inbox_ds.md'));
   fs.writeFileSync(
     inboxDs,
-    `# Worker Inbox (DS Inbox)\n\n> **Channel**: Reviewer (`OP`) ➔ Worker (`DS`)\n>\n> **Rule**: OP appends review verdicts and milestone gate passes here. Every message MUST end with `[END_OF_MESSAGE]`.\n\n---\n`,
+    `# Worker Inbox (DS Inbox)\n\n> **Channel**: Reviewer (\`OP\`) ➔ Worker (\`DS\`)\n>\n> **Rule**: OP appends review verdicts and milestone gate passes here. Every message MUST end with \`[END_OF_MESSAGE]\`.\n\n---\n`,
     'utf8'
   );
 }
@@ -54,7 +54,7 @@ if (fs.existsSync(inboxOp)) {
   fs.copyFileSync(inboxOp, path.join(archiveDir, 'inbox_op.md'));
   fs.writeFileSync(
     inboxOp,
-    `# Reviewer Inbox (OP Inbox)\n\n> **Channel**: Worker (`DS`) ➔ Reviewer (`OP`)\n>\n> **Rule**: DS appends sub-phase submissions and resubmissions here. Every message MUST end with `[END_OF_MESSAGE]`.\n\n---\n`,
+    `# Reviewer Inbox (OP Inbox)\n\n> **Channel**: Worker (\`DS\`) ➔ Reviewer (\`OP\`)\n>\n> **Rule**: DS appends sub-phase submissions and resubmissions here. Every message MUST end with \`[END_OF_MESSAGE]\`.\n\n---\n`,
     'utf8'
   );
 }

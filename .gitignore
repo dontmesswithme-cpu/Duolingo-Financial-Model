@@ -10,6 +10,9 @@ node_modules/
 # Exploratory scratch files & probes
 scratch/
 
+# Agent working memory (not part of the shipped project)
+.workbuddy-ai/
+
 # Watcher signal output & locks
 docs/.ds_watch_result.txt
 docs/.op_watch_result.txt
