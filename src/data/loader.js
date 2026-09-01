@@ -17,10 +17,11 @@
  * @module src/data/loader
  */
 
-import { DataValidationError, EngineError } from './errors.js';
+import { ConfigError, DataValidationError, EngineError } from './errors.js';
 import { SCHEMAS, extractRows, validateRecord } from './schema.js';
 import { auditDataset } from './audit.js';
-import { HISTORICAL_DIR, HISTORICAL_DATASETS } from './constants.js';
+import { HISTORICAL_DIR, HISTORICAL_DATASETS, ASSUMPTIONS_PATH, ASSUMPTIONS_FILE } from './constants.js';
+
 
 /**
  * Which record schema governs each dataset file.
@@ -249,3 +250,142 @@ export { HISTORICAL_DATASETS };
  * @type {Readonly<Record<string, string>>}
  */
 export const SCHEMA_BY_DATASET = DATASET_SCHEMAS;
+
+/**
+ * @typedef {object} AssumptionDriver
+ * @property {string} name
+ * @property {string} label
+ * @property {string} group
+ * @property {number} value
+ * @property {number} min
+ * @property {number} max
+ * @property {number} step
+ * @property {string} units
+ * @property {{ bear: number, bull: number }} scenarioDeltas
+ * @property {string} notes
+ */
+
+/**
+ * @typedef {object} AssumptionSet
+ * @property {ReadonlyArray<AssumptionDriver>} drivers
+ * @property {Readonly<Record<string, AssumptionDriver>>} byName
+ * @property {Readonly<Record<string, ReadonlyArray<AssumptionDriver>>>} byGroup
+ * @property {(name: string) => AssumptionDriver | null} get
+ * @property {(name: string) => number | undefined} getValue
+ */
+
+/**
+ * Loads, validates, and freezes the model assumptions dataset.
+ *
+ * Fails closed on any driver validation failure, duplicate name, or parse error
+ * with a single `ConfigError` collecting all offenders.
+ *
+ * @param {object} [options]
+ * @param {string} [options.dir] Directory prefix
+ * @param {string} [options.location] Exact file path/location
+ * @param {(location: string) => Promise<string>} [options.readText] Injected reader
+ * @returns {Promise<AssumptionSet>}
+ * @throws {ConfigError} When any driver or format invariant fails
+ */
+export async function loadAssumptions(options = {}) {
+  const readText = options.readText ?? defaultReadText;
+  const location =
+    options.location ??
+    (options.dir ? `${options.dir}${ASSUMPTIONS_FILE}` : ASSUMPTIONS_PATH);
+
+  let text;
+  try {
+    text = await readText(location);
+  } catch (cause) {
+    throw new ConfigError(
+      `Could not read assumptions file "${location}": ${cause.message}`,
+      location,
+    );
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (cause) {
+    throw new ConfigError(
+      `Assumptions file "${location}" is not valid JSON: ${cause.message}`,
+      location,
+    );
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new ConfigError(
+      `Assumptions file "${location}" must contain a JSON array of driver definitions.`,
+      location,
+    );
+  }
+
+  /** @type {string[]} */
+  const errors = [];
+  const seenNames = new Set();
+  /** @type {AssumptionDriver[]} */
+  const drivers = [];
+  /** @type {Record<string, AssumptionDriver>} */
+  const byName = {};
+  /** @type {Record<string, AssumptionDriver[]>} */
+  const byGroup = {};
+
+  parsed.forEach((driver, index) => {
+    const driverName =
+      driver && typeof driver === 'object' && typeof driver.name === 'string' && driver.name.trim() !== ''
+        ? driver.name
+        : `<driver_${index + 1}>`;
+
+    // Check duplicate name
+    if (driver && typeof driver.name === 'string' && driver.name.trim() !== '') {
+      if (seenNames.has(driver.name)) {
+        errors.push(`driver "${driver.name}" (index ${index + 1}): duplicate driver name.`);
+      } else {
+        seenNames.add(driver.name);
+      }
+    }
+
+    const res = validateRecord(driver, SCHEMAS.assumptionDriver, location);
+    if (!res.ok) {
+      for (const err of res.errors) {
+        errors.push(
+          `driver "${driverName}" (index ${index + 1}): field \`${err.field}\` ${err.message}`,
+        );
+      }
+    } else {
+      const frozenDriver = Object.freeze({
+        ...driver,
+        scenarioDeltas: Object.freeze({ ...driver.scenarioDeltas }),
+      });
+      drivers.push(frozenDriver);
+      byName[frozenDriver.name] = frozenDriver;
+      if (!byGroup[frozenDriver.group]) {
+        byGroup[frozenDriver.group] = [];
+      }
+      byGroup[frozenDriver.group].push(frozenDriver);
+    }
+  });
+
+  if (errors.length > 0) {
+    const summary = `loadAssumptions() failed closed on "${location}" with ${errors.length} violation(s):\n${errors.map((e) => `  - ${e}`).join('\n')}`;
+    throw new ConfigError(summary, location);
+  }
+
+  for (const group of Object.keys(byGroup)) {
+    byGroup[group] = Object.freeze(byGroup[group]);
+  }
+
+  return Object.freeze({
+    drivers: Object.freeze(drivers),
+    byName: Object.freeze(byName),
+    byGroup: Object.freeze(byGroup),
+    get(name) {
+      return byName[name] ?? null;
+    },
+    getValue(name) {
+      const d = byName[name];
+      return d !== undefined ? d.value : undefined;
+    },
+  });
+}
+

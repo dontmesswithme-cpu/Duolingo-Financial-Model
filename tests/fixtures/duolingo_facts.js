@@ -543,3 +543,460 @@ export const GROWTH_FIXTURE = Object.freeze({
   units: 'ratio',
   source: revenueAnchor('FY2024').source,
 });
+
+/**
+ * Anchors for supporting schedules contract (P2.1): working capital components
+ * and balance sheet rows required for schedule calculations and ratio tie-outs.
+ *
+ * @type {ReadonlyArray<{metric: string, period: string, value: number, units: string, source: object}>}
+ */
+export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
+  {
+    metric: 'accounts_receivable',
+    period: 'FY2025',
+    value: 162_827,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'deferred_cost_of_revenues',
+    period: 'FY2025',
+    value: 102_663,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'prepaid_expenses_and_other_current_assets',
+    period: 'FY2025',
+    value: 16_582,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'income_tax_receivable',
+    period: 'FY2025',
+    value: 14_067,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'deferred_revenues',
+    period: 'FY2025',
+    value: 496_205,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'accounts_payable',
+    period: 'FY2025',
+    value: 7_998,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'accrued_expenses_and_other_current_liabilities',
+    period: 'FY2025',
+    value: 45_688,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'income_tax_payable',
+    period: 'FY2025',
+    value: 1_257,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'deferred_revenues',
+    period: 'Q2 FY2026',
+    value: 505_102,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-Q',
+      period: 'As of June 30, 2026',
+      statement: 'Unaudited Condensed Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm',
+    },
+  },
+  {
+    metric: 'revenue_total',
+    period: 'Q3 FY2025',
+    value: 271_713,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-Q',
+      period: 'Three months ended September 30, 2025',
+      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm',
+    },
+  },
+  {
+    metric: 'revenue_total',
+    period: '9M FY2025',
+    value: 754_721,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-Q',
+      period: 'Nine months ended September 30, 2025',
+      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm',
+    },
+  },
+  {
+    metric: 'revenue_total',
+    period: 'Q1 FY2026',
+    value: 291_967,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-Q',
+      period: 'Three months ended March 31, 2026',
+      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026033482/duol-20260331.htm',
+    },
+  },
+  {
+    metric: 'revenue_total',
+    period: 'Q2 FY2026',
+    value: 298_454,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-Q',
+      period: 'Three months ended June 30, 2026',
+      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm',
+    },
+  },
+  // ── PP&E and Intangibles Anchors (P2.2) ──────────────────────────────
+  {
+    metric: 'ppe_gross',
+    period: 'FY2025',
+    value: 57_868,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Notes to Consolidated Financial Statements — Property and Equipment, Net',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'ppe_accumulated_depreciation',
+    period: 'FY2025',
+    value: -21_571,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Notes to Consolidated Financial Statements — Property and Equipment, Net',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'property_and_equipment_net',
+    period: 'FY2025',
+    value: 36_297,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'purchase_of_property_and_equipment',
+    period: 'FY2025',
+    value: -18_096,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Statements of Cash Flows',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'cf_depreciation_and_amortization',
+    period: 'FY2025',
+    value: 14_391,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Statements of Cash Flows',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'intangibles_gross',
+    period: 'FY2025',
+    value: 54_411,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Notes to Consolidated Financial Statements — Intangible Assets, Net',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'intangibles_accumulated_amortization',
+    period: 'FY2025',
+    value: -26_102,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Notes to Consolidated Financial Statements — Intangible Assets, Net',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'intangible_assets_net',
+    period: 'FY2025',
+    value: 28_309,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'capitalized_software_and_intangibles',
+    period: 'FY2025',
+    value: -9_303,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Statements of Cash Flows',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'cf_stock_based_compensation',
+    period: 'FY2025',
+    value: 137_437,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Statements of Cash Flows',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'operating_lease_right_of_use_assets',
+    period: 'FY2025',
+    value: 80_380,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+  {
+    metric: 'long_term_operating_lease_obligation',
+    period: 'FY2025',
+    value: 93_779,
+    units: 'thousands_usd',
+    source: {
+      filing: '10-K',
+      period: 'Fiscal Year 2025',
+      statement: 'Consolidated Balance Sheets',
+      url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    },
+  },
+]);
+
+function scheduleAnchor(metric, period) {
+  const anchor = SCHEDULE_KNOWN_FIGURES.find((f) => f.metric === metric && f.period === period);
+  if (!anchor) throw new Error(`Missing schedule anchor for ${metric} @ ${period}`);
+  return anchor;
+}
+
+/**
+ * Derived TTM revenue at Q2 FY2026:
+ * Q3 FY2025 (discrete) + Q4 FY2025 (FY2025 - 9M FY2025) + Q1 FY2026 (discrete) + Q2 FY2026 (discrete)
+ */
+const ttmRevenueAnchorQ2 =
+  scheduleAnchor('revenue_total', 'Q3 FY2025').value +
+  (revenueAnchor('FY2025').value - scheduleAnchor('revenue_total', '9M FY2025').value) +
+  scheduleAnchor('revenue_total', 'Q1 FY2026').value +
+  scheduleAnchor('revenue_total', 'Q2 FY2026').value;
+
+/**
+ * Derived schedule fixtures (P2.1, P2.2, P2.3):
+ * Working capital, PP&E, Intangibles, Debt, and SBC fixtures computed from cited anchors.
+ */
+export const SCHEDULE_FIXTURES = Object.freeze({
+  fy2025_dso: Object.freeze({
+    metric: 'dso',
+    period: 'FY2025',
+    value: (scheduleAnchor('accounts_receivable', 'FY2025').value / revenueAnchor('FY2025').value) * 365,
+    units: 'days',
+    source: scheduleAnchor('accounts_receivable', 'FY2025').source,
+  }),
+  fy2025_deferred_revenue_pct: Object.freeze({
+    metric: 'deferred_revenue_pct_revenue',
+    period: 'FY2025',
+    value: scheduleAnchor('deferred_revenues', 'FY2025').value / revenueAnchor('FY2025').value,
+    units: 'ratio',
+    source: scheduleAnchor('deferred_revenues', 'FY2025').source,
+  }),
+  fy2025_nwc: Object.freeze({
+    metric: 'net_working_capital',
+    period: 'FY2025',
+    value:
+      (scheduleAnchor('accounts_receivable', 'FY2025').value +
+        scheduleAnchor('deferred_cost_of_revenues', 'FY2025').value +
+        scheduleAnchor('prepaid_expenses_and_other_current_assets', 'FY2025').value +
+        scheduleAnchor('income_tax_receivable', 'FY2025').value) -
+      (scheduleAnchor('deferred_revenues', 'FY2025').value +
+        scheduleAnchor('accounts_payable', 'FY2025').value +
+        scheduleAnchor('accrued_expenses_and_other_current_liabilities', 'FY2025').value +
+        scheduleAnchor('income_tax_payable', 'FY2025').value),
+    units: 'thousands_usd',
+    source: scheduleAnchor('deferred_revenues', 'FY2025').source,
+  }),
+  q2_fy2026_deferred_revenue_pct: Object.freeze({
+    metric: 'deferred_revenue_pct_revenue',
+    period: 'Q2 FY2026',
+    value: scheduleAnchor('deferred_revenues', 'Q2 FY2026').value / ttmRevenueAnchorQ2,
+    units: 'ratio',
+    source: scheduleAnchor('deferred_revenues', 'Q2 FY2026').source,
+  }),
+  fy2025_ppe_gross: Object.freeze({
+    metric: 'ppe_gross',
+    period: 'FY2025',
+    value: scheduleAnchor('ppe_gross', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('ppe_gross', 'FY2025').source,
+  }),
+  fy2025_ppe_accum_dep: Object.freeze({
+    metric: 'ppe_accumulated_depreciation',
+    period: 'FY2025',
+    value: scheduleAnchor('ppe_accumulated_depreciation', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('ppe_accumulated_depreciation', 'FY2025').source,
+  }),
+  fy2025_ppe_net: Object.freeze({
+    metric: 'property_and_equipment_net',
+    period: 'FY2025',
+    value: scheduleAnchor('property_and_equipment_net', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('property_and_equipment_net', 'FY2025').source,
+  }),
+  fy2025_capex_ppe_pct: Object.freeze({
+    metric: 'capex_ppe_pct_revenue',
+    period: 'FY2025',
+    value: Math.abs(scheduleAnchor('purchase_of_property_and_equipment', 'FY2025').value) / revenueAnchor('FY2025').value,
+    units: 'ratio',
+    source: scheduleAnchor('purchase_of_property_and_equipment', 'FY2025').source,
+  }),
+  fy2025_intangibles_gross: Object.freeze({
+    metric: 'intangibles_gross',
+    period: 'FY2025',
+    value: scheduleAnchor('intangibles_gross', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('intangibles_gross', 'FY2025').source,
+  }),
+  fy2025_intangibles_accum_amort: Object.freeze({
+    metric: 'intangibles_accumulated_amortization',
+    period: 'FY2025',
+    value: scheduleAnchor('intangibles_accumulated_amortization', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('intangibles_accumulated_amortization', 'FY2025').source,
+  }),
+  fy2025_intangibles_net: Object.freeze({
+    metric: 'intangible_assets_net',
+    period: 'FY2025',
+    value: scheduleAnchor('intangible_assets_net', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('intangible_assets_net', 'FY2025').source,
+  }),
+  fy2025_capitalized_software_pct: Object.freeze({
+    metric: 'capitalized_software_pct_revenue',
+    period: 'FY2025',
+    value: Math.abs(scheduleAnchor('capitalized_software_and_intangibles', 'FY2025').value) / revenueAnchor('FY2025').value,
+    units: 'ratio',
+    source: scheduleAnchor('capitalized_software_and_intangibles', 'FY2025').source,
+  }),
+  fy2025_sbc_expense: Object.freeze({
+    metric: 'cf_stock_based_compensation',
+    period: 'FY2025',
+    value: scheduleAnchor('cf_stock_based_compensation', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('cf_stock_based_compensation', 'FY2025').source,
+  }),
+  fy2025_sbc_pct_revenue: Object.freeze({
+    metric: 'sbc_pct_of_revenue',
+    period: 'FY2025',
+    value: scheduleAnchor('cf_stock_based_compensation', 'FY2025').value / revenueAnchor('FY2025').value,
+    units: 'ratio',
+    source: scheduleAnchor('cf_stock_based_compensation', 'FY2025').source,
+  }),
+  fy2025_lease_rou_asset: Object.freeze({
+    metric: 'operating_lease_right_of_use_assets',
+    period: 'FY2025',
+    value: scheduleAnchor('operating_lease_right_of_use_assets', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('operating_lease_right_of_use_assets', 'FY2025').source,
+  }),
+  fy2025_lease_liability: Object.freeze({
+    metric: 'long_term_operating_lease_obligation',
+    period: 'FY2025',
+    value: scheduleAnchor('long_term_operating_lease_obligation', 'FY2025').value,
+    units: 'thousands_usd',
+    source: scheduleAnchor('long_term_operating_lease_obligation', 'FY2025').source,
+  }),
+});
+
+
+
+

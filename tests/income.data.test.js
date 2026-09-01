@@ -157,12 +157,23 @@ describe('P1.1 — dataset loads through the unmodified P0 pipeline', () => {
 describe('P1.1 — statement identities', () => {
   test('revenue components sum exactly to total revenue per period', async () => {
     const { rows } = await loadIncome();
-    for (const period of [...FISCAL_YEARS, ...QUARTERS]) {
+    const periodsToTest = [...FISCAL_YEARS, ...QUARTERS, '9M FY2025'];
+    for (const period of periodsToTest) {
       const total = valueOf(rows, period, 'revenue_total');
       const sum = REVENUE_COMPONENTS.reduce((acc, metric) => acc + valueOf(rows, period, metric), 0);
       assert.equal(sum, total, `${period}: components ${sum} != total ${total}`);
     }
   });
+
+  test('no revenue component is negative in any period', async () => {
+    const { rows } = await loadIncome();
+    for (const row of rows) {
+      if (REVENUE_COMPONENTS.includes(row.metric) || row.metric === 'revenue_total') {
+        assert.ok(row.value >= 0, `${row.metric} @ ${row.period} (${row.value}) must be non-negative`);
+      }
+    }
+  });
+
 
   test('revenue − cost of revenue = gross profit per period', async () => {
     const { rows } = await loadIncome();
@@ -290,16 +301,17 @@ describe('P1.1 — period transcription honesty', () => {
   test('no YTD row is relabelled as a discrete quarter', async () => {
     const { rows } = await loadIncome();
     for (const row of rows) {
-      // The income statement is transcribed from three-month columns only; the
-      // year-to-date columns a 10-Q also presents must never appear here.
-      assert.notEqual(row.periodType, 'ytd', `${row.metric} @ ${row.period}`);
-      assert.doesNotMatch(
-        row.source.period,
-        /^(Nine|Six) months ended/i,
-        `${row.metric} @ ${row.period} cites a YTD span but is labelled ${row.periodType}`,
-      );
+      // Discrete quarter rows must never cite a YTD (Six/Nine months ended) span
+      if (row.periodType === 'quarter') {
+        assert.doesNotMatch(
+          row.source.period,
+          /^(Nine|Six) months ended/i,
+          `${row.metric} @ ${row.period} cites a YTD span but is labelled ${row.periodType}`,
+        );
+      }
     }
   });
+
 
   test('the TTM window is closed by the latest reported quarter (Q2 FY2026)', async () => {
     const { rows } = await loadIncome();

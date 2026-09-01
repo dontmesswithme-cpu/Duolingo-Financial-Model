@@ -147,6 +147,28 @@ describe('P1.4 — full pipeline integration (loadHistorical -> ttm.compute)', (
     }
   });
 
+  test('all resolvable TTM revenue components are strictly positive and sum to TTM revenue', async () => {
+    const historical = await loadFullCorpus();
+    const result = ttm.compute(historical);
+    const revComponents = [
+      'revenue_subscription',
+      'revenue_advertising',
+      'revenue_duolingo_english_test',
+      'revenue_in_app_purchases',
+      'revenue_other',
+    ];
+    let sum = 0;
+    for (const metric of revComponents) {
+      const record = result.byMetric.get(metric);
+      assert.ok(record, `Missing TTM record for ${metric}`);
+      assert.ok(record.value > 0, `TTM ${metric} (${record.value}) must be strictly positive`);
+      sum += record.value;
+    }
+    const ttmTotal = result.byMetric.get('revenue_total');
+    assert.ok(ttmTotal, 'Missing TTM record for revenue_total');
+    assert.equal(sum, ttmTotal.value, `TTM revenue components sum ${sum} != TTM total revenue ${ttmTotal.value}`);
+  });
+
   test('engine purity: ttm.js contains zero DOM, zero fetch, zero wall-clock reads', async () => {
     const code = await readText(new URL('../src/engine/ttm.js', import.meta.url));
     assert.doesNotMatch(code, /\bwindow\./);
@@ -156,3 +178,4 @@ describe('P1.4 — full pipeline integration (loadHistorical -> ttm.compute)', (
     assert.doesNotMatch(code, /\bMath\.random\b/);
   });
 });
+

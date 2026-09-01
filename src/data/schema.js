@@ -122,6 +122,36 @@ const KPI_FIELDS = Object.freeze({
 });
 
 /**
+ * Scenario delta fields schema.
+ * @type {Readonly<Record<string, object>>}
+ */
+const SCENARIO_DELTAS_FIELDS = Object.freeze({
+  bear: { type: 'number', required: true, finite: true },
+  bull: { type: 'number', required: true, finite: true },
+});
+
+/**
+ * Assumption driver fields schema.
+ * @type {Readonly<Record<string, object>>}
+ */
+const ASSUMPTION_DRIVER_FIELDS = Object.freeze({
+  name: { type: 'string', required: true, nonEmpty: true },
+  label: { type: 'string', required: true, nonEmpty: true },
+  group: { type: 'string', required: true, nonEmpty: true },
+  value: { type: 'number', required: true, finite: true },
+  min: { type: 'number', required: true, finite: true },
+  max: { type: 'number', required: true, finite: true },
+  step: { type: 'number', required: true, positive: true },
+  units: { type: 'string', required: true, nonEmpty: true },
+  scenarioDeltas: {
+    type: 'object',
+    required: true,
+    fields: SCENARIO_DELTAS_FIELDS,
+  },
+  notes: { type: 'string', required: true, nonEmpty: true },
+});
+
+/**
  * @typedef {object} Schema
  * @property {string} name
  * @property {Readonly<Record<string, object>>} fields
@@ -131,14 +161,28 @@ const KPI_FIELDS = Object.freeze({
  * The registered record schemas.
  * @type {Readonly<Record<string, Schema>>}
  */
-export const SCHEMAS = Object.freeze({
+const schemasTarget = {
   historicalStatement: Object.freeze({
     name: 'historicalStatement',
     fields: HISTORICAL_STATEMENT_FIELDS,
   }),
   kpi: Object.freeze({ name: 'kpi', fields: KPI_FIELDS }),
   source: Object.freeze({ name: 'source', fields: SOURCE_FIELDS }),
+};
+
+Object.defineProperty(schemasTarget, 'assumptionDriver', {
+  value: Object.freeze({
+    name: 'assumptionDriver',
+    fields: ASSUMPTION_DRIVER_FIELDS,
+  }),
+  enumerable: false,
+  writable: false,
+  configurable: false,
 });
+
+export const SCHEMAS = Object.freeze(schemasTarget);
+
+
 
 /**
  * @param {object} rule
@@ -281,8 +325,45 @@ export function validateRecord(rec, schema, origin) {
   /** @type {ValidationError[]} */
   const errors = [];
   validateFields(rec, schema.fields, '', errors, origin);
+
+  // Invariant range validation for assumptionDriver schema
+  if (schema.name === 'assumptionDriver' || schema === SCHEMAS.assumptionDriver) {
+    const hasMin = typeof rec.min === 'number' && Number.isFinite(rec.min);
+    const hasMax = typeof rec.max === 'number' && Number.isFinite(rec.max);
+    const hasValue = typeof rec.value === 'number' && Number.isFinite(rec.value);
+
+    if (hasMin && hasMax && rec.min > rec.max) {
+      errors.push(
+        makeError(
+          'min',
+          `must not be greater than max (min: ${rec.min}, max: ${rec.max}).`,
+          origin,
+        ),
+      );
+    }
+    if (hasMin && hasValue && rec.value < rec.min) {
+      errors.push(
+        makeError(
+          'value',
+          `must be >= min (value: ${rec.value}, min: ${rec.min}).`,
+          origin,
+        ),
+      );
+    }
+    if (hasMax && hasValue && rec.value > rec.max) {
+      errors.push(
+        makeError(
+          'value',
+          `must be <= max (value: ${rec.value}, max: ${rec.max}).`,
+          origin,
+        ),
+      );
+    }
+  }
+
   return { ok: errors.length === 0, errors };
 }
+
 
 /**
  * Extracts the record rows from a parsed dataset file.

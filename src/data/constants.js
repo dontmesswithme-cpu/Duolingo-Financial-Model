@@ -112,6 +112,43 @@ export const SOURCE_LEDGER_REQUIRED = true;
 export const HISTORICAL_DIR = 'src/data/historical/';
 
 /**
+ * Historical data directory alias.
+ * @type {string}
+ */
+export const DATA_DIR = 'src/data/historical/';
+
+/**
+ * Assumptions file name and default relative path.
+ * @type {string}
+ */
+export const ASSUMPTIONS_FILE = 'assumptions.json';
+export const ASSUMPTIONS_PATH = 'src/data/assumptions.json';
+
+/**
+ * Number of days in a standard calendar year for financial ratio calculations.
+ * @type {number}
+ */
+export const DAYS_IN_YEAR = 365;
+
+/**
+ * Supported scenario delta keys for assumption drivers.
+ * @type {ReadonlyArray<string>}
+ */
+export const SCENARIO_DELTA_KEYS = Object.freeze(['bear', 'bull']);
+
+/**
+ * Driver groups for model assumptions.
+ * @type {ReadonlyArray<string>}
+ */
+export const DRIVER_GROUPS = Object.freeze([
+  'workingCapital',
+  'capexDna',
+  'debt',
+  'sbc',
+  'market',
+]);
+
+/**
  * The known historical datasets, per `docs/spec.md` §3.1. Discovery is an
  * explicit manifest rather than a directory scan: a browser cannot enumerate a
  * directory, so the file list is the single source of truth in both Node and
@@ -119,3 +156,4 @@ export const HISTORICAL_DIR = 'src/data/historical/';
  * @type {ReadonlyArray<string>}
  */
 export const HISTORICAL_DATASETS = Object.freeze(['income', 'balance', 'cashflow', 'kpis']);
+

@@ -1,0 +1,243 @@
+[
+  {
+    "name": "dso_days",
+    "label": "Days Sales Outstanding (DSO)",
+    "group": "workingCapital",
+    "value": 57.28,
+    "min": 10,
+    "max": 150,
+    "step": 0.1,
+    "units": "days",
+    "scenarioDeltas": {
+      "bear": 5,
+      "bull": -5
+    },
+    "notes": "FY2025 actual: Accounts Receivable 162,827 / Revenue 1,037,589 * 365 = 57.28 days"
+  },
+  {
+    "name": "deferred_revenue_pct_revenue",
+    "label": "Deferred Revenue (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.4782,
+    "min": 0.1,
+    "max": 0.9,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": -0.05,
+      "bull": 0.05
+    },
+    "notes": "FY2025 actual: Deferred Revenues 496,205 / Revenue 1,037,589 = 47.82%"
+  },
+  {
+    "name": "deferred_cost_pct_revenue",
+    "label": "Deferred Cost of Revenues (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.0989,
+    "min": 0.01,
+    "max": 0.3,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.01,
+      "bull": -0.01
+    },
+    "notes": "FY2025 actual: Deferred Cost of Revenues 102,663 / Revenue 1,037,589 = 9.89%"
+  },
+  {
+    "name": "prepaid_expenses_pct_revenue",
+    "label": "Prepaid Expenses and Other Current Assets (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.016,
+    "min": 0.001,
+    "max": 0.1,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.005,
+      "bull": -0.005
+    },
+    "notes": "FY2025 actual: Prepaid Expenses 16,582 / Revenue 1,037,589 = 1.60%"
+  },
+  {
+    "name": "income_tax_receivable_pct_revenue",
+    "label": "Income Tax Receivable (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.0136,
+    "min": 0,
+    "max": 0.05,
+    "step": 0.0005,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": -0.005,
+      "bull": 0.005
+    },
+    "notes": "FY2025 actual: Income Tax Receivable 14,067 / Revenue 1,037,589 = 1.36%"
+  },
+  {
+    "name": "dpo_days",
+    "label": "Days Payable Outstanding (DPO)",
+    "group": "workingCapital",
+    "value": 10.13,
+    "min": 1,
+    "max": 60,
+    "step": 0.1,
+    "units": "days",
+    "scenarioDeltas": {
+      "bear": -2,
+      "bull": 2
+    },
+    "notes": "FY2025 actual: Accounts Payable 7,998 / Cost of Revenue 288,132 * 365 = 10.13 days"
+  },
+  {
+    "name": "accounts_payable_pct_revenue",
+    "label": "Accounts Payable (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.0077,
+    "min": 0.001,
+    "max": 0.05,
+    "step": 0.0005,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": -0.002,
+      "bull": 0.002
+    },
+    "notes": "FY2025 actual: Accounts Payable 7,998 / Revenue 1,037,589 = 0.77%"
+  },
+  {
+    "name": "accrued_expenses_pct_revenue",
+    "label": "Accrued Expenses and Other Current Liabilities (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.044,
+    "min": 0.01,
+    "max": 0.15,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.005,
+      "bull": -0.005
+    },
+    "notes": "FY2025 actual: Accrued Expenses 45,688 / Revenue 1,037,589 = 4.40%"
+  },
+  {
+    "name": "income_tax_payable_pct_revenue",
+    "label": "Income Tax Payable (% of Revenue)",
+    "group": "workingCapital",
+    "value": 0.0012,
+    "min": 0,
+    "max": 0.02,
+    "step": 0.0002,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.001,
+      "bull": -0.001
+    },
+    "notes": "FY2025 actual: Income Tax Payable 1,257 / Revenue 1,037,589 = 0.12%"
+  },
+  {
+    "name": "capex_ppe_pct_revenue",
+    "label": "Purchases of PP&E (% of Revenue)",
+    "group": "capexDna",
+    "value": 0.0174,
+    "min": 0.002,
+    "max": 0.08,
+    "step": 0.0005,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.003,
+      "bull": -0.003
+    },
+    "notes": "FY2025 actual: Purchases of Property and Equipment 18,096 / Revenue 1,037,589 = 1.74%"
+  },
+  {
+    "name": "capitalized_software_pct_revenue",
+    "label": "Capitalized Software & Intangibles (% of Revenue)",
+    "group": "capexDna",
+    "value": 0.009,
+    "min": 0.001,
+    "max": 0.05,
+    "step": 0.0005,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.002,
+      "bull": -0.002
+    },
+    "notes": "FY2025 actual: Capitalized software & intangibles 9,303 / Revenue 1,037,589 = 0.90%"
+  },
+  {
+    "name": "capex_total_pct_revenue",
+    "label": "Total Capex (% of Revenue)",
+    "group": "capexDna",
+    "value": 0.0264,
+    "min": 0.005,
+    "max": 0.1,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.005,
+      "bull": -0.005
+    },
+    "notes": "FY2025 actual: Total capex (PP&E 18,096 + Software 9,303 = 27,399) / Revenue 1,037,589 = 2.64%"
+  },
+  {
+    "name": "depreciation_pct_revenue",
+    "label": "PP&E Depreciation (% of Revenue)",
+    "group": "capexDna",
+    "value": 0.005,
+    "min": 0.001,
+    "max": 0.05,
+    "step": 0.0005,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.001,
+      "bull": -0.001
+    },
+    "notes": "FY2025 actual: PP&E depreciation 5,195 / Revenue 1,037,589 = 0.50%"
+  },
+  {
+    "name": "amortization_pct_revenue",
+    "label": "Intangible Amortization (% of Revenue)",
+    "group": "capexDna",
+    "value": 0.0089,
+    "min": 0.001,
+    "max": 0.05,
+    "step": 0.0005,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.001,
+      "bull": -0.001
+    },
+    "notes": "FY2025 actual: Intangible amortization 9,196 / Revenue 1,037,589 = 0.89%"
+  },
+  {
+    "name": "depreciation_pct_ppe_gross",
+    "label": "PP&E Depreciation (% of Gross PP&E)",
+    "group": "capexDna",
+    "value": 0.0898,
+    "min": 0.01,
+    "max": 0.3,
+    "step": 0.001,
+    "units": "pct_of_gross_ppe",
+    "scenarioDeltas": {
+      "bear": 0.01,
+      "bull": -0.01
+    },
+    "notes": "FY2025 actual: PP&E depreciation 5,195 / Gross PP&E 57,868 = 8.98%"
+  },
+  {
+    "name": "sbc_target_pct_of_revenue",
+    "label": "Stock-Based Compensation (% of Revenue)",
+    "group": "sbc",
+    "value": 0.1325,
+    "min": 0.05,
+    "max": 0.3,
+    "step": 0.0025,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.02,
+      "bull": -0.02
+    },
+    "notes": "FY2025 actual: Stock-based compensation 137,437 / Revenue 1,037,589 = 13.25%"
+  }
+]
+

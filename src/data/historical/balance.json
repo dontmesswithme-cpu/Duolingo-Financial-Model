@@ -2860,5 +2860,905 @@
       "accessedAt": "2026-09-01"
     },
     "isEstimate": false
+  },
+  {
+    "metric": "ppe_leasehold_improvements",
+    "label": "Leasehold improvements",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 10258,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_furniture_fixtures_and_equipment",
+    "label": "Furniture, fixtures and equipment",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 3053,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_gross",
+    "label": "Total property and equipment",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 13311,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_accumulated_depreciation",
+    "label": "Less: accumulated depreciation",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -5100,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_capitalized_software",
+    "label": "Capitalized software",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 11144,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Capitalized Software",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_gross",
+    "label": "Total capitalized software",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 11144,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Capitalized Software",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_accumulated_amortization",
+    "label": "Less: accumulated amortization",
+    "klass": "stock",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -6578,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements — Capitalized Software",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_leasehold_improvements",
+    "label": "Leasehold improvements",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 15983,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_furniture_fixtures_and_equipment",
+    "label": "Furniture, fixtures and equipment",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 5204,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_gross",
+    "label": "Total property and equipment",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 21187,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_accumulated_depreciation",
+    "label": "Less: accumulated depreciation",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -8218,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_capitalized_software",
+    "label": "Capitalized software",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 16809,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_other",
+    "label": "Other intangible assets",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 18,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_gross",
+    "label": "Total intangible assets",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 16827,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_accumulated_amortization",
+    "label": "Less: accumulated amortization",
+    "klass": "stock",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -8330,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_leasehold_improvements",
+    "label": "Leasehold improvements",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 18191,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_furniture_fixtures_and_equipment",
+    "label": "Furniture, fixtures and equipment",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 5869,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_gross",
+    "label": "Total property and equipment",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 24060,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_accumulated_depreciation",
+    "label": "Less: accumulated depreciation",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -12268,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_capitalized_software",
+    "label": "Capitalized software",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 26895,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_other",
+    "label": "Other intangible assets",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 117,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_gross",
+    "label": "Total intangible assets",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 27012,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_accumulated_amortization",
+    "label": "Less: accumulated amortization",
+    "klass": "stock",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -11017,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_leasehold_improvements",
+    "label": "Leasehold improvements",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 26938,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_furniture_fixtures_and_equipment",
+    "label": "Furniture, fixtures and equipment",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 8415,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_gross",
+    "label": "Total property and equipment",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 35353,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_accumulated_depreciation",
+    "label": "Less: accumulated depreciation",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -16410,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_capitalized_software",
+    "label": "Capitalized software",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 35681,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_acquired",
+    "label": "Acquired intangible assets",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 1007,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_other_indefinite_lived",
+    "label": "Other indefinite-lived intangible assets",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 117,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_gross",
+    "label": "Total intangible assets",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 36805,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_accumulated_amortization",
+    "label": "Less: accumulated amortization",
+    "klass": "stock",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -16906,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_leasehold_improvements",
+    "label": "Leasehold improvements",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 44773,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_furniture_fixtures_and_equipment",
+    "label": "Furniture, fixtures and equipment",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 13095,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_gross",
+    "label": "Total property and equipment",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 57868,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_accumulated_depreciation",
+    "label": "Less: accumulated depreciation",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -21571,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_capitalized_software",
+    "label": "Capitalized software",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 44849,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_acquired",
+    "label": "Acquired intangible assets",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 9310,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_other_indefinite_lived",
+    "label": "Other indefinite-lived intangible assets",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 252,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_gross",
+    "label": "Total intangible assets",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 54411,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_accumulated_amortization",
+    "label": "Less: accumulated amortization",
+    "klass": "stock",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -26102,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_leasehold_improvements",
+    "label": "Leasehold improvements",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 52732,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_furniture_fixtures_and_equipment",
+    "label": "Furniture, fixtures and equipment",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 14136,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_gross",
+    "label": "Total property and equipment",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 66868,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "ppe_accumulated_depreciation",
+    "label": "Less: accumulated depreciation",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": -24249,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Property and Equipment, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_capitalized_software",
+    "label": "Capitalized software",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 49858,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_acquired",
+    "label": "Acquired intangible assets",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 9310,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_other_indefinite_lived",
+    "label": "Other indefinite-lived intangible assets",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 252,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_gross",
+    "label": "Total intangible assets",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 59420,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "intangibles_accumulated_amortization",
+    "label": "Less: accumulated amortization",
+    "klass": "stock",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": -31822,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "As of June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements — Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
   }
 ]
