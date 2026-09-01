@@ -15,6 +15,14 @@
  * @module tests/fixtures/duolingo_facts
  */
 
+// Node built-ins. This module is test-only and never imported by `src/`, so a
+// filesystem read here cannot reach the browser bundle. The P4.1 market anchors
+// at the bottom of this file are DERIVED from `assumptions.json` at module load
+// per the `GROWTH_FIXTURE` rule — a hand-typed market value is prohibited, and
+// deriving requires reading the driver defaults.
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 /**
  * Anchors mandated by the P1.1 Artifact Contract: FY2025 and FY2023 total
  * revenue and net income, plus the full FY2025 revenue-by-segment breakdown.
@@ -2006,11 +2014,303 @@ export function deriveExpectedThreeStatement(expectedForecast, drivers, schedule
     priorRetained = retained;
     priorNwc = nwc;
     priorPpe = endingPpe;
-    priorIntg = endingIntg;
-  }
+  priorIntg = endingIntg;
+}
 
   return Object.freeze(out);
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * P4.1 — WACC market anchors (GROWTH_FIXTURE derived-anchor pattern)
+ * ────────────────────────────────────────────────────────────────────────────
+ *
+ * Every value below is COMPUTED at module load from the market driver defaults
+ * in `src/data/assumptions.json`. Hand-typed market values are prohibited by
+ * the rule `GROWTH_FIXTURE` established, so these anchors cannot drift from the
+ * assumption set and cannot silently disagree with the corpus.
+ *
+ * The WACC is derived through the GENERAL weighted formula —
+ * `(E/V)·Re + (D/V)·Rd·(1−t)` — with an explicit zero debt balance, not by
+ * copying the cost of equity. That way the fixture itself proves the
+ * debt-free collapse rather than assuming it.
+ */
+
+/**
+ * The market driver defaults, read once at module load.
+ * @type {ReadonlyArray<object>}
+ */
+const ASSUMPTION_ROWS = JSON.parse(
+  fs.readFileSync(
+    fileURLToPath(new URL('../../src/data/assumptions.json', import.meta.url)),
+    'utf8',
+  ),
+);
+
+/**
+ * @param {string} name Driver name.
+ * @returns {object} The driver record.
+ */
+function marketDriver(name) {
+  const row = ASSUMPTION_ROWS.find((r) => r && r.name === name);
+  if (!row) {
+    throw new Error(`duolingo_facts: market driver "${name}" is missing from assumptions.json`);
+  }
+  return row;
+}
+
+/**
+ * The five market-sourced drivers plus the terminal growth judgment, each with
+ * the provenance the MKT regime requires.
+ *
+ * @type {Readonly<Record<string, object>>}
+ */
+export const MARKET_KNOWN_FIGURES = Object.freeze(
+  ['risk_free_rate', 'beta', 'equity_risk_premium', 'terminal_growth_rate', 'market_share_price', 'shares_outstanding'].reduce((acc, name) => {
+    const driver = marketDriver(name);
+    acc[name] = Object.freeze({
+      name: driver.name,
+      label: driver.label,
+      group: driver.group,
+      value: driver.value,
+      units: driver.units,
+      marking: driver.marking,
+      asOf: driver.asOf ?? null,
+      provider: driver.source?.provider ?? null,
+      url: driver.source?.url ?? null,
+      notes: driver.notes,
+    });
+    return acc;
+  }, {}),
+);
+
+const RF_ANCHOR = MARKET_KNOWN_FIGURES.risk_free_rate.value;
+const BETA_ANCHOR = MARKET_KNOWN_FIGURES.beta.value;
+const ERP_ANCHOR = MARKET_KNOWN_FIGURES.equity_risk_premium.value;
+const PRICE_ANCHOR = MARKET_KNOWN_FIGURES.market_share_price.value;
+const SHARES_ANCHOR = MARKET_KNOWN_FIGURES.shares_outstanding.value;
+const TERMINAL_G_ANCHOR = MARKET_KNOWN_FIGURES.terminal_growth_rate.value;
+
+/** CAPM cost of equity — derived, never typed. */
+const COST_OF_EQUITY_ANCHOR = RF_ANCHOR + BETA_ANCHOR * ERP_ANCHOR;
+
+/** Equity market value E — derived, never typed. */
+const MARKET_CAP_ANCHOR = PRICE_ANCHOR * SHARES_ANCHOR;
+
+/** Funded debt balance D — zero, per the P2.3 debt-free proof. */
+const DEBT_BALANCE_ANCHOR = 0;
+
+/** Total capital V = E + D. */
+const TOTAL_CAPITAL_ANCHOR = MARKET_CAP_ANCHOR + DEBT_BALANCE_ANCHOR;
+
+/**
+ * P4.1 WACC anchors, derived at module load through the general weighted
+ * formula with an explicit zero debt balance.
+ *
+ * @type {Readonly<Record<string, unknown>>}
+ */
+export const WACC_FIXTURE = Object.freeze({
+  method: 'CAPM — Re = rf + beta × ERP; WACC = (E/V)·Re + (D/V)·Rd·(1−t)',
+  riskFreeRate: RF_ANCHOR,
+  beta: BETA_ANCHOR,
+  equityRiskPremium: ERP_ANCHOR,
+  costOfEquity: COST_OF_EQUITY_ANCHOR,
+  sharePrice: PRICE_ANCHOR,
+  sharesOutstanding: SHARES_ANCHOR,
+  marketCap: MARKET_CAP_ANCHOR,
+  debtBalance: DEBT_BALANCE_ANCHOR,
+  totalCapital: TOTAL_CAPITAL_ANCHOR,
+  equityWeight: MARKET_CAP_ANCHOR / TOTAL_CAPITAL_ANCHOR,
+  debtWeight: DEBT_BALANCE_ANCHOR / TOTAL_CAPITAL_ANCHOR,
+  wacc:
+    (MARKET_CAP_ANCHOR / TOTAL_CAPITAL_ANCHOR) * COST_OF_EQUITY_ANCHOR +
+    (DEBT_BALANCE_ANCHOR / TOTAL_CAPITAL_ANCHOR) * 0,
+  terminalGrowthRate: TERMINAL_G_ANCHOR,
+  debtFree: DEBT_BALANCE_ANCHOR === 0,
+  derivedFrom: 'market driver defaults in src/data/assumptions.json (computed at module load)',
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * P4.2 — DCF valuation anchors (GROWTH_FIXTURE derived-anchor pattern)
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+
+/**
+ * Closed-form helper to compute discount factor for a given period index t and WACC.
+ *
+ * @param {number} t 1-based year index (e.g. FY2026 = 1)
+ * @param {number} [wacc] WACC rate
+ * @returns {number}
+ */
+export function deriveDiscountFactor(t, wacc = WACC_FIXTURE.wacc) {
+  return 1 / Math.pow(1 + wacc, t);
+}
+
+/**
+ * Independent closed-form recomputation of the DCF valuation schedule and bridge.
+ *
+ * @param {object} threeStatement Output from threeStatement.project or deriveExpectedThreeStatement
+ * @param {number|object} wacc WACC rate or WaccBuild
+ * @param {object} assumptions AssumptionSet or driver map
+ * @param {number} [horizon=5]
+ * @returns {object}
+ */
+export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5) {
+  const waccRate =
+    typeof wacc === 'number'
+      ? wacc
+      : (wacc?.wacc?.value ?? wacc?.wacc ?? (typeof wacc?.value === 'number' ? wacc.value : WACC_FIXTURE.wacc));
+
+  const getDriver = (name) => {
+    if (assumptions && typeof assumptions.get === 'function') {
+      return assumptions.get(name)?.value;
+    }
+    if (assumptions && typeof assumptions === 'object') {
+      return assumptions[name];
+    }
+    return undefined;
+  };
+
+  const g = getDriver('terminal_growth_rate') ?? TERMINAL_G_ANCHOR;
+  const shares = getDriver('shares_outstanding') ?? SHARES_ANCHOR;
+  const price = getDriver('market_share_price') ?? PRICE_ANCHOR;
+
+  const availablePeriods =
+    threeStatement.periods ||
+    threeStatement.cashFlow?.periods ||
+    Object.keys(threeStatement.cashFlow?.byPeriod || threeStatement);
+
+  const periods = availablePeriods.slice(0, horizon);
+  const schedule = [];
+  let pvExplicit = 0;
+
+  for (let i = 0; i < periods.length; i += 1) {
+    const period = periods[i];
+    const t = i + 1;
+    const fcf =
+      threeStatement.cashFlow?.byPeriod?.[period]?.free_cash_flow?.value ??
+      threeStatement[period]?.fcf;
+    const df = 1 / Math.pow(1 + waccRate, t);
+    const pv = fcf * df;
+    pvExplicit += pv;
+    schedule.push(
+      Object.freeze({
+        period,
+        t,
+        fcf,
+        discountFactor: df,
+        presentValue: pv,
+      }),
+    );
+  }
+
+  const finalItem = schedule[schedule.length - 1];
+  const fcf_T = finalItem.fcf;
+  const terminalFcf = fcf_T * (1 + g);
+  const terminalValue = terminalFcf / (waccRate - g);
+  const df_T = finalItem.discountFactor;
+  const pvTerminal = terminalValue * df_T;
+  const enterpriseValue = pvExplicit + pvTerminal;
+
+  const terminalPeriod = periods[periods.length - 1];
+  const finalBs = threeStatement.balanceSheet?.byPeriod?.[terminalPeriod];
+  const cash =
+    finalBs?.current_assets?.cash_and_cash_equivalents?.value ??
+    threeStatement[terminalPeriod]?.endingCash ??
+    threeStatement[terminalPeriod]?.cash;
+  const sti =
+    finalBs?.current_assets?.short_term_investments?.value ??
+    THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.short_term_investments;
+  const lti =
+    finalBs?.non_current_assets?.long_term_investments?.value ??
+    THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.long_term_investments;
+  const debt = 0;
+  const netCash = cash + sti + lti - debt;
+  const equityValue = enterpriseValue + netCash;
+  const perShare = (equityValue * 1000) / shares;
+
+  return Object.freeze({
+    wacc: waccRate,
+    terminalGrowthRate: g,
+    horizon,
+    periods: Object.freeze(periods.slice()),
+    schedule: Object.freeze(schedule),
+    pvExplicit,
+    terminalValue,
+    pvTerminal,
+    enterpriseValue,
+    ev: enterpriseValue,
+    netCash,
+    equityValue,
+    perShare,
+    sharesOutstanding: shares,
+    marketSharePrice: price,
+    bridge: Object.freeze({
+      cash,
+      shortTermInvestments: sti,
+      longTermInvestments: lti,
+      netCash,
+      debt,
+    }),
+    derivedFrom: 'market driver defaults + P3 forecast anchors (computed at module load)',
+  });
+}
+
+/** Discount factor anchors for FY2026 (t=1) and FY2030 (t=5). */
+export const DISCOUNT_FACTOR_FY2026 = 1 / (1 + WACC_FIXTURE.wacc);
+export const DISCOUNT_FACTOR_FY2030 = 1 / Math.pow(1 + WACC_FIXTURE.wacc, 5);
+
+/**
+ * P4.2 DCF Valuation Known Figures & Anchors.
+ */
+export const DCF_KNOWN_FIGURES = Object.freeze({
+  discountFactorFy2026: DISCOUNT_FACTOR_FY2026,
+  discountFactorFy2030: DISCOUNT_FACTOR_FY2030,
+  terminalGrowthRate: TERMINAL_G_ANCHOR,
+  sharesOutstanding: SHARES_ANCHOR,
+  marketSharePrice: PRICE_ANCHOR,
+  stiHeldConstant: THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.short_term_investments,
+  ltiHeldConstant: THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.long_term_investments,
+  debtBalance: 0,
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * P4.3 — Recommendation & Valuation Range Anchors
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+
+/**
+ * Mechanical recommendation evaluator for fixtures (anti-tautology).
+ *
+ * @param {number} dcfPerShare
+ * @param {number} [marketPrice]
+ * @returns {object}
+ */
+export function deriveExpectedRecommendation(dcfPerShare, marketPrice = PRICE_ANCHOR) {
+  const upsidePct = (dcfPerShare - marketPrice) / marketPrice;
+  let label = 'fair';
+  if (upsidePct >= 0.15) {
+    label = 'undervalued';
+  } else if (upsidePct <= -0.15) {
+    label = 'overvalued';
+  }
+  return Object.freeze({
+    dcfPerShare,
+    marketPrice,
+    upsidePct,
+    label,
+  });
+}
+
+/**
+ * P4.3 Recommendation Known Figures & Anchors.
+ */
+export const RECOMMENDATION_KNOWN_FIGURES = Object.freeze({
+  undervaluedThreshold: 0.15,
+  overvaluedThreshold: -0.15,
+  vocabulary: Object.freeze(['undervalued', 'fair', 'overvalued']),
+});
+
+
 
 
 

@@ -218,3 +218,67 @@ export const FORECAST_ANCHOR_PERIODS = Object.freeze({
  */
 export const HISTORICAL_DATASETS = Object.freeze(['income', 'balance', 'cashflow', 'kpis']);
 
+/**
+ * The marking taxonomy for valuation inputs and outputs, per
+ * `docs/conventions.md` (Financial Data Integrity).
+ *
+ * `MKT` marks a value sourced from an external market-data provider and pinned
+ * to an as-of date; `EST` marks a derived or judgment value. The two are the
+ * only legal `marking` values anywhere in the engine, so they live here rather
+ * than being re-typed in `wacc.js`, `dcf.js`, or `schema.js`.
+ * @type {ReadonlyArray<string>}
+ */
+export const MARKING_VALUES = Object.freeze(['MKT', 'EST']);
+
+/**
+ * Documentation of the P4.1 WACC build — the method statement the Valuation tab
+ * renders alongside the build table. Reference notes only; no engine reads a
+ * number from here.
+ *
+ * `debtFreeNote` records why the debt-free collapse is a *theorem*: the build
+ * always evaluates `WACC = (E/V)·Re + (D/V)·Rd·(1−t)`, and `D = 0` reduces it
+ * to `Re`. No branch deletes the formula.
+ *
+ * @type {Readonly<Record<string, string>>}
+ */
+export const WACC_BUILD_DEFAULTS = Object.freeze({
+  method:
+    'CAPM cost of equity = risk-free rate + beta × equity risk premium; WACC = (E/V)·Re + (D/V)·Rd·(1−t).',
+  costOfEquitySource: 'CAPM — rf + beta × ERP, every leg a MKT-labeled driver with an as-of date.',
+  weightsBasis:
+    'Market-value weights: E = share price × diluted shares outstanding; D = funded debt balance resolved from the debt schedule.',
+  debtFreeNote:
+    'Duolingo is debt-free per P2.3 (zero funded borrowings across every cited balance sheet date; ASC 842 operating leases are not debt). D = 0 collapses WACC to the cost of equity as a theorem of the general formula, never as a deleted branch.',
+  taxBasis:
+    'The normalized effective_tax_rate driver (P3.1 tax group) tax-affects the pre-tax cost of debt.',
+  terminalGrowthNote:
+    'terminal_growth_rate is an EST judgment bounded above by long-run US nominal GDP growth and strictly below WACC (Gordon guard).',
+});
+
+/**
+ * Bounds for the `terminal_growth_rate` driver. The `max` is the long-run US
+ * nominal GDP growth ceiling — a perpetuity cannot outgrow the economy that
+ * hosts it — and it stays far below any plausible WACC so the Gordon guard
+ * `WACC > g` holds across the whole slider range.
+ * @type {Readonly<{ min: number, max: number, step: number }>}
+ */
+export const TERMINAL_GROWTH_BOUNDS = Object.freeze({
+  min: 0,
+  max: 0.04,
+  step: 0.0025,
+});
+
+/**
+ * Mechanical recommendation thresholds, per `docs/spec.md` §7 (the model
+ * states an output, never an opinion). `recommend.js` imports these — it never
+ * re-types them — so the label boundaries have exactly one home.
+ *
+ * `upsidePct >= undervalued` → `undervalued`; `upsidePct <= overvalued` →
+ * `overvalued`; anything between → `fair`.
+ * @type {Readonly<{ undervalued: number, overvalued: number }>}
+ */
+export const RECOMMENDATION_THRESHOLDS = Object.freeze({
+  undervalued: 0.15,
+  overvalued: -0.15,
+});
+

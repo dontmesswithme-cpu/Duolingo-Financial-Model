@@ -478,6 +478,127 @@
       "bull": 0.01
     },
     "notes": "FY2025 actual: interest income 45,231 / average invested cash 1,125,751 — where invested cash is cash and cash equivalents + short-term investments + long-term investments, averaged across the FY2024 balance (975,937) and the FY2025 balance (1,275,565) — = 4.0179%. Drives the P3.2 income-statement ↔ balance-sheet interest-income linkage."
+  },
+  {
+    "name": "risk_free_rate",
+    "label": "Risk-Free Rate (10Y Treasury)",
+    "group": "market",
+    "value": 0.0473,
+    "min": 0,
+    "max": 0.15,
+    "step": 0.0005,
+    "units": "pct_decimal",
+    "scenarioDeltas": {
+      "bear": 0.005,
+      "bull": -0.005
+    },
+    "notes": "MKT snapshot as of 2026-08-28 via FRED (Federal Reserve Bank of St. Louis), series DGS10 — Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis: 4.73%. 2026-08-28 is the latest PUBLISHED observation: FRED lists the next release for this series as 2026-09-01 and it was not yet posted when the snapshot was taken, so the prior published observation is used rather than an intraday estimate. Bear/bull deltas move the discount rate inversely to equity risk appetite (bear = higher required return).",
+    "marking": "MKT",
+    "asOf": "2026-08-28",
+    "source": {
+      "provider": "FRED — Federal Reserve Bank of St. Louis (Board of Governors of the Federal Reserve System, H.15 Selected Interest Rates)",
+      "url": "https://fred.stlouisfed.org/series/DGS10"
+    }
+  },
+  {
+    "name": "beta",
+    "label": "Levered Equity Beta",
+    "group": "market",
+    "value": 0.89,
+    "min": 0.2,
+    "max": 2.5,
+    "step": 0.01,
+    "units": "multiple",
+    "scenarioDeltas": {
+      "bear": 0.15,
+      "bull": -0.15
+    },
+    "notes": "MKT snapshot as of 2026-09-01 via stockanalysis.com: Beta (5Y monthly) = 0.89 — DUOL's realized price volatility has run below the market average over the trailing five years of monthly returns. The provider figure is used as published and is not re-derived. Bear/bull deltas widen or narrow the systematic-risk input.",
+    "marking": "MKT",
+    "asOf": "2026-09-01",
+    "source": {
+      "provider": "stockanalysis.com",
+      "url": "https://stockanalysis.com/stocks/duol/statistics/"
+    }
+  },
+  {
+    "name": "equity_risk_premium",
+    "label": "Equity Risk Premium (US)",
+    "group": "market",
+    "value": 0.0442,
+    "min": 0,
+    "max": 0.12,
+    "step": 0.0005,
+    "units": "pct_decimal",
+    "scenarioDeltas": {
+      "bear": 0.005,
+      "bull": -0.005
+    },
+    "notes": "MKT snapshot as of 2026-07-01 via Aswath Damodaran (NYU Stern) — implied ERP for the United States of 4.42%, from his July 2026 country risk-premium update (mature-market premium 4.17% plus a 0.25% US default-risk correction after the Moody's Aa1 downgrade). Cross-check against Damodaran's own historical implied-ERP series: 4.33% (2024) and 4.23% (2025), so 4.42% is an in-range, consistent read rather than an outlier. Bear/bull deltas widen or narrow the premium.",
+    "marking": "MKT",
+    "asOf": "2026-07-01",
+    "source": {
+      "provider": "Aswath Damodaran, NYU Stern",
+      "url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html"
+    }
+  },
+  {
+    "name": "terminal_growth_rate",
+    "label": "Terminal Growth Rate (Perpetuity)",
+    "group": "market",
+    "value": 0.025,
+    "min": 0,
+    "max": 0.04,
+    "step": 0.0025,
+    "units": "pct_decimal",
+    "scenarioDeltas": {
+      "bear": -0.005,
+      "bull": 0.005
+    },
+    "notes": "EST judgment — long-run perpetuity growth for the Gordon terminal value. Set at 2.5%: strictly below the Base WACC (8.6638%, ~616bps of Gordon headroom) and below the long-run US nominal GDP growth ceiling of ~4.0% (~2.0% real + ~2.0% inflation), so the perpetuity never implies Duolingo outgrowing the economy that hosts it. Max bound is TERMINAL_GROWTH_BOUNDS.max (0.04) from constants.js. Not an MKT input — no market price reveals long-run growth — so it carries no as-of date. Contract-reading note: the P4.1 contract text says this driver is 'bounded below US nominal GDP growth'; that reads as an inversion of the standard Gordon ceiling (a perpetuity cannot grow faster than nominal GDP forever), so it is implemented here as an UPPER bound. OP ruling requested.",
+    "marking": "EST"
+  },
+  {
+    "name": "market_share_price",
+    "label": "Market Share Price (Snapshot Close)",
+    "group": "market",
+    "value": 148.36,
+    "min": 10,
+    "max": 2000,
+    "step": 0.01,
+    "units": "usd_per_share",
+    "scenarioDeltas": {
+      "bear": 0,
+      "bull": 0
+    },
+    "notes": "MKT snapshot as of 2026-08-31 via stockanalysis.com: official closing price $148.36 (open 144.69, high 149.62, low 144.46, volume 840,635). 2026-08-31 is the last COMPLETED trading session — the 2026-09-01 session was still in progress at ~$156.64 intraday (14:17 EDT) when this snapshot was taken, and an intraday print is not a close, so the prior official close is used and disclosed as such. Scenario deltas are deliberately 0: the market price is the benchmark the DCF is measured against, so it must not move with the operating scenario. Only DCF per-share moves across Bear/Base/Bull; shifting the benchmark too would compare two scenario-shifted numbers and the upside percentage would carry no information.",
+    "marking": "MKT",
+    "asOf": "2026-08-31",
+    "source": {
+      "provider": "stockanalysis.com",
+      "url": "https://stockanalysis.com/stocks/duol/history/"
+    }
+  },
+  {
+    "name": "shares_outstanding",
+    "label": "Diluted Shares Outstanding",
+    "group": "market",
+    "value": 50031000,
+    "min": 10000000,
+    "max": 200000000,
+    "step": 100000,
+    "units": "count",
+    "scenarioDeltas": {
+      "bear": 0,
+      "bull": 0
+    },
+    "notes": "MKT snapshot as of 2026-08-06 from the latest cited filing — Duolingo, Inc. Form 10-Q for the quarter ended 2026-06-30 (accession 0001628280-26-053603, filed 2026-08-06), Note 11 Earnings Per Share: 'Denominator for dilutive net income per common share - weighted-average shares' = 50,031 thousand for the three months ended June 30, 2026, i.e. 50,031,000 diluted shares. Diluted (not basic) is used because a DCF values the whole enterprise, including the dilutive effect of outstanding equity awards. Cross-check: the same filing's cover page reports basic shares outstanding of 40,387,012 Class A + 6,399,257 Class B = 46,786,269 as of August 4, 2026; the ~3.24M gap is treasury-stock-method dilution. Scenario deltas are 0: the share count is a filing fact, not an operating-scenario variable. Held constant across the forecast horizon — the P4 contract sanctions no share-count forecast driver.",
+    "marking": "MKT",
+    "asOf": "2026-08-06",
+    "source": {
+      "provider": "U.S. Securities and Exchange Commission — Form 10-Q, Duolingo, Inc. (CIK 0001562088)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm"
+    }
   }
 ]
 

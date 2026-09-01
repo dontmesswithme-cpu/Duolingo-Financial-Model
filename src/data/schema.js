@@ -9,7 +9,7 @@
  * @module src/data/schema
  */
 
-import { KLASS_VALUES, PERIOD_TYPE_VALUES, UNIT_KEYS } from './constants.js';
+import { KLASS_VALUES, PERIOD_TYPE_VALUES, UNIT_KEYS, MARKING_VALUES } from './constants.js';
 
 /**
  * Absolute http(s) URL, as required for every citation link.
@@ -122,6 +122,22 @@ const KPI_FIELDS = Object.freeze({
 });
 
 /**
+ * A market-data source, per the P4.1 Artifact Contract. Distinct from
+ * `SOURCE_FIELDS`: a market snapshot is not a filing citation, so it names a
+ * `provider` (and optionally a `url`) rather than filing/period/statement.
+ *
+ * @type {Readonly<Record<string, object>>}
+ */
+const MARKET_SOURCE_FIELDS = Object.freeze({
+  provider: { type: 'string', required: true, nonEmpty: true },
+  url: {
+    type: 'string',
+    pattern: URL_PATTERN,
+    patternHint: 'an absolute http(s) URL',
+  },
+});
+
+/**
  * Scenario delta fields schema.
  * @type {Readonly<Record<string, object>>}
  */
@@ -149,6 +165,35 @@ const ASSUMPTION_DRIVER_FIELDS = Object.freeze({
     fields: SCENARIO_DELTAS_FIELDS,
   },
   notes: { type: 'string', required: true, nonEmpty: true },
+
+  /**
+   * P4.1 additive extension — the sanctioned key for market-input provenance.
+   *
+   * `marking` is optional, not `requiredWhen: group === 'market'`: `scenarios.apply`
+   * rebuilds each driver from a fixed field list that does not (yet) carry
+   * `marking`, so requiring it would make every scenario application fail schema
+   * validation on the new market drivers. `wacc.build` enforces the marking
+   * discipline fail-closed at the point of use instead — see
+   * `assertMarketDriverDiscipline` — and raises a `ConfigError` naming every
+   * offender rather than letting an unmarked market input through silently.
+   */
+  marking: {
+    type: 'string',
+    enum: MARKING_VALUES,
+  },
+  asOf: {
+    type: 'string',
+    requiredWhen: (record) => record.group === 'market' && record.marking === 'MKT',
+    requiredHint: 'an as-of date (YYYY-MM-DD) for every MKT-labeled market driver',
+    pattern: ISO_DATE_PATTERN,
+    patternHint: 'a calendar date (YYYY-MM-DD)',
+  },
+  source: {
+    type: 'object',
+    requiredWhen: (record) => record.group === 'market' && record.marking === 'MKT',
+    requiredHint: 'a market source { provider, url? } for every MKT-labeled market driver',
+    fields: MARKET_SOURCE_FIELDS,
+  },
 });
 
 /**

@@ -142,6 +142,9 @@ export function apply(base, scenario = DEFAULT_SCENARIO) {
       units: driver.units,
       scenarioDeltas: Object.freeze({ ...driver.scenarioDeltas }),
       notes: driver.notes,
+      marking: driver.marking,
+      asOf: driver.asOf,
+      source: driver.source ? Object.freeze({ ...driver.source }) : undefined,
       baseValue: driver.value,
       appliedDelta: delta,
     });

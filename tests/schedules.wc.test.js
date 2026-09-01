@@ -175,9 +175,17 @@ describe('P2.1 — Assumptions Infrastructure: loadAssumptions() loader', () => 
     // `financing`) and that `DRIVER_GROUPS` in constants.js now registers. The
     // assertion is unchanged in kind — every driver's group must be recognized —
     // only the recognized set grows. No existing group was removed or weakened.
+    //
+    // P4.1 amendment (2026-09-01 — disclosed at P4.1 submission for OP ruling):
+    // `market` is added for the same reason and by the same rule. The P4.1
+    // artifact contract mandates `group: "market"` for all six valuation
+    // drivers, `DRIVER_GROUPS` in constants.js has registered `market` since
+    // P2, and the `assumptionDriver` schema's `asOf`/`source` requirement is
+    // keyed on `group === 'market'`. The assertion is unchanged in kind; only
+    // the recognized set grows. No existing group was removed or weakened.
     for (const driver of assumptions.drivers) {
       assert.ok(
-        ['workingCapital', 'capexDna', 'sbc', 'revenue', 'costs', 'tax', 'financing'].includes(
+        ['workingCapital', 'capexDna', 'sbc', 'revenue', 'costs', 'tax', 'financing', 'market'].includes(
           driver.group,
         ),
         `driver "${driver.name}" group "${driver.group}" must be recognized`,
@@ -192,10 +200,18 @@ describe('P2.1 — Assumptions Infrastructure: loadAssumptions() loader', () => 
   });
 
   test('honest-defaults rule: every default notes field documents corpus figures or EST judgment', async () => {
+    // P4.1 amendment (2026-09-01 — disclosed at P4.1 submission for OP ruling):
+    // the accepted vocabulary is extended ADDITIVELY with `MKT snapshot as of`,
+    // the P4.1 contract's honest-defaults wording for a market-sourced driver
+    // ("notes states the market source + as-of date"). The rule predates the
+    // market group, so a corpus-figure or EST-judgment phrase was previously
+    // the only legal provenance text. The assertion is unchanged in kind —
+    // every driver must document where its default came from — only the
+    // recognized vocabulary grows. No previously accepted phrase was removed.
     const assumptions = await getAssumptions();
     for (const driver of assumptions.drivers) {
       assert.ok(
-        driver.notes.includes('FY2025 actual') || driver.notes.includes('EST judgment') || driver.notes.includes('actual:'),
+        driver.notes.includes('FY2025 actual') || driver.notes.includes('EST judgment') || driver.notes.includes('actual:') || driver.notes.includes('MKT snapshot as of'),
         `driver ${driver.name} must carry honest derivation notes: received "${driver.notes}"`
       );
     }
