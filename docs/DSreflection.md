@@ -26,6 +26,7 @@
 - [P2.3] [Schedules/DebtFreeProof] PATTERN: Proving a debt-free capital structure requires an active scan of all cited balance sheet dates and metrics rather than an empty table. Provide an enumerated scan showing zero funded debt, term loans, notes payable, or credit facility lines exist in any filing, accompanied by a regression tripwire asserting no future debt metric goes unnoticed.
 - [P2.3] [Schedules/OperatingLeases] PATTERN: US GAAP ASC 842 operating leases (ROU assets and long-term operating lease liabilities) should be listed as filed in the debt schedule for visibility, accompanied by explicit disclosure that operating leases are not funded borrowings and that current lease obligations sit within accrued liabilities.
 - [P2.3] [Schedules/SBC] PATTERN: Stock-based compensation expense flows from Cash Flow Statement operating activities, with discrete quarters and TTM derived via `ttm.compute` differencing. Dilution-context reference rows (stock option exercises, tax withholding share settlements, repurchases) provide complete capitalization context and should be carried from financing cash flows and labeled as reference.
+- [P3.1] [Workflow/Watcher] RULE: Watchers (`node tools/watch_ds_inbox.mjs` / `watch_op_inbox.mjs`) must ALWAYS be executed foreground-blocking directly within the active tool call. Never run via background detached commands (`Start-Process`, `&`, background tasks). LLM agents are turn-based and only wake when a blocking tool call completes on signal receipt (`exit 0`).
 
 
 

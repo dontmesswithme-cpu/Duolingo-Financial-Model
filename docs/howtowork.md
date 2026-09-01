@@ -77,8 +77,9 @@ When executing subtask `PX.Y`:
    - Overwrite `docs/status_op.json` (`state: "review_pending"`, increment `seq` by 1).
 5. **Update Working RAM**:
    - Overwrite `docs/DSmemory.md` with active state.
-6. **Execute Watcher & Wait**:
-   - Execute: `node tools/watch_ds_inbox.mjs` (blocks until `status_ds.json.seq > baselineSeq`).
+6. **Execute Watcher & Wait (Foreground-Blocking)**:
+   - Execute directly in foreground: `node tools/watch_ds_inbox.mjs` (blocks synchronously until `status_ds.json.seq > baselineSeq`).
+   - **MANDATORY**: Must execute in the foreground to hold the LLM turn open. **NEVER** use `Start-Process`, `&`, or detached background execution; an LLM agent only wakes when the synchronous tool call completes upon receiving signal exit 0.
    - If the watcher exits with code 1 (timeout), immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
 7. **Handle Review Signal on Wake-Up**:
    - **Immediate Step (Guarded Reset)**: Read `docs/status_op.json`. If `state === "review_pending"`, reset it to `"state": "idle"` (do **NOT** bump `seq`). If `state` is anything else, leave the file untouched.
@@ -98,12 +99,13 @@ When executing subtask `PX.Y`:
 1. Complete Section 2 cold-start reads (Reflection ➔ Memory ➔ Status ➔ Signal Reconciliation ➔ Phase Spec).
 2. Resume execution from state recorded in `OPmemory.md`.
 
-### Step 1: Watch for Submissions
-Execute background watcher:
+### Step 1: Watch for Submissions (Foreground-Blocking)
+Execute watcher directly in the foreground tool execution (holding turn open):
 ```bash
 node tools/watch_op_inbox.mjs
 ```
-If the watcher exits with code 1 (timeout), immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
+- **MANDATORY**: Must run foreground-blocking. **NEVER** background or detach the process via `Start-Process`. LLM agents are turn-based and wake *only* when the synchronous tool call finishes on `seq > baselineSeq` (exit 0).
+- If the watcher exits with code 1 (timeout), immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
 
 ### Step 2: Deep Audit & Verification
 Upon wake-up (`status_op.json.seq > baselineSeq`):
@@ -177,9 +179,11 @@ When a watcher exits with code 1 after `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2
 3. **Assert Delimiter on Wake**: Receiving agents must assert that incoming messages terminate with `[END_OF_MESSAGE]`.
 4. **Reconcile `seq` on Cold-Start**: Detect un-signaled messages by comparing complete message blocks against `seq`.
 5. **Clean Resource Management**: Symmetrical initialization and disposal on all created resources.
+6. **Execute Watchers Synchronously in Foreground**: Always run watcher scripts (`node tools/watch_*.mjs`) as synchronous, foreground-blocking tool executions so that exit code 0 automatically wakes the agent turn for audit/continuation.
 
 ### DON'T:
 1. **Never Improvise Contract Deliverables**: Build what the contract specifies.
 2. **Never Overwrite Historical Logs**: Logs under `docs/logs/` are strictly append-only.
 3. **Never Increment `seq` on Idle Latch Resets**: DS conditionally resetting `status_op.json` to `"idle"` (when `"review_pending"`) must not increment `seq`.
 4. **DS Must Never Issue Review Headers**: Only OP issues `REVIEW:` and `GATE PASS:`.
+5. **Never Background or Detach Watchers**: Never run watchers via `Start-Process`, background jobs, detached shell subprocesses, or async fire-and-forget. A detached OS process cannot wake a dormant LLM turn.

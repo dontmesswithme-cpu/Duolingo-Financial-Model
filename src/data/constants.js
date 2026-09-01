@@ -138,6 +138,10 @@ export const SCENARIO_DELTA_KEYS = Object.freeze(['bear', 'bull']);
 
 /**
  * Driver groups for model assumptions.
+ *
+ * `workingCapital` … `market` are the P2 groups. `revenue`, `costs`, `tax`, and
+ * `financing` are appended additively by the P3.1 artifact contract (frozen
+ * surface permits additive extension only).
  * @type {ReadonlyArray<string>}
  */
 export const DRIVER_GROUPS = Object.freeze([
@@ -146,7 +150,64 @@ export const DRIVER_GROUPS = Object.freeze([
   'debt',
   'sbc',
   'market',
+  'revenue',
+  'costs',
+  'tax',
+  'financing',
 ]);
+
+/**
+ * First forecast fiscal year. FY2026 is the hybrid year: H1 actual (cited
+ * Q1/Q2 FY2026 rows) + H2 engine estimate.
+ * @type {number}
+ */
+export const FORECAST_BASE_YEAR = 2026;
+
+/**
+ * Forecast horizon bounds and default, per `docs/spec.md` §7 decision 1
+ * (5 forward years FY2026–FY2030, user-extensible 3–10).
+ * @type {number}
+ */
+export const FORECAST_HORIZON_MIN = 3;
+export const FORECAST_HORIZON_MAX = 10;
+export const FORECAST_HORIZON_DEFAULT = 5;
+
+/**
+ * Prefix used to build forecast period keys (`FY` + year).
+ * @type {string}
+ */
+export const FORECAST_PERIOD_PREFIX = 'FY';
+
+/**
+ * Number of half-year segments in a fiscal year. Drives the hybrid FY2026
+ * per-half provenance split and the half-period growth exponent.
+ * @type {number}
+ */
+export const HALVES_PER_YEAR = 2;
+
+/**
+ * Cited corpus periods the forecast anchors on. Every key names a period that
+ * exists in the P1 corpus — no forecast row is ever added to the data layer.
+ *
+ * - `baseFiscalYear`: last fully-reported fiscal year (FY2025) — the base every
+ *   growth driver compounds from.
+ * - `subscriberOpening` / `subscriberMidYear`: paid-subscriber stock anchors
+ *   (FY2025 year-end and Q2 FY2026), the two cited points in the cascade.
+ * - `priorH1Ytd` / `priorH1TailQuarter`: 9M FY2025 minus Q3 FY2025 yields H1
+ *   FY2025, the like-for-like comparison base for H1 FY2026 actuals.
+ * - `currentH1Quarters`: the two discrete FY2026 quarters whose sums are the
+ *   H1 actuals carried in every hybrid line.
+ *
+ * @type {Readonly<Record<string, string|ReadonlyArray<string>>>}
+ */
+export const FORECAST_ANCHOR_PERIODS = Object.freeze({
+  baseFiscalYear: 'FY2025',
+  subscriberOpening: 'FY2025',
+  subscriberMidYear: 'Q2 FY2026',
+  priorH1Ytd: '9M FY2025',
+  priorH1TailQuarter: 'Q3 FY2025',
+  currentH1Quarters: Object.freeze(['Q1 FY2026', 'Q2 FY2026']),
+});
 
 /**
  * The known historical datasets, per `docs/spec.md` §3.1. Discovery is an

@@ -6,103 +6,47 @@
 
 ## 1. Ground Truth Verification (Incoming Model Handshake)
 - **Protocol Version**: 1.0
-- **Current Phase**: `P2` Supporting Schedules — 🟢 Active
-- **Active Sub-Phase**: `P2.3` Debt Schedule (Debt-Free Explicit) + SBC Schedule — **FINAL P2 sub-phase** (DS working)
-- **Consecutive Fail Count**: **0** (P2.2 PASS after 1 FAIL cycle)
-- **Last Verified Test Count**: 277/277, 0 flakes × 3 runs
-- **Last Verified Build**: Clean
-- **Queue Status**: P2.2 CLOSED [PASS 12:40]. `status_ds.json` → worker_active (seq 6, P2.3); PASS + P2.3 protocol notes delivered; watcher re-armed (baseline `status_op.json.seq = 5`). Awaiting DS P2.3 submission.
-
----
+- **Current Phase**: `P3` Linked 3-Statement Projections — 🟢 Active
+- **Active Sub-Phase**: `P3.2` Three-Statement Linkage (DS working; seq 3 worker_active)
+- **Consecutive Fail Count**: 0 (P3.1 resubmission PASS — reset)
+- **Last Verified Test Count**: 335/335 (291 prior + 44 P3.1), 0 flakes × 3 OP runs
+- **Last Verified Build**: Clean; corpus 706 rows intact vs `v1.0-P2` (empty diff)
 
 ## 2. Current Audit State
-- **Last Action**: REVIEW: P2.2 [PASS ✅] — full record in `docs/logs/op/phase_2.md` [12:40].
-  All 7 fixes verified in substance (YTD mapping 7,028/5,587 + impairment 578; honest
-  FY2021 null BOP; amortization → 7 cited corpus rows + zero-literal gate; split basis
-  documented; acquired-additions 8,303 line; anti-tautology tests; disclosure). Rolls
-  close EXACTLY on independent arithmetic (intangibles FY2025/Q2 plugs 0).
-- **P2.2 final record**: FAIL 1 (tautological roll-forward: Q2 additions silently 0 →
-  9,000/5,009 phantom plugs; FY2021 fabricated BOP=EOP; FILED_AMORTIZATION hardcode;
-  undisclosed LED-006 deviation) → PASS (all fixed; 277/277). Three new OPreflection
-  learnings recorded (tautological identity tests; period-key mismatch; filed-value
-  layering).
-- **Immediate Next Action** (on DS P2.3 submission signal, seq > 5):
-  1. Assert inbox_op tail `[END_OF_MESSAGE]`; expect `SUBMISSION: P2.3`.
-  2. **Debt-free PROVEN gate**: buildDebt must return `hasDebt: false` + enumerated
-     scan evidence of corpus balance metric sets per date (reference the metrics
-     actually present); regression test asserts hasDebt===false AND no corpus metric
-     matches /borrow|notes payable|credit facility|term loan/i. Verify the scan
-     enumerates ALL 6 balance dates and the metric lists match the corpus (probe
-     independently — enumerate balance.json metrics per period myself and diff vs
-     the schedule's evidence list).
-  3. **Operating-lease transparency**: ROU assets + long-term operating lease
-     liability listed as-filed with "US GAAP operating leases are not debt" note;
-     current lease portion noted as within accrued liabilities — NO fabricated
-     current-lease split line.
-  4. **No hypothetical-issuance drivers**: debt driver group must NOT exist in
-     assumptions.json (spec §3.2 debt-free explicit; DRIVER_GROUPS constant includes
-     'debt' — check what DS does: if a debt group is added with issuance drivers =
-     contract violation; an empty/absent group with hasDebt proof is correct. The
-     DRIVER_GROUPS constant listing 'debt' was DS's own P2.1 addition — if P2.3
-     leaves it unused, note it).
-  5. **SBC schedule**: cf_stock_based_compensation annual+YTD ties EXACTLY;
-     discrete quarters via ttm.compute differencing; % of revenue per year
-     (recompute independently: FY2025 137,437/1,037,589 ≈ 13.24%; verify all years);
-     dilution-context reference lines from corpus (proceeds_from_stock_options_
-     exercise, taxes_paid_net_share_settlement, repurchase_of_common_stock) — read
-     from corpus, labeled reference not schedule math.
-  6. **sbc driver group**: sbc_target_pct_of_revenue default 137,437/1,037,589 with
-     derivation notes + scenario deltas; honest-defaults rule enforced.
-  7. **build() complete**: five families, no nulls; assumptions param wired or
-     documented (accepted-unused was P2.1-only).
-  8. Full battery: suite ×3; purity; zero-literal gate (auto-covered); anti-retyping
-     mutation for debt/sbc families; frozen surfaces; ledger set-diff (expect zero
-     new rows — P2.3 is engine + assumptions only; ANY new data row = deviation).
-  9. If PASS and it's the FINAL sub-phase → **GATE PASS sequence** (contract §4):
-     consolidated OP tie-out of every schedule family from corpus; P2.2 rows
-     re-verified (done at FAIL/PASS cycles — spot-check); frozen-surface check; boot
-     gate (app boots over full corpus headless); purity; 0 magic numbers; then
-     GATE PASS message + status.md update + status_ds completed + archive_phase.mjs
-     phase_2 + tag v1.0-P2.
+- **Last Action**: P3.1 RESUBMISSION REVIEW → PASS ✅ (2026-09-01 17:21; full record in docs/logs/op/phase_3.md).
+- **P3.1 review history (2 cycles)**:
+  1. FAIL 16:51 — sole substantive defect: hybrid H2 = FY estimate − H1 ACTUAL (contract: − H1 DRIVER estimate), undisclosed, codified in tests. DS had crashed mid-protocol (no inbox/latch/log/DSmemory) — audited working tree per Director instruction; remediation + protocol completion ordered.
+  2. Resubmission 17:00 → PASS 17:21. Remediation verified by OP probe (scratch/op_p3_1_resubmit_probe.mjs): subscription H2 = 522,134.23 (FYest − modeled H1 est); value = 1,031,077.23 = 508,943 cited H1 + H2 (−3,744.26 surprise carried into year — matches FAIL-review prediction exactly); total = 1,193,853.52 = 590,421 + 603,432.52; totality on the join; tests assert H2-invariance + value-moves-1:1; deriveExpectedForecast updated independently.
+- **Standing rulings from P3.1 (binding forward)**:
+  - Hybrid join: FY2026 full-year values = cited H1 actuals + engine H2 driver estimates. H2 subtrahend is the driver model's OWN H1 estimate (never the cited actual).
+  - Growth-segment FY/2 half-split = compliant annual semantics for non-compounding paths; subscription uses fully modeled H1 estimate.
+  - WC-test group-whitelist amendment (schedules.wc.test.js) accepted: additive + in-code disclosure + contract-sanctioned DRIVER_GROUPS extension.
+  - Protocol-crash recovery: DS completes protocol steps without re-implementing clean lanes.
 
----
+## 3. Pre-Staged P3.2 Audit Plan (next submission)
+Contract §3 Task P3.2 — `threeStatement.project(schedules, assumptions, forecast)` FROZEN signature:
+- **Balance gate (HARD)**: `assets === liabilities + equity` per forecast year on RAW constructed components; `EngineError("balance_check_failed", year)`; `balanceCheck` per-year output block. NO balancing plug line anywhere — unbalanced year = missing linkage to fix, never absorb. Tests must recompute independently (not trust `balanceCheck.ok`).
+- **Cash sweep**: EOP = BOP + ΔOCF + ΔICF + ΔFinancing per year; FY2026 BOP = Q2 FY2026 cited cash **1,180,887**; H2 estimated; pinned recomputes ≥ 2 years; final-year cash = cumulative sweep.
+- **Schedule tie-ins (pinned, anti-tautology)**: ΔNWC = projectWorkingCapital deltas; D&A = PP&E + intangible schedule outputs; capex = schedule additions; SBC from projectSbc path.
+- **Hybrid CF (three period-key mapping — explicit + tested, resolveCfPeriod precedent)**: IS H1 from discrete quarters / CF H1 from cited **6M FY2026 YTD rows (OCF 239,031)** / BS anchored on Q2 FY2026 stock. H2 = driver estimate (hybrid join ruling applies — never re-derive from H1 actual).
+- **Held-constant BS lines**: every constant line carries a note (source row + "no forecast driver — held constant"); grep gate: no `?? 0` / `?? const` silent fallbacks in BS construction — missing input = EngineError.
+- **Equity roll**: common stock held constant (note); APIC + SBC + option proceeds − buybacks; RE = BOP + NI; no-dividend policy note (no dividend row in corpus).
+- OP pre-staged Q2 FY2026 anchors (re-derive at audit from raw corpus): cash 1,180,887; APIC 1,046,326; RE 364,836; common stock 5; goodwill 35,335; ROU assets 74,830; DTA 206,039; LT lease liab 86,136; 6M OCF 239,031; buybacks 6M 69,603.
+- Standard gates: purity/determinism/zero-literal on threeStatement.js; frozen surfaces; suite ×3; corpus diff vs v1.0-P2 empty; 335 prior tests untouched.
+- Financing drivers already verified (assumptions.json unchanged since first review): share_repurchases 139,206 (H1×2 annualized, EST); option_proceeds 12,570 (FY2025); net_share_settlement_taxes 41,617; interest_income_rate 0.040179 — IS↔BS interest linkage = avg (cash+STI+LTI) × rate.
 
-## 3. Quality Gate Priorities (P2.3 + Gate pre-staging)
-- **SBC anchors** (verify from corpus at audit): cf_stock_based_compensation rows —
-  FY2021–FY2025 annuals + 9M/6M/3M YTDs; TTM SBC via differencing. % of revenue per
-  year: recompute all 5 + Q2 TTM basis.
-- **Debt-free evidence quality**: the scan must be REAL (enumerate from corpus), not
-  a hardcoded string list — an evidence array that doesn't match the corpus is
-  false evidence. Cross-check metric names vs my own enumeration.
-- Lease metrics in corpus (from P1.2): operating_lease_right_of_use_assets,
-  long_term_operating_lease_liability — confirmed present in balance.json.
-- Dilution-context CF rows: verify they exist in corpus with those exact metric
-  names before expecting the schedule to reference them.
-- **Gate checklist (contract §4) — 11 items**: staged in phase_2.md §4; execute all
-  before GATE PASS. Boot gate: node-based headless boot test exists from P1
-  (app.scaffold tests) — verify still green over extended corpus.
-- Estimated corpus after P2.3: 716 + 0 new rows expected (engine-only sub-phase).
+## 4. Carry-Forward Notes
+- P3.3 (final sub-phase → Gate sequence): scenarios apply/list (immutability mutation test; driver×scenario delta recompute; clamped-driver list in meta); 15-check balance matrix Bear/Base/Bull × FY2026–FY2030 on raw components; scenario distinctness FY2027+ (rounding-to-zero delta = defect); H1 never re-estimated under deltas (hybrid join compounds: deltas may move the H1 DRIVER-estimate subtrahend, never the H1 actual); determinism.
+- Gate: consolidated tie-out (full path per scenario; balance matrix; hybrid provenance under scenarios; pinned anchors) → GATE PASS → archive → tag `v1.0-P3` → reset P4.1 → HALT for DIR.
+- Standing gates force-apply every review: literal, purity, mutation, fail-closed, anti-tautology pins+tripwires, explicit period-key mapping, disclosure-at-submission.
+- Watch-list for P3.2: silent BS fallbacks; plug-shaped "other" lines; interest income computed on year-END balance instead of average; FY2026 BS accidentally anchored on FY2025; CF H1 taken from discrete quarters instead of the 6M YTD row.
 
----
-
-## 4. Carry-Forward Audit Notes (binding into P2.3 review and Gate)
-- P2.1/P2.2 rulings all on record; newest standing gates: zero-literal engine gate;
-  period-key mapping pattern (resolveCfPeriod); anti-tautology test pattern (plug
-  pins + tripwires); acquired-vs-software additions separation.
-- DSreflection: P2.2 learning presumably appended — verify at submission.
-- Breaker: 0 consecutive. Fresh count.
-- After GATE PASS: archive_phase.mjs phase_2 (auto-commit + tag v1.0-P2; signals
-  reset to P3.1), status.md P2 🟢 Done + P3 🟡 Active, OPmemory rewritten, HALT —
-  Director initiates P3.
-
----
-
-## 5. End-of-Turn Checklist
-- [x] Watcher fired on P2.2 Resubmission 1 (no race)
-- [x] Full re-audit of all 7 fixes (probes: rollfwd re-run + amortization rows + literal grep + suite ×3 277/277)
-- [x] REVIEW: P2.2 [PASS ✅] appended to inbox_ds.md with P2.3 protocol notes, `[END_OF_MESSAGE]` asserted
-- [x] Approval record appended to docs/logs/op/phase_2.md
-- [x] `status_ds.json` → worker_active (seq 6, P2.3)
-- [x] `status.md` updated (P2.2 approved; 277/277; corpus 716)
-- [x] `OPmemory.md` overwritten
-- [x] **WATCHING — watcher re-armed (baseline seq 5). Next: DS P2.3 submission → audit per §2; if PASS → Gate sequence.**
+## 5. End-of-Turn Checklist — Session 3 (P3.1 reviews: FAIL 16:51 → PASS 17:21) — COMPLETE
+- [x] Director instruction ("start reviewing 3.1") executed; §4.2 reconciliation (anomaly documented: DS crash pre-latch)
+- [x] First-review audit: all lanes + independent probes → FAIL (hybrid H2 semantics, undisclosed) + 5-point remediation; seq 2 flip
+- [x] Resubmission audit: remediation verified by independent contract-formula probe; suite ×3; frozen surfaces; protocol steps → PASS ✅
+- [x] Verdicts + carry-forwards delivered to inbox_ds.md (both ending `[END_OF_MESSAGE]`)
+- [x] status_ds.json: seq 2→3 (worker_active, P3.2); docs/logs/op/phase_3.md appended (both cycles)
+- [x] status.md updated (P3.1 PASS; P3.2 in flight); OPmemory overwritten (this file); fail count 0
+- [x] DSreflection collection point: 1 FAIL cycle this sub-phase (protocol-crash + undisclosed deviation — recorded)
+- [ ] **NEXT SESSION / CONTINUATION**: arm watcher (baseline `status_op.json.seq = 1`) awaiting DS P3.2 submission latch (seq → 2, `review_pending`). Prior session watchers died with host — re-run §2.1 reconciliation first; do not trust `.op_watch_result.txt` without it.

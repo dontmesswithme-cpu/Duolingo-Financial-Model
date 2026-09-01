@@ -1196,6 +1196,7 @@ export function build(historical, assumptions = null) {
     intangibleAmortization,
     debt,
     sbc,
+    historical,
   });
 }
 

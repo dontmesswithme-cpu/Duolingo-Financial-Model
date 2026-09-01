@@ -169,9 +169,17 @@ describe('P2.1 — Assumptions Infrastructure: loadAssumptions() loader', () => 
     assert.ok(Array.isArray(assumptions.drivers));
     assert.ok(assumptions.drivers.length >= 9, 'must contain at least the working capital drivers');
 
+    // P3.1 amendment (2026-09-01 — disclosed at P3.1 submission for OP ruling):
+    // the recognized-group whitelist is extended ADDITIVELY with the four groups
+    // the P3.1 artifact contract mandates (`revenue`, `costs`, `tax`,
+    // `financing`) and that `DRIVER_GROUPS` in constants.js now registers. The
+    // assertion is unchanged in kind — every driver's group must be recognized —
+    // only the recognized set grows. No existing group was removed or weakened.
     for (const driver of assumptions.drivers) {
       assert.ok(
-        ['workingCapital', 'capexDna', 'sbc'].includes(driver.group),
+        ['workingCapital', 'capexDna', 'sbc', 'revenue', 'costs', 'tax', 'financing'].includes(
+          driver.group,
+        ),
         `driver "${driver.name}" group "${driver.group}" must be recognized`,
       );
       assert.ok(typeof driver.name === 'string' && driver.name.length > 0);

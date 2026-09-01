@@ -238,6 +238,246 @@
       "bull": -0.02
     },
     "notes": "FY2025 actual: Stock-based compensation 137,437 / Revenue 1,037,589 = 13.25%"
+  },
+  {
+    "name": "paid_subscriber_growth",
+    "label": "Paid Subscriber Growth (Annual)",
+    "group": "revenue",
+    "value": 0.183929,
+    "min": -0.2,
+    "max": 0.6,
+    "step": 0.0025,
+    "units": "pct_growth_annual",
+    "scenarioDeltas": {
+      "bear": -0.06,
+      "bull": 0.06
+    },
+    "notes": "EST judgment — equal-weight blend of the two cited paid-subscriber observations: FY2025 full-year growth +28.4211% (9,500,000 FY2024 → 12,200,000 FY2025, 10-K FY2025) and H1 FY2026 annualized +8.3647% (12,200,000 → 12,700,000 over two quarters, 10-Q Q2 FY2026, compounded to an annual rate). Labeled EST: forward subscriber growth is judgment, not a filed figure. The two anchors bracket a sharp deceleration, so neither alone is a safe default; the blend is the disclosed middle."
+  },
+  {
+    "name": "subscription_arpu",
+    "label": "Subscription ARPU (per Average Paid Subscriber, Annual)",
+    "group": "revenue",
+    "value": 80.5016,
+    "min": 40,
+    "max": 200,
+    "step": 0.25,
+    "units": "usd_per_subscriber_year",
+    "scenarioDeltas": {
+      "bear": -4,
+      "bull": 4
+    },
+    "notes": "FY2025 actual: subscription revenue 873,442 (thousands USD) / average paid subscribers 10,850,000 ((9,500,000 FY2024 + 12,200,000 FY2025) / 2) = $80.5016 per average subscriber per year. Held flat across the horizon (conservative — no assumed price/mix expansion). The H1 FY2026 implied ARPU (~$81.76) is carried as a context output for cross-checking, not as an anchor."
+  },
+  {
+    "name": "advertising_revenue_growth",
+    "label": "Advertising Revenue Growth (Annual)",
+    "group": "revenue",
+    "value": 0.082656,
+    "min": -0.2,
+    "max": 0.6,
+    "step": 0.0025,
+    "units": "pct_growth_annual",
+    "scenarioDeltas": {
+      "bear": -0.05,
+      "bull": 0.05
+    },
+    "notes": "EST judgment — H1 like-for-like YoY: H1 FY2026 advertising 41,666 (Q1 20,614 + Q2 21,052, cited 10-Q) / H1 FY2025 38,485 (9M FY2025 − Q3 FY2025, cited) − 1 = +8.2656%. The half-year like-for-like comparison is the freshest anchor available in the corpus; FY2025 full-year YoY was +45.20%, which extrapolates implausibly."
+  },
+  {
+    "name": "det_revenue_growth",
+    "label": "Duolingo English Test Revenue Growth (Annual)",
+    "group": "revenue",
+    "value": -0.029356,
+    "min": -0.4,
+    "max": 0.4,
+    "step": 0.0025,
+    "units": "pct_growth_annual",
+    "scenarioDeltas": {
+      "bear": -0.05,
+      "bull": 0.05
+    },
+    "notes": "EST judgment — H1 like-for-like YoY: H1 FY2026 DET 21,426 (Q1 11,317 + Q2 10,109, cited 10-Q) / H1 FY2025 22,074 (9M FY2025 − Q3 FY2025, cited) − 1 = −2.9356%. The half-year like-for-like comparison is the freshest anchor available in the corpus."
+  },
+  {
+    "name": "iap_revenue_growth",
+    "label": "In-App Purchase Revenue Growth (Annual)",
+    "group": "revenue",
+    "value": -0.170633,
+    "min": -0.5,
+    "max": 0.4,
+    "step": 0.0025,
+    "units": "pct_growth_annual",
+    "scenarioDeltas": {
+      "bear": -0.06,
+      "bull": 0.08
+    },
+    "notes": "EST judgment — H1 like-for-like YoY: H1 FY2026 IAP 16,448 (Q1 8,446 + Q2 8,002, cited 10-Q) / H1 FY2025 19,832 (9M FY2025 − Q3 FY2025, cited) − 1 = −17.0633%. The half-year like-for-like comparison is the freshest anchor available in the corpus."
+  },
+  {
+    "name": "other_revenue_growth",
+    "label": "Other Revenue Growth (Annual)",
+    "group": "revenue",
+    "value": 0,
+    "min": -0.5,
+    "max": 2,
+    "step": 0.05,
+    "units": "pct_growth_annual",
+    "scenarioDeltas": {
+      "bear": -0.25,
+      "bull": 0.5
+    },
+    "notes": "EST judgment — held constant by explicit design (default growth 0): revenue_other is the footnote residual line, FY2025 actual 1,937, i.e. 0.19% of total revenue. The H1 like-for-like observation is +103.57% (952 → 1,938) but off an immaterial base; extrapolating it would distort the revenue mix. Growth 0 = held constant at the cited FY2025 value; the driver remains adjustable and is never dropped from the cascade."
+  },
+  {
+    "name": "cost_of_revenue_pct_revenue",
+    "label": "Cost of Revenue (% of Revenue)",
+    "group": "costs",
+    "value": 0.277694,
+    "min": 0.1,
+    "max": 0.5,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.02,
+      "bull": -0.02
+    },
+    "notes": "FY2025 actual: Cost of revenue 288,132 / Revenue 1,037,589 = 27.7694%. Anchored on FY2025 (the last fully-reported fiscal year) per the P3 contract's own cost-ratio basis."
+  },
+  {
+    "name": "rd_pct_revenue",
+    "label": "Research & Development (% of Revenue)",
+    "group": "costs",
+    "value": 0.295226,
+    "min": 0.1,
+    "max": 0.5,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.02,
+      "bull": -0.02
+    },
+    "notes": "FY2025 actual: Research and development 306,323 / Revenue 1,037,589 = 29.5226%."
+  },
+  {
+    "name": "sm_pct_revenue",
+    "label": "Sales & Marketing (% of Revenue)",
+    "group": "costs",
+    "value": 0.121124,
+    "min": 0.05,
+    "max": 0.3,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.01,
+      "bull": -0.01
+    },
+    "notes": "FY2025 actual: Sales and marketing 125,677 / Revenue 1,037,589 = 12.1124%."
+  },
+  {
+    "name": "ga_pct_revenue",
+    "label": "General & Administrative (% of Revenue)",
+    "group": "costs",
+    "value": 0.175298,
+    "min": 0.05,
+    "max": 0.35,
+    "step": 0.001,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": 0.01,
+      "bull": -0.01
+    },
+    "notes": "FY2025 actual: General and administrative 181,887 / Revenue 1,037,589 = 17.5298%."
+  },
+  {
+    "name": "other_income_net_pct_revenue",
+    "label": "Other Income, Net (% of Revenue)",
+    "group": "costs",
+    "value": 0.001551,
+    "min": -0.02,
+    "max": 0.02,
+    "step": 0.0002,
+    "units": "pct_of_revenue",
+    "scenarioDeltas": {
+      "bear": -0.001,
+      "bull": 0.001
+    },
+    "notes": "FY2025 actual: Other income, net 1,609 / Revenue 1,037,589 = 0.1551%."
+  },
+  {
+    "name": "effective_tax_rate",
+    "label": "Effective Tax Rate (Normalized Structural)",
+    "group": "tax",
+    "value": 0.134225,
+    "min": 0,
+    "max": 0.4,
+    "step": 0.0025,
+    "units": "pct_of_pretax",
+    "scenarioDeltas": {
+      "bear": 0.03,
+      "bull": -0.03
+    },
+    "notes": "EST judgment — normalized structural rate, NOT an observed effective rate. FY2025's effective rate of −126.997% (tax −231,655 on pretax 182,410) is a one-time valuation-allowance release and is prohibited as an anchor. FY2021 (−0.2952%) and FY2022 (−1.5997%) are not meaningful because both years had pretax losses. FY2023 9.6192% and FY2024 13.4225% are the only two positive-rate years in the corpus; the default takes FY2024, the most recent undistorted fiscal year (tax 13,732 / pretax 102,306 = 13.4225%). The rate sits below the 21% US federal statutory rate because of the valuation-allowance and foreign-tax-credit position — a modeling judgment the user can override."
+  },
+  {
+    "name": "share_repurchases",
+    "label": "Share Repurchases (Annual)",
+    "group": "financing",
+    "value": 139206,
+    "min": 0,
+    "max": 400000,
+    "step": 1000,
+    "units": "thousands_usd",
+    "scenarioDeltas": {
+      "bear": -40000,
+      "bull": 40000
+    },
+    "notes": "EST judgment — H1 FY2026 cited repurchases 69,603 (6M FY2026 YTD cash-flow row; Q1 24,331 + Q2 45,272, an accelerating pace) × 2 = 139,206 annualized. Held constant in absolute terms across the horizon — conservative, so buyback intensity declines as revenue grows. Stored as a positive magnitude; the engine applies the financing-outflow sign explicitly."
+  },
+  {
+    "name": "option_proceeds",
+    "label": "Proceeds from Stock Option Exercise (Annual)",
+    "group": "financing",
+    "value": 12570,
+    "min": 0,
+    "max": 40000,
+    "step": 250,
+    "units": "thousands_usd",
+    "scenarioDeltas": {
+      "bear": -3000,
+      "bull": 3000
+    },
+    "notes": "FY2025 actual: proceeds from stock option exercise 12,570 (cited 10-K FY2025 consolidated statement of cash flows, financing activities). Held constant across the horizon — EST. Stored as a positive magnitude; the engine applies the financing-inflow sign explicitly."
+  },
+  {
+    "name": "net_share_settlement_taxes",
+    "label": "Taxes Paid on Net Share Settlement (Annual)",
+    "group": "financing",
+    "value": 41617,
+    "min": 0,
+    "max": 120000,
+    "step": 500,
+    "units": "thousands_usd",
+    "scenarioDeltas": {
+      "bear": -8000,
+      "bull": 8000
+    },
+    "notes": "FY2025 actual magnitude: taxes paid related to net share settlement of equity awards 41,617 (cited 10-K FY2025 cash-flow statement, where it is signed −41,617 as a financing outflow). Held constant across the horizon — EST. Stored as a positive magnitude; the engine applies the financing-outflow sign explicitly."
+  },
+  {
+    "name": "interest_income_rate",
+    "label": "Interest Income Rate (% of Average Invested Cash)",
+    "group": "financing",
+    "value": 0.040179,
+    "min": 0,
+    "max": 0.12,
+    "step": 0.0005,
+    "units": "pct_of_average_invested_cash",
+    "scenarioDeltas": {
+      "bear": -0.01,
+      "bull": 0.01
+    },
+    "notes": "FY2025 actual: interest income 45,231 / average invested cash 1,125,751 — where invested cash is cash and cash equivalents + short-term investments + long-term investments, averaged across the FY2024 balance (975,937) and the FY2025 balance (1,275,565) — = 4.0179%. Drives the P3.2 income-statement ↔ balance-sheet interest-income linkage."
   }
 ]
 

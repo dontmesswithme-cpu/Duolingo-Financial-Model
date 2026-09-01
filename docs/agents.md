@@ -97,6 +97,11 @@ Instead of consuming LLM context tokens in polling loops, agents execute lightwe
   node tools/watch_op_inbox.mjs
   ```
 
+> **CRITICAL EXECUTION REQUIREMENT — FOREGROUND-BLOCKING ONLY**:
+> - **LLM Turn-Driven Wakeup**: LLM agents do not possess persistent OS listener threads. Control returns to an agent **only** when an active tool call returns stdout/exit into its context.
+> - **NEVER Detach / Background**: Never use `Start-Process`, `&`, or background daemon commands. A backgrounded process returns immediately to the LLM turn, leaving the agent dormant and unable to wake when the partner agent submits.
+> - **Synchronous Blocking**: The watcher command must hold the tool execution open in the foreground until `seq > baselineSeq` triggers `exit 0`, which immediately delivers output to the agent context and wakes the agent to perform the audit or next phase.
+
 > **Timeout Policy**: Watchers exit with code 1 after `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2 hours). On timeout, agents execute the recovery procedure in `howtowork.md` §4.2 (signal reconciliation ➔ partner liveness check ➔ Director escalation).
 
 ---
