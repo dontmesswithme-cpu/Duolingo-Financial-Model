@@ -104,6 +104,22 @@ export const FISCAL_CALENDAR_NOTES = Object.freeze({
 export const SOURCE_LEDGER_REQUIRED = true;
 
 /**
+ * Canonical verified SEC EDGAR filing URLs recorded in the project source ledger.
+ * @type {ReadonlySet<string>}
+ */
+export const LEDGER_URLS = Object.freeze(
+  new Set([
+    'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001562088&type=10-K&dateb=&owner=include&count=40',
+    'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    'https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm',
+    'https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm',
+    'https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm',
+    'https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm',
+    'https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm',
+  ]),
+);
+
+/**
  * Directory containing the historical dataset JSON files. Relative to the
  * document root when served statically. A URL fragment, so it is a
  * configuration value and lives here per the grep gate.
@@ -281,4 +297,11 @@ export const RECOMMENDATION_THRESHOLDS = Object.freeze({
   undervalued: 0.15,
   overvalued: -0.15,
 });
+
+/**
+ * Git tag prefix and fallback model version for Cover/TOC metadata.
+ */
+export const WORKFLOW_GIT_TAG_PREFIX = 'v1.0';
+export const MODEL_VERSION_FALLBACK = 'v1.0-P4';
+
 

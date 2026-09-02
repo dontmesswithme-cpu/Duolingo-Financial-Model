@@ -19,13 +19,22 @@
  * @returns {boolean}
  */
 function matchesSelector(element, selector) {
-  const parsed = /^\[([a-zA-Z0-9_-]+)(?:=["']?([^"'\]]*)["']?)?\]$/.exec(selector.trim());
-  if (!parsed) {
-    throw new Error(`DOM stub does not support selector: ${selector}`);
+  const trimmed = selector.trim();
+  if (trimmed.startsWith('#')) {
+    const id = trimmed.slice(1);
+    return element.id === id || element.getAttribute('id') === id;
   }
-  const [, name, value] = parsed;
-  if (!element.hasAttribute(name)) return false;
-  return value === undefined ? true : element.getAttribute(name) === value;
+  const attrRegex = /\[([a-zA-Z0-9_-]+)(?:=["']?([^"'\]]*)["']?)?\]/g;
+  let match;
+  let hasMatches = false;
+  while ((match = attrRegex.exec(trimmed)) !== null) {
+    hasMatches = true;
+    const [, name, value] = match;
+    if (!element.hasAttribute(name)) return false;
+    if (value !== undefined && element.getAttribute(name) !== value) return false;
+  }
+  if (hasMatches) return true;
+  throw new Error(`DOM stub does not support selector: ${selector}`);
 }
 
 /** Stands in for a DOM element. */
@@ -78,12 +87,13 @@ export class StubElement {
   /**
    * Invokes every handler registered for `type`, snapshot order preserved.
    * @param {string} type
+   * @param {object} [eventData]
    * @returns {void}
    */
-  dispatch(type) {
+  dispatch(type, eventData = {}) {
     const handlers = this.listeners.get(type);
     if (!handlers) return;
-    for (const handler of [...handlers]) handler({ type, target: this });
+    for (const handler of [...handlers]) handler({ type, target: this, ...eventData });
   }
 }
 
@@ -91,21 +101,34 @@ export class StubElement {
  * Builds a stub root holding tab controls and panes, mirroring `index.html`.
  *
  * @param {ReadonlyArray<string>} tabKeys
- * @returns {{ root: object, links: StubElement[], panes: StubElement[] }}
+ * @returns {{ root: StubElement, links: StubElement[], panes: StubElement[] }}
  */
 export function createTabRoot(tabKeys) {
   const links = tabKeys.map((key) =>
     new StubElement({ 'data-tab-link': '', 'data-tab': key }),
   );
-  const panes = tabKeys.map((key) =>
-    new StubElement({ 'data-tab-pane': '', 'data-tab': key }),
-  );
+  const panes = tabKeys.map((key) => {
+    const pane = new StubElement({ 'data-tab-pane': '', 'data-tab': key });
+    pane.id = `tab-${key}`;
+    let _innerHTML = '';
+    Object.defineProperty(pane, 'innerHTML', {
+      get() {
+        return _innerHTML;
+      },
+      set(val) {
+        _innerHTML = String(val);
+      },
+    });
+    return pane;
+  });
   const elements = [...links, ...panes];
 
-  const root = {
-    querySelectorAll(selector) {
-      return elements.filter((element) => matchesSelector(element, selector));
-    },
+  const root = new StubElement();
+  root.querySelectorAll = (selector) => {
+    return elements.filter((element) => matchesSelector(element, selector));
+  };
+  root.querySelector = (selector) => {
+    return root.querySelectorAll(selector)[0] || null;
   };
 
   return { root, links, panes };

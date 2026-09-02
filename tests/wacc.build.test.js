@@ -21,6 +21,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
@@ -588,19 +589,39 @@ describe('P4.1 — engine purity, determinism and corpus gates', () => {
   });
 
   test('market inputs live only in assumptions.json — no market value in the engine', () => {
-    const raw = fs.readFileSync(ENGINE_PATH, 'utf8');
-    const code = raw.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+    const engineDir = fileURLToPath(new URL('../src/engine/', import.meta.url));
+    const engineFiles = fs.readdirSync(engineDir).filter((f) => f.endsWith('.js'));
+
+    const waccRaw = fs.readFileSync(ENGINE_PATH, 'utf8');
+    const waccCode = waccRaw.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
 
     // A market number typed into the engine would be a literal gate violation
     // and an uncited figure. The build must read every one from a driver.
     for (const name of ['risk_free_rate', 'beta', 'equity_risk_premium', 'market_share_price', 'shares_outstanding']) {
       assert.ok(
-        code.includes(`'${name}'`),
+        waccCode.includes(`'${name}'`),
         `wacc.js must resolve ${name} by driver name`,
       );
     }
-    assert.doesNotMatch(code, /0\.0473/, 'the risk-free rate must not be hardcoded');
-    assert.doesNotMatch(code, /148\.36/, 'the share price must not be hardcoded');
-    assert.doesNotMatch(code, /0\.0442/, 'the ERP must not be hardcoded');
+
+    // Every engine file outside comments must contain no bare numerics > 999,
+    // no hardcoded market-anchor literals, and no buried fallbacks on market drivers
+    for (const file of engineFiles) {
+      const filePath = path.join(engineDir, file);
+      const raw = fs.readFileSync(filePath, 'utf8');
+      const code = raw.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+
+      const bigLiterals = code.match(/\b\d{4,}\b/g) || [];
+      assert.deepEqual(
+        bigLiterals,
+        [],
+        `Found bare numeric literals > 999 in ${file}: ${bigLiterals.join(', ')}`,
+      );
+
+      assert.doesNotMatch(code, /0\.0473/, `risk-free rate (0.0473) must not be hardcoded in ${file}`);
+      assert.doesNotMatch(code, /148\.36/, `market share price (148.36) must not be hardcoded in ${file}`);
+      assert.doesNotMatch(code, /0\.0442/, `ERP (0.0442) must not be hardcoded in ${file}`);
+      assert.doesNotMatch(code, /\?\?\s*(?:148\.36|0\.025|0\.0473|0\.0442)/, `buried market fallback found in ${file}`);
+    }
   });
 });

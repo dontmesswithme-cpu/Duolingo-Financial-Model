@@ -101,15 +101,17 @@ describe('AppState contract', () => {
       'assumptions',
       'dcf',
       'dirty',
+      'forecast',
       'recommendation',
       'scenario',
       'schedules',
       'threeStatement',
+      'wacc',
     ]);
 
     assert.equal(state.scenario, 'base');
     assert.equal(state.dirty, false);
-    for (const key of ['assumptions', 'schedules', 'threeStatement', 'dcf', 'recommendation']) {
+    for (const key of ['assumptions', 'schedules', 'forecast', 'threeStatement', 'wacc', 'dcf', 'recommendation']) {
       assert.equal(state[key], null, `${key} must be null before the pipeline is wired`);
     }
     app.dispose();

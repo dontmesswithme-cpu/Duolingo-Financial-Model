@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **Director** | `DIR` | Human / Lead | Vision holder, product owner, sets high-level requirements, milestones, resolves design decisions, and unblocks escalations. |
 | **Worker** | `DS` | Autonomous Dev Agent | Implements code, architecture, data structures, and tests adhering strictly to declarative Artifact Contracts. |
-| **Reviewer** | `OP` | Autonomous QA Agent | Audits deliverables line-by-line against Artifact Contracts, evaluates test suites independently, manages failure circuit breaker, and issues binding verdicts. |
+| **Reviewer** | `OP` | Autonomous QA Agent | Audits deliverables line-by-line against Artifact Contracts, **independently verifies external truth (not just internal consistency)**, evaluates test suites, manages failure circuit breaker, and issues binding verdicts. |
 | **Domain Subagents** | `SUB` | Specialized Agents | On-demand subagents (e.g. Visual UI Critic, Security Auditor, Performance Profiler) spawned as needed. |
 
 ---
@@ -36,10 +36,12 @@
 
 ### Reviewer (`OP` — Quality Gatekeeper & Auditor)
 - **Authority**: The definitive quality gatekeeper. Sole evaluator of pass/fail verdicts and the 3-cycle failure circuit breaker.
+- **Core Mandate — External Truth, Not Just Internal Consistency**: OP does **not** merely confirm that DS's code and DS's tests agree with each other (internal consistency — `412/412` green). OP independently verifies that the **deliverable is true against the external authoritative source** (SEC EDGAR filings, market-provider `MKT` snapshots `asOf`/`source`, contract arithmetic `WACC = rf+β×ERP`, `df=1/(1+WACC)^t`, `terminalValue` Gordon) and that the **tests themselves actually prove what their names claim** (gate scope = gate name, literal discipline across `src/engine/*.js`, disclosure completeness, bearing). A green suite that asserts a tautology (`plug ≡ residual`, `wacc ≡ costOfEquity` without levered probe, `market inputs live only in assumptions.json` that only greps `wacc.js`) is a **FAIL** even at `412/412` — external truth is the gate.
 - **Key Responsibilities**:
   - Monitors `docs/status_op.json` via background watcher (`seq > baselineSeq`).
-  - Performs line-by-line audit against Artifact Contracts and `docs/review_checklist.md`.
-  - Runs automated test suites and validation probes independently in `scratch/`.
+  - Performs line-by-line audit against Artifact Contracts and `docs/review_checklist.md` — including a **gate-scope audit** (does each test grep/scan the files its name promises? `wacc.build.test.js:590` only scanning `wacc.js` while `recommend.js:346` contains `148.36` is a bullcrap gate).
+  - **Independently verifies external truth**: re-derives every market/valuation anchor from raw `assumptions.json`/`historical`/`FRED`/`SEC` filings (not DS fixtures — `GROWTH_FIXTURE` pattern in reverse), cross-checks `MKT` `asOf`/`source.provider` against provider, re-runs `WACC×g` monotonicity, `WACC>g` guard, `Bear<Base<Bull` per-share ordering, `H1 590,421/78,472/76,618/239,031` invariance per scenario, and runs standalone literal/fallback probes in `scratch/` that **fail even if DS suite is green** (e.g. grep all `src/engine/*.js` outside comments for `\b\d{4,}\b` and `\?\?\s*148\.36`, call engine with missing `MKT` driver and assert `ConfigError`/`missing_driver`).
+  - Runs automated test suites **and** independent validation probes in `scratch/` — the suite is the cross-check, not the proof.
   - Tracks consecutive failure count in private RAM (`OPmemory.md`).
   - On 3rd consecutive FAIL: trips circuit breaker, writes `ESCALATION:` to `inbox_ds.md`, updates `status.md`, flips `status_ds.json` to `"blocked"`, and halts.
   - Exclusively updates `docs/status.md` and issues `GATE PASS` upon completing all sub-phases in a milestone.
@@ -122,8 +124,8 @@ Instead of consuming LLM context tokens in polling loops, agents execute lightwe
 [OP] Watcher triggers (status_op.json.seq > baselineSeq)
   │
   ├─► Assert inbox_op.md tail ends with [END_OF_MESSAGE]
-  ├─► Deep audit touched files against Artifact Contract & review_checklist.md
-  ├─► Execute automated test suite independently
+  ├─► Deep audit touched files against Artifact Contract & review_checklist.md — plus **gate-scope audit** (does each test's grep/scan actually cover the files its name promises?)
+  ├─► Execute automated test suite independently **and** run external-truth probes in `scratch/` that would fail even if DS suite is green (re-derive `MKT` anchors from raw `assumptions.json`/`SEC` filings, grep all `src/engine/*.js` for `??` fallbacks and bare literals `>999`)
   │
   ┌────┴─────────────────────────────────────────┐
   ▼                                              ▼

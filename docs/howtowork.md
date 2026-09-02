@@ -107,11 +107,11 @@ node tools/watch_op_inbox.mjs
 - **MANDATORY**: Must run foreground-blocking. **NEVER** background or detach the process via `Start-Process`. LLM agents are turn-based and wake *only* when the synchronous tool call finishes on `seq > baselineSeq` (exit 0).
 - If the watcher exits with code 1 (timeout), immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
 
-### Step 2: Deep Audit & Verification
+### Step 2: Deep Audit & Verification — External Truth, Not Just Internal Consistency
 Upon wake-up (`status_op.json.seq > baselineSeq`):
 1. **Integrity Assertion**: Read tail of `docs/inbox_op.md` and verify it ends with `[END_OF_MESSAGE]`. If missing, halt with corruption warning.
-2. **Contract Audit**: Inspect every touched file against the active Artifact Contract in `docs/phases/phase_X.md` and `docs/review_checklist.md`.
-3. **Independent Verification**: Execute automated test runner directly (`npm test`) and run standalone probe scripts in `scratch/`.
+2. **Contract Audit**: Inspect every touched file against the active Artifact Contract in `docs/phases/phase_X.md` and `docs/review_checklist.md` — including a **gate-scope audit** (does each test's grep/scan actually cover the files its name promises? A gate named *“no hardcoded market values anywhere in `src/engine/`”* that only greps `wacc.js` while `recommend.js:346` contains `148.36` is a FAIL even at `412/412`).
+3. **Independent Verification — External Truth, Not Just `npm test`**: Execute the automated test suite independently (`npm test` — the cross-check, not the proof) **and** run standalone probe scripts in `scratch/` that would **fail even if DS's suite is green**: re-derive every valuation/market anchor from raw `historical`/`assumptions.json`/`SEC EDGAR`/`FRED` (not DS fixtures — reverse the `GROWTH_FIXTURE` pattern), call the engine with missing/non-finite `MKT` drivers and assert typed `ConfigError`/`missing_driver` (do not rely on DS's discipline gate masking a fallback), grep **all** `src/engine/*.js` outside comments for bare numerics `>999` and buried fallbacks `\?\?` on market drivers, re-run `WACC×g` monotonicity and `WACC>g` guard per cell, and `Bear<Base<Bull` per-share ordering. Internal consistency (`412/412` green while `recommend.js:346` literally contains `148.36`) is a **FAIL** — external truth is the gate.
 
 ### Step 3: Issue Verdict & Manage Circuit Breaker (OP is Sole Authority)
 Every message written to `inbox_ds.md` **MUST** end with `[END_OF_MESSAGE]`.
@@ -179,7 +179,7 @@ When a watcher exits with code 1 after `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2
 3. **Assert Delimiter on Wake**: Receiving agents must assert that incoming messages terminate with `[END_OF_MESSAGE]`.
 4. **Reconcile `seq` on Cold-Start**: Detect un-signaled messages by comparing complete message blocks against `seq`.
 5. **Clean Resource Management**: Symmetrical initialization and disposal on all created resources.
-6. **Execute Watchers Synchronously in Foreground**: Always run watcher scripts (`node tools/watch_*.mjs`) as synchronous, foreground-blocking tool executions so that exit code 0 automatically wakes the agent turn for audit/continuation.
+6. **Arm the Watcher Last — Always in the Foreground — Never a Gimmick, No Workarounds**: The watcher (`node tools/watch_*.mjs`) is armed **only at the very end of the turn**, after **all** other tasks are fully complete — processing review feedback, applying fixes, resubmitting, writing log and inbox entries, updating memory, and flipping signal latches. It must **always** execute as a synchronous, foreground-blocking tool call that holds the LLM turn open until it exits; exit 0 (signal received) is what wakes the agent for audit/continuation. **Never** replace it with a token gesture: a short nominal block (e.g., a 15-second sleep or capped timeout run just so the step can be marked "done") is a **protocol violation**, not compliance — the watcher must genuinely block until the partner's `seq` advances or the §4.2 timeout fires. Always invoke it with an explicit tool timeout equal to the watcher's configured `WORKFLOW_WATCHER_TIMEOUT_MS` (per §4.2, default: 2 hours — pass the matching milliseconds to the shell tool's timeout parameter); **never** run it under the shell tool's default timeout (120s), which would silently kill the blocking wait, orphan the signal listener, and break the wake-up mechanism. **This rule is absolute and non-negotiable — it cannot be worked around, bypassed, or softened under any circumstance.**
 
 ### DON'T:
 1. **Never Improvise Contract Deliverables**: Build what the contract specifies.

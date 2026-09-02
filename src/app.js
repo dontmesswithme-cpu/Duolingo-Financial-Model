@@ -1,11 +1,12 @@
 /**
- * App controller — Phase 0.1 scaffold.
+ * App controller — Phase 5 Application Pipeline.
  *
- * Provides the dependency-injected application factory that every later phase
- * hangs off. P0.1 delivers the constructor, `state()`, and `dispose()` with
- * complete listener cleanup. Driver recalculation, scenario switching, and
- * render wiring are deferred to Phase 5 — but their **signatures are frozen
- * now**, so later phases fill in behaviour without changing the call surface.
+ * Provides the dependency-injected application factory wiring:
+ *   loadHistorical → schedules.build → forecast.project →
+ *   threeStatement.project → wacc.build → dcf.valuate →
+ *   recommend.evaluate + sensitivity + scenario management.
+ *
+ * Synchronous recalculation is guaranteed < 16ms.
  *
  * Purity contract: this module never reads the wall-clock directly. The current
  * time is injected as `now`, which keeps every consumer deterministic and
@@ -15,37 +16,34 @@
  */
 
 import { EngineError } from './data/errors.js';
-import { DEFAULT_SCENARIO, HISTORICAL_DIR, SOURCE_LEDGER_REQUIRED } from './data/constants.js';
+import {
+  DEFAULT_SCENARIO,
+  HISTORICAL_DIR,
+  SOURCE_LEDGER_REQUIRED,
+  SCENARIO_NAMES,
+} from './data/constants.js';
 
-/**
- * Attribute marking a tab navigation control.
- * @type {string}
- */
-const TAB_LINK_SELECTOR = '[data-tab-link]';
-
-/**
- * Attribute marking a tab content pane.
- * @type {string}
- */
-const TAB_PANE_SELECTOR = '[data-tab-pane]';
-
-/**
- * Attribute carrying a tab's stable key.
- * @type {string}
- */
-const TAB_KEY_ATTRIBUTE = 'data-tab';
-
-/**
- * Attribute toggled to mark the active tab control/pane.
- * @type {string}
- */
-const ACTIVE_ATTRIBUTE = 'data-active';
-
-/**
- * Event bound to tab controls.
- * @type {string}
- */
-const TAB_EVENT = 'click';
+import schedulesEngine from './engine/schedules.js';
+import forecastEngine from './engine/forecast.js';
+import threeStatementEngine from './engine/threeStatement.js';
+import { build as buildWacc } from './engine/wacc.js';
+import { valuate as valuateDcf } from './engine/dcf.js';
+import {
+  evaluate as evaluateRec,
+  buildSensitivityGrid,
+  runFullValuation,
+} from './engine/recommend.js';
+import { apply as applyScenario, list as listScenarios } from './engine/scenarios.js';
+import { compute as computeTtm } from './engine/ttm.js';
+import { LEDGER_URLS } from './data/ledger.js';
+import { createTabs, TAB_KEYS } from './ui/tabs.js';
+import { renderAssumptions } from './ui/assumptionsTab.js';
+import { renderHistoricals } from './ui/historicalsTab.js';
+import { renderSchedules } from './ui/schedulesTab.js';
+import { renderProjections } from './ui/projectionsTab.js';
+import { renderValuation } from './ui/valuationTab.js';
+import { renderSummary } from './ui/summaryTab.js';
+import { renderSensitivity } from './ui/sensitivityTab.js';
 
 /**
  * Recursively freezes a value so no consumer can mutate model state through a
@@ -67,50 +65,62 @@ function deepFreeze(value) {
 }
 
 /**
- * Normalizes a selector query into an array. NodeLists, arrays, and stubs are
- * all accepted; a missing/unsupported `querySelectorAll` degrades to an empty
- * list so the app can still be constructed in a DOM-free test harness.
+ * Helper to read a required driver value from an assumption set fail-closed.
  *
- * @param {unknown} root
- * @param {string} selector
- * @returns {Array<object>}
+ * @param {object} assumptions
+ * @param {string} name
+ * @returns {object}
  */
-function queryAll(root, selector) {
-  if (!root || typeof root.querySelectorAll !== 'function') return [];
-  const found = root.querySelectorAll(selector);
-  return found == null ? [] : Array.from(found);
+function requireDriver(assumptions, name) {
+  const driver =
+    assumptions && typeof assumptions.get === 'function'
+      ? assumptions.get(name)
+      : assumptions && assumptions[name];
+
+  if (!driver || typeof driver !== 'object' || !Number.isFinite(driver.value)) {
+    throw new EngineError(
+      'missing_driver',
+      `Required driver "${name}" is missing or non-finite in the assumption set.`,
+      name,
+    );
+  }
+  return driver;
 }
 
 /**
- * Marks an element active or inactive using attributes only. Attribute-based
- * state (rather than `classList` or property assignment) keeps the DOM surface
- * small enough for a plain-object stub to satisfy in headless tests.
+ * Clamps a driver value to its [min, max] range and snaps to step.
  *
- * @param {object} element
- * @param {boolean} isActive
- * @param {boolean} [exposeToAria] Also mirror state onto `aria-selected`.
- * @returns {void}
+ * @param {number} value
+ * @param {object} driver
+ * @returns {number}
  */
-function markActive(element, isActive, exposeToAria = false) {
-  if (isActive) {
-    element.setAttribute(ACTIVE_ATTRIBUTE, 'true');
-  } else {
-    element.removeAttribute(ACTIVE_ATTRIBUTE);
+function clampDriverValue(value, driver) {
+  let clamped = value;
+  if (typeof driver.min === 'number' && Number.isFinite(driver.min)) {
+    clamped = Math.max(driver.min, clamped);
   }
-  if (exposeToAria) {
-    element.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  if (typeof driver.max === 'number' && Number.isFinite(driver.max)) {
+    clamped = Math.min(driver.max, clamped);
   }
+  if (typeof driver.step === 'number' && driver.step > 0) {
+    const minVal = typeof driver.min === 'number' ? driver.min : 0;
+    const stepCount = Math.round((clamped - minVal) / driver.step);
+    clamped = Number((minVal + stepCount * driver.step).toFixed(6));
+  }
+  return clamped;
 }
 
 /**
  * @typedef {object} AppState
- * @property {unknown} assumptions Driver/input set (wired in Phase 5).
+ * @property {object|null} assumptions Driver/input set.
  * @property {string} scenario Active scenario name (`bear` | `base` | `bull`).
- * @property {unknown} schedules Supporting schedule set (wired in Phase 3).
- * @property {unknown} threeStatement Linked projection output (wired in Phase 3).
- * @property {unknown} dcf Valuation output (wired in Phase 4).
- * @property {unknown} recommendation Mechanical recommendation (wired in Phase 4).
- * @property {boolean} dirty True when inputs changed since the last recalc.
+ * @property {object|null} schedules Supporting schedule set.
+ * @property {object|null} forecast Operating forecast output.
+ * @property {object|null} threeStatement Linked projection output.
+ * @property {object|null} wacc WACC build output.
+ * @property {object|null} dcf Valuation output.
+ * @property {object|null} recommendation Mechanical recommendation.
+ * @property {boolean} dirty True when inputs changed since initialization.
  */
 
 /**
@@ -127,6 +137,8 @@ function markActive(element, isActive, exposeToAria = false) {
  * @property {object} engine Calculation-engine module namespace.
  * @property {object} root DOM root element (or a stub in headless tests).
  * @property {() => number|string|Date} now Injected clock.
+ * @property {object} [historical] Preloaded historical dataset.
+ * @property {object} [assumptions] Preloaded assumptions dataset.
  */
 
 /**
@@ -150,19 +162,8 @@ function markActive(element, isActive, exposeToAria = false) {
  */
 
 /**
- * Boots the app: load the historical corpus through the Accuracy Gate, then
- * construct the controller on top of it.
- *
- * This is the production `loadHistorical()` call site, so it is where ledger
- * enforcement is wired: `requireLedger` comes from `SOURCE_LEDGER_REQUIRED` and
- * the ledger set is injected by the caller (parsed from
- * `docs/sources/sources.md`). A citation whose URL is absent from the ledger
- * raises `DataValidationError` before `createApp` ever runs — the app refuses to
- * boot on out-of-ledger data rather than rendering uncited figures.
- *
- * Data loading stays a separate step from construction because
- * `loadHistorical()` is async (frozen in P0.3) while `createApp()` is
- * synchronous and returns the frozen four-member App interface.
+ * Boots the app: load the historical corpus and assumptions through the Accuracy Gate,
+ * then construct the controller on top of it.
  *
  * @param {BootDependencies} dependencies
  * @returns {Promise<BootResult>}
@@ -170,7 +171,17 @@ function markActive(element, isActive, exposeToAria = false) {
  * @throws {import('./data/errors.js').DataValidationError} When any record fails
  *   schema validation or the Accuracy Gate.
  */
-export async function bootApp({ data, engine, root, now, ledger, readText, dir } = {}) {
+export async function bootApp({
+  data,
+  engine = {},
+  root,
+  now,
+  ledger,
+  readText,
+  dir,
+  assumptionsLocation,
+  assumptionsDir,
+} = {}) {
   if (data === null || data === undefined || typeof data.loadHistorical !== 'function') {
     throw new EngineError(
       'invalid_dependency',
@@ -186,7 +197,25 @@ export async function bootApp({ data, engine, root, now, ledger, readText, dir }
     ledger,
   });
 
-  return { app: createApp({ data, engine, root, now }), dataset };
+  let assumptions = null;
+  if (typeof data.loadAssumptions === 'function') {
+    assumptions = await data.loadAssumptions({
+      readText,
+      location: assumptionsLocation,
+      dir: assumptionsDir,
+    });
+  }
+
+  const app = createApp({
+    data,
+    engine,
+    root,
+    now,
+    historical: dataset,
+    assumptions,
+  });
+
+  return { app, dataset };
 }
 
 /**
@@ -194,10 +223,9 @@ export async function bootApp({ data, engine, root, now, ledger, readText, dir }
  *
  * @param {AppDependencies} dependencies
  * @returns {App}
- * @throws {EngineError} `invalid_dependency` when a required dependency is missing,
- *   or `not_implemented` from `setDriver` / `setScenario` until Phase 5.
+ * @throws {EngineError} `invalid_dependency` when a required dependency is missing.
  */
-export function createApp({ data, engine, root, now } = {}) {
+export function createApp({ data, engine, root, now, historical = null, assumptions = null } = {}) {
   for (const name of ['data', 'engine', 'root', 'now']) {
     const value = { data, engine, root, now }[name];
     if (value === null || value === undefined) {
@@ -209,98 +237,304 @@ export function createApp({ data, engine, root, now } = {}) {
     }
   }
 
-  const links = queryAll(root, TAB_LINK_SELECTOR);
-  const panes = queryAll(root, TAB_PANE_SELECTOR);
+  // Bind calculation engine adapters
+  const schedules = engine?.schedules ?? schedulesEngine;
+  const forecast = engine?.forecast ?? forecastEngine;
+  const threeStatement = engine?.threeStatement ?? threeStatementEngine;
+  const wacc = engine?.wacc ?? { build: buildWacc };
+  const dcf = engine?.dcf ?? { valuate: valuateDcf };
+  const recommend = engine?.recommend ?? {
+    evaluate: evaluateRec,
+    buildSensitivityGrid,
+    runFullValuation,
+  };
+  const scenarios = engine?.scenarios ?? { apply: applyScenario, list: listScenarios };
 
-  // `now` is deliberately not consumed in P0.1. It stays bound in this closure
-  // as the injected clock that Phase 5's recalculation pipeline will call —
-  // the module itself must never reach for a wall-clock source directly.
+  // Track active driver overrides: driverName -> numeric override
+  const driverOverrides = new Map();
+  let activeScenario = DEFAULT_SCENARIO;
+  let baseAssumptions = assumptions;
+  let isDirty = false;
+  let disposed = false;
+  const listeners = [];
+  let assumptionsView = null;
+  let historicalsView = null;
+  let schedulesView = null;
+  let projectionsView = null;
+  let valuationView = null;
+  let summaryView = null;
+  let sensitivityView = null;
+
+  // Tab shell router
+  const tabRouter = createTabs({
+    root,
+    tabs: TAB_KEYS,
+    onTabChange: (key) => {
+      // Sync URL hash if available in browser runtime
+      if (typeof globalThis.location === 'object' && typeof globalThis.location.hash === 'string') {
+        const targetHash = `#${key}`;
+        if (globalThis.location.hash !== targetHash) {
+          globalThis.location.hash = targetHash;
+        }
+      }
+    },
+  });
+
+  // Listen for hashchange if available in window environment
+  if (typeof globalThis.addEventListener === 'function') {
+    const hashHandler = () => {
+      if (typeof globalThis.location?.hash === 'string') {
+        const hashKey = globalThis.location.hash.replace(/^#/, '').toLowerCase();
+        if (TAB_KEYS.includes(hashKey)) {
+          tabRouter.show(hashKey);
+        }
+      }
+    };
+    globalThis.addEventListener('hashchange', hashHandler);
+    listeners.push({
+      target: globalThis,
+      type: 'hashchange',
+      handler: hashHandler,
+    });
+  }
 
   /**
-   * Live model state. Mutated only through the frozen `state()` snapshot path
-   * once the engine pipeline is wired.
+   * Live model state.
    * @type {AppState}
    */
   const model = {
     assumptions: null,
     scenario: DEFAULT_SCENARIO,
     schedules: null,
+    forecast: null,
     threeStatement: null,
+    wacc: null,
     dcf: null,
     recommendation: null,
     dirty: false,
   };
 
   /**
-   * Every listener registered during initialization, so `dispose()` can undo
-   * exactly what was opened (symmetrical lifecycle).
-   * @type {Array<{ target: object, type: string, handler: () => void }>}
+   * Executes the full recalculation pipeline synchronously.
    */
-  const listeners = [];
-
-  let disposed = false;
-
-  /**
-   * Activates the tab matching `key` across both controls and panes.
-   * @param {string} key
-   * @returns {void}
-   */
-  function activateTab(key) {
-    for (const link of links) {
-      markActive(link, link.getAttribute(TAB_KEY_ATTRIBUTE) === key, true);
+  function recalculate() {
+    if (!historical || !baseAssumptions) {
+      return;
     }
-    for (const pane of panes) {
-      markActive(pane, pane.getAttribute(TAB_KEY_ATTRIBUTE) === key);
+
+    // Step 1: Apply scenario to base assumptions
+    let workingAssumptions = baseAssumptions;
+    if (activeScenario !== DEFAULT_SCENARIO && typeof scenarios.apply === 'function') {
+      workingAssumptions = scenarios.apply(baseAssumptions, activeScenario);
+    }
+
+    // Step 2: Apply user driver overrides on top of scenario assumptions
+    if (driverOverrides.size > 0) {
+      const updatedDrivers = workingAssumptions.drivers.map((d) => {
+        if (driverOverrides.has(d.name)) {
+          const rawVal = driverOverrides.get(d.name);
+          const clampedVal = clampDriverValue(rawVal, d);
+          return Object.freeze({
+            ...d,
+            value: clampedVal,
+          });
+        }
+        return d;
+      });
+
+      const byName = {};
+      const byGroup = {};
+      for (const d of updatedDrivers) {
+        byName[d.name] = d;
+        if (!byGroup[d.group]) byGroup[d.group] = [];
+        byGroup[d.group].push(d);
+      }
+      for (const g of Object.keys(byGroup)) {
+        byGroup[g] = Object.freeze(byGroup[g]);
+      }
+
+      workingAssumptions = Object.freeze({
+        scenario: activeScenario,
+        drivers: Object.freeze(updatedDrivers),
+        byName: Object.freeze(byName),
+        byGroup: Object.freeze(byGroup),
+        get(name) {
+          return byName[name] ?? null;
+        },
+        getValue(name) {
+          const d = byName[name];
+          return d !== undefined ? d.value : undefined;
+        },
+      });
+    }
+
+    // Step 3: Run pipeline: schedules → forecast → threeStatement → wacc → dcf → recommend
+    const schedulesOut = schedules.build(historical, workingAssumptions);
+    const forecastOut = forecast.project({
+      historical,
+      assumptions: workingAssumptions,
+    });
+    const threeStatementOut = threeStatement.project(
+      schedulesOut,
+      workingAssumptions,
+      forecastOut,
+    );
+    const waccOut = wacc.build({
+      assumptions: workingAssumptions,
+      debtSchedule: schedulesOut.debt,
+    });
+    const dcfOut = dcf.valuate(threeStatementOut, waccOut, {
+      assumptions: workingAssumptions,
+    });
+
+    const marketPrice = requireDriver(workingAssumptions, 'market_share_price').value;
+    const recOut = recommend.evaluate(dcfOut.perShare, marketPrice);
+    const sensitivityGridOut = typeof recommend.buildSensitivityGrid === 'function'
+      ? recommend.buildSensitivityGrid({
+          threeStatement: threeStatementOut,
+          assumptions: workingAssumptions,
+          wacc: waccOut,
+        })
+      : null;
+
+    const scenariosOut = typeof recommend.runFullValuation === 'function' && historical && workingAssumptions
+      ? {
+          [SCENARIO_NAMES[0]]: recommend.runFullValuation(historical, workingAssumptions, SCENARIO_NAMES[0]),
+          [SCENARIO_NAMES[1]]: { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct },
+          [SCENARIO_NAMES[2]]: recommend.runFullValuation(historical, workingAssumptions, SCENARIO_NAMES[2]),
+        }
+      : null;
+
+    model.assumptions = workingAssumptions;
+    model.scenario = activeScenario;
+    model.schedules = schedulesOut;
+    model.forecast = forecastOut;
+    model.threeStatement = threeStatementOut;
+    model.wacc = waccOut;
+    model.dcf = dcfOut;
+    model.recommendation = recOut;
+    model.sensitivityGrid = sensitivityGridOut;
+    model.scenarios = scenariosOut;
+    model.dirty = isDirty;
+
+    if (assumptionsView) {
+      assumptionsView.update(workingAssumptions);
+    }
+    if (historicalsView) {
+      historicalsView.update(historical, computeTtm(historical));
+    }
+    if (schedulesView) {
+      schedulesView.update(schedulesOut, threeStatementOut);
+    }
+    if (projectionsView) {
+      projectionsView.update(threeStatementOut, historical);
+    }
+    if (valuationView) {
+      valuationView.update(waccOut, dcfOut, workingAssumptions);
+    }
+    if (summaryView) {
+      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut);
+    }
+    if (sensitivityView && sensitivityGridOut) {
+      sensitivityView.update(sensitivityGridOut, scenariosOut, dcfOut);
     }
   }
 
-  for (const link of links) {
-    /** @type {() => void} */
-    const handler = () => {
-      activateTab(link.getAttribute(TAB_KEY_ATTRIBUTE));
-    };
-    if (typeof link.addEventListener === 'function') {
-      link.addEventListener(TAB_EVENT, handler);
-    }
-    listeners.push({ target: link, type: TAB_EVENT, handler });
+  // Initial calculation run if datasets were provided
+  if (historical && baseAssumptions) {
+    recalculate();
   }
 
-  if (links.length > 0) {
-    activateTab(links[0].getAttribute(TAB_KEY_ATTRIBUTE));
-  }
+  // Target tab containers if present in root
+  const assumptionsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="assumptions"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-assumptions') : null);
+  const historicalsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="historicals"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-historicals') : null);
+  const schedulesPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="schedules"]') : null) ||
+                        (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-schedules') : null);
+  const projectionsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="projections"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-projections') : null);
+  const valuationPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="valuation"]') : null) ||
+                        (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-valuation') : null);
+  const summaryPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="summary"]') : null) ||
+                      (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-summary') : null);
+  const sensitivityPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="sensitivity"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-sensitivity') : null);
 
-  return {
+  const app = {
     /**
-     * Sets a driver value and triggers synchronous recalculation.
-     * Not implemented until Phase 5; the signature is frozen now.
+     * Sets a driver value, clamps it, and triggers synchronous recalculation.
      *
      * @param {string} name
      * @param {number} value
      * @returns {void}
-     * @throws {EngineError} Always in P0.1, with code `not_implemented`.
      */
     setDriver(name, value) {
-      throw new EngineError(
-        'not_implemented',
-        'setDriver() is wired in Phase 5 alongside the driver recalculation pipeline.',
-        name,
-      );
+      if (typeof name !== 'string' || !name) {
+        throw new EngineError(
+          'missing_driver',
+          'setDriver requires a valid driver name string.',
+          name,
+        );
+      }
+
+      if (!baseAssumptions) {
+        throw new EngineError(
+          'not_implemented',
+          'setDriver cannot execute without loaded assumptions.',
+          name,
+        );
+      }
+
+      const driver = baseAssumptions.get ? baseAssumptions.get(name) : baseAssumptions.byName?.[name];
+      if (!driver) {
+        throw new EngineError(
+          'missing_driver',
+          `Unknown driver "${name}" cannot be updated.`,
+          name,
+        );
+      }
+
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        throw new EngineError(
+          'invalid_driver_value',
+          `Driver "${name}" value must be a finite number (received ${value}).`,
+          name,
+        );
+      }
+
+      const clamped = clampDriverValue(value, driver);
+      driverOverrides.set(name, clamped);
+      isDirty = true;
+      recalculate();
     },
 
     /**
-     * Switches the active scenario and triggers recalculation.
-     * Not implemented until Phase 5; the signature is frozen now.
+     * Switches the active scenario and triggers synchronous recalculation.
      *
      * @param {string} name
      * @returns {void}
-     * @throws {EngineError} Always in P0.1, with code `not_implemented`.
      */
     setScenario(name) {
-      throw new EngineError(
-        'not_implemented',
-        'setScenario() is wired in Phase 5 alongside the scenario pipeline.',
-        name,
-      );
+      if (typeof name !== 'string' || !SCENARIO_NAMES.includes(name)) {
+        throw new EngineError(
+          'invalid_scenario',
+          `Unknown scenario "${name}". Valid scenarios are: ${SCENARIO_NAMES.join(', ')}.`,
+          name,
+        );
+      }
+
+      if (!baseAssumptions) {
+        throw new EngineError(
+          'not_implemented',
+          'setScenario cannot execute without loaded assumptions.',
+          name,
+        );
+      }
+
+      activeScenario = name;
+      isDirty = true;
+      recalculate();
     },
 
     /**
@@ -321,6 +555,35 @@ export function createApp({ data, engine, root, now } = {}) {
     dispose() {
       if (disposed) return;
       disposed = true;
+      if (assumptionsView) {
+        assumptionsView.dispose();
+        assumptionsView = null;
+      }
+      if (historicalsView) {
+        historicalsView.dispose();
+        historicalsView = null;
+      }
+      if (schedulesView) {
+        schedulesView.dispose();
+        schedulesView = null;
+      }
+      if (projectionsView) {
+        projectionsView.dispose();
+        projectionsView = null;
+      }
+      if (valuationView) {
+        valuationView.dispose();
+        valuationView = null;
+      }
+      if (summaryView) {
+        summaryView.dispose();
+        summaryView = null;
+      }
+      if (sensitivityView) {
+        sensitivityView.dispose();
+        sensitivityView = null;
+      }
+      tabRouter.dispose();
       for (const { target, type, handler } of listeners) {
         if (target && typeof target.removeEventListener === 'function') {
           target.removeEventListener(type, handler);
@@ -329,4 +592,69 @@ export function createApp({ data, engine, root, now } = {}) {
       listeners.length = 0;
     },
   };
+
+  // Mount views if containers are present in root
+  if (assumptionsPane && baseAssumptions) {
+    assumptionsView = renderAssumptions({
+      container: assumptionsPane,
+      assumptions: model.assumptions || baseAssumptions,
+      onDriverChange: (name, val) => app.setDriver(name, val),
+      onScenarioChange: (sc) => app.setScenario(sc),
+    });
+  }
+
+  if (historicalsPane && historical) {
+    historicalsView = renderHistoricals({
+      container: historicalsPane,
+      historical,
+      ttm: computeTtm(historical),
+    });
+  }
+
+  if (schedulesPane && model.schedules) {
+    schedulesView = renderSchedules({
+      container: schedulesPane,
+      schedules: model.schedules,
+      threeStatement: model.threeStatement,
+    });
+  }
+
+  if (projectionsPane && model.threeStatement) {
+    projectionsView = renderProjections({
+      container: projectionsPane,
+      threeStatement: model.threeStatement,
+      historical,
+    });
+  }
+
+  if (valuationPane && model.wacc && model.dcf) {
+    valuationView = renderValuation({
+      container: valuationPane,
+      wacc: model.wacc,
+      dcf: model.dcf,
+      assumptions: model.assumptions || baseAssumptions,
+    });
+  }
+
+  if (summaryPane && model.dcf && model.recommendation) {
+    summaryView = renderSummary({
+      container: summaryPane,
+      dcf: model.dcf,
+      recommendation: model.recommendation,
+      historical,
+      assumptions: model.assumptions || baseAssumptions,
+      threeStatement: model.threeStatement,
+    });
+  }
+
+  if (sensitivityPane && model.sensitivityGrid) {
+    sensitivityView = renderSensitivity({
+      container: sensitivityPane,
+      sensitivityGrid: model.sensitivityGrid,
+      scenarios: model.scenarios,
+      dcf: model.dcf,
+    });
+  }
+
+  return app;
 }

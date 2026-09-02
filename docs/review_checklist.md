@@ -12,6 +12,7 @@
 4. **Blind Approvals**: Approving UI, visual, or audio features without multimodal screenshot inspection or automated sanity metrics.
 5. **Fabricated Metrics**: Discrepancy between reported test counts/coverage and actual command execution results.
 6. **Hardcoded Secrets / Magic Values**: API keys, credentials, or arbitrary magic numbers embedded directly in source logic.
+7. **Undisclosed Hardcoded Fallbacks / Literals & Gate-Scope Mismatch (External-Truth Failure)**: A buried fallback literal (`?? 148.36`, `?? 0.025`, `ttmRev?.value ?? quarterlyValue ?? 0`) in `src/engine/*.js` that violates the phase contract's *“no hardcoded market values anywhere in `src/engine/`”* / *“zero bare numerics >999”* gate, or a test whose name promises *“no market value in the engine”* but only greps one file (`tests/wacc.build.test.js:590` scanned only `wacc.js` while `recommend.js:346` contained `148.36`) while the suite stays `412/412` green — **internal consistency without external truth is a FAIL**. Masked dead code (`wacc.build` discipline gate throwing before `recommend.js:346` is reached) is still a letter violation and an undisclosed deviation.
 
 ---
 
@@ -29,11 +30,13 @@
 - [ ] Asynchronous race conditions, concurrency bugs, and re-entrancy issues prevented.
 - [ ] Clear, typed error responses with descriptive messages.
 
-### C. Test Integrity & Verification
-- [ ] Independent test runner passes cleanly with 0 flakes.
-- [ ] New components have dedicated unit/integration test coverage.
+### C. Test Integrity & Verification — External Truth, Not Just Internal Consistency
+- [ ] Independent test runner passes cleanly with 0 flakes — **but a green suite alone is not a PASS**; it only proves DS's code and DS's tests agree (internal consistency). OP must also prove the deliverable is **true against the external source** and that the tests themselves prove what they claim (gate scope = gate name).
+- [ ] New components have dedicated unit/integration test coverage **and** each gate's grep/scan actually covers the files its name promises (e.g. `“no market value in the engine”` must grep **all** `src/engine/*.js` outside comments for `\b\d{4,}\b` and `\?\?\s*(148\.36|0\.025)`, not just `wacc.js`; `recommend.test.js` must not only check `0.15` but also that no `MKT` driver fallback exists).
 - [ ] Deterministic test execution (mocked time/randomness, seeded PRNG).
 - [ ] Real wall-clock timestamps in logs (no future-dated or estimated times).
+- [ ] **External-truth pins**: every `MKT` anchor (`risk_free_rate 0.0473` FRED `2026-08-28`, `beta 0.89` stockanalysis `2026-09-01`, `ERP 0.0442` Damodaran `2026-07-01`, `market_share_price 148.36` `2026-08-31`, `shares_outstanding 50,031,000` SEC 10-Q `0001628280-26-053603`, `terminal_growth_rate 0.025` EST) re-derived from raw `assumptions.json`/`historical`/`SEC` filings (not DS fixtures), `WACC`/`df`/`terminalValue`/`netCash`/`perShare` recomputed independently via raw inputs, `WACC>g` guard per cell, `Bear<Base<Bull` ordering, `H1 590,421/78,472/76,618/239,031` invariance per scenario.
+- [ ] **Literal / fallback discipline**: `src/engine/*.js` contains zero bare numerics `>999` outside comments **across the whole engine** and zero buried `??` fallbacks on `MKT`/`EST` drivers (`?? 148.36`, `?? 0.025`, `?.value ?? quarterlyValue ?? 0` are fails even if masked by upstream discipline — the P2.1 lesson).
 
 ### D. Performance & Resource Efficiency
 - [ ] Bounded memory usage under sustained load or stress tests.
@@ -48,12 +51,12 @@
 
 ---
 
-## 3. Reviewer Verification Steps (OP Protocol)
+## 3. Reviewer Verification Steps (OP Protocol) — External Truth First
 
 When conducting an audit, the Reviewer (`OP`) executes:
 
-1. **File Diff Inspection**: Read every single touched file line-by-line against this checklist and `docs/conventions.md`.
-2. **Independent Test Execution**: Run the test suite (`npm test`, `pytest`, etc.) directly to verify green status and test counts.
-3. **Standalone Probe Scripts**: If testing complex math, parsing, or algorithmic logic, write and execute standalone probe scripts in `scratch/`.
+1. **File Diff Inspection**: Read every single touched file line-by-line against this checklist and `docs/conventions.md` — including a **gate-scope audit** (does each test's `grep`/`scan` path match its name?).
+2. **Independent Test Execution**: Run the test suite (`npm test`, `pytest`, etc.) directly to verify green status and test counts — **the cross-check, not the proof**.
+3. **Standalone External-Truth Probes**: Write and execute standalone probe scripts in `scratch/` that would **fail even if DS's suite is green**: call the engine with missing/non-finite `MKT` drivers and assert typed `ConfigError`/`missing_driver` (do not rely on DS's discipline gate masking a fallback), grep **all** `src/engine/*.js` outside comments for bare numerics `>999` and buried `\?\?` fallbacks on market drivers, re-derive every `MKT`/`EST` anchor from raw `assumptions.json`/`historical`/`SEC` filings (reverse `GROWTH_FIXTURE`), re-run `WACC×g` monotonicity and `Bear<Base<Bull` ordering.
 4. **Visual Audit** *(if visual deliverable)*: Inspect rendered screenshots in `docs/screenshots/phase_X/v(n)/` against benchmarks.
-5. **Issue Verdict**: Format review response with clear PASS/FAIL header and `[END_OF_MESSAGE]` delimiter.
+5. **Issue Verdict**: Format review response with clear PASS/FAIL header and `[END_OF_MESSAGE]` delimiter — a `412/412` green suite that contains a tautology (`plug ≡ residual`, `wacc ≡ costOfEquity` without levered probe) or a bullcrap gate (`“no market value in the engine”` that only greps `wacc.js`) is a **FAIL**.

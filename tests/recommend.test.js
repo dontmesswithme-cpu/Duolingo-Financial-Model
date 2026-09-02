@@ -127,7 +127,7 @@ describe('P4.3 — Mechanical recommendation and threshold boundaries', () => {
     pinned(rec.upsidePct, expRec.upsidePct, 'matches deriveExpectedRecommendation fixture');
   });
 
-  test('zero hardcoded threshold literals in recommend.js (imported from constants.js)', async () => {
+  test('zero hardcoded threshold literals or market/driver fallbacks in recommend.js', async () => {
     const source = await readText(RECOMMEND_ENGINE_PATH);
     const codeOnly = source
       .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -140,6 +140,8 @@ describe('P4.3 — Mechanical recommendation and threshold boundaries', () => {
     );
     assert.doesNotMatch(codeOnly, /0\.15/, 'recommend.js must not contain hardcoded 0.15 literal');
     assert.doesNotMatch(codeOnly, /-0\.15/, 'recommend.js must not contain hardcoded -0.15 literal');
+    assert.doesNotMatch(codeOnly, /148\.36/, 'recommend.js must not contain hardcoded 148.36 market price');
+    assert.doesNotMatch(codeOnly, /\?\?\s*(?:148\.36|0\.025|0\.0473|0\.0442)/, 'recommend.js must not contain ?? market fallback literals');
   });
 
   test('fail-closed on non-finite or non-positive inputs', () => {
@@ -247,6 +249,26 @@ describe('P4.3 — Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
         }),
       (err) => err instanceof EngineError && err.code === 'terminal_growth_exceeds_wacc',
     );
+  });
+
+  test('buildSensitivityGrid supports documented alias property names (threeStatementBase, assumptionsBase, etc.)', async () => {
+    const historical = await getHistorical();
+    const assumptions = await getAssumptions();
+    const fullProj = runFullProjection(historical, assumptions, 'base');
+    const waccOut = buildWacc({ assumptions, debtSchedule: fullProj.schedules.debt });
+
+    const gridWithAliases = buildSensitivityGrid({
+      threeStatementBase: fullProj.threeStatement,
+      assumptionsBase: assumptions,
+      waccBase: waccOut,
+      waccRange: [0.07, 0.08, 0.09],
+      terminalGrowthRange: [0.015, 0.02, 0.025],
+    });
+
+    assert.equal(gridWithAliases.waccValues.length, 3);
+    assert.equal(gridWithAliases.growthValues.length, 3);
+    assert.equal(gridWithAliases.cells.length, 9);
+    assert.ok(gridWithAliases.matrix[0.07][0.025].perShare > gridWithAliases.matrix[0.09][0.015].perShare);
   });
 });
 

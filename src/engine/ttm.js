@@ -154,34 +154,33 @@ export function deriveDiscreteQuarters(rows, metric) {
  * Period ordering comparator for finding the latest reported period.
  */
 const PERIOD_SORT_ORDER = Object.freeze({
-  'FY2021': 2021.4,
-  'FY2022': 2022.4,
-  'FY2023': 2023.4,
-  'FY2024': 2024.4,
-  'FY2025': 2025.4,
-  '3M FY2025': 2025.1,
-  'Q1 FY2025': 2025.1,
-  '6M FY2025': 2025.2,
-  'Q2 FY2025': 2025.2,
-  '9M FY2025': 2025.3,
-  'Q3 FY2025': 2025.3,
-  'Q4 FY2025': 2025.4,
-  '3M FY2026': 2026.1,
-  'Q1 FY2026': 2026.1,
-  '6M FY2026': 2026.2,
-  'Q2 FY2026': 2026.2,
-  '9M FY2026': 2026.3,
-  'Q3 FY2026': 2026.3,
-  'Q4 FY2026': 2026.4,
-  'FY2026': 2026.4,
+  'FY2021': 1,
+  'FY2022': 2,
+  'FY2023': 3,
+  'FY2024': 4,
+  '3M FY2025': 5,
+  'Q1 FY2025': 5,
+  '6M FY2025': 6,
+  'Q2 FY2025': 6,
+  '9M FY2025': 7,
+  'Q3 FY2025': 7,
+  'Q4 FY2025': 8,
+  'FY2025': 8,
+  '3M FY2026': 9,
+  'Q1 FY2026': 9,
+  '6M FY2026': 10,
+  'Q2 FY2026': 10,
+  '9M FY2026': 11,
+  'Q3 FY2026': 11,
+  'Q4 FY2026': 12,
+  'FY2026': 12,
 });
 
 function periodScore(period) {
   if (PERIOD_SORT_ORDER[period] !== undefined) {
     return PERIOD_SORT_ORDER[period];
   }
-  const match = period.match(/(?:FY)?(\d{4})/);
-  return match ? Number(match[1]) : 0;
+  return 0;
 }
 
 /**

@@ -68,7 +68,7 @@ function extractTabKeys(html, tagName, markerAttribute) {
   const tagPattern = new RegExp(`<${tagName}\\b[^>]*\\b${markerAttribute}\\b[^>]*>`, 'g');
   const keys = [];
   for (const [tag] of html.matchAll(tagPattern)) {
-    const key = /\bdata-tab="([^"]+)"/.exec(tag);
+    const key = /\bdata-tab(?:-link|-pane)?="([^"]+)"/.exec(tag) || /\bdata-tab="([^"]+)"/.exec(tag);
     assert.ok(key, `tab element is missing a data-tab key: ${tag}`);
     keys.push(key[1]);
   }

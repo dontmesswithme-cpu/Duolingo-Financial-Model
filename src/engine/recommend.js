@@ -72,6 +72,33 @@ function deepFreeze(value) {
 }
 
 /**
+ * Reads a driver object from an AssumptionSet and asserts that its value is finite.
+ *
+ * @param {object} assumptions
+ * @param {string} name
+ * @returns {object}
+ * @throws {EngineError} `missing_driver` when absent or non-finite.
+ */
+function requireDriverValue(assumptions, name) {
+  const driver =
+    assumptions && typeof assumptions.get === 'function'
+      ? assumptions.get(name)
+      : assumptions && typeof assumptions === 'object'
+        ? assumptions[name]
+        : null;
+
+  if (!driver || typeof driver !== 'object' || !Number.isFinite(driver.value)) {
+    throw new EngineError(
+      'missing_driver',
+      `Required driver "${name}" is missing or non-finite in the assumption set.`,
+      name,
+    );
+  }
+
+  return driver;
+}
+
+/**
  * Evaluates the mechanical investment recommendation from DCF intrinsic value vs market price.
  *
  * FROZEN signature per spec §3.2:
@@ -160,7 +187,10 @@ export function buildSensitivityGrid(input) {
     );
   }
 
-  const { threeStatement, assumptions, horizon } = input;
+  // Support both canonical and documented alias keys (phase_4.md:110 vs implementation)
+  const threeStatement = input.threeStatement ?? input.threeStatementBase;
+  const assumptions = input.assumptions ?? input.assumptionsBase;
+  const horizon = input.horizon;
 
   if (!threeStatement || typeof threeStatement !== 'object') {
     throw new EngineError(
@@ -180,10 +210,11 @@ export function buildSensitivityGrid(input) {
 
   // Resolve base WACC
   let baseWaccRate = null;
-  if (typeof input.wacc === 'number') {
-    baseWaccRate = input.wacc;
-  } else if (input.wacc && typeof input.wacc === 'object') {
-    baseWaccRate = input.wacc.wacc?.value ?? input.wacc.wacc ?? input.wacc.value ?? null;
+  const waccInput = input.wacc ?? input.waccBase;
+  if (typeof waccInput === 'number') {
+    baseWaccRate = waccInput;
+  } else if (waccInput && typeof waccInput === 'object') {
+    baseWaccRate = waccInput.wacc?.value ?? waccInput.wacc ?? waccInput.value ?? null;
   }
 
   if (baseWaccRate === null) {
@@ -191,18 +222,20 @@ export function buildSensitivityGrid(input) {
     baseWaccRate = waccOut.wacc.value;
   }
 
-  const baseGrowth = assumptions.get?.('terminal_growth_rate')?.value ?? 0.025;
+  const baseGrowth = requireDriverValue(assumptions, 'terminal_growth_rate').value;
 
   // Default WACC values: WACC ± 200bps in 50bps steps (9 points)
   const defaultWaccOffsets = [-0.02, -0.015, -0.01, -0.005, 0, 0.005, 0.01, 0.015, 0.02];
-  const waccValues = Array.isArray(input.waccValues)
-    ? input.waccValues.slice()
+  const customWaccValues = input.waccValues ?? input.waccRange;
+  const waccValues = Array.isArray(customWaccValues)
+    ? customWaccValues.slice()
     : defaultWaccOffsets.map((offset) => Number((baseWaccRate + offset).toFixed(6)));
 
   // Default terminal growth values: 1.0% to 3.0% in 50bps steps (5 points)
   const defaultGrowthValues = [0.01, 0.015, 0.02, 0.025, 0.03];
-  const growthValues = Array.isArray(input.growthValues)
-    ? input.growthValues.slice()
+  const customGrowthValues = input.growthValues ?? input.terminalGrowthRange;
+  const growthValues = Array.isArray(customGrowthValues)
+    ? customGrowthValues.slice()
     : defaultGrowthValues;
 
   const cells = [];
@@ -342,8 +375,7 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
     assumptions: activeAssumptions,
   });
 
-  const priceDriver = activeAssumptions.get ? activeAssumptions.get('market_share_price') : null;
-  const marketPrice = priceDriver?.value ?? activeAssumptions.market_share_price?.value ?? 148.36;
+  const marketPrice = requireDriverValue(activeAssumptions, 'market_share_price').value;
 
   const recOut = evaluate(dcfOut.perShare, marketPrice);
 

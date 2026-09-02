@@ -1,6 +1,7 @@
 // OP Watcher — monitors docs/status_op.json for DS signal updates.
 // Uses fast non-blocking polling (1s interval) on structured JSON state.
-// Wakes immediately when DS increments seq (seq > baselineSeq), writes result, and exits 0.
+// Wakes immediately when DS increments seq (seq > baselineSeq) or sets state to 'review_pending'.
+// Supports explicit baseline via CLI argument (e.g. node tools/watch_op_inbox.mjs 4).
 //
 // Configurable timeout via WORKFLOW_WATCHER_TIMEOUT_MS (default: 7200000 = 2 hours).
 // On timeout, logs a warning and exits with code 1.
@@ -18,15 +19,40 @@ const TIMEOUT_MS = parseInt(process.env.WORKFLOW_WATCHER_TIMEOUT_MS, 10) || 7_20
 function getStatus() {
   if (!fs.existsSync(targetPath)) return null;
   try {
-    const raw = fs.readFileSync(targetPath, 'utf8');
-    return JSON.parse(raw);
+    let raw = fs.readFileSync(targetPath, 'utf8');
+    if (raw.charCodeAt(0) === 0xFEFF) {
+      raw = raw.slice(1);
+    }
+    return JSON.parse(raw.trim());
   } catch {
     return null;
   }
 }
 
+// Support explicit baseline via CLI argument: node tools/watch_op_inbox.mjs [baselineSeq]
+const argBaseline = process.argv[2] !== undefined ? parseInt(process.argv[2], 10) : null;
 const initial = getStatus();
-const baselineSeq = initial ? (typeof initial.seq === 'number' ? initial.seq : 0) : 0;
+const baselineSeq = argBaseline !== null
+  ? argBaseline
+  : (initial && typeof initial.seq === 'number' ? initial.seq : 0);
+
+function hasSignal(status) {
+  if (!status) return false;
+  const currentSeq = typeof status.seq === 'number' ? status.seq : 0;
+  if (argBaseline !== null) {
+    return currentSeq > baselineSeq;
+  }
+  return status.state === 'review_pending' || currentSeq > baselineSeq;
+}
+
+// Immediate wake check: If unhandled signal or new seq already present, wake instantly
+if (initial && hasSignal(initial)) {
+  const currentSeq = typeof initial.seq === 'number' ? initial.seq : 0;
+  const summary = `[SIGNAL RECEIVED IMMEDIATELY] status_op.json seq: ${currentSeq}, state: ${initial.state}, phase: ${initial.phase}.${initial.subphase}`;
+  fs.writeFileSync(resultPath, JSON.stringify(initial, null, 2), 'utf8');
+  console.log(summary);
+  process.exit(0);
+}
 
 // Deadlock recovery: exit with error after timeout
 const watchdog = setTimeout(() => {
@@ -39,13 +65,10 @@ const watchdog = setTimeout(() => {
 
 const timer = setInterval(() => {
   const current = getStatus();
-  if (!current) return;
-
-  const currentSeq = typeof current.seq === 'number' ? current.seq : 0;
-
-  if (currentSeq > baselineSeq) {
+  if (current && hasSignal(current)) {
     clearInterval(timer);
     clearTimeout(watchdog);
+    const currentSeq = typeof current.seq === 'number' ? current.seq : 0;
     const summary = `[SIGNAL RECEIVED] status_op.json seq: ${currentSeq}, state: ${current.state}, phase: ${current.phase}.${current.subphase}`;
     fs.writeFileSync(resultPath, JSON.stringify(current, null, 2), 'utf8');
     console.log(summary);
