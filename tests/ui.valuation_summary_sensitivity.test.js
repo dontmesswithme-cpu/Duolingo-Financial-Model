@@ -267,12 +267,12 @@ describe('P5.5 — Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () 
     }
 
     const html = container.innerHTML;
-    // Scenario Comparison table assertions
-    assert.match(html, /Bear Case/);
+    // Scenario Comparison table assertions (P6R.3 display labels: Downside, Base, Upside)
+    assert.match(html, /Downside Case/);
     assert.match(html, /\$132\.16/);
     assert.match(html, /Base Case/);
     assert.match(html, /\$249\.36/);
-    assert.match(html, /Bull Case/);
+    assert.match(html, /Upside Case/);
     assert.match(html, /\$532\.17/);
 
     // Hybrid FY2026 Invariance Footnote with OCF $239,031

@@ -153,7 +153,7 @@ export function renderSummary({
           </div>
         </div>
         <div class="rec-discipline-note">
-          <strong>Protocol Discipline:</strong> Investment recommendation label is strictly determined by mechanical evaluation against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). Contains zero subjective or discretionary editorial language.
+          <strong>Mechanical Discipline:</strong> Investment recommendation label is strictly determined by mechanical evaluation against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). Contains zero subjective or discretionary editorial language.
         </div>
       </div>
     `;

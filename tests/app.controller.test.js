@@ -341,11 +341,11 @@ describe('P5.2 — Cover/TOC Markup, EST/MKT Legend & Invariants', () => {
     assert.match(html, /LBO Analysis/i);
     assert.match(html, /N\/A/);
 
-    // Disclaimer & Legend
+    // Disclaimer & Independence (Protocol purged per Director P6R.2)
     assert.match(html, /DISCLAIMER/i);
-    assert.match(html, /MKT/);
-    assert.match(html, /EST/);
-    assert.match(html, /Protocol 1\.0/i);
+    assert.match(html, /not affiliated/i);
+    assert.match(html, /not investment advice/i);
+    assert.doesNotMatch(html, /protocol/i);
   });
 
   test('purity: src/app.js and src/ui/ contain zero wall-clock reads or non-deterministic APIs', async () => {

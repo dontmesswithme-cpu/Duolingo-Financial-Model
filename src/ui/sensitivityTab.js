@@ -17,7 +17,7 @@
 
 import { EngineError } from '../data/errors.js';
 import { SCENARIO_NAMES } from '../data/constants.js';
-import { usd, percent, estSuffix } from './format.js';
+import { usd, percent, estSuffix, SCENARIO_DISPLAY_NAMES } from './format.js';
 import { TabulatorFull as DefaultTabulator } from './tabulator.js';
 
 /**
@@ -34,10 +34,11 @@ export function buildSensitivityColumns(growthValues = []) {
       frozen: true,
       headerSort: false,
       editor: false,
+      minWidth: 200,
       formatter: (cell) => {
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
-        const baseTag = row.isBaseWacc ? ' <span class="badge badge-est">BASE</span>' : '';
-        return `<div class="sensitivity-wacc-label">${row.waccLabel || ''}${baseTag}</div>`;
+        const activeTag = (row.isActiveWacc || row.isBaseWacc) ? ' <span class="badge badge-est">ACTIVE</span>' : '';
+        return `<div class="sensitivity-wacc-label">${row.waccLabel || ''}${activeTag}</div>`;
       },
     },
     ...growthValues.map((gVal) => {
@@ -49,13 +50,14 @@ export function buildSensitivityColumns(growthValues = []) {
         headerSort: false,
         hozAlign: 'right',
         editor: false,
+        minWidth: 95,
         titleFormatter: () => estSuffix(titleText, 'EST'),
         formatter: (cell) => {
           const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
           if (val === null || val === undefined || !Number.isFinite(val)) return '—';
           const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
-          const isBaseCell = row.isBaseWacc && Math.abs(gVal - (row.baseGrowth || 0.02)) < 0.0001;
-          const highlightClass = isBaseCell ? 'cell-highlight-base' : '';
+          const isHighlightCell = (row.isActiveWacc || row.isBaseWacc) && Math.abs(gVal - (row.activeGrowth || row.baseGrowth || 0.02)) < 0.0001;
+          const highlightClass = isHighlightCell ? 'cell-highlight-base' : '';
           return `<div class="sensitivity-cell-value ${highlightClass}">${usd(val, { decimals: 2 })}</div>`;
         },
       };
@@ -104,11 +106,13 @@ export function renderSensitivity({
     const matrix = currentGrid.matrix || {};
 
     const rows = waccVals.map((wVal) => {
-      const isBaseWacc = baseWacc !== undefined && Math.abs(wVal - baseWacc) < 0.0001;
+      const isCenterWacc = baseWacc !== undefined && Math.abs(wVal - baseWacc) < 0.0001;
       const rowObj = {
         wacc: wVal,
         waccLabel: percent(wVal, { decimals: 2 }),
-        isBaseWacc,
+        isActiveWacc: isCenterWacc,
+        isBaseWacc: isCenterWacc,
+        activeGrowth: baseG,
         baseGrowth: baseG,
       };
 
@@ -142,10 +146,10 @@ export function renderSensitivity({
     const bearUpside = bear?.upsidePct ?? bear?.recommendation?.upsidePct ?? null;
     const bearRecLabel = bear?.recommendation?.label || 'fair';
 
-    const baseWacc = currentGrid?.base?.wacc ?? (base?.wacc?.wacc?.value ?? base?.wacc?.value ?? null);
-    const baseG = currentGrid?.base?.growth ?? (base?.assumptions?.getValue ? base?.assumptions?.getValue('terminal_growth_rate') : base?.assumptions?.get?.('terminal_growth_rate')?.value);
-    const basePrice = currentDcf?.perShare ?? (base?.perShare ?? base?.dcf?.perShare ?? null);
-    const baseUpside = currentScenarios?.base?.upsidePct ?? base?.upsidePct ?? base?.recommendation?.upsidePct ?? null;
+    const baseWacc = base?.wacc?.wacc?.value ?? base?.wacc?.value ?? currentGrid?.base?.wacc ?? null;
+    const baseG = (base?.assumptions?.getValue ? base?.assumptions?.getValue('terminal_growth_rate') : base?.assumptions?.get?.('terminal_growth_rate')?.value) ?? currentGrid?.base?.growth ?? null;
+    const basePrice = base?.perShare ?? base?.dcf?.perShare ?? currentDcf?.perShare ?? null;
+    const baseUpside = base?.upsidePct ?? base?.recommendation?.upsidePct ?? currentScenarios?.base?.upsidePct ?? null;
     const baseRecLabel = base?.recommendation?.label || 'undervalued';
 
     const bullWacc = bull?.wacc?.wacc?.value ?? bull?.wacc?.value ?? null;
@@ -157,7 +161,7 @@ export function renderSensitivity({
     const scenarioRows = [
       {
         id: bearKey,
-        name: 'Bear Case',
+        name: `${SCENARIO_DISPLAY_NAMES[bearKey] || 'Downside'} Case`,
         badgeClass: `badge-${bearKey}`,
         desc: 'Downside adoption slowdown; conservative subscription pricing; compressed terminal margin.',
         wacc: bearWacc,
@@ -169,7 +173,7 @@ export function renderSensitivity({
       },
       {
         id: baseKey,
-        name: 'Base Case',
+        name: `${SCENARIO_DISPLAY_NAMES[baseKey] || 'Base'} Case`,
         badgeClass: `badge-${baseKey}`,
         desc: 'Current baseline consensus; steady Super Duolingo Max tier scaling; 33.9% terminal FCF margin.',
         wacc: baseWacc,
@@ -181,7 +185,7 @@ export function renderSensitivity({
       },
       {
         id: bullKey,
-        name: 'Bull Case',
+        name: `${SCENARIO_DISPLAY_NAMES[bullKey] || 'Upside'} Case`,
         badgeClass: `badge-${bullKey}`,
         desc: 'Accelerated GenAI Max tier monetization; DET expansion in institutional admissions; 38.0% FCF margin.',
         wacc: bullWacc,
@@ -196,11 +200,11 @@ export function renderSensitivity({
     return `
       <div class="sensitivity-card scenario-card">
         <div class="statement-card-header">
-          Scenario Valuation Bands &amp; Sensitivity Spectrum (Bear / Base / Bull)
+          Scenario Valuation Bands &amp; Sensitivity Spectrum (Downside / Base / Upside)
         </div>
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
-            Full-path end-to-end valuation runs parameterized across three macroeconomic and operating scenarios (preserving <code>Bear &lt; Base &lt; Bull</code> intrinsic value ordering).
+            Full-path end-to-end valuation runs parameterized across three macroeconomic and operating scenarios (preserving <code>Downside &lt; Base &lt; Upside</code> intrinsic value ordering).
           </p>
           <table class="financial-summary-table scenario-table">
             <thead>
@@ -231,7 +235,7 @@ export function renderSensitivity({
             </tbody>
           </table>
           <div class="disclaimer-box scenario-invariant-note">
-            <strong>Hybrid FY2026 Invariance Invariant:</strong> In accordance with Protocol 1.0 audit rules, <strong>H1 FY2026 Actuals</strong> (Total Revenue: $590,421 / Operating Income: $78,472 / Operating Cash Flow: $239,031) are transcribed directly from SEC Form 10-Q filings and remain <strong>byte-identical and invariant across all Bear, Base, and Bull scenarios</strong>, while H2 estimates respond dynamically to driver inputs.
+            <strong>Hybrid FY2026 Invariance Invariant:</strong> In accordance with audit standards, <strong>H1 FY2026 Actuals</strong> (Total Revenue: $590,421 / Operating Income: $78,472 / Operating Cash Flow: $239,031) are transcribed directly from SEC Form 10-Q filings and remain <strong>byte-identical and invariant across all Downside, Base, and Upside scenarios</strong>, while H2 estimates respond dynamically to driver inputs.
           </div>
         </div>
       </div>
@@ -271,7 +275,7 @@ export function renderSensitivity({
         </div>
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
-            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (1.0%–3.0%). Strict monotonicity holds across all 45 cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Highlighted cell denotes Base Case valuation.
+            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (1.0%–3.0%). Strict monotonicity holds across all 45 cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC; highlighted cell denotes Active Case valuation.
           </p>
           <div class="tabulator-grid-container financial-table" data-statement="sensitivityGrid"></div>
         </div>
@@ -320,6 +324,9 @@ export function renderSensitivity({
       }
       tabulatorInstances.length = 0;
       tabulatorConfigs.length = 0;
+      currentGrid = null;
+      currentScenarios = null;
+      currentDcf = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

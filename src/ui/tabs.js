@@ -150,6 +150,8 @@ export function createTabs({ root, tabs = TAB_KEYS, onTabChange } = {}) {
         }
       }
       listeners.length = 0;
+      links.length = 0;
+      panes.length = 0;
     },
   };
 }

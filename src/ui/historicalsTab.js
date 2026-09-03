@@ -81,13 +81,59 @@ function pivotRowsByMetric(rows, isFlow = false) {
   return byMetric;
 }
 
+const PRIMARY_CITATIONS_CACHE = new WeakMap();
+
 /**
- * Builds Tabulator column definitions for a financial statement.
+ * Derives the primary filing citation for each column in a statement dataset.
+ * The primary filing is the filing URL cited by the majority of rows in that column.
+ *
+ * @param {Array<object>} statementRows Raw rows array from dataset
+ * @returns {Record<string, object>} Map of period -> primary source object
+ */
+export function deriveColumnPrimaryCitations(statementRows = []) {
+  if (!Array.isArray(statementRows)) return {};
+  if (PRIMARY_CITATIONS_CACHE.has(statementRows)) {
+    return PRIMARY_CITATIONS_CACHE.get(statementRows);
+  }
+  const primaryMap = {};
+
+  const byPeriod = {};
+  for (const row of statementRows) {
+    if (!row || !row.period || !row.source?.url) continue;
+    if (!byPeriod[row.period]) byPeriod[row.period] = {};
+    const url = row.source.url;
+    if (!byPeriod[row.period][url]) {
+      byPeriod[row.period][url] = { count: 0, source: row.source };
+    }
+    byPeriod[row.period][url].count++;
+  }
+
+  for (const [period, urlEntries] of Object.entries(byPeriod)) {
+    let maxCount = -1;
+    let chosenSource = null;
+    for (const entry of Object.values(urlEntries)) {
+      if (entry.count > maxCount) {
+        maxCount = entry.count;
+        chosenSource = entry.source;
+      }
+    }
+    if (chosenSource) {
+      primaryMap[period] = { ...chosenSource };
+    }
+  }
+
+  PRIMARY_CITATIONS_CACHE.set(statementRows, primaryMap);
+  return primaryMap;
+}
+
+/**
+ * Builds Tabulator column definitions for a financial statement with hybrid citations.
  *
  * @param {boolean} [isKpi=false]
+ * @param {Record<string, object>} [primaryCitations={}] Map of period -> { url, citationHtml, ... }
  * @returns {Array<object>}
  */
-export function buildTabulatorColumns(isKpi = false) {
+export function buildTabulatorColumns(isKpi = false, primaryCitations = {}) {
   const columns = [
     {
       title: 'Metric / Line Item',
@@ -95,6 +141,7 @@ export function buildTabulatorColumns(isKpi = false) {
       frozen: true,
       headerSort: false,
       editor: false,
+      minWidth: 260,
       formatter: (cell) => {
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
         if (isKpi) {
@@ -103,36 +150,53 @@ export function buildTabulatorColumns(isKpi = false) {
         return `<div class="metric-title">${row.label} ${row.citationHtml || ''}</div>`;
       },
     },
-    ...ANNUAL_PERIODS.map((period) => ({
-      title: period,
-      field: period,
-      headerSort: false,
-      hozAlign: 'right',
-      editor: false,
-      formatter: (cell) => {
-        const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (!Number.isFinite(val)) return '—';
-        return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
-      },
-    })),
-    ...QUARTERLY_PERIODS.map((period) => ({
-      title: period,
-      field: period,
-      headerSort: false,
-      hozAlign: 'right',
-      editor: false,
-      formatter: (cell) => {
-        const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (!Number.isFinite(val)) return '—';
-        return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
-      },
-    })),
+    ...ANNUAL_PERIODS.map((period) => {
+      const primary = primaryCitations[period];
+      const colDef = {
+        title: period,
+        field: period,
+        headerSort: false,
+        hozAlign: 'right',
+        editor: false,
+        minWidth: 95,
+        formatter: (cell) => {
+          const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
+          if (!Number.isFinite(val)) return '—';
+          return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
+        },
+      };
+      if (primary && primary.citationHtml) {
+        colDef.titleFormatter = () => `${period} ${primary.citationHtml}`;
+      }
+      return colDef;
+    }),
+    ...QUARTERLY_PERIODS.map((period) => {
+      const primary = primaryCitations[period];
+      const colDef = {
+        title: period,
+        field: period,
+        headerSort: false,
+        hozAlign: 'right',
+        editor: false,
+        minWidth: 95,
+        formatter: (cell) => {
+          const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
+          if (!Number.isFinite(val)) return '—';
+          return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
+        },
+      };
+      if (primary && primary.citationHtml) {
+        colDef.titleFormatter = () => `${period} ${primary.citationHtml}`;
+      }
+      return colDef;
+    }),
     {
       title: 'TTM',
       field: 'TTM',
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       titleFormatter: () => estSuffix('TTM', 'computed'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
@@ -172,34 +236,46 @@ export function renderHistoricals({
   const tabulatorConfigs = [];
   const citationRegistry = [];
 
-  function collectCitation(source, metricLabel) {
+  function collectCitation(source, metricLabel, isException = false) {
     if (!source || !source.url) return { id: null, html: '' };
     let existingIndex = citationRegistry.findIndex((c) => c.url === source.url);
     if (existingIndex === -1) {
       citationRegistry.push({
         id: citationRegistry.length + 1,
-        metric: metricLabel,
+        metric: metricLabel || 'Primary Filing',
         filing: source.filing || 'SEC Filing',
         period: source.period || '',
-        statement: source.statement || '',
+        statement: source.statement || 'Consolidated Financial Statements',
         url: source.url,
         accessedAt: source.accessedAt || '',
       });
       existingIndex = citationRegistry.length - 1;
     }
     const citationId = citationRegistry[existingIndex].id;
-    const supHtml = `<sup><a href="${source.url}" target="_blank" rel="noopener noreferrer" class="citation-sup" data-citation-id="${citationId}" title="${source.filing || 'Filing'} (${source.period || ''})">[${citationId}]</a></sup>`;
+    const excClass = isException ? ' citation-exception' : '';
+    const supHtml = `<sup><a href="${source.url}" target="_blank" rel="noopener noreferrer" class="citation-sup${excClass}" data-citation-id="${citationId}" title="${source.filing || 'Filing'} (${source.period || ''})">[${citationId}]</a></sup>`;
     return { id: citationId, html: supHtml };
   }
 
-  function buildStatementData(rawDataset, isFlow = false, isKpi = false) {
+  function buildStatementData(rawDataset, isFlow = false, isKpi = false, primaryCitations = {}) {
     const rows = extractRows(rawDataset) || [];
     const metricMap = pivotRowsByMetric(rows, isFlow);
     const metricKeys = Object.keys(metricMap);
 
     return metricKeys.map((mKey) => {
       const m = metricMap[mKey];
-      const citation = collectCitation(m.source, m.label);
+
+      // Inline row superscripts appear ONLY on exception rows:
+      // rows whose source.url differs from their column's primary filing.
+      let exceptionCitation = null;
+      for (const r of rows) {
+        if (r.metric !== mKey || !r.period || !r.source?.url) continue;
+        const primary = primaryCitations[r.period];
+        if (primary && primary.url && r.source.url !== primary.url) {
+          exceptionCitation = collectCitation(r.source, `${m.label} (${r.period})`, true);
+          break;
+        }
+      }
 
       let ttmVal = null;
       if (currentTtm && currentTtm.records) {
@@ -215,7 +291,7 @@ export function renderHistoricals({
         label: m.label,
         definition: m.definition || '',
         category: m.category || '',
-        citationHtml: citation.html,
+        citationHtml: exceptionCitation ? exceptionCitation.html : '',
         TTM: ttmVal,
       };
 
@@ -251,8 +327,17 @@ export function renderHistoricals({
     tabulatorInstances.length = 0;
     tabulatorConfigs.length = 0;
 
-    const incomeData = buildStatementData(currentHistorical.income, true, false);
-    const incomeCols = buildTabulatorColumns(false);
+    // Income Statement
+    const incomeRows = extractRows(currentHistorical.income) || [];
+    const incomePrimaries = deriveColumnPrimaryCitations(incomeRows);
+    for (const p of ALL_PERIOD_COLUMNS) {
+      if (incomePrimaries[p]) {
+        const cit = collectCitation(incomePrimaries[p], `Income Statement — ${p} Primary Filing`);
+        incomePrimaries[p].citationHtml = cit.html;
+      }
+    }
+    const incomeData = buildStatementData(currentHistorical.income, true, false, incomePrimaries);
+    const incomeCols = buildTabulatorColumns(false, incomePrimaries);
     const incomeConfig = {
       statement: 'income',
       data: incomeData,
@@ -267,8 +352,17 @@ export function renderHistoricals({
     };
     tabulatorConfigs.push(incomeConfig);
 
-    const balanceData = buildStatementData(currentHistorical.balance, false, false);
-    const balanceCols = buildTabulatorColumns(false);
+    // Balance Sheet
+    const balanceRows = extractRows(currentHistorical.balance) || [];
+    const balancePrimaries = deriveColumnPrimaryCitations(balanceRows);
+    for (const p of ALL_PERIOD_COLUMNS) {
+      if (balancePrimaries[p]) {
+        const cit = collectCitation(balancePrimaries[p], `Balance Sheet — ${p} Primary Filing`);
+        balancePrimaries[p].citationHtml = cit.html;
+      }
+    }
+    const balanceData = buildStatementData(currentHistorical.balance, false, false, balancePrimaries);
+    const balanceCols = buildTabulatorColumns(false, balancePrimaries);
     const balanceConfig = {
       statement: 'balance',
       data: balanceData,
@@ -283,8 +377,17 @@ export function renderHistoricals({
     };
     tabulatorConfigs.push(balanceConfig);
 
-    const cashflowData = buildStatementData(currentHistorical.cashflow, true, false);
-    const cashflowCols = buildTabulatorColumns(false);
+    // Cash Flow Statement
+    const cashflowRows = extractRows(currentHistorical.cashflow) || [];
+    const cashflowPrimaries = deriveColumnPrimaryCitations(cashflowRows);
+    for (const p of ALL_PERIOD_COLUMNS) {
+      if (cashflowPrimaries[p]) {
+        const cit = collectCitation(cashflowPrimaries[p], `Cash Flow Statement — ${p} Primary Filing`);
+        cashflowPrimaries[p].citationHtml = cit.html;
+      }
+    }
+    const cashflowData = buildStatementData(currentHistorical.cashflow, true, false, cashflowPrimaries);
+    const cashflowCols = buildTabulatorColumns(false, cashflowPrimaries);
     const cashflowConfig = {
       statement: 'cashflow',
       data: cashflowData,
@@ -299,8 +402,17 @@ export function renderHistoricals({
     };
     tabulatorConfigs.push(cashflowConfig);
 
-    const kpiData = buildStatementData(currentHistorical.kpis, false, true);
-    const kpiCols = buildTabulatorColumns(true);
+    // KPIs
+    const kpiRows = extractRows(currentHistorical.kpis) || [];
+    const kpiPrimaries = deriveColumnPrimaryCitations(kpiRows);
+    for (const p of ALL_PERIOD_COLUMNS) {
+      if (kpiPrimaries[p]) {
+        const cit = collectCitation(kpiPrimaries[p], `KPIs — ${p} Primary Filing`);
+        kpiPrimaries[p].citationHtml = cit.html;
+      }
+    }
+    const kpiData = buildStatementData(currentHistorical.kpis, false, true, kpiPrimaries);
+    const kpiCols = buildTabulatorColumns(true, kpiPrimaries);
     const kpiConfig = {
       statement: 'kpis',
       data: kpiData,
@@ -399,6 +511,9 @@ export function renderHistoricals({
       }
       tabulatorInstances.length = 0;
       tabulatorConfigs.length = 0;
+      citationRegistry.length = 0;
+      currentHistorical = null;
+      currentTtm = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

@@ -67,6 +67,7 @@ export function buildProjectionColumns({ isPct = false } = {}) {
       frozen: true,
       headerSort: false,
       editor: false,
+      minWidth: 260,
       formatter: (cell) => {
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
         const linkClass = row.isLink ? 'cell-link' : 'cell-formula';
@@ -79,6 +80,7 @@ export function buildProjectionColumns({ isPct = false } = {}) {
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
         if (val === null || val === undefined || !Number.isFinite(val)) return '—';
@@ -93,6 +95,7 @@ export function buildProjectionColumns({ isPct = false } = {}) {
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       titleFormatter: () => estSuffix(period, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
@@ -578,6 +581,8 @@ export function renderProjections({
       }
       tabulatorInstances.length = 0;
       tabulatorConfigs.length = 0;
+      currentThreeStatement = null;
+      currentHistorical = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

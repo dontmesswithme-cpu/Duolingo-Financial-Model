@@ -42,10 +42,12 @@ export function buildScheduleColumns({ isPct = false } = {}) {
       frozen: true,
       headerSort: false,
       editor: false,
+      minWidth: 260,
       formatter: (cell) => {
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
         const linkClass = row.isLink ? 'cell-link' : 'cell-formula';
-        return `<div class="schedule-metric-label ${linkClass}">${row.label || ''}</div>`;
+        const tag = row.rowTag ? ` <span class="badge ${row.tagClass || 'badge-muted'}">${row.rowTag}</span>` : '';
+        return `<div class="schedule-metric-label ${linkClass}">${row.label || ''}${tag}</div>`;
       },
     },
     ...HISTORICAL_PERIODS.map((period) => ({
@@ -54,6 +56,7 @@ export function buildScheduleColumns({ isPct = false } = {}) {
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
         if (val === null || val === undefined || !Number.isFinite(val)) return '—';
@@ -68,6 +71,7 @@ export function buildScheduleColumns({ isPct = false } = {}) {
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       titleFormatter: () => estSuffix(period, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
@@ -266,9 +270,9 @@ export function renderSchedules({
 
   function buildDebtData() {
     const rows = [
-      { id: 'total_debt', label: 'Total Funded Debt (Short & Long-Term)', isLink: false },
-      { id: 'interest_exp', label: 'Interest Expense on Borrowings', isLink: false },
-      { id: 'lease_liab_non_cur', label: 'Operating Lease Liabilities (Long-Term)', isLink: false },
+      { id: 'total_debt', label: 'Total Funded Debt (Short & Long-Term)', isLink: false, isFundedDebt: true, rowTag: 'DEBT-FREE', tagClass: 'badge-pass' },
+      { id: 'interest_exp', label: 'Interest Expense on Borrowings', isLink: false, isFundedDebt: true, rowTag: 'DEBT-FREE', tagClass: 'badge-pass' },
+      { id: 'lease_liab_non_cur', label: 'Operating Lease Liabilities (Long-Term)', isLink: true, isLease: true, rowTag: 'ASC 842', tagClass: 'badge-est' },
     ];
 
     return rows.map((r) => {
@@ -277,9 +281,10 @@ export function renderSchedules({
         let val = 0;
         if (r.id === 'lease_liab_non_cur') {
           if (HISTORICAL_PERIODS.includes(p)) {
-            val = currentSchedules?.debt?.scannedByPeriod?.[p]?.operating_leases?.long_term_lease_liability?.value ?? 0;
+            val = currentSchedules?.debt?.byPeriod?.[p]?.operating_leases?.long_term_lease_liability?.value ?? 0;
           } else if (FORECAST_PERIODS.includes(p)) {
-            val = currentThreeStatement?.balanceSheet?.byPeriod?.[p]?.non_current_liabilities?.long_term_operating_lease_liability?.value ?? 0;
+            val = currentThreeStatement?.balanceSheet?.byPeriod?.[p]?.non_current_liabilities?.long_term_operating_lease_liability?.value ??
+                  currentSchedules?.debt?.byPeriod?.['Q2 FY2026']?.operating_leases?.long_term_lease_liability?.value ?? 0;
           }
         }
         rowObj[p] = val;
@@ -288,13 +293,14 @@ export function renderSchedules({
     });
   }
 
-  function renderCard(title, statementKey) {
+  function renderCard(title, statementKey, footnoteHtml = '') {
     return `
       <div class="schedule-statement-card">
         <div class="statement-card-header">
           ${title}
         </div>
         <div class="tabulator-grid-container financial-table" data-statement="${statementKey}"></div>
+        ${footnoteHtml}
       </div>
     `;
   }
@@ -326,7 +332,7 @@ export function renderSchedules({
     return `
       <div class="balance-check-card">
         <div class="statement-card-header">
-          Balance Sheet Invariant Hard Gate (Assets === Liabilities + Stockholders' Equity)
+          Balance Sheet Invariant Hard Gate (Assets = Liabilities + Stockholders' Equity)
         </div>
         <div class="balance-check-grid">
           ${checks}
@@ -429,7 +435,22 @@ export function renderSchedules({
     const ppeHtml = renderCard('PP&amp;E Roll-Forward Schedule ($ in thousands)', 'ppe');
     const intHtml = renderCard('Intangible Assets &amp; Amortization Schedule ($ in thousands)', 'intangibles');
     const sbcHtml = renderCard('Stock-Based Compensation (SBC) Schedule ($ in thousands)', 'sbc');
-    const debtHtml = renderCard('Debt Schedule &amp; Capital Structure (Debt-Free Verified)', 'debt');
+
+    const debtBasisText = currentSchedules?.debt?.statementBasis ||
+      'Duolingo, Inc. has zero funded debt, zero bank borrowings, zero credit facility drawings, and zero promissory notes outstanding across all reported periods (FY2021–Q2 FY2026).';
+
+    const debtFootnoteHtml = `
+      <div class="disclaimer-box schedule-footnote debt-footnote">
+        <p class="footnote-line">
+          <strong>Funded Debt Status (Debt-Free Verified):</strong> ${debtBasisText}
+        </p>
+        <p class="footnote-line">
+          <strong>Operating Leases (ASC 842):</strong> Historical values reflect filed non-current operating lease liabilities ($k). FY2026–FY2030 lease values are <em>held at last filed Q2 FY2026 level; no lease forecast driver — see methodology</em>. Operating lease obligations do not constitute funded debt or borrowings.
+        </p>
+      </div>
+    `;
+
+    const debtHtml = renderCard('Debt Schedule &amp; Capital Structure (Debt-Free Verified)', 'debt', debtFootnoteHtml);
     const balanceCheckHtml = renderBalanceCheckCard();
 
     container.innerHTML = `
@@ -477,6 +498,8 @@ export function renderSchedules({
       }
       tabulatorInstances.length = 0;
       tabulatorConfigs.length = 0;
+      currentSchedules = null;
+      currentThreeStatement = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

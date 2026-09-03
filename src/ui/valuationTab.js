@@ -35,6 +35,7 @@ export function buildDcfColumns(periods = []) {
       frozen: true,
       headerSort: false,
       editor: false,
+      minWidth: 260,
       formatter: (cell) => {
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
         const linkClass = row.isLink ? 'cell-link' : 'cell-formula';
@@ -47,6 +48,7 @@ export function buildDcfColumns(periods = []) {
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       titleFormatter: () => estSuffix(period, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
@@ -63,6 +65,7 @@ export function buildDcfColumns(periods = []) {
       headerSort: false,
       hozAlign: 'right',
       editor: false,
+      minWidth: 95,
       titleFormatter: () => estSuffix('Terminal Year', 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
@@ -459,6 +462,9 @@ export function renderValuation({
       }
       tabulatorInstances.length = 0;
       tabulatorConfigs.length = 0;
+      currentWacc = null;
+      currentDcf = null;
+      currentAssumptions = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

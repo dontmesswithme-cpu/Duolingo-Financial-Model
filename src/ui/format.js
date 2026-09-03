@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Formatting utilities for financial presentation.
  *
  * Universal rule (spec §3.2, §3.4):
@@ -152,10 +152,117 @@ export function mktBadge({ asOf = '', provider = '', url = '' } = {}) {
   return `<span class="mkt-badge-wrapper">${badgeHtml}<span class="mkt-details">${detailText}</span></span>`;
 }
 
+export function isRatioUnit(units) {
+  return typeof units === 'string' && units.startsWith('pct_');
+}
+
+/**
+ * Humanizes raw unit strings for display. Unit tags like pct_of_revenue return empty string.
+ *
+ * @param {string} units
+ * @returns {string}
+ */
+export function humanizeUnits(units) {
+  if (!units || isRatioUnit(units)) return '';
+  if (units === 'days') return 'days';
+  if (units === 'thousands_usd') return '$k';
+  if (units === 'usd_per_subscriber_year') return '$/sub';
+  if (units === 'usd_per_share') return '$/sh';
+  if (units === 'multiple') return 'x';
+  if (units === 'count') return 'shares';
+  return units;
+}
+
+/**
+ * Formats a driver's raw numeric value for display in the interactive input box.
+ *
+ * @param {number|null|undefined} value
+ * @param {string} units
+ * @returns {string}
+ */
+export function formatDriverDisplay(value, units) {
+  if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
+    return '—';
+  }
+  if (isRatioUnit(units)) {
+    return percent(value, { decimals: 2 });
+  }
+  return String(value);
+}
+
+/**
+ * Parses user input from the driver companion input box back into the engine raw value.
+ *
+ * @param {string|number} input
+ * @param {object} driver
+ * @returns {number}
+ */
+export function parseDriverInput(input, driver) {
+  if (typeof input === 'number') {
+    return clampDriverValue(input, driver);
+  }
+  if (!input || typeof input !== 'string') return driver?.value ?? 0;
+  const str = input.trim();
+  const isRatio = isRatioUnit(driver?.units);
+  let parsed;
+
+  if (isRatio) {
+    if (str.endsWith('%')) {
+      const num = Number(str.slice(0, -1).trim());
+      parsed = Number.isFinite(num) ? num / 100 : driver?.value;
+    } else {
+      const num = Number(str);
+      if (!Number.isFinite(num)) return driver?.value ?? 0;
+      if (typeof driver?.max === 'number' && num > driver.max && (num / 100) <= (driver.max * 1.5)) {
+        parsed = num / 100;
+      } else if (typeof driver?.max === 'number' && driver.max <= 1.0 && num > 1.0) {
+        parsed = num / 100;
+      } else {
+        parsed = num;
+      }
+    }
+  } else {
+    const num = Number(str);
+    parsed = Number.isFinite(num) ? num : driver?.value;
+  }
+
+  return clampDriverValue(parsed, driver);
+}
+
+function clampDriverValue(val, driver) {
+  let v = val;
+  if (typeof driver?.min === 'number' && v < driver.min) v = driver.min;
+  if (typeof driver?.max === 'number' && v > driver.max) v = driver.max;
+  return v;
+}
+
+export function formatDisplayText(text) {
+  if (!text || typeof text !== 'string') return text || '';
+  return text
+    .replace(/\bBear\b/g, 'Downside')
+    .replace(/\bbear\b/g, 'downside')
+    .replace(/\bBull\b/g, 'Upside')
+    .replace(/\bbull\b/g, 'upside');
+}
+
+export const SCENARIO_DISPLAY_NAMES = Object.freeze({
+  bear: 'Downside',
+  base: 'Base',
+  bull: 'Upside',
+});
+
 export default Object.freeze({
   usd,
   percent,
   compact,
   estSuffix,
   mktBadge,
+  isRatioUnit,
+  humanizeUnits,
+  formatDriverDisplay,
+  parseDriverInput,
+  formatDisplayText,
+  SCENARIO_DISPLAY_NAMES,
 });
+
+

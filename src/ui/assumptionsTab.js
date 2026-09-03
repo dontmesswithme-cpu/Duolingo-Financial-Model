@@ -16,7 +16,17 @@
 
 import { EngineError } from '../data/errors.js';
 import { SCENARIO_NAMES } from '../data/constants.js';
-import { estSuffix, mktBadge } from './format.js';
+import {
+  estSuffix,
+  mktBadge,
+  formatDriverDisplay,
+  parseDriverInput,
+  humanizeUnits,
+  formatDisplayText,
+  SCENARIO_DISPLAY_NAMES,
+} from './format.js';
+
+export { SCENARIO_DISPLAY_NAMES };
 
 /**
  * Human-friendly group labels.
@@ -60,7 +70,7 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
         <div class="scenario-btn-group" role="group" aria-label="Scenario Selector">
           ${SCENARIO_NAMES.map((sc) => `
             <button type="button" class="scenario-btn ${sc === activeScenario ? 'active' : ''}" data-scenario="${sc}">
-              ${sc.toUpperCase()}
+              ${(SCENARIO_DISPLAY_NAMES[sc] || sc).toUpperCase()}
             </button>
           `).join('')}
         </div>
@@ -91,7 +101,7 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
                 <span class="driver-label">${driver.label || driver.name}</span>
                 ${badgeMarkup}
               </div>
-              <div class="driver-notes">${driver.notes || ''}</div>
+              <div class="driver-notes">${formatDisplayText(driver.notes || '')}</div>
             </div>
 
             <div class="driver-slider-cell">
@@ -100,9 +110,9 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
             </div>
 
             <div class="driver-input-cell">
-              <input type="number" class="cell-input driver-number-input" data-driver-input="${driver.name}"
-                     min="${minVal}" max="${maxVal}" step="${stepVal}" value="${driver.value}" />
-              <span class="driver-units">${driver.units || ''}</span>
+              <input type="text" inputmode="decimal" class="cell-input driver-number-input" data-driver-input="${driver.name}"
+                     value="${formatDriverDisplay(driver.value, driver.units)}" />
+              <span class="driver-units">${humanizeUnits(driver.units)}</span>
             </div>
           </div>
         `;
@@ -146,11 +156,17 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
     for (const numInput of Array.from(numberInputs || [])) {
       const driverName = numInput.getAttribute ? numInput.getAttribute('data-driver-input') : null;
       const changeHandler = () => {
-        const val = Number(numInput.value);
-        if (Number.isFinite(val) && driverName && typeof onDriverChange === 'function') {
-          const matchingSlider = container.querySelector ? container.querySelector(`[data-driver-slider="${driverName}"]`) : null;
-          if (matchingSlider) matchingSlider.value = String(val);
-          onDriverChange(driverName, val);
+        const driver = currentAssumptions?.get ? currentAssumptions.get(driverName) : (currentAssumptions?.drivers || []).find((d) => d.name === driverName);
+        if (driverName && driver) {
+          const parsedVal = parseDriverInput(numInput.value, driver);
+          if (Number.isFinite(parsedVal)) {
+            const matchingSlider = container.querySelector ? container.querySelector(`[data-driver-slider="${driverName}"]`) : null;
+            if (matchingSlider) matchingSlider.value = String(parsedVal);
+            numInput.value = formatDriverDisplay(parsedVal, driver.units);
+            if (typeof onDriverChange === 'function') {
+              onDriverChange(driverName, parsedVal);
+            }
+          }
         }
       };
       if (typeof numInput.addEventListener === 'function') {
@@ -166,7 +182,10 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
         const val = Number(slider.value);
         if (Number.isFinite(val) && driverName) {
           const matchingNum = container.querySelector ? container.querySelector(`[data-driver-input="${driverName}"]`) : null;
-          if (matchingNum) matchingNum.value = String(val);
+          if (matchingNum) {
+            const driver = currentAssumptions?.get ? currentAssumptions.get(driverName) : (currentAssumptions?.drivers || []).find((d) => d.name === driverName);
+            matchingNum.value = formatDriverDisplay(val, driver?.units);
+          }
           if (typeof onDriverChange === 'function') {
             onDriverChange(driverName, val);
           }
@@ -189,7 +208,7 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
       if (currentAssumptions && currentAssumptions.drivers) {
         for (const d of currentAssumptions.drivers) {
           const numInput = container.querySelector ? container.querySelector(`[data-driver-input="${d.name}"]`) : null;
-          if (numInput) numInput.value = String(d.value);
+          if (numInput) numInput.value = formatDriverDisplay(d.value, d.units);
           const slider = container.querySelector ? container.querySelector(`[data-driver-slider="${d.name}"]`) : null;
           if (slider) slider.value = String(d.value);
         }

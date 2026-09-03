@@ -277,6 +277,23 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
           globalThis.location.hash = targetHash;
         }
       }
+
+      // Redraw Tabulator instances in active tab pane so tables initialized while hidden calculate correct layout
+      const viewMap = {
+        historicals: historicalsView,
+        schedules: schedulesView,
+        projections: projectionsView,
+        valuation: valuationView,
+        sensitivity: sensitivityView,
+      };
+      const activeView = viewMap[key];
+      if (activeView && Array.isArray(activeView.tabulatorInstances)) {
+        for (const inst of activeView.tabulatorInstances) {
+          if (inst && typeof inst.redraw === 'function') {
+            try { inst.redraw(true); } catch { /* ignore */ }
+          }
+        }
+      }
     },
   });
 
@@ -314,6 +331,55 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
     dirty: false,
   };
 
+/**
+ * Applies driver overrides to an AssumptionSet while preserving immutability.
+ *
+ * @param {object} assumptions
+ * @param {Map<string, number>} overrides
+ * @returns {object}
+ */
+function applyDriverOverrides(assumptions, overrides) {
+  if (!overrides || overrides.size === 0) {
+    return assumptions;
+  }
+  const updatedDrivers = assumptions.drivers.map((d) => {
+    if (overrides.has(d.name)) {
+      const rawVal = overrides.get(d.name);
+      const clampedVal = clampDriverValue(rawVal, d);
+      return Object.freeze({
+        ...d,
+        value: clampedVal,
+      });
+    }
+    return d;
+  });
+
+  const byName = {};
+  const byGroup = {};
+  for (const d of updatedDrivers) {
+    byName[d.name] = d;
+    if (!byGroup[d.group]) byGroup[d.group] = [];
+    byGroup[d.group].push(d);
+  }
+  for (const g of Object.keys(byGroup)) {
+    byGroup[g] = Object.freeze(byGroup[g]);
+  }
+
+  return Object.freeze({
+    scenario: assumptions.scenario || 'base',
+    drivers: Object.freeze(updatedDrivers),
+    byName: Object.freeze(byName),
+    byGroup: Object.freeze(byGroup),
+    get(name) {
+      return byName[name] ?? null;
+    },
+    getValue(name) {
+      const d = byName[name];
+      return d !== undefined ? d.value : undefined;
+    },
+  });
+}
+
   /**
    * Executes the full recalculation pipeline synchronously.
    */
@@ -322,50 +388,13 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
       return;
     }
 
-    // Step 1: Apply scenario to base assumptions
-    let workingAssumptions = baseAssumptions;
+    // Step 1: Scenario-neutral driver state (user base drivers with zero scenario deltas applied)
+    const neutralAssumptions = applyDriverOverrides(baseAssumptions, driverOverrides);
+
+    // Step 2: Active scenario assumptions (neutral state + active-scenario deltas)
+    let workingAssumptions = neutralAssumptions;
     if (activeScenario !== DEFAULT_SCENARIO && typeof scenarios.apply === 'function') {
-      workingAssumptions = scenarios.apply(baseAssumptions, activeScenario);
-    }
-
-    // Step 2: Apply user driver overrides on top of scenario assumptions
-    if (driverOverrides.size > 0) {
-      const updatedDrivers = workingAssumptions.drivers.map((d) => {
-        if (driverOverrides.has(d.name)) {
-          const rawVal = driverOverrides.get(d.name);
-          const clampedVal = clampDriverValue(rawVal, d);
-          return Object.freeze({
-            ...d,
-            value: clampedVal,
-          });
-        }
-        return d;
-      });
-
-      const byName = {};
-      const byGroup = {};
-      for (const d of updatedDrivers) {
-        byName[d.name] = d;
-        if (!byGroup[d.group]) byGroup[d.group] = [];
-        byGroup[d.group].push(d);
-      }
-      for (const g of Object.keys(byGroup)) {
-        byGroup[g] = Object.freeze(byGroup[g]);
-      }
-
-      workingAssumptions = Object.freeze({
-        scenario: activeScenario,
-        drivers: Object.freeze(updatedDrivers),
-        byName: Object.freeze(byName),
-        byGroup: Object.freeze(byGroup),
-        get(name) {
-          return byName[name] ?? null;
-        },
-        getValue(name) {
-          const d = byName[name];
-          return d !== undefined ? d.value : undefined;
-        },
-      });
+      workingAssumptions = scenarios.apply(neutralAssumptions, activeScenario);
     }
 
     // Step 3: Run pipeline: schedules → forecast → threeStatement → wacc → dcf → recommend
@@ -397,11 +426,18 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
         })
       : null;
 
-    const scenariosOut = typeof recommend.runFullValuation === 'function' && historical && workingAssumptions
+    // Step 4: Scenario comparison table (computes each case as neutral state + that scenario's deltas)
+    const scenariosOut = typeof recommend.runFullValuation === 'function' && historical && neutralAssumptions
       ? {
-          [SCENARIO_NAMES[0]]: recommend.runFullValuation(historical, workingAssumptions, SCENARIO_NAMES[0]),
-          [SCENARIO_NAMES[1]]: { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct },
-          [SCENARIO_NAMES[2]]: recommend.runFullValuation(historical, workingAssumptions, SCENARIO_NAMES[2]),
+          [SCENARIO_NAMES[0]]: activeScenario === SCENARIO_NAMES[0]
+            ? { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct }
+            : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[0]),
+          [SCENARIO_NAMES[1]]: activeScenario === SCENARIO_NAMES[1]
+            ? { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct }
+            : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[1]),
+          [SCENARIO_NAMES[2]]: activeScenario === SCENARIO_NAMES[2]
+            ? { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct }
+            : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[2]),
         }
       : null;
 
@@ -584,12 +620,18 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
         sensitivityView = null;
       }
       tabRouter.dispose();
+      for (const k of Object.keys(model)) {
+        model[k] = null;
+      }
       for (const { target, type, handler } of listeners) {
         if (target && typeof target.removeEventListener === 'function') {
           target.removeEventListener(type, handler);
         }
       }
       listeners.length = 0;
+      if (typeof globalThis.gc === 'function') {
+        try { globalThis.gc(); } catch { /* ignore */ }
+      }
     },
   };
 
