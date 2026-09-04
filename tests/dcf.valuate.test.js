@@ -58,50 +58,50 @@ const P3_CORPUS_RECORD_COUNT = 706;
 /**
  * Independent hand-computed Base DCF pins (anti-tautology).
  *
- * Sourced from verified P3 Base projection + P4.1 WACC build:
- *   WACC         = 0.086638 (8.6638%)
+ * Sourced from verified Base FCFF projection + P6R2 refreshed WACC build:
+ *   WACC         = 0.087594 (8.7594%)
  *   g            = 0.025 (2.5%)
  *   shares       = 50,031,000 diluted
- *   market price = $148.36
- *   FY2026 FCF   = 368,996.473501334 (hybrid: cited H1 239,031 OCF − 8,469 ICF + H2 estimate)
- *   FY2027 FCF   = 423,811.4396894751
- *   FY2028 FCF   = 496,897.03358301386
- *   FY2029 FCF   = 583,080.6789661058
- *   FY2030 FCF   = 686,125.9343167322
- *   df_FY2026    = 1 / (1 + 0.086638)^1 = 0.920269675825804
- *   df_FY2030    = 1 / (1 + 0.086638)^5 = 0.660048058982708
- *   pvExplicit   = 1,956,849.6801141608 ($k)
- *   terminalFcf  = 686,125.9343167322 × 1.025 = 703,279.0826746505 ($k)
- *   terminalVal  = 703,279.0826746505 / (0.086638 − 0.025) = 11,409,829.693933133 ($k)
- *   pvTerminal   = 11,409,829.693933133 × df_FY2030 = 7,531,035.94280383 ($k)
- *   EV           = 1,956,849.6801141608 + 7,531,035.94280383 = 9,487,885.622917991 ($k)
- *   ending cash  = 2,752,098.0600566613 ($k)
+ *   market price = $157.85
+ *   FY2026 FCFF  = 323,417.33993955905 ($k, after-tax interest stripped)
+ *   FY2027 FCFF  = 368,200.9837946979 ($k)
+ *   FY2028 FCFF  = 431,125.5393149832 ($k)
+ *   FY2029 FCFF  = 504,377.9944682029 ($k)
+ *   FY2030 FCFF  = 591,200.8006542748 ($k)
+ *   df_FY2026    = 1 / (1 + 0.087594)^1 = 0.919460754656609
+ *   df_FY2030    = 1 / (1 + 0.087594)^5 = 0.6571522283467118
+ *   pvExplicit   = 1,692,767.2958480918 ($k)
+ *   terminalFcf  = 591,200.8006542748 × 1.025 = 605,980.8206706316 ($k)
+ *   terminalVal  = 605,980.8206706316 / (0.087594 − 0.025) = 9,681,132.707138568 ($k)
+ *   pvTerminal   = 9,681,132.707138568 × df_FY2030 = 6,361,977.931416345 ($k)
+ *   EV           = 1,692,767.2958480918 + 6,361,977.931416345 = 8,054,745.227264437 ($k)
+ *   ending cash  = 1,180,887 ($k, latest filed Q2 FY2026 BOP)
  *   STI          = 132,979 ($k)
  *   LTI          = 102,693 ($k)
- *   net cash     = 2,752,098.0600566613 + 132,979 + 102,693 = 2,987,770.0600566613 ($k)
- *   equityValue  = 9,487,885.622917991 + 2,987,770.0600566613 = 12,475,655.682974651 ($k)
- *   perShare     = (12,475,655.682974651 × 1000) / 50,031,000 = $249.35851138243592
+ *   net cash     = 1,180,887 + 132,979 + 102,693 = 1,416,559 ($k)
+ *   equityValue  = 8,054,745.227264437 + 1,416,559 = 9,471,304.227264438 ($k)
+ *   perShare     = (9,471,304.227264438 × 1000) / 50,031,000 = $189.30871314314004
  */
 const DCF_PIN = Object.freeze({
-  wacc: 0.086638,
+  wacc: 0.087594,
   terminalGrowthRate: 0.025,
   sharesOutstanding: 50031000,
-  marketSharePrice: 148.36,
-  fcfFy2026: 368996.473501334,
-  fcfFy2030: 686125.9343167322,
-  dfFy2026: 0.920269675825804,
-  dfFy2030: 0.660048058982708,
-  pvExplicit: 1956849.6801141608,
-  terminalFcf: 703279.0826746505,
-  terminalValue: 11409829.693933133,
-  pvTerminal: 7531035.94280383,
-  enterpriseValue: 9487885.622917991,
-  endingCash: 2752098.0600566613,
+  marketSharePrice: 157.85,
+  fcfFy2026: 323417.33993955905,
+  fcfFy2030: 591200.8006542748,
+  dfFy2026: 0.919460754656609,
+  dfFy2030: 0.6571522283467118,
+  pvExplicit: 1692767.2958480918,
+  terminalFcf: 605980.8206706316,
+  terminalValue: 9681132.707138568,
+  pvTerminal: 6361977.931416345,
+  enterpriseValue: 8054745.227264437,
+  endingCash: 1180887,
   sti: 132979,
   lti: 102693,
-  netCash: 2987770.0600566613,
-  equityValue: 12475655.682974651,
-  perShare: 249.35851138243592,
+  netCash: 1416559,
+  equityValue: 9471304.227264438,
+  perShare: 189.30871314314004,
 });
 
 /** Absolute tolerance for small floats (rates / discount factors <= 1). */
@@ -208,10 +208,10 @@ describe('P4.2 — Explicit-period PV and FCF source fidelity', () => {
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
     const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
 
-    // FCF source fidelity: each schedule row matches ThreeStatement free_cash_flow exactly
+    // FCF source fidelity: each schedule row matches ThreeStatement fcff companion line exactly
     let sumPv = 0;
     for (const item of dcf.schedule) {
-      const tsFcf = fullProj.cashFlow.byPeriod[item.period].free_cash_flow.value;
+      const tsFcf = fullProj.cashFlow.byPeriod[item.period].fcff.value;
       assert.equal(item.fcf, tsFcf, `FCF in ${item.period} must match ThreeStatementOutput exactly`);
       pinned(item.presentValue, item.fcf * item.discountFactor, `pv in ${item.period}`);
       sumPv += item.presentValue;
@@ -337,7 +337,7 @@ describe('P4.2 — EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
     // Per-share = (equityValue * 1000) / sharesOutstanding
     const expectedPerShare = (dcf.equityValue * UNITS.thousands_usd.scale) / dcf.sharesOutstanding;
     pinned(dcf.perShare, expectedPerShare, 'perShare = (equityValue * scale) / shares');
-    pinned(dcf.perShare, DCF_PIN.perShare, 'perShare pin (~$249.36)');
+    pinned(dcf.perShare, DCF_PIN.perShare, 'perShare pin (~$189.31)');
 
     // Independent closed-form tie-out from duolingo_facts.js
     const expDcf = deriveExpectedDcf(fullProj.threeStatement, waccBuild, assumptions);
@@ -408,7 +408,7 @@ describe('P4.2 — Horizon flexibility & bounds', () => {
     assert.deepEqual(dcf3.periods, ['FY2026', 'FY2027', 'FY2028']);
 
     // Terminal year is FY2028
-    const fcf_2028 = fullProj.cashFlow.byPeriod.FY2028.free_cash_flow.value;
+    const fcf_2028 = fullProj.cashFlow.byPeriod.FY2028.fcff.value;
     const g = assumptions.get('terminal_growth_rate').value;
     const waccRate = waccBuild.wacc.value;
     const df_2028 = 1 / Math.pow(1 + waccRate, 3);
@@ -420,9 +420,10 @@ describe('P4.2 — Horizon flexibility & bounds', () => {
     pinned(dcf3.terminalValue, expectedTerminalValue, '3-year terminalValue');
     pinned(dcf3.pvTerminal, expectedPvTerminal, '3-year pvTerminal');
 
-    // Balance sheet bridge is taken from FY2028
+    // Headline bridge cash is today's cash; legacy bridge cash is from terminal forecast period FY2028
     const bs2028 = fullProj.balanceSheet.byPeriod.FY2028;
-    pinned(dcf3.bridge.cash, bs2028.current_assets.cash_and_cash_equivalents.value, 'bridge cash from FY2028');
+    pinned(dcf3.bridge.cash, DCF_PIN.endingCash, 'headline bridge cash today');
+    pinned(dcf3.legacy.bridge.cash, bs2028.current_assets.cash_and_cash_equivalents.value, 'legacy bridge cash from FY2028');
   });
 
   test('invalid horizon values throw typed EngineError invalid_horizon', async () => {

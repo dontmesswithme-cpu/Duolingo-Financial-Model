@@ -214,9 +214,10 @@ export function renderAssumptions({ container, assumptions, onDriverChange, onSc
         }
 
         const scenarioBtns = container.querySelectorAll ? container.querySelectorAll('[data-scenario]') : [];
+        const activeScenario = currentAssumptions.scenario || 'base';
         for (const btn of Array.from(scenarioBtns || [])) {
           const sc = btn.getAttribute ? btn.getAttribute('data-scenario') : null;
-          const isActive = sc === currentAssumptions.scenario;
+          const isActive = sc === activeScenario;
           if (isActive) {
             btn.classList?.add('active');
           } else {

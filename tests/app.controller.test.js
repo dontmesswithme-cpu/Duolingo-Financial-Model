@@ -74,7 +74,7 @@ describe('P5.2 — DI Constructor & Dependency Validation', () => {
     assert.ok(state.dcf);
     assert.ok(state.recommendation);
     assert.equal(state.recommendation.label, 'undervalued');
-    assert.ok(Math.abs(state.dcf.perShare - 249.35851138243592) < 1e-6);
+    assert.ok(Math.abs(state.dcf.perShare - 189.30871314314004) < 1e-6);
 
     app.dispose();
   });
@@ -199,21 +199,21 @@ describe('P5.2 — Scenario Management & Delta Clamping', () => {
 
     // Base valuation
     const basePerShare = app.state().dcf.perShare;
-    assert.ok(Math.abs(basePerShare - 249.35851138243592) < 1e-6);
+    assert.ok(Math.abs(basePerShare - 189.30871314314004) < 1e-6);
 
     // Switch to Bear
     app.setScenario('bear');
     const bearPerShare = app.state().dcf.perShare;
     assert.equal(app.state().scenario, 'bear');
     assert.ok(bearPerShare < basePerShare);
-    assert.ok(Math.abs(bearPerShare - 132.16013280285296) < 1e-4);
+    assert.ok(Math.abs(bearPerShare - 102.41326051479186) < 1e-4);
 
     // Switch to Bull
     app.setScenario('bull');
     const bullPerShare = app.state().dcf.perShare;
     assert.equal(app.state().scenario, 'bull');
     assert.ok(bullPerShare > basePerShare);
-    assert.ok(Math.abs(bullPerShare - 532.1748654342703) < 1e-4);
+    assert.ok(Math.abs(bullPerShare - 405.6797934948002) < 1e-4);
 
     // Rejects invalid scenario name
     assert.throws(

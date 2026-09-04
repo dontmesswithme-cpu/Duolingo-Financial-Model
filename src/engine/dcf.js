@@ -239,26 +239,54 @@ export function valuate(threeStatement, wacc, dcfInput) {
 
   const periods = availablePeriods.slice(0, horizon);
 
-  // ── 1. Explicit-period PV schedule ─────────────────────────────────────
-  const schedule = [];
-  let pvExplicit = 0;
+  // ── 1. Explicit-period PV schedules (FCFF headline & FCFE floor) ───────
+  const fcffSchedule = [];
+  const fcfeSchedule = [];
+  let pvExplicitFcff = 0;
+  let pvExplicitFcfe = 0;
+  const effTaxRate = assumptions?.get
+    ? (assumptions.get('effective_tax_rate')?.value ?? 0)
+    : (assumptions?.effective_tax_rate?.value ?? 0);
 
   for (let i = 0; i < periods.length; i += 1) {
     const period = periods[i];
     const t = i + 1;
     const cfPeriod = threeStatement.cashFlow.byPeriod?.[period];
     const fcfLine = cfPeriod?.free_cash_flow;
-    const fcfVal =
+    const fcfeVal =
       fcfLine && typeof fcfLine === 'object' && typeof fcfLine.value === 'number'
         ? fcfLine.value
         : typeof fcfLine === 'number'
           ? fcfLine
           : null;
 
-    if (fcfVal === null || !Number.isFinite(fcfVal)) {
+    if (fcfeVal === null || !Number.isFinite(fcfeVal)) {
       throw new EngineError(
         'missing_fcf',
         `Free cash flow is missing or non-finite for period "${period}".`,
+        period,
+      );
+    }
+
+    const fcffLine = cfPeriod?.fcff;
+    let fcffVal =
+      fcffLine && typeof fcffLine === 'object' && typeof fcffLine.value === 'number'
+        ? fcffLine.value
+        : typeof fcffLine === 'number'
+          ? fcffLine
+          : null;
+
+    if (fcffVal === null) {
+      const interestVal =
+        threeStatement.incomeStatement?.byPeriod?.[period]?.interest_income?.value ?? 0;
+      const afterTaxInterest = interestVal * (1 - effTaxRate);
+      fcffVal = fcfeVal - afterTaxInterest;
+    }
+
+    if (!Number.isFinite(fcffVal)) {
+      throw new EngineError(
+        'missing_fcf',
+        `FCFF cash flow is missing or non-finite for period "${period}".`,
         period,
       );
     }
@@ -272,30 +300,54 @@ export function valuate(threeStatement, wacc, dcfInput) {
       );
     }
 
-    const presentValue = fcfVal * discountFactor;
-    pvExplicit += presentValue;
-
-    schedule.push(
+    const presentValueFcff = fcffVal * discountFactor;
+    pvExplicitFcff += presentValueFcff;
+    fcffSchedule.push(
       Object.freeze({
         period,
         t,
-        fcf: fcfVal,
+        fcf: fcffVal,
+        fcff: fcffVal,
         discountFactor,
-        presentValue,
+        presentValue: presentValueFcff,
+      }),
+    );
+
+    const presentValueFcfe = fcfeVal * discountFactor;
+    pvExplicitFcfe += presentValueFcfe;
+    fcfeSchedule.push(
+      Object.freeze({
+        period,
+        t,
+        fcf: fcfeVal,
+        fcfe: fcfeVal,
+        discountFactor,
+        presentValue: presentValueFcfe,
       }),
     );
   }
 
-  // ── 2. Gordon Terminal Value ───────────────────────────────────────────
-  const finalScheduleItem = schedule[schedule.length - 1];
-  const fcf_T = finalScheduleItem.fcf;
-  const df_T = finalScheduleItem.discountFactor;
+  // ── 2. Gordon Terminal Values ──────────────────────────────────────────
+  const finalFcffItem = fcffSchedule[fcffSchedule.length - 1];
+  const fcff_T = finalFcffItem.fcf;
+  const df_T = finalFcffItem.discountFactor;
 
-  const terminalFcf = fcf_T * (1 + terminalGrowthRate);
-  const terminalValue = terminalFcf / (waccRate - terminalGrowthRate);
-  const pvTerminal = terminalValue * df_T;
+  const terminalFcff = fcff_T * (1 + terminalGrowthRate);
+  const terminalValueFcff = terminalFcff / (waccRate - terminalGrowthRate);
+  const pvTerminalFcff = terminalValueFcff * df_T;
 
-  if (!Number.isFinite(terminalValue) || !Number.isFinite(pvTerminal)) {
+  const finalFcfeItem = fcfeSchedule[fcfeSchedule.length - 1];
+  const fcfe_T = finalFcfeItem.fcf;
+  const terminalFcfe = fcfe_T * (1 + terminalGrowthRate);
+  const terminalValueFcfe = terminalFcfe / (waccRate - terminalGrowthRate);
+  const pvTerminalFcfe = terminalValueFcfe * df_T;
+
+  if (
+    !Number.isFinite(terminalValueFcff) ||
+    !Number.isFinite(pvTerminalFcff) ||
+    !Number.isFinite(terminalValueFcfe) ||
+    !Number.isFinite(pvTerminalFcfe)
+  ) {
     throw new EngineError(
       'invalid_terminal_value',
       'Computed Gordon terminal value or its present value is non-finite.',
@@ -303,10 +355,62 @@ export function valuate(threeStatement, wacc, dcfInput) {
     );
   }
 
-  // ── 3. Enterprise Value ────────────────────────────────────────────────
-  const enterpriseValue = pvExplicit + pvTerminal;
+  // ── 3. Enterprise Value (FCFF Headline) ────────────────────────────────
+  const evFcff = pvExplicitFcff + pvTerminalFcff;
 
-  // ── 4. Net Cash Bridge from final forecast balance sheet ───────────────
+  // Debt resolution:
+  // Duolingo is debt-free (P2.3). Total funded debt = 0.
+  let debtVal = 0;
+  if (typeof wacc?.debtBalance === 'number') {
+    debtVal = wacc.debtBalance;
+  } else if (typeof wacc?.totalDebt === 'number') {
+    debtVal = wacc.totalDebt;
+  } else if (wacc?.debtSchedule?.hasDebt === true && Number.isFinite(wacc.debtSchedule.totalDebt)) {
+    debtVal = wacc.debtSchedule.totalDebt;
+  } else if (
+    threeStatement.supporting?.debt?.hasDebt === true &&
+    Number.isFinite(threeStatement.supporting.debt.totalDebt)
+  ) {
+    debtVal = threeStatement.supporting.debt.totalDebt;
+  } else if (Array.isArray(wacc?.derivedFrom)) {
+    const debtProv = wacc.derivedFrom.find((d) => d && d.kind === 'debtSchedule');
+    if (debtProv && typeof debtProv.totalDebt === 'number') {
+      debtVal = debtProv.totalDebt;
+    }
+  }
+
+  // ── 4. Today's Net Cash Bridge (Latest filed Q2 FY2026 balance sheet) ──
+  const bop = threeStatement.bopBalanceSheet || threeStatement.supporting?.bopBalanceSheet;
+  let cashToday = 0;
+  let stiToday = 0;
+  let ltiToday = 0;
+  const debtToday = debtVal;
+
+  if (bop && typeof bop === 'object') {
+    cashToday = bop.cash_and_cash_equivalents ?? 0;
+    stiToday = bop.short_term_investments ?? 0;
+    ltiToday = bop.long_term_investments ?? 0;
+  } else {
+    const p0Bs = threeStatement.balanceSheet?.byPeriod?.[periods[0]];
+    cashToday =
+      p0Bs?.current_assets?.cash_and_cash_equivalents?.value ??
+      (typeof p0Bs?.current_assets?.cash_and_cash_equivalents === 'number'
+        ? p0Bs.current_assets.cash_and_cash_equivalents
+        : 0);
+    stiToday =
+      p0Bs?.current_assets?.short_term_investments?.value ??
+      (typeof p0Bs?.current_assets?.short_term_investments === 'number'
+        ? p0Bs.current_assets.short_term_investments
+        : 0);
+    ltiToday =
+      p0Bs?.non_current_assets?.long_term_investments?.value ??
+      (typeof p0Bs?.non_current_assets?.long_term_investments === 'number'
+        ? p0Bs.non_current_assets.long_term_investments
+        : 0);
+  }
+  const netCashToday = cashToday + stiToday + ltiToday - debtToday;
+
+  // ── 5. Terminal Forecast Net Cash Bridge (Legacy mixed-basis) ──────────
   const terminalPeriod = periods[periods.length - 1];
   const finalBs = threeStatement.balanceSheet.byPeriod?.[terminalPeriod];
 
@@ -360,42 +464,30 @@ export function valuate(threeStatement, wacc, dcfInput) {
     );
   }
 
-  // Debt resolution:
-  // Duolingo is debt-free (P2.3). Total funded debt = 0.
-  // If a synthetic levered schedule is provided in wacc or threeStatement.supporting.debt,
-  // evaluate the general debt subtraction formula:
-  let debtVal = 0;
-  if (typeof wacc?.debtBalance === 'number') {
-    debtVal = wacc.debtBalance;
-  } else if (typeof wacc?.totalDebt === 'number') {
-    debtVal = wacc.totalDebt;
-  } else if (wacc?.debtSchedule?.hasDebt === true && Number.isFinite(wacc.debtSchedule.totalDebt)) {
-    debtVal = wacc.debtSchedule.totalDebt;
-  } else if (
-    threeStatement.supporting?.debt?.hasDebt === true &&
-    Number.isFinite(threeStatement.supporting.debt.totalDebt)
-  ) {
-    debtVal = threeStatement.supporting.debt.totalDebt;
-  } else if (Array.isArray(wacc?.derivedFrom)) {
-    const debtProv = wacc.derivedFrom.find((d) => d && d.kind === 'debtSchedule');
-    if (debtProv && typeof debtProv.totalDebt === 'number') {
-      debtVal = debtProv.totalDebt;
-    }
-  }
+  const netCashLegacy = cashVal + stiVal + ltiVal - debtVal;
 
-  const netCash = cashVal + stiVal + ltiVal - debtVal;
-
-  // ── 5. Equity Value ────────────────────────────────────────────────────
-  const equityValue = enterpriseValue + netCash;
-
-  // ── 6. Per-Share Equity Value ──────────────────────────────────────────
-  // Statement money lines are in thousands of USD (UNITS.thousands_usd.scale = 1000).
-  // Shares outstanding is count of shares.
-  // perShare (in USD) = (equityValue × scale) / sharesOutstanding.
+  // ── 6. Equity Values & Per Share ───────────────────────────────────────
   const moneyScale = UNITS.thousands_usd.scale;
-  const perShare = (equityValue * moneyScale) / sharesOutstanding;
 
-  if (!Number.isFinite(perShare)) {
+  // FCFF Headline (adds today's net cash)
+  const equityValueFcff = evFcff + netCashToday;
+  const perShareFcff = (equityValueFcff * moneyScale) / sharesOutstanding;
+
+  // FCFE Floor (no cash add)
+  const evFcfe = pvExplicitFcfe + pvTerminalFcfe;
+  const equityValueFcfe = evFcfe;
+  const perShareFcfe = (equityValueFcfe * moneyScale) / sharesOutstanding;
+
+  // Legacy mixed-basis (adds terminal forecast cash)
+  const evLegacy = evFcfe;
+  const equityValueLegacy = evLegacy + netCashLegacy;
+  const perShareLegacy = (equityValueLegacy * moneyScale) / sharesOutstanding;
+
+  if (
+    !Number.isFinite(perShareFcff) ||
+    !Number.isFinite(perShareFcfe) ||
+    !Number.isFinite(perShareLegacy)
+  ) {
     throw new EngineError(
       'invalid_per_share',
       'Computed per-share equity value is non-finite.',
@@ -404,12 +496,59 @@ export function valuate(threeStatement, wacc, dcfInput) {
   }
 
   // ── Provenance & Bridge descriptors ────────────────────────────────────
-  const bridge = Object.freeze({
+  const bridgeToday = Object.freeze({
+    cash: cashToday,
+    shortTermInvestments: stiToday,
+    longTermInvestments: ltiToday,
+    netCash: netCashToday,
+    debt: debtToday,
+  });
+
+  const bridgeLegacy = Object.freeze({
     cash: cashVal,
     shortTermInvestments: stiVal,
     longTermInvestments: ltiVal,
-    netCash,
+    netCash: netCashLegacy,
     debt: debtVal,
+  });
+
+  const fcffBlock = Object.freeze({
+    schedule: Object.freeze(fcffSchedule),
+    pvExplicit: pvExplicitFcff,
+    terminalValue: terminalValueFcff,
+    pvTerminal: pvTerminalFcff,
+    enterpriseValue: evFcff,
+    netCashToday,
+    equityValue: equityValueFcff,
+    perShare: perShareFcff,
+  });
+
+  const fcfeBlock = Object.freeze({
+    schedule: Object.freeze(fcfeSchedule),
+    pvExplicit: pvExplicitFcfe,
+    terminalValue: terminalValueFcfe,
+    pvTerminal: pvTerminalFcfe,
+    equityValue: equityValueFcfe,
+    perShare: perShareFcfe,
+  });
+
+  const equivalenceBlock = Object.freeze({
+    debtFree: debtVal === 0,
+    statement:
+      'At D = 0, WACC ≡ Re, so FCFF and FCFE discount at the same rate; both paths value the same equity claim and converge',
+    divergence: perShareFcff - perShareFcfe,
+  });
+
+  const legacyBlock = Object.freeze({
+    schedule: Object.freeze(fcfeSchedule),
+    pvExplicit: pvExplicitFcfe,
+    terminalValue: terminalValueFcfe,
+    pvTerminal: pvTerminalFcfe,
+    enterpriseValue: evLegacy,
+    netCash: netCashLegacy,
+    equityValue: equityValueLegacy,
+    perShare: perShareLegacy,
+    bridge: bridgeLegacy,
   });
 
   const derivedFrom = Object.freeze([
@@ -437,8 +576,14 @@ export function valuate(threeStatement, wacc, dcfInput) {
     Object.freeze({
       kind: 'cashFlow',
       periods: Object.freeze(periods.slice()),
-      fcfByPeriod: Object.freeze(
-        schedule.reduce((acc, s) => {
+      fcffByPeriod: Object.freeze(
+        fcffSchedule.reduce((acc, s) => {
+          acc[s.period] = s.fcf;
+          return acc;
+        }, {}),
+      ),
+      fcfeByPeriod: Object.freeze(
+        fcfeSchedule.reduce((acc, s) => {
           acc[s.period] = s.fcf;
           return acc;
         }, {}),
@@ -447,32 +592,43 @@ export function valuate(threeStatement, wacc, dcfInput) {
     Object.freeze({
       kind: 'balanceSheet',
       terminalPeriod,
-      cash: cashVal,
-      shortTermInvestments: stiVal,
-      longTermInvestments: ltiVal,
+      cashToday,
+      shortTermInvestmentsToday: stiToday,
+      longTermInvestmentsToday: ltiToday,
+      netCashToday,
+      cashTerminal: cashVal,
+      shortTermInvestmentsTerminal: stiVal,
+      longTermInvestmentsTerminal: ltiVal,
       debt: debtVal,
-      netCash,
+      netCashLegacy,
     }),
   ]);
 
   const result = {
-    // ── Contract outputs (spec §3.2 & Task P4.2 B) ───────────────────────
+    // ── Contract outputs (spec §3.2 & Task P4.2 B & Task P6R2.4 B.2) ─────
     wacc: waccRate,
     terminalGrowthRate,
     horizon,
     periods: Object.freeze(periods.slice()),
-    schedule: Object.freeze(schedule),
-    pvExplicit,
-    terminalValue,
-    pvTerminal,
-    enterpriseValue,
+    schedule: Object.freeze(fcffSchedule),
+    pvExplicit: pvExplicitFcff,
+    terminalValue: terminalValueFcff,
+    pvTerminal: pvTerminalFcff,
+    enterpriseValue: evFcff,
     /** Alias of `enterpriseValue` for convenience. */
-    ev: enterpriseValue,
-    netCash,
-    equityValue,
-    perShare,
+    ev: evFcff,
+    netCash: netCashToday,
+    equityValue: equityValueFcff,
+    perShare: perShareFcff,
     sharesOutstanding,
-    bridge,
+    bridge: bridgeToday,
+
+    // ── Dual-Path & Finding F Blocks ─────────────────────────────────────
+    fcff: fcffBlock,
+    fcfe: fcfeBlock,
+    equivalence: equivalenceBlock,
+    legacy: legacyBlock,
+    basis: 'fcff',
 
     // ── Valuation metadata ───────────────────────────────────────────────
     isComputed: true,

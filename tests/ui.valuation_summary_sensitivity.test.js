@@ -132,11 +132,11 @@ describe('P5.5 — Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
 
     // WACC Build Table assertions
     assert.match(html, /Weighted Average Cost of Capital \(WACC\)/);
-    assert.match(html, /4\.73%/); // Risk-Free Rate
+    assert.match(html, /4\.79%/); // Risk-Free Rate
     assert.match(html, /0\.89/); // Beta
-    assert.match(html, /4\.42%/); // ERP
-    assert.match(html, /8\.6638%/); // Cost of Equity / WACC
-    assert.match(html, /\$7,422,599,160/); // Market Cap
+    assert.match(html, /4\.46%/); // ERP
+    assert.match(html, /8\.7594%/); // Cost of Equity / WACC
+    assert.match(html, /\$7,897,393,350/); // Market Cap
     assert.match(html, /Normalized effective corporate income tax rate/);
     assert.match(html, /13\.42%/); // Engine wacc.taxRate
     assert.match(html, /stockanalysis\.com/); // Beta source provider
@@ -144,15 +144,16 @@ describe('P5.5 — Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
     assert.doesNotMatch(html, /21\.00%/); // No 21% statutory tax text
 
     // Bridge Waterfall assertions
-    assert.match(html, /\$1,956,849\.68/); // PV Explicit
-    assert.match(html, /\$7,531,035\.94/); // PV Terminal
-    assert.match(html, /\$9,487,885\.62/); // EV
-    assert.match(html, /\$2,987,770\.06/); // Net Cash
-    assert.match(html, /\$12,475,655\.68/); // Equity Value
-    assert.match(html, /\$249\.36/); // DCF Target Price
+    assert.match(html, /\$1,692,767\.30/); // PV Explicit
+    assert.match(html, /\$6,361,977\.93/); // PV Terminal
+    assert.match(html, /\$8,054,745\.23/); // EV
+    assert.match(html, /\$1,416,559\.00/); // Net Cash
+    assert.match(html, /\$9,471,304\.23/); // Equity Value
+    assert.match(html, /\$189\.31/); // DCF Target Price
 
-    // DCF schedule Terminal column has valid terminal FCF
-    assert.ok(dcfCall.config.data[0].Terminal > 0, 'Terminal FCF must be positive');
+    // DCF schedule Terminal column has valid terminal FCF in Finding E termFcf row
+    const termFcfRow = dcfCall.config.data.find((r) => r.id === 'termFcf');
+    assert.ok(termFcfRow && termFcfRow.Terminal > 0, 'Terminal FCF must be positive');
     assert.equal(dcfCall.config.data[1].Terminal, null, 'Terminal discount period t must be null');
 
     view.dispose();
@@ -179,9 +180,9 @@ describe('P5.5 — Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
 
     // Recommendation card assertions
     assert.match(html, /UNDERVALUED/);
-    assert.match(html, /\$249\.36/); // DCF Target Price
-    assert.match(html, /\$148\.36/); // Market Price
-    assert.match(html, /\+68\.08%/); // Implied Upside
+    assert.match(html, /\$189\.31/); // DCF Target Price
+    assert.match(html, /\$157\.85/); // Market Price
+    assert.match(html, /\+19\.93%/); // Implied Upside
 
     // Operating KPIs derived from corpus and engine
     const kpiRows = extractRows(historical.kpis);
@@ -269,11 +270,11 @@ describe('P5.5 — Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () 
     const html = container.innerHTML;
     // Scenario Comparison table assertions (P6R.3 display labels: Downside, Base, Upside)
     assert.match(html, /Downside Case/);
-    assert.match(html, /\$132\.16/);
+    assert.match(html, /\$102\.41/);
     assert.match(html, /Base Case/);
-    assert.match(html, /\$249\.36/);
+    assert.match(html, /\$189\.31/);
     assert.match(html, /Upside Case/);
-    assert.match(html, /\$532\.17/);
+    assert.match(html, /\$405\.68/);
 
     // Hybrid FY2026 Invariance Footnote with OCF $239,031
     assert.match(html, /Hybrid FY2026 Invariance Invariant/);

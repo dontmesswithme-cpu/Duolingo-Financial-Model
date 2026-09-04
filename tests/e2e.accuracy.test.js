@@ -13,9 +13,9 @@
  *     - Filed H1 actuals (REV 590,421, OI 78,472, NI 76,618, OCF 239,031) + forecasted H2 = FY2026 1,193,853.52 total.
  *     - Invariance of filed H1 actuals across driver shifts.
  *  4. Full Authoritative Valuation Pin Set
- *     - WACC / CAPM Build (rf 4.73%, beta 0.89, ERP 4.42% -> Re 8.6638%, debt-free theorem WACC = 8.6638%).
- *     - DCF Explicit & Terminal Values (pvExplicit 1,956,849.68, Gordon TV 11,409,829.69, EV 9,487,885.62, Net Cash 2,987,770.06, Equity 12,475,655.68, perShare $249.35851138243592, +68.08% Undervalued).
- *     - Scenario Range: Bear $132.16 (fair) < Base $249.36 < Bull $532.17 (undervalued).
+ *     - WACC / CAPM Build (rf 4.79%, beta 0.89, ERP 4.46% -> Re 8.7594%, debt-free theorem WACC = 8.7594%).
+ *     - DCF Explicit & Terminal Values (pvExplicit 1,692,767.30, Gordon TV 9,681,132.71, EV 8,054,745.23, Net Cash 1,416,559.00, Equity 9,471,304.23, perShare $189.30871314314004, +19.93% Undervalued).
+ *     - Scenario Range: Bear $102.41 (overvalued) < Base $189.31 < Bull $405.68 (undervalued).
  *     - Sensitivity 9x5 Matrix: 45 cells, WACC > g guard, monotonicity across rows and columns.
  *  5. KPI Truths & Golden Metrics
  *     - DAU 58.7M, MAU 133.1M, Subscribers 12.7M, Total Bookings $1,158,425, Rule of 40 47.4%.
@@ -233,16 +233,16 @@ describe('P6.1 — Full Authoritative Valuation Pin Set', () => {
   test('WACC / CAPM Build matches authoritative pin table', async () => {
     const { wacc, assumptions } = await getFullModel();
 
-    assert.equal(assumptions.get('risk_free_rate').value, 0.0473, 'Risk-free rate = 4.73%');
+    assert.equal(assumptions.get('risk_free_rate').value, 0.0479, 'Risk-free rate = 4.79%');
     assert.equal(assumptions.get('beta').value, 0.89, 'Beta = 0.89');
-    assert.equal(assumptions.get('equity_risk_premium').value, 0.0442, 'ERP = 4.42%');
+    assert.equal(assumptions.get('equity_risk_premium').value, 0.0446, 'ERP = 4.46%');
     assert.equal(assumptions.get('effective_tax_rate').value, 0.134225, 'Tax rate = 13.4225%');
     assert.equal(assumptions.get('shares_outstanding').value, 50031000, 'Diluted shares = 50,031,000');
-    assert.equal(assumptions.get('market_share_price').value, 148.36, 'Market share price = $148.36');
+    assert.equal(assumptions.get('market_share_price').value, 157.85, 'Market share price = $157.85');
 
     // Cost of Equity & WACC
-    assert.equal(Math.round(wacc.costOfEquity.value * 1000000) / 1000000, 0.086638, 'Cost of Equity Re = 0.086638');
-    assert.equal(Math.round(wacc.wacc.value * 1000000) / 1000000, 0.086638, 'Debt-free WACC = 0.086638');
+    assert.equal(Math.round(wacc.costOfEquity.value * 1000000) / 1000000, 0.087594, 'Cost of Equity Re = 0.087594');
+    assert.equal(Math.round(wacc.wacc.value * 1000000) / 1000000, 0.087594, 'Debt-free WACC = 0.087594');
     assert.equal(wacc.debtFree, true, 'debtFree is true');
     assert.equal(wacc.costOfDebt.value, null, 'costOfDebt.value is null for debt-free structure');
     assert.equal(wacc.debtWeight.value, 0, 'debtWeight is 0');
@@ -253,44 +253,44 @@ describe('P6.1 — Full Authoritative Valuation Pin Set', () => {
     const { dcf, recommendation } = await getFullModel();
 
     // Discount Factors
-    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.920269675825804) < 1e-6, 'df FY2026 matches pin');
-    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.660048058982708) < 1e-6, 'df FY2030 matches pin');
+    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.919460754656609) < 1e-6, 'df FY2026 matches pin');
+    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.6571522283467118) < 1e-6, 'df FY2030 matches pin');
 
     // Present Value of Explicit Period FCFs
-    assert.ok(Math.abs(dcf.pvExplicit - 1956849.68) < 1.0, 'pvExplicit matches pin 1,956,849.68');
+    assert.ok(Math.abs(dcf.pvExplicit - 1692767.30) < 1.0, 'pvExplicit matches pin 1,692,767.30');
 
     // Terminal Year FCF & Gordon TV
     const terminalFcf = dcf.schedule[4].fcf * (1 + dcf.terminalGrowthRate);
-    assert.ok(Math.abs(terminalFcf - 703279.08) < 1.0, 'terminal FCF matches pin 703,279.08');
-    assert.ok(Math.abs(dcf.terminalValue - 11409829.69) < 10.0, 'Gordon TV matches pin 11,409,829.69');
-    assert.ok(Math.abs(dcf.pvTerminal - 7531035.94) < 10.0, 'pvTerminal matches pin 7,531,035.94');
+    assert.ok(Math.abs(terminalFcf - 605980.82) < 1.0, 'terminal FCF matches pin 605,980.82');
+    assert.ok(Math.abs(dcf.terminalValue - 9681132.71) < 10.0, 'Gordon TV matches pin 9,681,132.71');
+    assert.ok(Math.abs(dcf.pvTerminal - 6361977.93) < 10.0, 'pvTerminal matches pin 6,361,977.93');
 
     // EV, Net Cash, Equity Value, Per Share Value
-    assert.ok(Math.abs(dcf.enterpriseValue - 9487885.62) < 10.0, 'EV matches pin 9,487,885.62');
-    assert.ok(Math.abs(dcf.netCash - 2987770.06) < 1.0, 'Net Cash matches pin 2,987,770.06');
-    assert.ok(Math.abs(dcf.equityValue - 12475655.68) < 10.0, 'Equity Value matches pin 12,475,655.68');
+    assert.ok(Math.abs(dcf.enterpriseValue - 8054745.23) < 10.0, 'EV matches pin 8,054,745.23');
+    assert.ok(Math.abs(dcf.netCash - 1416559.00) < 1.0, 'Net Cash matches pin 1,416,559.00');
+    assert.ok(Math.abs(dcf.equityValue - 9471304.23) < 10.0, 'Equity Value matches pin 9,471,304.23');
 
     // Per Share Value & Recommendation
-    assert.ok(Math.abs(dcf.perShare - 249.35851138243592) < 1e-4, 'perShare matches exact pin 249.35851138243592');
+    assert.ok(Math.abs(dcf.perShare - 189.30871314314004) < 1e-4, 'perShare matches exact pin 189.30871314314004');
     assert.equal(recommendation.label, 'undervalued', 'Recommendation label is undervalued');
-    assert.ok(Math.abs(recommendation.upsidePct - 0.6808) < 1e-3, 'Upside % matches +68.08%');
+    assert.ok(Math.abs(recommendation.upsidePct - 0.1993) < 1e-3, 'Upside % matches +19.93%');
   });
 
-  test('Scenario Range satisfies strict ordering: Bear ($132.16) < Base ($249.36) < Bull ($532.17)', async () => {
+  test('Scenario Range satisfies strict ordering: Bear ($102.41) < Base ($189.31) < Bull ($405.68)', async () => {
     const { scenarios } = await getFullModel();
 
     const bearPrice = scenarios.bear.dcf.perShare;
     const basePrice = scenarios.base.dcf.perShare;
     const bullPrice = scenarios.bull.dcf.perShare;
 
-    assert.ok(Math.abs(bearPrice - 132.16) < 0.5, `Bear price ${bearPrice} matches ~132.16`);
-    assert.ok(Math.abs(basePrice - 249.36) < 0.5, `Base price ${basePrice} matches ~249.36`);
-    assert.ok(Math.abs(bullPrice - 532.17) < 0.5, `Bull price ${bullPrice} matches ~532.17`);
+    assert.ok(Math.abs(bearPrice - 102.41) < 0.5, `Bear price ${bearPrice} matches ~102.41`);
+    assert.ok(Math.abs(basePrice - 189.31) < 0.5, `Base price ${basePrice} matches ~189.31`);
+    assert.ok(Math.abs(bullPrice - 405.68) < 0.5, `Bull price ${bullPrice} matches ~405.68`);
 
     assert.ok(bearPrice < basePrice, 'Bear price < Base price');
     assert.ok(basePrice < bullPrice, 'Base price < Bull price');
 
-    assert.equal(scenarios.bear.recommendation.label, 'fair', 'Bear scenario recommendation is fair');
+    assert.equal(scenarios.bear.recommendation.label, 'overvalued', 'Bear scenario recommendation is overvalued');
     assert.equal(scenarios.base.recommendation.label, 'undervalued', 'Base scenario recommendation is undervalued');
     assert.equal(scenarios.bull.recommendation.label, 'undervalued', 'Bull scenario recommendation is undervalued');
   });
@@ -341,12 +341,12 @@ describe('P6.1 — Full Authoritative Valuation Pin Set', () => {
 
 describe('P6.1 — Rule of 40 & Golden Metrics', () => {
   test('Rule of 40 equals 47.4% (31.4% FY2030 FCF margin + 16.1% 5Y CAGR)', async () => {
-    const { forecast, dcf } = await getFullModel();
+    const { forecast, threeStatement } = await getFullModel();
 
     // FY2030 revenue and FCF
     const rev2025 = 1037589;
     const rev2030 = forecast.byPeriod.FY2030.revenue.total.value;
-    const fcf2030 = dcf.schedule[4].fcf;
+    const fcf2030 = threeStatement.cashFlow.byPeriod.FY2030.free_cash_flow.value;
 
     assert.ok(rev2030, 'FY2030 total revenue exists');
     assert.ok(fcf2030, 'FY2030 FCF exists');

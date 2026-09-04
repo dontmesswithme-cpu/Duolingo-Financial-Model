@@ -189,28 +189,28 @@ describe('P5.6 — Enterprise Value Bridge Waterfall: createWaterfall', () => {
     assert.match(svg, /viewBox="0 0 800 380"/);
     assert.match(svg, /class="[^"]*svg-waterfall"/);
 
-    // Step 1: Explicit PV ($1,956,850)
+    // Step 1: Explicit PV ($1,692,767)
     assert.match(svg, /PV of Explicit FCFs/);
-    assert.match(svg, /\$1,956,850/);
+    assert.match(svg, /\$1,692,767/);
 
-    // Step 2: Terminal PV ($7,531,036)
+    // Step 2: Terminal PV ($6,361,978)
     assert.match(svg, /PV of Terminal Value/);
-    assert.match(svg, /\$7,531,036/);
+    assert.match(svg, /\$6,361,978/);
 
-    // Step 3: Enterprise Value ($9,487,886)
+    // Step 3: Enterprise Value ($8,054,745)
     assert.match(svg, /Implied Enterprise Value/);
-    assert.match(svg, /\$9,487,886/);
+    assert.match(svg, /\$8,054,745/);
 
-    // Step 4: Net Cash ($2,987,770)
+    // Step 4: Net Cash ($1,416,559)
     assert.match(svg, /\(\+\) Net Cash Bridge/);
-    assert.match(svg, /\$2,987,770/);
+    assert.match(svg, /\$1,416,559/);
 
-    // Step 5: Equity Value ($12,475,656)
+    // Step 5: Equity Value ($9,471,304)
     assert.match(svg, /Implied Equity Value/);
-    assert.match(svg, /\$12,475,656/);
+    assert.match(svg, /\$9,471,304/);
 
-    // Target price pill ($249.36)
-    assert.match(svg, /\$249\.36 \/ share/);
+    // Target price pill ($189.31)
+    assert.match(svg, /\$189\.31 \/ share/);
 
     chart.dispose();
   });
@@ -297,7 +297,7 @@ describe('P5.6 — Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$249\.36/);
+    assert.match(container.innerHTML, /\$189\.31/);
 
     view.dispose();
   });
@@ -320,7 +320,7 @@ describe('P5.6 — Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$249\.36/);
+    assert.match(container.innerHTML, /\$189\.31/);
 
     view.dispose();
   });

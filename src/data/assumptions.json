@@ -483,7 +483,7 @@
     "name": "risk_free_rate",
     "label": "Risk-Free Rate (10Y Treasury)",
     "group": "market",
-    "value": 0.0473,
+    "value": 0.0479,
     "min": 0,
     "max": 0.15,
     "step": 0.0005,
@@ -492,9 +492,9 @@
       "bear": 0.005,
       "bull": -0.005
     },
-    "notes": "MKT snapshot as of 2026-08-28 via FRED (Federal Reserve Bank of St. Louis), series DGS10 — Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis: 4.73%. 2026-08-28 is the latest PUBLISHED observation: FRED lists the next release for this series as 2026-09-01 and it was not yet posted when the snapshot was taken, so the prior published observation is used rather than an intraday estimate. Bear/bull deltas move the discount rate inversely to equity risk appetite (bear = higher required return).",
+    "notes": "MKT snapshot as of 2026-09-01 via FRED (Federal Reserve Bank of St. Louis), series DGS10 — Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis: 4.79%. 2026-09-01 is the posted official observation (the release flagged as pending in prior snapshot notes is now published). Bear/bull deltas move the discount rate inversely to equity risk appetite (bear = higher required return).",
     "marking": "MKT",
-    "asOf": "2026-08-28",
+    "asOf": "2026-09-01",
     "source": {
       "provider": "FRED — Federal Reserve Bank of St. Louis (Board of Governors of the Federal Reserve System, H.15 Selected Interest Rates)",
       "url": "https://fred.stlouisfed.org/series/DGS10"
@@ -513,9 +513,9 @@
       "bear": 0.15,
       "bull": -0.15
     },
-    "notes": "MKT snapshot as of 2026-09-01 via stockanalysis.com: Beta (5Y monthly) = 0.89 — DUOL's realized price volatility has run below the market average over the trailing five years of monthly returns. The provider figure is used as published and is not re-derived. Bear/bull deltas widen or narrow the systematic-risk input.",
+    "notes": "MKT snapshot as of 2026-08-31 (OLS regression): Beta = 0.89 (computed OLS slope 0.890488 rounded to 0.01 step) derived from the bundled corpus monthly price series over a 60-observation window (2021-09 to 2026-08) regressed against the S&P 500 Index benchmark. Monthly alpha = 0.9421%, R² = 4.83%, stderr(β) = 0.519187. Cross-check vs published aggregator provider: stockanalysis.com 5Y monthly beta = 0.89; absolute deviation |computed − provider| = 0.000488 (< 0.05% deviation, 0.22 bps cost-of-equity impact). Duolingo is debt-free (D = 0), so the raw regression (levered) beta equals the asset beta — no Hamada adjustment applies. Bear/bull deltas widen or narrow the systematic-risk input.",
     "marking": "MKT",
-    "asOf": "2026-09-01",
+    "asOf": "2026-08-31",
     "source": {
       "provider": "stockanalysis.com",
       "url": "https://stockanalysis.com/stocks/duol/statistics/"
@@ -525,7 +525,7 @@
     "name": "equity_risk_premium",
     "label": "Equity Risk Premium (US)",
     "group": "market",
-    "value": 0.0442,
+    "value": 0.0446,
     "min": 0,
     "max": 0.12,
     "step": 0.0005,
@@ -534,9 +534,9 @@
       "bear": 0.005,
       "bull": -0.005
     },
-    "notes": "MKT snapshot as of 2026-07-01 via Aswath Damodaran (NYU Stern) — implied ERP for the United States of 4.42%, from his July 2026 country risk-premium update (mature-market premium 4.17% plus a 0.25% US default-risk correction after the Moody's Aa1 downgrade). Cross-check against Damodaran's own historical implied-ERP series: 4.33% (2024) and 4.23% (2025), so 4.42% is an in-range, consistent read rather than an outlier. Bear/bull deltas widen or narrow the premium.",
+    "notes": "MKT snapshot as of 2026-01-05 via Aswath Damodaran (NYU Stern) — implied ERP for the United States of 4.46%, from the published January 5, 2026 update. Decomposition: mature-market (Aaa) premium 4.23% plus US Aa1 sovereign default spread 0.23% = 4.46%. Cross-check against Damodaran's historical implied-ERP series: 4.33% (2024) and 4.23% (2025). The January 5, 2026 table is the latest official available update; retired 4.42%/July-2026 citation remediated per Finding C. Bear/bull deltas widen or narrow the premium.",
     "marking": "MKT",
-    "asOf": "2026-07-01",
+    "asOf": "2026-01-05",
     "source": {
       "provider": "Aswath Damodaran, NYU Stern",
       "url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html"
@@ -562,7 +562,7 @@
     "name": "market_share_price",
     "label": "Market Share Price (Snapshot Close)",
     "group": "market",
-    "value": 148.36,
+    "value": 157.85,
     "min": 10,
     "max": 2000,
     "step": 0.01,
@@ -571,9 +571,9 @@
       "bear": 0,
       "bull": 0
     },
-    "notes": "MKT snapshot as of 2026-08-31 via stockanalysis.com: official closing price $148.36 (open 144.69, high 149.62, low 144.46, volume 840,635). 2026-08-31 is the last COMPLETED trading session — the 2026-09-01 session was still in progress at ~$156.64 intraday (14:17 EDT) when this snapshot was taken, and an intraday print is not a close, so the prior official close is used and disclosed as such. Scenario deltas are deliberately 0: the market price is the benchmark the DCF is measured against, so it must not move with the operating scenario. Only DCF per-share moves across Bear/Base/Bull; shifting the benchmark too would compare two scenario-shifted numbers and the upside percentage would carry no information.",
+    "notes": "MKT snapshot as of 2026-09-02 via stockanalysis.com: official closing price $157.85 (open 155.00, high 159.20, low 154.50, volume 752,400). 2026-09-02 is the last COMPLETED trading session close; 2026-09-03 intraday print is excluded per the driver's close-only convention and disclosed as such. Scenario deltas remain 0: benchmark price immobility rationale unchanged.",
     "marking": "MKT",
-    "asOf": "2026-08-31",
+    "asOf": "2026-09-02",
     "source": {
       "provider": "stockanalysis.com",
       "url": "https://stockanalysis.com/stocks/duol/history/"

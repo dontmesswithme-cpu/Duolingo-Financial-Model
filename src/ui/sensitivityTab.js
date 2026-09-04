@@ -56,7 +56,8 @@ export function buildSensitivityColumns(growthValues = []) {
           const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
           if (val === null || val === undefined || !Number.isFinite(val)) return '—';
           const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
-          const isHighlightCell = (row.isActiveWacc || row.isBaseWacc) && Math.abs(gVal - (row.activeGrowth || row.baseGrowth || 0.02)) < 0.0001;
+          const targetG = row.activeGrowth ?? row.baseGrowth ?? 0.02;
+          const isHighlightCell = (row.isActiveWacc || row.isBaseWacc) && Math.abs(gVal - targetG) < 0.0001;
           const highlightClass = isHighlightCell ? 'cell-highlight-base' : '';
           return `<div class="sensitivity-cell-value ${highlightClass}">${usd(val, { decimals: 2 })}</div>`;
         },
@@ -132,6 +133,7 @@ export function renderSensitivity({
   }
 
   function renderScenarioComparisonCard() {
+    // Benchmark share price: derived dynamically from neutral snapshot driver. All scenario comparison upsides evaluate versus this benchmark.
     const bearKey = SCENARIO_NAMES[0];
     const baseKey = SCENARIO_NAMES[1];
     const bullKey = SCENARIO_NAMES[2];
@@ -197,6 +199,10 @@ export function renderSensitivity({
       },
     ];
 
+    const baseMktDriver = base?.assumptions?.get ? base?.assumptions?.get('market_share_price') : null;
+    const benchmarkPrice = baseMktDriver?.value ?? 157.85;
+    const benchmarkAsOf = baseMktDriver?.asOf || '';
+
     return `
       <div class="sensitivity-card scenario-card">
         <div class="statement-card-header">
@@ -205,6 +211,7 @@ export function renderSensitivity({
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
             Full-path end-to-end valuation runs parameterized across three macroeconomic and operating scenarios (preserving <code>Downside &lt; Base &lt; Upside</code> intrinsic value ordering).
+            <span class="scenario-benchmark-caption">Benchmark share price: $${benchmarkPrice.toFixed(2)}${benchmarkAsOf ? ` (${benchmarkAsOf})` : ''} snapshot driver. All scenario comparison upsides evaluate versus this neutral benchmark.</span>
           </p>
           <table class="financial-summary-table scenario-table">
             <thead>
@@ -268,6 +275,10 @@ export function renderSensitivity({
     };
     tabulatorConfigs.push(gridConfig);
 
+    const narrowingFootnoteHtml = currentGrid?.axisNarrowed
+      ? `<div class="disclaimer-box sensitivity-narrowing-note">axis range narrowed to respect WACC &gt; g at current driver settings.</div>`
+      : '';
+
     const matrixHtml = `
       <div class="sensitivity-card matrix-card">
         <div class="statement-card-header">
@@ -275,9 +286,10 @@ export function renderSensitivity({
         </div>
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
-            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (1.0%–3.0%). Strict monotonicity holds across all 45 cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC; highlighted cell denotes Active Case valuation.
+            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
           </p>
           <div class="tabulator-grid-container financial-table" data-statement="sensitivityGrid"></div>
+          ${narrowingFootnoteHtml}
         </div>
       </div>
     `;

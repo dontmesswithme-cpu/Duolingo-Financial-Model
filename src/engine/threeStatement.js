@@ -619,7 +619,7 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
     });
 
     // 3. Cash Flow Statement
-    let ocfLine, icfLine, fcfLine, cffLine, netChangeInCashLine, endingCashLine;
+    let ocfLine, icfLine, fcfLine, fcffLine, cffLine, netChangeInCashLine, endingCashLine;
     let endingCashValue;
 
     if (isHybrid) {
@@ -654,6 +654,26 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
         h2Value: h2Ocf + h2Icf,
         h1DerivedFrom: [{ from: 'H1_OCF + H1_ICF', value: h1Ocf + h1Icf }],
         h2DerivedFrom: [{ from: 'H2_OCF + H2_ICF', value: h2Ocf + h2Icf }],
+      });
+
+      const h1InterestVal = interestIncomeLine.h1.value;
+      const h2InterestVal = interestIncomeLine.h2.value;
+      const h1AfterTaxInterest = h1InterestVal * (1 - taxRate);
+      const h2AfterTaxInterest = h2InterestVal * (1 - taxRate);
+      const h1Fcff = h1Ocf + h1Icf - h1AfterTaxInterest;
+      const h2Fcff = h2Ocf + h2Icf - h2AfterTaxInterest;
+      fcffLine = hybridLine({
+        h1Value: h1Fcff,
+        h2Value: h2Fcff,
+        h1DerivedFrom: [
+          { from: 'H1_FCF - H1_Interest_After_Tax', value: h1Fcff },
+          { driver: 'effective_tax_rate', value: taxRate },
+        ],
+        h2DerivedFrom: [
+          { from: 'H2_FCF - H2_Interest_After_Tax', value: h2Fcff },
+          { driver: 'interest_income_rate', value: interestRate },
+          { driver: 'effective_tax_rate', value: taxRate },
+        ],
       });
 
       const h1Cff = rowCff6M.value;
@@ -705,6 +725,15 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
         { from: `cash_from_investing_activities.${period}`, value: icfVal },
       ]);
 
+      const afterTaxInterest = interestIncomeLine.value * (1 - taxRate);
+      const fcffVal = ocfVal + icfVal - afterTaxInterest;
+      fcffLine = estimateLine(fcffVal, [
+        { from: `free_cash_flow.${period}`, value: ocfVal + icfVal },
+        { from: `interest_income.${period}`, value: interestIncomeLine.value },
+        { driver: 'effective_tax_rate', value: taxRate },
+        { driver: 'interest_income_rate', value: interestRate },
+      ]);
+
       const cffVal = financingCashFlow;
       cffLine = estimateLine(cffVal, [
         { driver: 'option_proceeds', value: optionProceeds },
@@ -748,7 +777,10 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
         repurchase_of_common_stock: estimateLine(-shareRepurchases, []),
         total: cffLine,
       }),
+      // free_cash_flow is FCFE-basis (net-income derived; frozen P4 consumers)
       free_cash_flow: fcfLine,
+      // fcff is FCFF companion line (NI-basis FCF minus after-tax interest income; Finding F)
+      fcff: fcffLine,
       net_change_in_cash: netChangeInCashLine,
       beginning_cash: estimateLine(priorBs.cash_and_cash_equivalents, []),
       ending_cash: endingCashLine,
@@ -959,7 +991,9 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
       intangibleAmortization: projIntangibles,
       debt: schedules.debt,
       sbc: projSbc,
+      bopBalanceSheet: BOP_Q2_FY2026,
     }),
+    bopBalanceSheet: BOP_Q2_FY2026,
   };
 
   return deepFreeze(result);

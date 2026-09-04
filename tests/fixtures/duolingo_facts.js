@@ -2187,6 +2187,7 @@ export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5
     const period = periods[i];
     const t = i + 1;
     const fcf =
+      threeStatement.cashFlow?.byPeriod?.[period]?.fcff?.value ??
       threeStatement.cashFlow?.byPeriod?.[period]?.free_cash_flow?.value ??
       threeStatement[period]?.fcf;
     const df = 1 / Math.pow(1 + waccRate, t);
@@ -2211,17 +2212,15 @@ export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5
   const pvTerminal = terminalValue * df_T;
   const enterpriseValue = pvExplicit + pvTerminal;
 
-  const terminalPeriod = periods[periods.length - 1];
-  const finalBs = threeStatement.balanceSheet?.byPeriod?.[terminalPeriod];
+  const bop = threeStatement.bopBalanceSheet || threeStatement.supporting?.bopBalanceSheet;
   const cash =
-    finalBs?.current_assets?.cash_and_cash_equivalents?.value ??
-    threeStatement[terminalPeriod]?.endingCash ??
-    threeStatement[terminalPeriod]?.cash;
+    bop?.cash_and_cash_equivalents ??
+    THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.cash_and_cash_equivalents;
   const sti =
-    finalBs?.current_assets?.short_term_investments?.value ??
+    bop?.short_term_investments ??
     THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.short_term_investments;
   const lti =
-    finalBs?.non_current_assets?.long_term_investments?.value ??
+    bop?.long_term_investments ??
     THREE_STATEMENT_KNOWN_FIGURES.bopQ2Fy2026.long_term_investments;
   const debt = 0;
   const netCash = cash + sti + lti - debt;

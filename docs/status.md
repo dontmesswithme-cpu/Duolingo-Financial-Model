@@ -12,7 +12,8 @@
 | **P4** | **Valuation: DCF, WACC Build & Recommendation** | 🟢 Done (Gate Passed 2026-09-02, tag `v1.0-P4`) |
 | **P5** | **Interactive UI: 8-Tab Model Interface** | 🟢 **Done (Gate Passed 2026-09-02 19:07, tag `v1.0-P5`)** |
 | **P6** | **End-to-End Verification, Performance & Release** | 🟡 Sub-phases approved (P6.1 ✅ P6.2 ✅ P6.3 ✅); gate HELD — P6R polish phase drafting |
-| **P6R** | **Release Readiness Polish** | 🟡 Sub-phases approved 4/4 (P6R.1 ✅ P6R.2 ✅ P6R.3 ✅ P6R.4 ✅ 2026-09-03; suite 533/533) — gate HELD for Director FINAL PASS (no archive/tag/`v1.0` before explicit approval) |
+| **P6R** | **Release Readiness Polish** | 🟢 Sub-phases approved 4/4 (P6R.1 ✅ P6R.2 ✅ P6R.3 ✅ P6R.4 ✅ 2026-09-03; suite 533/533) — gate HELD, merged into P6R2 completion + Director final pass |
+| **P6R2** | **Model-Rigor Revision & Live Market Pricing** | 🟢 Sub-phases approved 5/5 (P6R2.1 ✅ P6R2.2 ✅ P6R2.3 ✅ P6R2.4 ✅ P6R2.5 ✅ 2026-09-04; suite 618/618) — gate HELD for Director FINAL PASS (no archive/tag/`v1.0` before explicit approval) |
 
 ---
 
@@ -29,4 +30,4 @@
 - **Circuit Breaker**: Tripped once (P5.3, 2026-09-02 15:29 — 3 consecutive FAILs) → stood down by Director resolution 16:14 (Option A live-mount plan). Final P5 state: reset; P5.4/P5.5/P5.6 each 1 FAIL → 1 resubmission → PASS.
 
 ## Next
-- **P6R Release Readiness Polish** — 🟡 SUB-PHASES APPROVED 4/4 (P6R.1 18:40 · P6R.2 19:20 · P6R.3 20:35 · P6R.4 22:15; suite 533/533 ×3; engine/data frozen; valuation pins invariant). **Gate HELD: `v1.0` tags only on Director's final pass — no archive, no tag, no release before explicit Director approval.** Pending Director items: (a) interface review; (b) GitHub push (Pages + Vercel smoke); (c) canonical repo URL; (d) disclaimer wording approval; (e) explicit FINAL PASS. P6 gate remains held (merged into the P6R completion + Director final-pass sequence).
+- **P6R2 Model-Rigor Revision & Live Market Pricing** — 🟢 SUB-PHASES APPROVED 5/5 (matrix centered · beta self-computed · anchors live-verified · FCFF 189.31/FCFE 186.58/legacy 246.30 · live-price plumbing; suite 618/618 ×3). **Gate HELD: `v1.0` tags only on Director's final pass — no archive, no tag, no release before explicit Director approval.** Pending Director items: (a) interface review (8 tabs × states + live-price states); (b) GitHub push (Pages + Vercel live; `/api/price` live behavior + deployed-URL smoke still pending); (c) canonical repo URL; (d) disclaimer wording approval; (e) explicit FINAL PASS. P6/P6R gates remain held (merged into the P6R2 completion + Director final-pass sequence).

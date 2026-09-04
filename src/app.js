@@ -44,6 +44,7 @@ import { renderProjections } from './ui/projectionsTab.js';
 import { renderValuation } from './ui/valuationTab.js';
 import { renderSummary } from './ui/summaryTab.js';
 import { renderSensitivity } from './ui/sensitivityTab.js';
+import { createMarketPriceState, fetchLatestPrice } from './engine/market.js';
 
 /**
  * Recursively freezes a value so no consumer can mutate model state through a
@@ -108,6 +109,66 @@ function clampDriverValue(value, driver) {
     clamped = Number((minVal + stepCount * driver.step).toFixed(6));
   }
   return clamped;
+}
+
+/**
+ * Derives scenario-relative sensitivity axes centered on active WACC and active g,
+ * with deterministic fail-closed narrowing to enforce WACC > g on every cell.
+ *
+ * @param {number} activeWacc Active scenario WACC rate
+ * @param {number} activeG Active scenario terminal growth rate
+ * @returns {{ waccValues: number[], growthValues: number[], axisNarrowed: boolean, wSteps: number, gSteps: number }}
+ */
+export function computeSensitivityAxes(activeWacc, activeG) {
+  const STEP = 0.005; // 50 bps
+  let gSteps = 2;     // ±100 bps (5 columns)
+  let wSteps = 4;     // ±200 bps (9 rows)
+  let axisNarrowed = false;
+
+  function buildGridValues(wCount, gCount) {
+    const wVals = [];
+    for (let i = -wCount; i <= wCount; i++) {
+      wVals.push(Number((activeWacc + i * STEP).toFixed(6)));
+    }
+    const gVals = [];
+    for (let j = -gCount; j <= gCount; j++) {
+      gVals.push(Number((activeG + j * STEP).toFixed(6)));
+    }
+    return { wVals, gVals };
+  }
+
+  function isValid(wVals, gVals) {
+    for (const w of wVals) {
+      for (const g of gVals) {
+        if (w <= g) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  let { wVals, gVals } = buildGridValues(wSteps, gSteps);
+
+  while (!isValid(wVals, gVals)) {
+    axisNarrowed = true;
+    if (gSteps > 0) {
+      gSteps -= 1;
+    } else if (wSteps > 0) {
+      wSteps -= 1;
+    } else {
+      break;
+    }
+    ({ wVals, gVals } = buildGridValues(wSteps, gSteps));
+  }
+
+  return {
+    waccValues: wVals,
+    growthValues: gVals,
+    axisNarrowed,
+    wSteps,
+    gSteps,
+  };
 }
 
 /**
@@ -181,6 +242,7 @@ export async function bootApp({
   dir,
   assumptionsLocation,
   assumptionsDir,
+  transport,
 } = {}) {
   if (data === null || data === undefined || typeof data.loadHistorical !== 'function') {
     throw new EngineError(
@@ -213,7 +275,12 @@ export async function bootApp({
     now,
     historical: dataset,
     assumptions,
+    transport,
   });
+
+  if (typeof globalThis.window !== 'undefined' && typeof app.fetchPrice === 'function') {
+    app.fetchPrice().catch(() => {});
+  }
 
   return { app, dataset };
 }
@@ -225,7 +292,7 @@ export async function bootApp({
  * @returns {App}
  * @throws {EngineError} `invalid_dependency` when a required dependency is missing.
  */
-export function createApp({ data, engine, root, now, historical = null, assumptions = null } = {}) {
+export function createApp({ data, engine, root, now, historical = null, assumptions = null, transport = null } = {}) {
   for (const name of ['data', 'engine', 'root', 'now']) {
     const value = { data, engine, root, now }[name];
     if (value === null || value === undefined) {
@@ -257,6 +324,12 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
   let isDirty = false;
   let disposed = false;
   const listeners = [];
+
+  // Initialize market pricing state from snapshot driver (Task P6R2.5 Finding G)
+  const snapshotDriver = baseAssumptions?.get ? baseAssumptions.get('market_share_price') : baseAssumptions?.byName?.market_share_price;
+  const snapshotPrice = snapshotDriver && Number.isFinite(snapshotDriver.value) ? snapshotDriver.value : 0;
+  const snapshotAsOf = snapshotDriver?.asOf || '';
+  let marketPriceState = createMarketPriceState(snapshotPrice, snapshotAsOf);
   let assumptionsView = null;
   let historicalsView = null;
   let schedulesView = null;
@@ -416,15 +489,32 @@ function applyDriverOverrides(assumptions, overrides) {
       assumptions: workingAssumptions,
     });
 
-    const marketPrice = requireDriver(workingAssumptions, 'market_share_price').value;
-    const recOut = recommend.evaluate(dcfOut.perShare, marketPrice);
-    const sensitivityGridOut = typeof recommend.buildSensitivityGrid === 'function'
-      ? recommend.buildSensitivityGrid({
-          threeStatement: threeStatementOut,
-          assumptions: workingAssumptions,
-          wacc: waccOut,
-        })
-      : null;
+    const effectiveMarketPrice = driverOverrides.has('market_share_price')
+      ? driverOverrides.get('market_share_price')
+      : marketPriceState.price;
+    const recOut = recommend.evaluate(dcfOut.perShare, effectiveMarketPrice);
+    let sensitivityGridOut = null;
+    if (typeof recommend.buildSensitivityGrid === 'function') {
+      const activeWacc = typeof waccOut === 'number' ? waccOut : (waccOut.wacc?.value ?? waccOut.wacc ?? waccOut.value);
+      const activeG = requireDriver(workingAssumptions, 'terminal_growth_rate').value;
+      const axes = computeSensitivityAxes(activeWacc, activeG);
+
+      const gridInput = {
+        threeStatement: threeStatementOut,
+        assumptions: workingAssumptions,
+        wacc: waccOut,
+        growthValues: axes.growthValues,
+      };
+      if (axes.axisNarrowed) {
+        gridInput.waccValues = axes.waccValues;
+      }
+
+      const rawGrid = recommend.buildSensitivityGrid(gridInput);
+      sensitivityGridOut = Object.freeze({
+        ...rawGrid,
+        axisNarrowed: axes.axisNarrowed,
+      });
+    }
 
     // Step 4: Scenario comparison table (computes each case as neutral state + that scenario's deltas)
     const scenariosOut = typeof recommend.runFullValuation === 'function' && historical && neutralAssumptions
@@ -466,10 +556,10 @@ function applyDriverOverrides(assumptions, overrides) {
       projectionsView.update(threeStatementOut, historical);
     }
     if (valuationView) {
-      valuationView.update(waccOut, dcfOut, workingAssumptions);
+      valuationView.update(waccOut, dcfOut, workingAssumptions, null, marketPriceState);
     }
     if (summaryView) {
-      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut);
+      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut, marketPriceState);
     }
     if (sensitivityView && sensitivityGridOut) {
       sensitivityView.update(sensitivityGridOut, scenariosOut, dcfOut);
@@ -579,7 +669,13 @@ function applyDriverOverrides(assumptions, overrides) {
      * @returns {Readonly<AppState>}
      */
     state() {
-      return deepFreeze({ ...model });
+      const snap = { ...model };
+      Object.defineProperty(snap, 'marketPrice', {
+        value: marketPriceState,
+        enumerable: false,
+        configurable: true,
+      });
+      return deepFreeze(snap);
     },
 
     /**
@@ -675,6 +771,8 @@ function applyDriverOverrides(assumptions, overrides) {
       wacc: model.wacc,
       dcf: model.dcf,
       assumptions: model.assumptions || baseAssumptions,
+      marketPriceState,
+      onRefreshPrice: () => app.fetchPrice(),
     });
   }
 
@@ -686,6 +784,8 @@ function applyDriverOverrides(assumptions, overrides) {
       historical,
       assumptions: model.assumptions || baseAssumptions,
       threeStatement: model.threeStatement,
+      marketPriceState,
+      onRefreshPrice: () => app.fetchPrice(),
     });
   }
 
@@ -697,6 +797,34 @@ function applyDriverOverrides(assumptions, overrides) {
       dcf: model.dcf,
     });
   }
+
+  async function fetchPrice() {
+    const snapDriver = baseAssumptions?.get ? baseAssumptions.get('market_share_price') : baseAssumptions?.byName?.market_share_price;
+    const sPrice = snapDriver && Number.isFinite(snapDriver.value) ? snapDriver.value : 0;
+    const sAsOf = snapDriver?.asOf || '';
+    const activeTransport = transport || (typeof globalThis.fetch === 'function' ? globalThis.fetch.bind(globalThis) : null);
+    const res = await fetchLatestPrice(activeTransport, {
+      fallbackPrice: sPrice,
+      fallbackAsOf: sAsOf,
+    });
+    marketPriceState = res;
+    recalculate();
+    return marketPriceState;
+  }
+
+  Object.defineProperty(app, 'fetchPrice', {
+    value: fetchPrice,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+
+  Object.defineProperty(app, 'refreshPrice', {
+    value: fetchPrice,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
 
   return app;
 }

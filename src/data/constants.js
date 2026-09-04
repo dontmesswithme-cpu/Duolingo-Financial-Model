@@ -304,4 +304,9 @@ export const RECOMMENDATION_THRESHOLDS = Object.freeze({
 export const WORKFLOW_GIT_TAG_PREFIX = 'v1.0';
 export const MODEL_VERSION_FALLBACK = 'v1.0-P4';
 
+/**
+ * Pinned market data provider URL for live pricing proxy and citations.
+ */
+export const STOCKANALYSIS_DUOL_URL = 'https://stockanalysis.com/stocks/duol/history/';
+
 

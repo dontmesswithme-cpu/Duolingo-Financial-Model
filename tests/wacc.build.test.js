@@ -46,24 +46,24 @@ const P3_CORPUS_RECORD_COUNT = 706;
  * produced it. The fixture file supplies the DERIVED anchors; these supply the
  * independent check that those anchors are the right numbers.
  *
- * Sourced 2026-09-01:
- *   rf   = 4.73%  (FRED DGS10, 2026-08-28)
- *   beta = 0.89   (stockanalysis.com, 5Y monthly, 2026-09-01)
- *   ERP  = 4.42%  (Damodaran, NYU Stern, 2026-07-01)
- *   Re   = 0.0473 + 0.89 × 0.0442 = 0.086638
- *   px   = 148.36 (last completed close, 2026-08-31)
+ * Sourced 2026-09-02:
+ *   rf   = 4.79%  (FRED DGS10, 2026-09-01)
+ *   beta = 0.89   (stockanalysis.com / computed OLS, 2026-08-31)
+ *   ERP  = 4.46%  (Damodaran, NYU Stern, 2026-01-05)
+ *   Re   = 0.0479 + 0.89 × 0.0446 = 0.087594
+ *   px   = 157.85 (last completed close, 2026-09-02)
  *   sh   = 50,031,000 (Q2 FY2026 10-Q diluted weighted-average)
- *   E    = 148.36 × 50,031,000 = 7,422,599,160
+ *   E    = 157.85 × 50,031,000 = 7,897,393,350
  */
 const PIN = Object.freeze({
-  riskFreeRate: 0.0473,
+  riskFreeRate: 0.0479,
   beta: 0.89,
-  equityRiskPremium: 0.0442,
-  costOfEquity: 0.086638,
-  wacc: 0.086638,
-  sharePrice: 148.36,
+  equityRiskPremium: 0.0446,
+  costOfEquity: 0.087594,
+  wacc: 0.087594,
+  sharePrice: 157.85,
   sharesOutstanding: 50031000,
-  marketCap: 7422599160,
+  marketCap: 7897393350,
   equityWeight: 1,
   debtWeight: 0,
   terminalGrowthRate: 0.025,
@@ -77,15 +77,15 @@ const TOL = 1e-12;
  * Relative tolerance, combined with `TOL` so large-magnitude pins get
  * magnitude-appropriate slack.
  *
- * Why this exists: `marketCap = 148.36 × 50,031,000` is exactly 7,422,599,160
- * in decimal, but 148.36 is not exactly representable as a IEEE-754 double, so
- * the product lands on ...160.000001. A flat 1e-12 absolute tolerance is
- * unreachable at a magnitude of 7.4e9 — not because the answer is wrong, but
+ * Why this exists: `marketCap = 157.85 × 50,031,000` is exactly 7,897,393,350
+ * in decimal, but 157.85 is not exactly representable as a IEEE-754 double, so
+ * the product lands on ...350.000001. A flat 1e-12 absolute tolerance is
+ * unreachable at a magnitude of 7.8e9 — not because the answer is wrong, but
  * because a double carries ~1e-16 of *relative* error. Scaling by magnitude is
  * the correct fix; loosening the number by hand would be the lazy one.
  *
- * At this rate marketCap still gets only ~7.4e-3 of slack, which catches every
- * defect that matters: one extra share moves it by 148.36, one cent of share
+ * At this rate marketCap still gets only ~7.8e-3 of slack, which catches every
+ * defect that matters: one extra share moves it by 157.85, one cent of share
  * price moves it by 500,310.
  */
 const REL_TOL = 1e-12;
@@ -619,9 +619,12 @@ describe('P4.1 — engine purity, determinism and corpus gates', () => {
       );
 
       assert.doesNotMatch(code, /0\.0473/, `risk-free rate (0.0473) must not be hardcoded in ${file}`);
+      assert.doesNotMatch(code, /0\.0479/, `risk-free rate (0.0479) must not be hardcoded in ${file}`);
       assert.doesNotMatch(code, /148\.36/, `market share price (148.36) must not be hardcoded in ${file}`);
+      assert.doesNotMatch(code, /157\.85/, `market share price (157.85) must not be hardcoded in ${file}`);
       assert.doesNotMatch(code, /0\.0442/, `ERP (0.0442) must not be hardcoded in ${file}`);
-      assert.doesNotMatch(code, /\?\?\s*(?:148\.36|0\.025|0\.0473|0\.0442)/, `buried market fallback found in ${file}`);
+      assert.doesNotMatch(code, /0\.0446/, `ERP (0.0446) must not be hardcoded in ${file}`);
+      assert.doesNotMatch(code, /\?\?\s*(?:148\.36|157\.85|0\.025|0\.0473|0\.0479|0\.0442|0\.0446)/, `buried market fallback found in ${file}`);
     }
   });
 });

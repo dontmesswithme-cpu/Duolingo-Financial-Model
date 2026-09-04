@@ -80,7 +80,9 @@ function createKpiLookup(historical) {
  * @param {object} [options.historical]
  * @param {object} [options.assumptions]
  * @param {object} [options.threeStatement]
- * @returns {{ update: (dcf: object, recommendation: object, kpi?: object, historical?: object, assumptions?: object, threeStatement?: object) => void, dispose: () => void }}
+ * @param {object} [options.marketPriceState] MarketPriceState (Finding G)
+ * @param {() => Promise<void>|void} [options.onRefreshPrice] Manual refresh callback
+ * @returns {{ update: (dcf: object, recommendation: object, kpi?: object, historical?: object, assumptions?: object, threeStatement?: object, marketPriceState?: object) => void, dispose: () => void }}
  */
 export function renderSummary({
   container,
@@ -90,6 +92,8 @@ export function renderSummary({
   historical = null,
   assumptions = null,
   threeStatement = null,
+  marketPriceState = null,
+  onRefreshPrice = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderSummary requires a container element.', 'container');
@@ -101,11 +105,16 @@ export function renderSummary({
   let currentHistorical = historical;
   let currentAssumptions = assumptions;
   let currentThreeStatement = threeStatement;
+  let currentMarketPrice = marketPriceState;
   let disposed = false;
 
   function renderRecommendationCard() {
     const targetPrice = currentDcf?.perShare;
-    const marketPrice = currentRec?.marketPrice;
+    const marketPrice = currentRec?.marketPrice ?? currentMarketPrice?.price;
+    const isOverridden = Number.isFinite(currentRec?.marketPrice) &&
+                         Number.isFinite(currentMarketPrice?.price) &&
+                         Math.abs(currentRec.marketPrice - currentMarketPrice.price) > 0.0001;
+    const overrideMarker = isOverridden ? '<span class="benchmark-override-badge font-small text-muted"> (edited benchmark)</span>' : '';
     const upsidePct = currentRec?.upsidePct;
     const label = currentRec?.label || 'fair';
 
@@ -121,6 +130,10 @@ export function renderSummary({
       badgeClass = 'overvalued';
       labelDisplay = 'OVERVALUED';
     }
+
+    const priceAsOf = currentMarketPrice?.asOf || (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf : '') || '';
+    const priceProvider = currentMarketPrice?.source?.provider ?? 'stockanalysis.com';
+    const retrievedText = currentMarketPrice?.retrievedAt ? ` · Retrieved: ${currentMarketPrice.retrievedAt.slice(0, 10)}` : '';
 
     return `
       <div class="summary-card recommendation-card rec-card-${badgeClass}">
@@ -140,9 +153,12 @@ export function renderSummary({
             <div class="rec-hero-sub">${estSuffix('DCF Target Price', 'EST')}</div>
           </div>
           <div class="rec-hero-item">
-            <div class="rec-hero-label">Market Benchmark Share Price</div>
+            <div class="rec-hero-label">Market Benchmark Share Price${overrideMarker}</div>
             <div class="rec-hero-value font-mono font-large">${usd(marketPrice, { decimals: 2 })}</div>
-            <div class="rec-hero-sub">${mktBadge({ asOf: currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf || '' : '', provider: 'NASDAQ: DUOL' })}</div>
+            <div class="rec-hero-sub">${mktBadge({ asOf: priceAsOf, provider: priceProvider })}${retrievedText}</div>
+            <div class="rec-hero-action">
+              <button type="button" class="btn-refresh-price" data-action="refresh-price">↻ Refresh Live Price</button>
+            </div>
           </div>
           <div class="rec-hero-item">
             <div class="rec-hero-label">Implied Upside / (Downside)</div>
@@ -336,12 +352,16 @@ export function renderSummary({
   }
 
   function render() {
+    const bannerHtml = currentMarketPrice?.bannerText
+      ? `<div class="live-price-banner live-price-${currentMarketPrice.status || 'fallback'}" role="alert">${currentMarketPrice.bannerText}</div>`
+      : '';
     const recHtml = renderRecommendationCard();
     const bridgeHtml = renderValuationBridgeSnapshot();
     const operatingHtml = renderOperatingQualityAndKpis();
 
     container.innerHTML = `
       <div class="summary-view-wrapper">
+        ${bannerHtml}
         ${recHtml}
         ${bridgeHtml}
         ${operatingHtml}
@@ -349,21 +369,43 @@ export function renderSummary({
     `;
   }
 
+  function handleContainerClick(e) {
+    const btn = e.target?.closest ? e.target.closest('[data-action="refresh-price"]') : null;
+    if (btn && typeof onRefreshPrice === 'function') {
+      btn.disabled = true;
+      btn.textContent = 'Refreshing...';
+      Promise.resolve(onRefreshPrice()).finally(() => {
+        btn.disabled = false;
+        btn.textContent = '↻ Refresh Live Price';
+      });
+    }
+  }
+
+  if (typeof container.addEventListener === 'function') {
+    container.addEventListener('click', handleContainerClick);
+  }
+
   render();
 
   return {
-    update(newDcf, newRec, newKpi = null, newHistorical = null, newAssumptions = null, newThreeStatement = null) {
+    update(newDcf, newRec, newKpi = null, newHistorical = null, newAssumptions = null, newThreeStatement = null, newMarketPrice = undefined) {
       currentDcf = newDcf;
       currentRec = newRec;
       currentKpi = newKpi || currentKpi;
       currentHistorical = newHistorical || currentHistorical;
       currentAssumptions = newAssumptions || currentAssumptions;
       currentThreeStatement = newThreeStatement || currentThreeStatement;
+      if (newMarketPrice !== undefined) {
+        currentMarketPrice = newMarketPrice;
+      }
       render();
     },
     dispose() {
       if (disposed) return;
       disposed = true;
+      if (typeof container.removeEventListener === 'function') {
+        container.removeEventListener('click', handleContainerClick);
+      }
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

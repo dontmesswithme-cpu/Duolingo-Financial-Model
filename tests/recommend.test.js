@@ -12,7 +12,7 @@
  *  - `recommend.runFullValuation(historical, assumptions, scenario)`: full-path valuation
  *    across Bear/Base/Bull, strict ordering Bear < Base < Bull for per-share equity,
  *    hybrid H1 invariance across scenarios (590,421 rev / 76,618 OI / 239,031 OCF),
- *    and benchmark price invariance ($148.36).
+ *    and benchmark price invariance ($157.85).
  *  - Purity, determinism, deep-freeze, zero bare literals > 999, and corpus record count invariant.
  */
 
@@ -111,15 +111,15 @@ describe('P4.3 — Mechanical recommendation and threshold boundaries', () => {
     }
   });
 
-  test('Base DCF output against MKT snapshot price yields undervalued (+68.08%)', async () => {
-    const basePerShare = 249.35851138243592;
-    const marketPrice = 148.36;
+  test('Base DCF output against MKT snapshot price yields undervalued (+19.93%)', async () => {
+    const basePerShare = 189.30871314314004;
+    const marketPrice = 157.85;
 
     const rec = evaluate(basePerShare, marketPrice);
     assert.equal(rec.label, 'undervalued');
     const expectedUpside = (basePerShare - marketPrice) / marketPrice;
-    pinned(rec.upsidePct, expectedUpside, 'Base upside percentage (~68.08%)');
-    assert.ok(rec.upsidePct > 0.68 && rec.upsidePct < 0.69);
+    pinned(rec.upsidePct, expectedUpside, 'Base upside percentage (~19.93%)');
+    assert.ok(rec.upsidePct > 0.19 && rec.upsidePct < 0.20);
 
     // Tie-out against fixture
     const expRec = deriveExpectedRecommendation(basePerShare, marketPrice);
@@ -292,18 +292,18 @@ describe('P4.3 — Full Valuation Pipeline & Scenario Ranges', () => {
     );
 
     // Assert Base per-share matches pinned value
-    pinned(baseVal.perShare, 249.35851138243592, 'Base per-share pin');
+    pinned(baseVal.perShare, 189.30871314314004, 'Base per-share pin');
     assert.equal(baseVal.recommendation.label, 'undervalued');
 
-    // Benchmark price invariance: marketPrice remains 148.36 across all scenarios
-    assert.equal(bearVal.marketPrice, 148.36);
-    assert.equal(baseVal.marketPrice, 148.36);
-    assert.equal(bullVal.marketPrice, 148.36);
+    // Benchmark price invariance: marketPrice remains 157.85 across all scenarios
+    assert.equal(bearVal.marketPrice, 157.85);
+    assert.equal(baseVal.marketPrice, 157.85);
+    assert.equal(bullVal.marketPrice, 157.85);
 
     // Scenario recommendations
-    assert.equal(bearVal.recommendation.label, 'fair', 'Bear upside is ~ -10.92% (within +/-15% fair band)');
-    assert.equal(baseVal.recommendation.label, 'undervalued', 'Base upside is ~ +68.08%');
-    assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +258.71%');
+    assert.equal(bearVal.recommendation.label, 'overvalued', 'Bear upside is ~ -35.12% (<= -15% overvalued band)');
+    assert.equal(baseVal.recommendation.label, 'undervalued', 'Base upside is ~ +19.93% (>= +15% undervalued band)');
+    assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +157.00% (>= +15% undervalued band)');
   });
 
   test('hybrid FY2026 valuation honesty under scenarios: cited H1 actuals invariant', async () => {
