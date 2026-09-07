@@ -1,8 +1,8 @@
 {
   "protocol": "1.0",
-  "seq": 23,
-  "state": "review_pending",
-  "phase": "P6R2",
-  "subphase": "P6R2.5",
-  "updated_at": "2026-09-04T04:05:00.000Z"
+  "seq": 0,
+  "state": "idle",
+  "phase": "P9",
+  "subphase": "P9.1",
+  "updated_at": "2026-09-07T19:42:41.284Z"
 }

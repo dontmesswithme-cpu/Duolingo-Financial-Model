@@ -1,5 +1,5 @@
 /**
- * P5.3 Artifact Contract Tests — Assumptions & Historicals Tab Views & App Mounting.
+ * P5.3 Artifact Contract Tests  -  Assumptions & Historicals Tab Views & App Mounting.
  *
  * Comprehensive verification against docs/phases/phase_5.md §3 Task P5.3 & DIR Validation Plan:
  *  1. Live Tabulator Grid Instantiation & Constructor Invocation on all 4 statements
@@ -68,7 +68,7 @@ function createHtmlContainer() {
   return container;
 }
 
-describe('P5.3 — Assumptions Tab: Driver Controls, Blue Styling & MKT Attribution', () => {
+describe('P5.3  -  Assumptions Tab: Driver Controls, Blue Styling & MKT Attribution', () => {
   test('renders all drivers with universal blue .cell-input class and bounded inputs', async () => {
     const assumptions = await getAssumptions();
     const container = createHtmlContainer();
@@ -130,7 +130,7 @@ describe('P5.3 — Assumptions Tab: Driver Controls, Blue Styling & MKT Attribut
   });
 });
 
-describe('P5.3 — Historicals Tab: Live Tabulator Grid Instantiation & Schema Contracts', () => {
+describe('P5.3  -  Historicals Tab: Live Tabulator Grid Instantiation & Schema Contracts', () => {
   test('invokes TabulatorConstructor exactly four times with full contract options and frozen columns', async () => {
     const historical = await getHistorical();
     const container = createHtmlContainer();
@@ -213,7 +213,7 @@ describe('P5.3 — Historicals Tab: Live Tabulator Grid Instantiation & Schema C
   });
 });
 
-describe('P5.3 — Live App Mounting & Integration', () => {
+describe('P5.3  -  Live App Mounting & Integration', () => {
   test('createApp mounts assumptions and historicals views into live DOM root', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -297,7 +297,7 @@ describe('P5.3 — Live App Mounting & Integration', () => {
   });
 });
 
-describe('P5.3 — Quality Gates: Zero style=, Purity & Corpus Invariance', () => {
+describe('P5.3  -  Quality Gates: Zero style=, Purity & Corpus Invariance', () => {
   test('zero style= inline attributes across all src/ui/ files', () => {
     const uiFiles = fs.readdirSync(UI_DIR).filter((f) => f.endsWith('.js'));
     for (const file of uiFiles) {

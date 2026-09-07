@@ -1,13 +1,13 @@
-// archive_phase.mjs — Archives inboxes and signal states for a completed phase,
+// archive_phase.mjs  -  Archives inboxes and signal states for a completed phase,
 // commits + tags in git, and optionally pings a Director webhook.
 //
 // Usage: node tools/archive_phase.mjs phase_0
 //
 // Environment Variables:
-//   WORKFLOW_AUTO_GIT          — Enable git commit + tag on Gate Pass (default: "true")
-//   WORKFLOW_GIT_TAG_PREFIX    — Git tag prefix (default: "v1.0", produces "v1.0-P0", "v1.0-P1", ...)
-//   WORKFLOW_WEBHOOK_URL       — Discord/Slack webhook URL for Gate Pass alerts (unset = disabled)
-//   WORKFLOW_PROJECT_NAME      — Project name for webhook messages (default: "Workflow")
+//   WORKFLOW_AUTO_GIT           -  Enable git commit + tag on Gate Pass (default: "true")
+//   WORKFLOW_GIT_TAG_PREFIX     -  Git tag prefix (default: "v1.0", produces "v1.0-P0", "v1.0-P1", ...)
+//   WORKFLOW_WEBHOOK_URL        -  Discord/Slack webhook URL for Gate Pass alerts (unset = disabled)
+//   WORKFLOW_PROJECT_NAME       -  Project name for webhook messages (default: "Workflow")
 
 import fs from 'fs';
 import path from 'path';
@@ -93,7 +93,7 @@ if (autoGit) {
   if (fs.existsSync(gitDir)) {
     try {
       execSync('git add .', { cwd: rootDir, stdio: 'pipe' });
-      execSync(`git commit -m "GATE PASS: ${phaseLabel} — Phase archived and verified"`, {
+      execSync(`git commit -m "GATE PASS: ${phaseLabel}  -  Phase archived and verified"`, {
         cwd: rootDir,
         stdio: 'pipe',
       });
@@ -123,7 +123,7 @@ const webhookUrl = process.env.WORKFLOW_WEBHOOK_URL;
 const projectName = process.env.WORKFLOW_PROJECT_NAME || 'Workflow';
 
 if (webhookUrl) {
-  const message = `✅ GATE PASS: ${phaseLabel} — ${projectName} phase archived${autoGit ? ` and tagged as \`${tagName}\`` : ''}.`;
+  const message = `✅ GATE PASS: ${phaseLabel}  -  ${projectName} phase archived${autoGit ? ` and tagged as \`${tagName}\`` : ''}.`;
 
   try {
     const payload = JSON.stringify({ content: message, text: message });

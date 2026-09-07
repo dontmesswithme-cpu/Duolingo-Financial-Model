@@ -1,12 +1,12 @@
 /**
- * Historical data loader — full pipeline (P0.2).
+ * Historical data loader  -  full pipeline (P0.2).
  *
  * `loadHistorical()` is the only door into the data layer, and it is locked:
  *
  *   discovery -> parse -> per-record `validateRecord` -> `auditDataset`
  *
  * Any violation at any stage throws a single `DataValidationError` naming every
- * offender. The app therefore cannot boot on uncited or malformed data — this is
+ * offender. The app therefore cannot boot on uncited or malformed data  -  this is
  * the mechanical form of the project's Accuracy Gate.
  *
  * The loader is runtime-agnostic: it never imports `node:fs` at module scope,
@@ -130,7 +130,7 @@ function formatViolations(violations) {
         parts.push(`${violation.metric ?? UNKNOWN} @ ${violation.period ?? UNKNOWN}`);
       }
       const subject = parts.length > 0 ? parts.join(' :: ') : UNKNOWN;
-      return `  - ${subject}: ${violation.rule} — ${violation.message}`;
+      return `  - ${subject}: ${violation.rule}  -  ${violation.message}`;
     })
     .join('\n');
 }

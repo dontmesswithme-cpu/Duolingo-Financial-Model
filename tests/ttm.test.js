@@ -1,5 +1,5 @@
 /**
- * P1.3 Artifact Contract tests — `src/engine/ttm.js`.
+ * P1.3 Artifact Contract tests  -  `src/engine/ttm.js`.
  *
  * Covers:
  * - YTD differencing for flow metrics against hand-computed fixture differences.
@@ -32,7 +32,7 @@ async function getHistorical() {
   });
 }
 
-describe('P1.3 — TTM engine: discrete-quarter derivation and differencing', () => {
+describe('P1.3  -  TTM engine: discrete-quarter derivation and differencing', () => {
   test('deriveDiscreteQuarters correctly differences YTD rows for operating cash flow', async () => {
     const historical = await getHistorical();
     const discrete = deriveDiscreteQuarters(historical.cashflow, 'cash_from_operating_activities');
@@ -77,7 +77,7 @@ describe('P1.3 — TTM engine: discrete-quarter derivation and differencing', ()
   });
 });
 
-describe('P1.3 — TTM engine: compute() over loaded historical corpus', () => {
+describe('P1.3  -  TTM engine: compute() over loaded historical corpus', () => {
   test('ttm.compute produces TTM flow records with isComputed: true and derivedFrom chain', async () => {
     const historical = await getHistorical();
     const result = compute(historical);
@@ -182,7 +182,7 @@ describe('P1.3 — TTM engine: compute() over loaded historical corpus', () => {
   });
 });
 
-describe('P1.3 — Engine purity gate: src/engine/ttm.js', () => {
+describe('P1.3  -  Engine purity gate: src/engine/ttm.js', () => {
   test('src/engine/ttm.js contains no forbidden side-effecting APIs (DOM, fetch, Date.now, Math.random)', async () => {
     const raw = await readText(new URL('../src/engine/ttm.js', import.meta.url));
     const code = raw.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');

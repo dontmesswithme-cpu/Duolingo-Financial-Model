@@ -1,5 +1,5 @@
 /**
- * P0.3 Artifact Contract tests — constants integrity (`src/data/constants.js`).
+ * P0.3 Artifact Contract tests  -  constants integrity (`src/data/constants.js`).
  *
  * Proves the single source of truth is complete, internally consistent, and
  * consistent with the modules that consume it: the units registry covers the
@@ -145,7 +145,7 @@ describe('Freeze integrity', () => {
 describe('Config-values grep gate', () => {
   test('no configuration values are defined outside constants.js under src/', () => {
     // Per the reviewer's binding ruling (inbox_ds.md, 2026-08-31): the gate is
-    // scoped to configuration values — thresholds, scale factors, limits, URL
+    // scoped to configuration values  -  thresholds, scale factors, limits, URL
     // fragments. Structural literals (indices, length checks, row numbering,
     // regex quantifiers) are exempt.
     const forbidden = [
@@ -171,7 +171,7 @@ describe('Config-values grep gate', () => {
     /**
      * Strips block (JSDoc) comments and whole-line `//` comments before
      * scanning. The gate targets *code*, and documentation prose legitimately
-     * names values like `bear` — a comment mention is not a hardcoded value.
+     * names values like `bear`  -  a comment mention is not a hardcoded value.
      * @param {string} source
      * @returns {string}
      */

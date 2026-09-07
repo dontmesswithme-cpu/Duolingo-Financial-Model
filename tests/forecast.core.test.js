@@ -1,12 +1,12 @@
 /**
- * P3.1 Artifact Contract tests — Driver-Based Forecast Core.
+ * P3.1 Artifact Contract tests  -  Driver-Based Forecast Core.
  *
  * Covers:
  *  - `forecast.project(input)` frozen signature, horizon clamp [3,10], typed errors.
  *  - Revenue cascade: paid subscribers → average subs → × ARPU → subscription
  *    revenue; advertising / DET / IAP / other as growth-driven segment paths.
  *  - Segment-sum totality pinned against an INDEPENDENT recomputation
- *    (`deriveExpectedForecast`) for FY2026 and FY2030 — anti-tautology.
+ *    (`deriveExpectedForecast`) for FY2026 and FY2030  -  anti-tautology.
  *  - Hybrid FY2026: H1 actual from the cited Q1/Q2 FY2026 rows (590,421),
  *    H2 = full-year estimate − H1, per-half provenance on every IS line.
  *  - Cascade anti-retyping: mutating a cited anchor or a driver changes output.
@@ -63,7 +63,7 @@ const FORECAST_DRIVERS = [
   'ga_pct_revenue',
 ];
 
-/** Record count of the P2 corpus — the engine-only phase must not change it. */
+/** Record count of the P2 corpus  -  the engine-only phase must not change it. */
 const P2_CORPUS_RECORD_COUNT = 706;
 
 async function getHistorical() {
@@ -99,7 +99,7 @@ function clone(value) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Fixture integrity: cited forecast anchors vs corpus', () => {
+describe('P3.1  -  Fixture integrity: cited forecast anchors vs corpus', () => {
   test('every FORECAST_KNOWN_FIGURES anchor matches the corpus exactly', async () => {
     const historical = await getHistorical();
     const rows = [
@@ -173,7 +173,7 @@ describe('P3.1 — Fixture integrity: cited forecast anchors vs corpus', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Driver defaults are re-derived from the corpus', () => {
+describe('P3.1  -  Driver defaults are re-derived from the corpus', () => {
   test('segment growth driver defaults equal the H1 like-for-like YoY observations', async () => {
     const assumptions = await getAssumptions();
     const pairs = [
@@ -296,7 +296,7 @@ describe('P3.1 — Driver defaults are re-derived from the corpus', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Interface, horizon clamp & fail-closed inputs', () => {
+describe('P3.1  -  Interface, horizon clamp & fail-closed inputs', () => {
   test('project() is exported with the frozen single-argument signature', () => {
     assert.equal(typeof project, 'function');
     assert.equal(project.length, 1);
@@ -406,7 +406,7 @@ describe('P3.1 — Interface, horizon clamp & fail-closed inputs', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Hybrid FY2026 per-half provenance', () => {
+describe('P3.1  -  Hybrid FY2026 per-half provenance', () => {
   test('H1 revenue equals the cited Q1+Q2 FY2026 quarters (590,421)', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -521,7 +521,7 @@ describe('P3.1 — Hybrid FY2026 per-half provenance', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Segment-sum totality & pinned values (anti-tautology)', () => {
+describe('P3.1  -  Segment-sum totality & pinned values (anti-tautology)', () => {
   test('revenue_total === Σ segments in every forecast year', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -647,7 +647,7 @@ describe('P3.1 — Segment-sum totality & pinned values (anti-tautology)', () =>
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Cascade anti-retyping (mutation tests)', () => {
+describe('P3.1  -  Cascade anti-retyping (mutation tests)', () => {
   test('mutating the paid-subscriber mid-year anchor changes subscription revenue', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -769,7 +769,7 @@ describe('P3.1 — Cascade anti-retyping (mutation tests)', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-describe('P3.1 — Purity, determinism, immutability & literal gate', () => {
+describe('P3.1  -  Purity, determinism, immutability & literal gate', () => {
   test('src/engine/forecast.js contains zero forbidden side-effecting APIs', () => {
     const code = fs.readFileSync(ENGINE_PATH, 'utf8');
     assert.doesNotMatch(code, /\bwindow\b/);

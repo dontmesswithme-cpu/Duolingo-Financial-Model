@@ -1,5 +1,5 @@
 /**
- * P2.2 Artifact Contract tests — PP&E Roll-Forward + Intangible Amortization Schedule.
+ * P2.2 Artifact Contract tests  -  PP&E Roll-Forward + Intangible Amortization Schedule.
  *
  * Covers:
  *  - Schedules scaffold: schedules.build(historical, assumptions) populated with
@@ -64,7 +64,7 @@ async function getAssumptions() {
   });
 }
 
-describe('P2 — Schedules Engine: schedules.build()', () => {
+describe('P2  -  Schedules Engine: schedules.build()', () => {
   test('schedules.build returns complete ScheduleSet with all five families populated', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -80,7 +80,7 @@ describe('P2 — Schedules Engine: schedules.build()', () => {
   });
 });
 
-describe('P2.2 — PP&E Roll-Forward Schedule: buildPpeRollForward()', () => {
+describe('P2.2  -  PP&E Roll-Forward Schedule: buildPpeRollForward()', () => {
   test('covers all 6 balance sheet dates in chronological order', async () => {
     const historical = await getHistorical();
     const ppe = buildPpeRollForward(historical);
@@ -193,7 +193,7 @@ describe('P2.2 — PP&E Roll-Forward Schedule: buildPpeRollForward()', () => {
     }
   });
 
-  test('roll-forward closes for FY2022–Q2 FY2026 with verified plugs', async () => {
+  test('roll-forward closes for FY2022-Q2 FY2026 with verified plugs', async () => {
     const historical = await getHistorical();
     const ppe = buildPpeRollForward(historical);
 
@@ -282,7 +282,7 @@ describe('P2.2 — PP&E Roll-Forward Schedule: buildPpeRollForward()', () => {
   });
 });
 
-describe('P2.2 — Intangibles & Amortization Schedule: buildIntangibleAmortization()', () => {
+describe('P2.2  -  Intangibles & Amortization Schedule: buildIntangibleAmortization()', () => {
   test('covers all 6 balance sheet dates in chronological order', async () => {
     const historical = await getHistorical();
     const intSchedule = buildIntangibleAmortization(historical);
@@ -480,7 +480,7 @@ describe('P2.2 — Intangibles & Amortization Schedule: buildIntangibleAmortizat
   });
 });
 
-describe('P2.2 — PP&E & Intangibles Projections: pure projection functions', () => {
+describe('P2.2  -  PP&E & Intangibles Projections: pure projection functions', () => {
   test('projectPpeRollForward applies drivers deterministically over forecast revenues', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -580,7 +580,7 @@ describe('P2.2 — PP&E & Intangibles Projections: pure projection functions', (
   });
 });
 
-describe('P2.2 — Engine purity & anti-literal regression gate: src/engine/schedules.js', () => {
+describe('P2.2  -  Engine purity & anti-literal regression gate: src/engine/schedules.js', () => {
   test('src/engine/schedules.js contains zero forbidden side-effecting APIs', () => {
     const code = fs.readFileSync(fileURLToPath(new URL('../src/engine/schedules.js', import.meta.url)), 'utf8');
 

@@ -1,12 +1,12 @@
 /**
- * P3.3 Artifact Contract Tests — Scenario System, Full-Path Integration & Balance-Gate Matrix.
+ * P3.3 Artifact Contract Tests  -  Scenario System, Full-Path Integration & Balance-Gate Matrix.
  *
  * Covers:
  *  - `scenarios.apply(base, scenario)` immutable delta application, schema validation, and clamping.
  *  - `scenarios.list()` scenario metadata descriptor.
  *  - `runFullProjection(historical, assumptions, scenario)` end-to-end integration.
  *  - **Balance-Gate Matrix (15/15 checks)**: Assets === Liabilities + Equity across
- *    all 3 scenarios (Bear, Base, Bull) × all 5 forecast years (FY2026–FY2030)
+ *    all 3 scenarios (Bear, Base, Bull) × all 5 forecast years (FY2026-FY2030)
  *    asserted on raw constructed components with 0 balancing plug lines.
  *  - **Scenario Distinctness**: Bear < Base < Bull progression across Revenue, Net Income, and FCF.
  *  - **Hybrid FY2026 Honesty under Scenarios**: H1 actuals invariant under scenario shifts;
@@ -47,7 +47,7 @@ async function getAssumptions() {
   return loadAssumptions({ location: ASSUMPTIONS_PATH, readText });
 }
 
-describe('P3.3 Scenario System — Interface & Metadata', () => {
+describe('P3.3 Scenario System  -  Interface & Metadata', () => {
   test('scenarios.list returns frozen metadata for bear, base, bull', () => {
     const metas = list();
     assert.ok(Array.isArray(metas), 'list() must return an array');
@@ -237,7 +237,7 @@ describe('P3.3 Scenario Distinctness & Trajectory Progression', () => {
     const base = runFullProjection(historical, baseAssumptions, 'base');
     const bull = runFullProjection(historical, baseAssumptions, 'bull');
 
-    // Test across forecast horizon periods FY2027–FY2030
+    // Test across forecast horizon periods FY2027-FY2030
     for (const period of ['FY2027', 'FY2028', 'FY2029', 'FY2030']) {
       const bearRev = bear.forecast.byPeriod[period].revenue.total.value;
       const baseRev = base.forecast.byPeriod[period].revenue.total.value;

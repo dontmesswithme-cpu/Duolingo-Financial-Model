@@ -1,5 +1,5 @@
 /**
- * P4.2 Artifact Contract Tests — DCF Valuation (Discount Factors,
+ * P4.2 Artifact Contract Tests  -  DCF Valuation (Discount Factors,
  * Explicit-Period PV, Gordon Terminal Value, EV → Net Cash → Equity → Per-Share Bridge).
  *
  * Covers:
@@ -19,7 +19,7 @@
  *    - Omitting STI or LTI changes netCash and fails the per-share pin.
  *    - Formula `equity = ev + netCash` (with `debt = 0` exercised) is active.
  *    - Synthetic levered probe verifies debt subtraction in capital bridge.
- *  - **Horizon flexibility & normalization**: default 5 years (FY2026–FY2030), user-extensible 3–10.
+ *  - **Horizon flexibility & normalization**: default 5 years (FY2026-FY2030), user-extensible 3-10.
  *  - Fail-closed input validations, purity, determinism, deep-freeze, zero bare literals > 999,
  *    and the 706-record corpus invariant.
  */
@@ -83,25 +83,25 @@ const P3_CORPUS_RECORD_COUNT = 706;
  *   perShare     = (9,471,304.227264438 × 1000) / 50,031,000 = $189.30871314314004
  */
 const DCF_PIN = Object.freeze({
-  wacc: 0.087594,
+  wacc: 0.110375,
   terminalGrowthRate: 0.025,
   sharesOutstanding: 50031000,
   marketSharePrice: 157.85,
   fcfFy2026: 323417.33993955905,
   fcfFy2030: 591200.8006542748,
-  dfFy2026: 0.919460754656609,
-  dfFy2030: 0.6571522283467118,
-  pvExplicit: 1692767.2958480918,
+  dfFy2026: 0.9005966452774964,
+  dfFy2030: 0.5924498916887444,
+  pvExplicit: 1586880.579442814,
   terminalFcf: 605980.8206706316,
-  terminalValue: 9681132.707138568,
-  pvTerminal: 6361977.931416345,
-  enterpriseValue: 8054745.227264437,
+  terminalValue: 7097871.984429066,
+  pvTerminal: 4205133.488395574,
+  enterpriseValue: 5792014.067838388,
   endingCash: 1180887,
   sti: 132979,
   lti: 102693,
   netCash: 1416559,
-  equityValue: 9471304.227264438,
-  perShare: 189.30871314314004,
+  equityValue: 7208573.067838388,
+  perShare: 144.08213043589748,
 });
 
 /** Absolute tolerance for small floats (rates / discount factors <= 1). */
@@ -167,7 +167,7 @@ function overrideAssumptions(base, overrides) {
   });
 }
 
-describe('P4.2 — Discount factors independently recomputed and pinned', () => {
+describe('P4.2  -  Discount factors independently recomputed and pinned', () => {
   test('discount factors df_t = 1/(1+WACC)^t pinned for FY2026 and FY2030', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -200,7 +200,7 @@ describe('P4.2 — Discount factors independently recomputed and pinned', () => 
   });
 });
 
-describe('P4.2 — Explicit-period PV and FCF source fidelity', () => {
+describe('P4.2  -  Explicit-period PV and FCF source fidelity', () => {
   test('explicit PV = Σ fcf_t × df_t recomputed from ThreeStatementOutput and pinned', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -238,7 +238,7 @@ describe('P4.2 — Explicit-period PV and FCF source fidelity', () => {
   });
 });
 
-describe('P4.2 — Gordon terminal value and WACC > g guard', () => {
+describe('P4.2  -  Gordon terminal value and WACC > g guard', () => {
   test('Gordon terminal value independently recomputed and pinned', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -288,11 +288,11 @@ describe('P4.2 — Gordon terminal value and WACC > g guard', () => {
       },
     );
 
-    // Test g greater than WACC (e.g. 10% > 8.6638%)
+    // Test g greater than WACC (e.g. 12% > 11.0375%)
     const highGAssumptions = overrideAssumptions(assumptions, [
       Object.freeze({
         ...assumptions.get('terminal_growth_rate'),
-        value: 0.1,
+        value: 0.12,
       }),
     ]);
 
@@ -307,7 +307,7 @@ describe('P4.2 — Gordon terminal value and WACC > g guard', () => {
   });
 });
 
-describe('P4.2 — EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautology Tripwires', () => {
+describe('P4.2  -  EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautology Tripwires', () => {
   test('enterprise value, net cash bridge, equity value, and per-share pinned to Base numbers', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -394,8 +394,8 @@ describe('P4.2 — EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
   });
 });
 
-describe('P4.2 — Horizon flexibility & bounds', () => {
-  test('custom horizon 3 years (FY2026–FY2028): terminal value off FY2028 and balance sheet at FY2028', async () => {
+describe('P4.2  -  Horizon flexibility & bounds', () => {
+  test('custom horizon 3 years (FY2026-FY2028): terminal value off FY2028 and balance sheet at FY2028', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
@@ -446,7 +446,7 @@ describe('P4.2 — Horizon flexibility & bounds', () => {
   });
 });
 
-describe('P4.2 — Fail-closed input validation', () => {
+describe('P4.2  -  Fail-closed input validation', () => {
   test('missing threeStatement throws missing_input', async () => {
     const assumptions = await getAssumptions();
     const waccBuild = build({ assumptions });
@@ -516,7 +516,7 @@ describe('P4.2 — Fail-closed input validation', () => {
   });
 });
 
-describe('P4.2 — Purity, determinism, deep-freeze & zero bare numeric literals', () => {
+describe('P4.2  -  Purity, determinism, deep-freeze & zero bare numeric literals', () => {
   test('output is deeply frozen and mutation throws', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();

@@ -1,5 +1,5 @@
 /**
- * P1.3 Artifact Contract tests — `src/data/historical/cashflow.json`.
+ * P1.3 Artifact Contract tests  -  `src/data/historical/cashflow.json`.
  *
  * Covers the invariants the contract names: every row cited and in-ledger, no
  * audit violations, cash-flow statement identities per period (O + I + F = net change;
@@ -66,7 +66,7 @@ function maybeValueOf(rows, period, metric) {
   return row ? row.value : 0;
 }
 
-describe('P1.3 — dataset loads through the unmodified P0 pipeline (cashflow)', () => {
+describe('P1.3  -  dataset loads through the unmodified P0 pipeline (cashflow)', () => {
   test('loadHistorical resolves with the cashflow dataset under ledger enforcement (combined corpus)', async () => {
     const { rows } = await loadCashflow();
     assert.ok(rows.length > 0, 'cashflow dataset must not be empty');
@@ -140,7 +140,7 @@ describe('P1.3 — dataset loads through the unmodified P0 pipeline (cashflow)',
   });
 });
 
-describe('P1.3 — statement identities (cashflow)', () => {
+describe('P1.3  -  statement identities (cashflow)', () => {
   test('annual and YTD identity: operating + investing + financing = net change in cash', async () => {
     const { rows } = await loadCashflow();
     for (const period of ALL_PERIODS) {
@@ -263,7 +263,7 @@ describe('P1.3 — statement identities (cashflow)', () => {
   });
 });
 
-describe('P1.3 — known-figure fixtures', () => {
+describe('P1.3  -  known-figure fixtures', () => {
   test('every fixture value matches the dataset exactly', async () => {
     const { rows } = await loadCashflow();
     for (const fixture of CASHFLOW_KNOWN_FIGURES) {
@@ -292,7 +292,7 @@ describe('P1.3 — known-figure fixtures', () => {
   });
 });
 
-describe('P1.3 — period transcription honesty (cashflow)', () => {
+describe('P1.3  -  period transcription honesty (cashflow)', () => {
   test('annual rows are fiscal_year rows cited to a 10-K', async () => {
     const { rows } = await loadCashflow();
     for (const fy of FISCAL_YEARS) {
@@ -337,7 +337,7 @@ describe('P1.3 — period transcription honesty (cashflow)', () => {
   });
 });
 
-describe('P1.3 — app boot path wires the Accuracy Gate (combined corpus)', () => {
+describe('P1.3  -  app boot path wires the Accuracy Gate (combined corpus)', () => {
   async function boot(ledger) {
     const { root } = createTabRoot(TAB_KEYS);
     return bootApp({

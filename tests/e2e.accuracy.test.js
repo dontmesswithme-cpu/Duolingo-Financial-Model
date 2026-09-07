@@ -1,5 +1,5 @@
 /**
- * P6.1 Artifact Contract Tests — End-to-End Accuracy, Corpus Tie-Out & Valuation Encasement.
+ * P6.1 Artifact Contract Tests  -  End-to-End Accuracy, Corpus Tie-Out & Valuation Encasement.
  *
  * Comprehensive verification against docs/phases/phase_6.md §3 Task P6.1:
  *  1. Sampled Corpus Tie-Outs per Statement Class (Annual, Quarterly, YTD)
@@ -83,8 +83,8 @@ async function getFullModel() {
   };
 }
 
-describe('P6.1 — Sampled Corpus Tie-Outs per Statement Class', () => {
-  test('Income Statement: annual FY2021–FY2025, quarterly, and YTD classes tie out to filed records', async () => {
+describe('P6.1  -  Sampled Corpus Tie-Outs per Statement Class', () => {
+  test('Income Statement: annual FY2021-FY2025, quarterly, and YTD classes tie out to filed records', async () => {
     const { historical } = await getFullModel();
     const incomeRows = extractRows(historical.income);
 
@@ -185,7 +185,7 @@ describe('P6.1 — Sampled Corpus Tie-Outs per Statement Class', () => {
   });
 });
 
-describe('P6.1 — TTM Recomputation Anchors', () => {
+describe('P6.1  -  TTM Recomputation Anchors', () => {
   test('computeTtm produces mathematically exact TTM figures across 10-K and 10-Q intervals', async () => {
     const { historical } = await getFullModel();
     const ttmResult = computeTtm(historical);
@@ -207,7 +207,7 @@ describe('P6.1 — TTM Recomputation Anchors', () => {
   });
 });
 
-describe('P6.1 — Hybrid FY2026 Invariants', () => {
+describe('P6.1  -  Hybrid FY2026 Invariants', () => {
   test('Hybrid FY2026 combines filed H1 actuals with projected H2 seamlessly', async () => {
     const { forecast, threeStatement } = await getFullModel();
     const fc2026 = forecast.byPeriod.FY2026;
@@ -229,20 +229,20 @@ describe('P6.1 — Hybrid FY2026 Invariants', () => {
   });
 });
 
-describe('P6.1 — Full Authoritative Valuation Pin Set', () => {
+describe('P6.1  -  Full Authoritative Valuation Pin Set', () => {
   test('WACC / CAPM Build matches authoritative pin table', async () => {
     const { wacc, assumptions } = await getFullModel();
 
     assert.equal(assumptions.get('risk_free_rate').value, 0.0479, 'Risk-free rate = 4.79%');
-    assert.equal(assumptions.get('beta').value, 0.89, 'Beta = 0.89');
-    assert.equal(assumptions.get('equity_risk_premium').value, 0.0446, 'ERP = 4.46%');
+    assert.equal(assumptions.get('beta').value, 1.47, 'Beta = 1.47');
+    assert.equal(assumptions.get('equity_risk_premium').value, 0.0425, 'ERP = 4.25%');
     assert.equal(assumptions.get('effective_tax_rate').value, 0.134225, 'Tax rate = 13.4225%');
     assert.equal(assumptions.get('shares_outstanding').value, 50031000, 'Diluted shares = 50,031,000');
     assert.equal(assumptions.get('market_share_price').value, 157.85, 'Market share price = $157.85');
 
     // Cost of Equity & WACC
-    assert.equal(Math.round(wacc.costOfEquity.value * 1000000) / 1000000, 0.087594, 'Cost of Equity Re = 0.087594');
-    assert.equal(Math.round(wacc.wacc.value * 1000000) / 1000000, 0.087594, 'Debt-free WACC = 0.087594');
+    assert.equal(Math.round(wacc.costOfEquity.value * 1000000) / 1000000, 0.110375, 'Cost of Equity Re = 0.110375');
+    assert.equal(Math.round(wacc.wacc.value * 1000000) / 1000000, 0.110375, 'Debt-free WACC = 0.110375');
     assert.equal(wacc.debtFree, true, 'debtFree is true');
     assert.equal(wacc.costOfDebt.value, null, 'costOfDebt.value is null for debt-free structure');
     assert.equal(wacc.debtWeight.value, 0, 'debtWeight is 0');
@@ -253,45 +253,45 @@ describe('P6.1 — Full Authoritative Valuation Pin Set', () => {
     const { dcf, recommendation } = await getFullModel();
 
     // Discount Factors
-    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.919460754656609) < 1e-6, 'df FY2026 matches pin');
-    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.6571522283467118) < 1e-6, 'df FY2030 matches pin');
+    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.9005966497061873) < 1e-6, 'df FY2026 matches pin');
+    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.5924495535359744) < 1e-6, 'df FY2030 matches pin');
 
     // Present Value of Explicit Period FCFs
-    assert.ok(Math.abs(dcf.pvExplicit - 1692767.30) < 1.0, 'pvExplicit matches pin 1,692,767.30');
+    assert.ok(Math.abs(dcf.pvExplicit - 1586880.58) < 1.0, 'pvExplicit matches pin 1,586,880.58');
 
     // Terminal Year FCF & Gordon TV
     const terminalFcf = dcf.schedule[4].fcf * (1 + dcf.terminalGrowthRate);
     assert.ok(Math.abs(terminalFcf - 605980.82) < 1.0, 'terminal FCF matches pin 605,980.82');
-    assert.ok(Math.abs(dcf.terminalValue - 9681132.71) < 10.0, 'Gordon TV matches pin 9,681,132.71');
-    assert.ok(Math.abs(dcf.pvTerminal - 6361977.93) < 10.0, 'pvTerminal matches pin 6,361,977.93');
+    assert.ok(Math.abs(dcf.terminalValue - 7097871.98) < 10.0, 'Gordon TV matches pin 7,097,871.98');
+    assert.ok(Math.abs(dcf.pvTerminal - 4205133.49) < 10.0, 'pvTerminal matches pin 4,205,133.49');
 
     // EV, Net Cash, Equity Value, Per Share Value
-    assert.ok(Math.abs(dcf.enterpriseValue - 8054745.23) < 10.0, 'EV matches pin 8,054,745.23');
+    assert.ok(Math.abs(dcf.enterpriseValue - 5792014.07) < 10.0, 'EV matches pin 5,792,014.07');
     assert.ok(Math.abs(dcf.netCash - 1416559.00) < 1.0, 'Net Cash matches pin 1,416,559.00');
-    assert.ok(Math.abs(dcf.equityValue - 9471304.23) < 10.0, 'Equity Value matches pin 9,471,304.23');
+    assert.ok(Math.abs(dcf.equityValue - 7208573.07) < 10.0, 'Equity Value matches pin 7,208,573.07');
 
     // Per Share Value & Recommendation
-    assert.ok(Math.abs(dcf.perShare - 189.30871314314004) < 1e-4, 'perShare matches exact pin 189.30871314314004');
-    assert.equal(recommendation.label, 'undervalued', 'Recommendation label is undervalued');
-    assert.ok(Math.abs(recommendation.upsidePct - 0.1993) < 1e-3, 'Upside % matches +19.93%');
+    assert.ok(Math.abs(dcf.perShare - 144.082130498451) < 1e-4, 'perShare matches exact pin 144.082130498451');
+    assert.equal(recommendation.label, 'fair', 'Recommendation label is fair');
+    assert.ok(Math.abs(recommendation.upsidePct - (-0.087221)) < 1e-3, 'Upside % matches -8.72%');
   });
 
-  test('Scenario Range satisfies strict ordering: Bear ($102.41) < Base ($189.31) < Bull ($405.68)', async () => {
+  test('Scenario Range satisfies strict ordering: Bear ($84.39) < Base ($144.08) < Bull ($277.84)', async () => {
     const { scenarios } = await getFullModel();
 
     const bearPrice = scenarios.bear.dcf.perShare;
     const basePrice = scenarios.base.dcf.perShare;
     const bullPrice = scenarios.bull.dcf.perShare;
 
-    assert.ok(Math.abs(bearPrice - 102.41) < 0.5, `Bear price ${bearPrice} matches ~102.41`);
-    assert.ok(Math.abs(basePrice - 189.31) < 0.5, `Base price ${basePrice} matches ~189.31`);
-    assert.ok(Math.abs(bullPrice - 405.68) < 0.5, `Bull price ${bullPrice} matches ~405.68`);
+    assert.ok(Math.abs(bearPrice - 84.39) < 0.5, `Bear price ${bearPrice} matches ~84.39`);
+    assert.ok(Math.abs(basePrice - 144.08) < 0.5, `Base price ${basePrice} matches ~144.08`);
+    assert.ok(Math.abs(bullPrice - 277.84) < 0.5, `Bull price ${bullPrice} matches ~277.84`);
 
     assert.ok(bearPrice < basePrice, 'Bear price < Base price');
     assert.ok(basePrice < bullPrice, 'Base price < Bull price');
 
     assert.equal(scenarios.bear.recommendation.label, 'overvalued', 'Bear scenario recommendation is overvalued');
-    assert.equal(scenarios.base.recommendation.label, 'undervalued', 'Base scenario recommendation is undervalued');
+    assert.equal(scenarios.base.recommendation.label, 'fair', 'Base scenario recommendation is fair');
     assert.equal(scenarios.bull.recommendation.label, 'undervalued', 'Bull scenario recommendation is undervalued');
   });
 
@@ -339,7 +339,7 @@ describe('P6.1 — Full Authoritative Valuation Pin Set', () => {
   });
 });
 
-describe('P6.1 — Rule of 40 & Golden Metrics', () => {
+describe('P6.1  -  Rule of 40 & Golden Metrics', () => {
   test('Rule of 40 equals 47.4% (31.4% FY2030 FCF margin + 16.1% 5Y CAGR)', async () => {
     const { forecast, threeStatement } = await getFullModel();
 
@@ -362,7 +362,7 @@ describe('P6.1 — Rule of 40 & Golden Metrics', () => {
   });
 });
 
-describe('P6.1 — Rendered View Tie-Out & Quality Gates', () => {
+describe('P6.1  -  Rendered View Tie-Out & Quality Gates', () => {
   test('createApp initializes cleanly and executes reactive recalc pipeline', async () => {
     const { historical, assumptions } = await getFullModel();
     const { root } = createTabRoot(TAB_KEYS);

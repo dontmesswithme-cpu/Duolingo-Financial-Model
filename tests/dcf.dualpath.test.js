@@ -42,7 +42,7 @@ function getValuation(scenName = 'base') {
   return { sched, fc, ts, wacc, dcf, assump: activeAssump };
 }
 
-describe('P6R2.4 — Three-Statement FCFF Companion Line', () => {
+describe('P6R2.4  -  Three-Statement FCFF Companion Line', () => {
   const { ts, assump } = getValuation('base');
   const taxRate = assump.get('effective_tax_rate').value;
 
@@ -82,7 +82,7 @@ describe('P6R2.4 — Three-Statement FCFF Companion Line', () => {
   });
 });
 
-describe('P6R2.4 — Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
+describe('P6R2.4  -  Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
   const { dcf } = getValuation('base');
 
   test('dcf output exposes fcff, fcfe, equivalence, and legacy blocks', () => {
@@ -112,9 +112,9 @@ describe('P6R2.4 — Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
       dcf.fcff.perShare < dcf.legacy.perShare,
       `FCFF per share (${dcf.fcff.perShare}) must be less than legacy (${dcf.legacy.perShare})`,
     );
-    // Base: $189.31 < $246.30
-    assert.ok(Math.abs(dcf.fcff.perShare - 189.308713) < 0.01, `Base FCFF perShare ~189.31 (got ${dcf.fcff.perShare})`);
-    assert.ok(Math.abs(dcf.legacy.perShare - 246.301148) < 0.01, `Base legacy perShare ~246.30 (got ${dcf.legacy.perShare})`);
+    // Base: $144.08 < $193.82
+    assert.ok(Math.abs(dcf.fcff.perShare - 144.082130) < 0.01, `Base FCFF perShare ~144.08 (got ${dcf.fcff.perShare})`);
+    assert.ok(Math.abs(dcf.legacy.perShare - 193.823467) < 0.01, `Base legacy perShare ~193.82 (got ${dcf.legacy.perShare})`);
   });
 
   test('equivalence block confirms debt-free theorem and quantifies divergence', () => {
@@ -136,13 +136,13 @@ describe('P6R2.4 — Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
       bear.perShare < base.perShare && base.perShare < bull.perShare,
       `Strict ordering Bear (${bear.perShare}) < Base (${base.perShare}) < Bull (${bull.perShare})`,
     );
-    assert.ok(Math.abs(bear.perShare - 102.413261) < 0.01, `Bear perShare ~102.41 (got ${bear.perShare})`);
-    assert.ok(Math.abs(base.perShare - 189.308713) < 0.01, `Base perShare ~189.31 (got ${base.perShare})`);
-    assert.ok(Math.abs(bull.perShare - 405.679793) < 0.01, `Bull perShare ~405.68 (got ${bull.perShare})`);
+    assert.ok(Math.abs(bear.perShare - 84.389050) < 0.01, `Bear perShare ~84.39 (got ${bear.perShare})`);
+    assert.ok(Math.abs(base.perShare - 144.082130) < 0.01, `Base perShare ~144.08 (got ${base.perShare})`);
+    assert.ok(Math.abs(bull.perShare - 277.837024) < 0.01, `Bull perShare ~277.84 (got ${bull.perShare})`);
   });
 });
 
-describe('P6R2.4 — Finding E Presentation Restructure & DOM Reconstruction', () => {
+describe('P6R2.4  -  Finding E Presentation Restructure & DOM Reconstruction', () => {
   test('buildDcfColumns renders Terminal Year (Gordon) header', () => {
     const cols = buildDcfColumns(['FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030']);
     const termCol = cols.find((c) => c.field === 'Terminal');

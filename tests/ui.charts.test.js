@@ -1,5 +1,5 @@
 /**
- * P5.6 Artifact Contract Tests — Custom SVG Charts (Visual Audit).
+ * P5.6 Artifact Contract Tests  -  Custom SVG Charts (Visual Audit).
  *
  * Covers:
  *  - createRevenueFcfChart: actual solid vs forecast dashed paths, transition boundary, data dots
@@ -78,7 +78,7 @@ async function getDatasets() {
   };
 }
 
-describe('P5.6 — Revenue & FCF Line Chart: createRevenueFcfChart', () => {
+describe('P5.6  -  Revenue & FCF Line Chart: createRevenueFcfChart', () => {
   test('generates valid SVG with solid historical and dashed forecast segments', async () => {
     const { historical, forecast, threeStatement } = await getDatasets();
 
@@ -137,7 +137,7 @@ describe('P5.6 — Revenue & FCF Line Chart: createRevenueFcfChart', () => {
   });
 });
 
-describe('P5.6 — Margin Progression Chart: createMarginChart', () => {
+describe('P5.6  -  Margin Progression Chart: createMarginChart', () => {
   test('generates valid SVG with Gross Margin & Operating Margin progression', async () => {
     const { historical, forecast, threeStatement } = await getDatasets();
 
@@ -172,7 +172,7 @@ describe('P5.6 — Margin Progression Chart: createMarginChart', () => {
   });
 });
 
-describe('P5.6 — Enterprise Value Bridge Waterfall: createWaterfall', () => {
+describe('P5.6  -  Enterprise Value Bridge Waterfall: createWaterfall', () => {
   test('generates valid SVG waterfall with all 5 bridge bars and target price', async () => {
     const { dcf } = await getDatasets();
 
@@ -189,34 +189,34 @@ describe('P5.6 — Enterprise Value Bridge Waterfall: createWaterfall', () => {
     assert.match(svg, /viewBox="0 0 800 380"/);
     assert.match(svg, /class="[^"]*svg-waterfall"/);
 
-    // Step 1: Explicit PV ($1,692,767)
+    // Step 1: Explicit PV ($1,586,881)
     assert.match(svg, /PV of Explicit FCFs/);
-    assert.match(svg, /\$1,692,767/);
+    assert.match(svg, /\$1,586,881/);
 
-    // Step 2: Terminal PV ($6,361,978)
+    // Step 2: Terminal PV ($4,205,133)
     assert.match(svg, /PV of Terminal Value/);
-    assert.match(svg, /\$6,361,978/);
+    assert.match(svg, /\$4,205,133/);
 
-    // Step 3: Enterprise Value ($8,054,745)
+    // Step 3: Enterprise Value ($5,792,014)
     assert.match(svg, /Implied Enterprise Value/);
-    assert.match(svg, /\$8,054,745/);
+    assert.match(svg, /\$5,792,014/);
 
     // Step 4: Net Cash ($1,416,559)
     assert.match(svg, /\(\+\) Net Cash Bridge/);
     assert.match(svg, /\$1,416,559/);
 
-    // Step 5: Equity Value ($9,471,304)
+    // Step 5: Equity Value ($7,208,573)
     assert.match(svg, /Implied Equity Value/);
-    assert.match(svg, /\$9,471,304/);
+    assert.match(svg, /\$7,208,573/);
 
-    // Target price pill ($189.31)
-    assert.match(svg, /\$189\.31 \/ share/);
+    // Target price pill ($144.08)
+    assert.match(svg, /\$144\.08 \/ share/);
 
     chart.dispose();
   });
 });
 
-describe('P5.6 — Quality Gates: Purity, Zero Bare Literals, No Chart Libraries', () => {
+describe('P5.6  -  Quality Gates: Purity, Zero Bare Literals, No Chart Libraries', () => {
   test('purity: zero Date.now, Math.random, fetch, or document in src/ui/charts.js', () => {
     const src = fs.readFileSync(path.resolve('./src/ui/charts.js'), 'utf8');
     assert.doesNotMatch(src, /Date\.now/);
@@ -261,7 +261,7 @@ describe('P5.6 — Quality Gates: Purity, Zero Bare Literals, No Chart Libraries
   });
 });
 
-describe('P5.6 — Live Tab Mount Integration: Charts reachable in Product UI', () => {
+describe('P5.6  -  Live Tab Mount Integration: Charts reachable in Product UI', () => {
   test('renderProjections mounts both Revenue/FCF line chart and Margin progression chart', async () => {
     const { historical, threeStatement } = await getDatasets();
     const { renderProjections } = await import('../src/ui/projectionsTab.js');
@@ -297,7 +297,7 @@ describe('P5.6 — Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$189\.31/);
+    assert.match(container.innerHTML, /\$144\.08/);
 
     view.dispose();
   });
@@ -320,7 +320,7 @@ describe('P5.6 — Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$189\.31/);
+    assert.match(container.innerHTML, /\$144\.08/);
 
     view.dispose();
   });

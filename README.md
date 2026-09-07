@@ -50,15 +50,15 @@ The model incorporates a multi-case delta engine that dynamically recalibrates a
 
 ## 2. Key Product Highlights & Architecture
 
-### The Accuracy Gate — 100% SEC-Cited Integrity
+### The Accuracy Gate  -  100% SEC-Cited Integrity
 
 Unlike conventional financial models with opaque spreadsheets and untraceable figures, this model enforces an **Accuracy Gate** at both build and runtime:
 - **706 Historical Records**: Every historical data point in Income, Balance Sheet, Cash Flow, and KPIs is sourced from official SEC EDGAR 10-K and 10-Q filings with verified primary-filer URLs.
 - **Strict Labeling Taxonomy**:
-  - `ACT` — Audited filed actuals with SEC filing citations.
-  - `EST` — Forward projections and subjective assumptions with explicit ranges and notes.
-  - `MKT` — Market benchmarks with as-of timestamps and source providers.
-  - `computed` — Dynamically derived metrics (e.g., TTM trailing computations).
+  - `ACT`  -  Audited filed actuals with SEC filing citations.
+  - `EST`  -  Forward projections and subjective assumptions with explicit ranges and notes.
+  - `MKT`  -  Market benchmarks with as-of timestamps and source providers.
+  - `computed`  -  Dynamically derived metrics (e.g., TTM trailing computations).
 - **Hybrid FY2026 Accounting**: Combines filed H1 actuals ($590,421k revenue, $78,472k operating income, $76,618k net income, $239,031k operating cash flow) with driver-based H2 projections to produce a full FY2026 forecast of $1,193,853.52k.
 - **Fail-Closed Engine**: Missing drivers, invalid parameters, or mathematical inconsistencies throw typed errors rather than silently fabricating defaults.
 
@@ -114,7 +114,7 @@ flowchart TD
 
 1. **Cover & Table of Contents**: Project overview, methodology disclosures, authoritative valuation pins, and navigational index.
 2. **Assumptions & Drivers**: Real-time driver adjustment with slider bounds, honest corpus notes, and instantaneous Bear/Base/Bull scenario switching.
-3. **Historical Financials**: 101 metric rows spanning FY2021–FY2025 and discrete quarters, equipped with an interactive **Citations Drawer** showing filed SEC URLs.
+3. **Historical Financials**: 101 metric rows spanning FY2021-FY2025 and discrete quarters, equipped with an interactive **Citations Drawer** showing filed SEC URLs.
 4. **Supporting Schedules**: Complete 5-family schedule roll-forwards (Working Capital, PP&E, Intangibles & Amortization, Debt-Free Capital Structure, and Stock-Based Compensation).
 5. **Financial Projections**: Fully linked 5-year IS $\rightarrow$ BS $\rightarrow$ CF statements with verified balance gate ($\text{Assets} \equiv \text{Liabilities} + \text{Equity}$ with zero diff).
 6. **DCF Valuation**: Complete CAPM WACC build, present value schedule, Gordon Growth terminal value, and Enterprise Value to Equity Value bridge waterfall chart.
@@ -137,7 +137,7 @@ flowchart TD
 
 - **Recalculation Latency**: Median **~2.3ms** in-memory / **13.8ms** real-browser (Budget: $< 16\text{ms}$) across 100 consecutive driver updates. 100% synchronous engine execution with zero async/await on the hot path.
 - **Cold Boot Time**: Median **~92ms** in-memory / **207ms** real-browser (Budget: $< 500\text{ms}$) from initial script load to complete 8-tab DOM hydration.
-- **Memory Footprint**: Steady-state heap **~7.6MB–35MB** (Budget: $< 50\text{MB}$) after activating all 8 tabs and Tabulator data grids.
+- **Memory Footprint**: Steady-state heap **~7.6MB-35MB** (Budget: $< 50\text{MB}$) after activating all 8 tabs and Tabulator data grids.
 - **Accessibility & Keyboard Navigation**: Full keyboard navigation across tab lists (`ArrowLeft`, `ArrowRight`, `Home`, `End`) with grid isolation protection (arrow keys inside tables do not trigger tab switches).
 - **Responsive Layouts**: Tested and validated across mobile (`390px`) and desktop (`1280px+`) viewports with responsive SVG chart scaling and sticky frozen label columns.
 
@@ -153,11 +153,11 @@ npm test
 ```
 
 ### Test Coverage Highlights
-- `tests/e2e.accuracy.test.js` — 100% figure re-verification, statement accounting identities, TTM differencing, and valuation pin encasement.
-- `tests/perf.budgets.test.js` — Latency percentiles, cold-boot timing, heap allocation boundaries, zero-network integrity, and accessibility guards.
-- `tests/threeStatement.link.test.js` — Full 3-statement circular integration and balance identity checks.
-- `tests/wacc.build.test.js` & `tests/dcf.valuate.test.js` — CAPM arithmetic, Gordon Growth formulas, and debt-free theorems.
-- `tests/vendor.manifest.test.js` — Vendored asset integrity and SHA-256 checksum verification.
+- `tests/e2e.accuracy.test.js`  -  100% figure re-verification, statement accounting identities, TTM differencing, and valuation pin encasement.
+- `tests/perf.budgets.test.js`  -  Latency percentiles, cold-boot timing, heap allocation boundaries, zero-network integrity, and accessibility guards.
+- `tests/threeStatement.link.test.js`  -  Full 3-statement circular integration and balance identity checks.
+- `tests/wacc.build.test.js` & `tests/dcf.valuate.test.js`  -  CAPM arithmetic, Gordon Growth formulas, and debt-free theorems.
+- `tests/vendor.manifest.test.js`  -  Vendored asset integrity and SHA-256 checksum verification.
 
 ---
 

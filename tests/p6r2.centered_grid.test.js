@@ -1,13 +1,13 @@
 /**
- * P6R2.1 — Centered 9×5 Sensitivity Matrix & Axis Guard Verification Suite.
+ * P6R2.1  -  Centered 9×5 Sensitivity Matrix & Axis Guard Verification Suite.
  *
  * Automated verification for Phase 6R2 Task P6R2.1:
  *  1. Axis derivation: WACC ± 200bps (9 rows), growth ± 100bps (5 columns) centered on active scenario
  *  2. Center invariance: center cell (row 5, column 3) = (activeWacc, activeG) = active valuation pin across all states
  *  3. Monotonicity (∂P/∂WACC < 0, ∂P/∂g > 0) and WACC > g on every cell
  *  4. Axis guard (fail-closed shrink): decrements g radius first, then WACC radius; floor = active pin; renders narrowing footnote
- *  5. Description text purges fixed 1.0%–3.0% literal and states both axes track active scenario
- *  6. Engine-default regression pin: direct buildSensitivityGrid() calls without growthValues retain [0.01–0.03]
+ *  5. Description text purges fixed 1.0%-3.0% literal and states both axes track active scenario
+ *  6. Engine-default regression pin: direct buildSensitivityGrid() calls without growthValues retain [0.01-0.03]
  *  7. Quality gates: frozen engine diff, zero bare literals > 999 in UI, zero style=
  *
  * @module tests/p6r2.centered_grid.test
@@ -79,7 +79,7 @@ function getAppEngine() {
   };
 }
 
-describe('P6R2.1 — Axis Derivation & Shrink Guard Unit Mechanics (computeSensitivityAxes)', () => {
+describe('P6R2.1  -  Axis Derivation & Shrink Guard Unit Mechanics (computeSensitivityAxes)', () => {
   test('base case: derives 9 WACC rows and 5 growth columns centered on active inputs', () => {
     const activeWacc = 0.086638;
     const activeG = 0.025;
@@ -161,8 +161,8 @@ describe('P6R2.1 — Axis Derivation & Shrink Guard Unit Mechanics (computeSensi
   });
 });
 
-describe('P6R2.1 — Controller Integration & Center Invariance Sweep (createApp)', () => {
-  test('default (base) state: center cell is exactly row 5, col 3 and equals active valuation pin $189.31', async () => {
+describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp)', () => {
+  test('default (base) state: center cell is exactly row 5, col 3 and equals active valuation pin $144.08', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -189,12 +189,12 @@ describe('P6R2.1 — Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6, 'Center cell perShare must match active pin');
-    assert.ok(Math.abs(centerCell.perShare - 189.30871314314004) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 144.082130498451) < 1e-4);
 
     app.dispose();
   });
 
-  test('bear-active state: center cell is row 5, col 3 and equals active Bear pin $102.41', async () => {
+  test('bear-active state: center cell is row 5, col 3 and equals active Bear pin $84.39', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -221,12 +221,12 @@ describe('P6R2.1 — Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6);
-    assert.ok(Math.abs(centerCell.perShare - 102.41326051479186) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 84.3890501794256) < 1e-4);
 
     app.dispose();
   });
 
-  test('bull-active state: center cell is row 5, col 3 and equals active Bull pin $405.68', async () => {
+  test('bull-active state: center cell is row 5, col 3 and equals active Bull pin $277.84', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -253,7 +253,7 @@ describe('P6R2.1 — Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6);
-    assert.ok(Math.abs(centerCell.perShare - 405.6797934948002) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 277.8370238128362) < 1e-4);
 
     app.dispose();
   });
@@ -348,8 +348,8 @@ describe('P6R2.1 — Controller Integration & Center Invariance Sweep (createApp
   });
 });
 
-describe('P6R2.1 — UI Rendering, Highlights, Purged Literals & Narrowing Footnote', () => {
-  test('matrix description purges 1.0%–3.0% and mentions WACC (±200 bps) and Gordon Growth (±100 bps)', () => {
+describe('P6R2.1  -  UI Rendering, Highlights, Purged Literals & Narrowing Footnote', () => {
+  test('matrix description purges 1.0%-3.0% and mentions WACC (±200 bps) and Gordon Growth (±100 bps)', () => {
     const container = createHtmlContainer();
     const sensitivityGrid = {
       base: { wacc: 0.086638, growth: 0.025, perShare: 249.36 },
@@ -371,7 +371,7 @@ describe('P6R2.1 — UI Rendering, Highlights, Purged Literals & Narrowing Footn
     assert.match(html, /Gordon Growth rates \(&plusmn;100 bps\)/i);
     assert.match(html, /both axes tracking the active scenario/i);
     assert.match(html, /Matrix center tracks active scenario WACC/i);
-    assert.doesNotMatch(html, /1\.0%[–\-]3\.0%/, 'Fixed 1.0%–3.0% literal must be purged');
+    assert.doesNotMatch(html, /1\.0%[-\-]3\.0%/, 'Fixed 1.0%-3.0% literal must be purged');
   });
 
   test('center cell receives cell-highlight-base and center WACC row receives ACTIVE badge', () => {
@@ -481,8 +481,8 @@ describe('P6R2.1 — UI Rendering, Highlights, Purged Literals & Narrowing Footn
   });
 });
 
-describe('P6R2.1 — Engine Invariance & Quality Gates', () => {
-  test('engine-default regression pin: direct buildSensitivityGrid() call without growthValues retains [0.01–0.03]', async () => {
+describe('P6R2.1  -  Engine Invariance & Quality Gates', () => {
+  test('engine-default regression pin: direct buildSensitivityGrid() call without growthValues retains [0.01-0.03]', async () => {
     const { historical, assumptions } = await getDatasets();
     const sched = buildSchedules(historical, assumptions);
     const fc = projectForecast({ historical, assumptions });

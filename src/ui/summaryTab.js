@@ -94,6 +94,8 @@ export function renderSummary({
   threeStatement = null,
   marketPriceState = null,
   onRefreshPrice = null,
+  verdict = null,
+  methods = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderSummary requires a container element.', 'container');
@@ -106,51 +108,81 @@ export function renderSummary({
   let currentAssumptions = assumptions;
   let currentThreeStatement = threeStatement;
   let currentMarketPrice = marketPriceState;
+  let currentVerdict = verdict;
+  let currentMethods = methods;
   let disposed = false;
 
-  function renderRecommendationCard() {
-    const targetPrice = currentDcf?.perShare;
+  function renderMultiMethodVerdictCard() {
     const marketPrice = currentRec?.marketPrice ?? currentMarketPrice?.price;
     const isOverridden = Number.isFinite(currentRec?.marketPrice) &&
                          Number.isFinite(currentMarketPrice?.price) &&
-                         Math.abs(currentRec.marketPrice - currentMarketPrice.price) > 0.0001;
+                         Math.abs(currentRec.marketPrice - currentMarketPrice.price) > 1e-4;
     const overrideMarker = isOverridden ? '<span class="benchmark-override-badge font-small text-muted"> (edited benchmark)</span>' : '';
-    const upsidePct = currentRec?.upsidePct;
-    const label = currentRec?.label || 'fair';
-
-    const underThresh = RECOMMENDATION_THRESHOLDS.undervalued;
-    const overThresh = RECOMMENDATION_THRESHOLDS.overvalued;
-
-    let badgeClass = 'fair';
-    let labelDisplay = 'FAIR VALUE';
-    if (label === 'undervalued') {
-      badgeClass = 'undervalued';
-      labelDisplay = 'UNDERVALUED';
-    } else if (label === 'overvalued') {
-      badgeClass = 'overvalued';
-      labelDisplay = 'OVERVALUED';
-    }
 
     const priceAsOf = currentMarketPrice?.asOf || (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf : '') || '';
     const priceProvider = currentMarketPrice?.source?.provider ?? 'stockanalysis.com';
     const retrievedText = currentMarketPrice?.retrievedAt ? ` · Retrieved: ${currentMarketPrice.retrievedAt.slice(0, 10)}` : '';
+
+    const underThresh = RECOMMENDATION_THRESHOLDS.undervalued;
+    const overThresh = RECOMMENDATION_THRESHOLDS.overvalued;
+
+    const activeVerdict = currentVerdict || {
+      verdict: currentRec?.label || 'fair',
+      agreement: {
+        unanimous: false,
+        summary: 'Multi-method agreement evaluation active.',
+        spread: { min: currentDcf?.perShare, max: currentDcf?.perShare, span: 0 },
+        counts: { undervalued: 0, overvalued: 0, fair: 1, total: 1 }
+      },
+      methodResults: [
+        {
+          method: 'fcff_dcf',
+          label: '2-Stage FCFF DCF',
+          basis: 'FY2026-FY2030 + Gordon',
+          impliedPerShare: currentDcf?.perShare,
+          upsidePct: currentRec?.upsidePct,
+          verdict: currentRec?.label || 'fair'
+        }
+      ],
+      dissent: []
+    };
+
+    const finalVerdict = activeVerdict.verdict;
+    let badgeClass = 'fair';
+    let labelDisplay = 'FAIR VALUE';
+    if (finalVerdict === 'undervalued') {
+      badgeClass = 'undervalued';
+      labelDisplay = 'UNDERVALUED';
+    } else if (finalVerdict === 'overvalued') {
+      badgeClass = 'overvalued';
+      labelDisplay = 'OVERVALUED';
+    } else if (finalVerdict === 'fair') {
+      labelDisplay = activeVerdict.agreement?.unanimous ? 'FAIR VALUE' : 'FAIR VALUE (NO CONSENSUS)';
+    }
+
+    const minSpread = activeVerdict.agreement?.spread?.min;
+    const maxSpread = activeVerdict.agreement?.spread?.max;
+
+    const methodRows = activeVerdict.methodResults || [];
 
     return `
       <div class="summary-card recommendation-card rec-card-${badgeClass}">
         <div class="rec-card-header">
           <div class="rec-title-group">
             <span class="rec-section-tag">VALUATION CONCLUSION</span>
-            <h3 class="rec-headline">Mechanical Valuation Output &amp; Benchmark Comparison</h3>
+            <h3 class="rec-headline">Multi-Method Valuation Output &amp; Agreement Verdict</h3>
+            <p class="verdict-agreement-summary font-small text-muted">${activeVerdict.agreement?.summary || ''}</p>
           </div>
           <div class="rec-badge-wrapper">
             <span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span>
           </div>
         </div>
+
         <div class="rec-metrics-hero">
           <div class="rec-hero-item">
-            <div class="rec-hero-label">DCF Intrinsic Value / Share</div>
-            <div class="rec-hero-value font-mono font-large font-bold">${usd(targetPrice, { decimals: 2 })}</div>
-            <div class="rec-hero-sub">${estSuffix('DCF Target Price', 'EST')}</div>
+            <div class="rec-hero-label">Multi-Method Agreement Verdict</div>
+            <div class="rec-hero-value font-mono font-large font-bold">${labelDisplay}</div>
+            <div class="rec-hero-sub">${activeVerdict.agreement?.unanimous ? 'Unanimous 6-Method Consensus' : 'Split; Unanimous Consensus Not Reached'}</div>
           </div>
           <div class="rec-hero-item">
             <div class="rec-hero-label">Market Benchmark Share Price${overrideMarker}</div>
@@ -161,15 +193,65 @@ export function renderSummary({
             </div>
           </div>
           <div class="rec-hero-item">
-            <div class="rec-hero-label">Implied Upside / (Downside)</div>
-            <div class="rec-hero-value font-mono font-large font-bold ${upsidePct >= 0 ? 'text-positive' : 'text-negative'}">
-              ${percent(upsidePct, { decimals: 2, showSign: true })}
+            <div class="rec-hero-label">Implied Valuation Range (6 Methods)</div>
+            <div class="rec-hero-value font-mono font-large font-bold">
+              ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} - ${usd(maxSpread, { decimals: 2 })}` : ' - '}
             </div>
-            <div class="rec-hero-sub">Relative to Benchmark</div>
+            <div class="rec-hero-sub">Min-Max Method Dispersion</div>
           </div>
         </div>
+
+        <div class="multi-method-table-wrapper">
+          <table class="financial-summary-table multi-method-table">
+            <thead>
+              <tr>
+                <th>Valuation Method</th>
+                <th>Model Basis</th>
+                <th class="align-right">Implied / Share</th>
+                <th class="align-right">Multiple / Range</th>
+                <th class="align-right">Implied Upside</th>
+                <th>Method Verdict (Isolated)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${methodRows.map((m) => {
+                const upside = m.upsidePct;
+                const mVerdict = m.verdict;
+                let vClass = 'fair';
+                let vText = 'FAIR';
+                if (mVerdict === 'undervalued') {
+                  vClass = 'undervalued';
+                  vText = 'UNDERVALUED';
+                } else if (mVerdict === 'overvalued') {
+                  vClass = 'overvalued';
+                  vText = 'OVERVALUED';
+                }
+                const rangeStr = m.rangePerShare
+                  ? `${usd(m.rangePerShare.min, { decimals: 2 })} - ${usd(m.rangePerShare.max, { decimals: 2 })}`
+                  : (m.medianMultiple ? `${m.medianMultiple.toFixed(2)}x` : ' - ');
+
+                return `
+                  <tr class="method-row-${m.method}">
+                    <td><strong>${m.label}</strong></td>
+                    <td><span class="font-muted font-small">${m.basis}</span></td>
+                    <td class="align-right font-mono font-bold font-large">${usd(m.impliedPerShare, { decimals: 2 })}</td>
+                    <td class="align-right font-mono font-small">${rangeStr}</td>
+                    <td class="align-right font-mono font-bold ${upside >= 0 ? 'text-positive' : 'text-negative'}">
+                      ${percent(upside, { decimals: 2, showSign: true })}
+                    </td>
+                    <td><span class="rec-badge rec-badge-${vClass}">${vText}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
         <div class="rec-discipline-note">
-          <strong>Mechanical Discipline:</strong> Investment recommendation label is strictly determined by mechanical evaluation against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). Contains zero subjective or discretionary editorial language.
+          <strong>Mechanical Discipline:</strong> Investment verdict is strictly determined by unanimous agreement across all six independent valuation methods evaluated against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). All six methods must agree beyond the threshold band for a directional verdict; any split produces FAIR (no consensus). Unweighted; zero subjective or discretionary editorial language.
+        </div>
+        <div class="disclaimer-box lease-convention-note">
+          <strong>Cross-Method Lease Capitalization Disclosure:</strong> DCF keeps operating lease costs within operating cash flows (rent in operating flow), whereas relative valuation methods (EV/Revenue, EV/EBITDAR, SOTP, Per-User) capitalize Duolingo operating lease liabilities into Enterprise Value ($86.136M long-term obligation filed in Q2 Form 10-Q Note 9; current operating lease portion folded into accrued expenses and not separately broken out in quarterly filings; ~$7.204M in annual Form 10-K Note 9; ~$0.14/share materiality) and add back rent ($12.071M filed) to EBITDAR. P/FCF operates on equity-level cash flows after actual lease payments.
         </div>
       </div>
     `;
@@ -206,15 +288,15 @@ export function renderSummary({
             </thead>
             <tbody>
               <tr>
-                <td>PV of 5-Year Explicit Forecast (FY2026–FY2030)</td>
+                <td>PV of 5-Year Explicit Forecast (FY2026-FY2030)</td>
                 <td class="align-right font-mono">${usd(pvExplicit, { decimals: 2 })}</td>
-                <td class="align-right font-mono">${ev > 0 ? percent(pvExplicit / ev, { decimals: 1 }) : '—'}</td>
+                <td class="align-right font-mono">${ev > 0 ? percent(pvExplicit / ev, { decimals: 1 }) : ' - '}</td>
                 <td>${estSuffix('Explicit FCFs', 'EST')}</td>
               </tr>
               <tr>
                 <td>PV of Gordon Terminal Value</td>
                 <td class="align-right font-mono">${usd(pvTerminal, { decimals: 2 })}</td>
-                <td class="align-right font-mono">${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : '—'}</td>
+                <td class="align-right font-mono">${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : ' - '}</td>
                 <td>${estSuffix('Gordon Growth', 'EST')}</td>
               </tr>
               <tr class="table-row-highlight">
@@ -226,20 +308,20 @@ export function renderSummary({
               <tr>
                 <td>(+) Net Cash Bridge (Cash + STI + LTI − Debt)</td>
                 <td class="align-right font-mono">${usd(netCash, { decimals: 2 })}</td>
-                <td class="align-right font-mono">${ev > 0 ? percent(netCash / ev, { decimals: 1 }) : '—'}</td>
+                <td class="align-right font-mono">${ev > 0 ? percent(netCash / ev, { decimals: 1 }) : ' - '}</td>
                 <td>Balance-sheet cash sweep assets</td>
               </tr>
               <tr class="table-row-total">
                 <td><strong>Implied Equity Value</strong></td>
                 <td class="align-right font-mono font-bold font-large">${usd(equityVal, { decimals: 2 })}</td>
-                <td class="align-right font-mono">—</td>
+                <td class="align-right font-mono"> - </td>
                 <td><code>Enterprise Value + Net Cash</code></td>
               </tr>
               <tr class="table-row-grand-total">
                 <td><strong>Implied Equity Value Per Share</strong></td>
                 <td class="align-right font-mono font-bold font-huge">${usd(perShare, { decimals: 2 })}</td>
-                <td class="align-right font-mono">—</td>
-                <td>${Number.isFinite(shares) ? (shares / 1000).toFixed(3) + 'M diluted shares' : '—'}</td>
+                <td class="align-right font-mono"> - </td>
+                <td>${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M diluted shares' : ' - '}</td>
               </tr>
             </tbody>
           </table>
@@ -256,25 +338,25 @@ export function renderSummary({
     const subsRow = kpiLookup['paid_subscribers'];
     const detRow = kpiLookup['revenue_duolingo_english_test'];
 
-    const dauVal = dauRow && Number.isFinite(dauRow.value) ? (dauRow.value / 1e6).toFixed(1) + 'M' : '—';
-    const dauSub = dauRow?.period ? `Latest Reported (${dauRow.period})` : '—';
+    const dauVal = dauRow && Number.isFinite(dauRow.value) ? (dauRow.value / 1e6).toFixed(1) + 'M' : ' - ';
+    const dauSub = dauRow?.period ? `Latest Reported (${dauRow.period})` : ' - ';
 
-    const mauVal = mauRow && Number.isFinite(mauRow.value) ? (mauRow.value / 1e6).toFixed(1) + 'M' : '—';
-    const mauSub = mauRow?.period ? `Latest Reported (${mauRow.period})` : '—';
+    const mauVal = mauRow && Number.isFinite(mauRow.value) ? (mauRow.value / 1e6).toFixed(1) + 'M' : ' - ';
+    const mauSub = mauRow?.period ? `Latest Reported (${mauRow.period})` : ' - ';
 
-    const subsVal = subsRow && Number.isFinite(subsRow.value) ? (subsRow.value / 1e6).toFixed(1) + 'M' : '—';
-    const subsSub = subsRow?.period ? `Latest Reported (${subsRow.period})` : '—';
+    const subsVal = subsRow && Number.isFinite(subsRow.value) ? (subsRow.value / 1e6).toFixed(1) + 'M' : ' - ';
+    const subsSub = subsRow?.period ? `Latest Reported (${subsRow.period})` : ' - ';
 
-    let convVal = '—';
-    let convSub = '—';
+    let convVal = ' - ';
+    let convSub = ' - ';
     if (subsRow && mauRow && Number.isFinite(subsRow.value) && Number.isFinite(mauRow.value) && mauRow.value > 0) {
       const conv = subsRow.value / mauRow.value;
       convVal = percent(conv, { decimals: 1 });
       convSub = `${subsRow.period} Subs / ${mauRow.period} MAU`;
     }
 
-    const detVal = detRow && Number.isFinite(detRow.value) ? usd(detRow.value, { decimals: 0 }) : '—';
-    const detSub = detRow?.period ? `${detRow.period} Form 10-K` : '—';
+    const detVal = detRow && Number.isFinite(detRow.value) ? usd(detRow.value, { decimals: 0 }) : ' - ';
+    const detSub = detRow?.period ? `${detRow.period} Form 10-K` : ' - ';
 
     // Rule of 40 calculation: projected FY2030 Unlevered FCF Margin + 5-Year Revenue CAGR
     let rule40Score = null;
@@ -327,7 +409,7 @@ export function renderSummary({
             <div class="kpi-metric-box">
               <div class="kpi-box-title">Rule of 40 Score</div>
               <div class="kpi-box-value font-mono font-bold ${rule40Score !== null && rule40Score >= 0.4 ? 'text-positive' : ''}">
-                ${rule40Score !== null ? percent(rule40Score, { decimals: 1 }) : '—'}
+                ${rule40Score !== null ? percent(rule40Score, { decimals: 1 }) : ' - '}
               </div>
               <div class="kpi-box-sub">${fcfMargin !== null && revCAGR !== null ? `FCF (${percent(fcfMargin, { decimals: 1 })}) + CAGR (${percent(revCAGR, { decimals: 1 })})` : 'FCF Margin + 5Y Rev CAGR'}</div>
             </div>
@@ -352,10 +434,12 @@ export function renderSummary({
   }
 
   function render() {
-    const bannerHtml = currentMarketPrice?.bannerText
-      ? `<div class="live-price-banner live-price-${currentMarketPrice.status || 'fallback'}" role="alert">${currentMarketPrice.bannerText}</div>`
+    const rawBanner = currentMarketPrice?.bannerText || '';
+    const cleanBanner = typeof rawBanner.replace === 'function' ? rawBanner.replace(/—/g, '-') : rawBanner;
+    const bannerHtml = cleanBanner
+      ? `<div class="live-price-banner live-price-${currentMarketPrice.status || 'fallback'}" role="alert">${cleanBanner}</div>`
       : '';
-    const recHtml = renderRecommendationCard();
+    const recHtml = renderMultiMethodVerdictCard();
     const bridgeHtml = renderValuationBridgeSnapshot();
     const operatingHtml = renderOperatingQualityAndKpis();
 
@@ -388,7 +472,7 @@ export function renderSummary({
   render();
 
   return {
-    update(newDcf, newRec, newKpi = null, newHistorical = null, newAssumptions = null, newThreeStatement = null, newMarketPrice = undefined) {
+    update(newDcf, newRec, newKpi = null, newHistorical = null, newAssumptions = null, newThreeStatement = null, newMarketPrice = undefined, newVerdict = undefined, newMethods = undefined) {
       currentDcf = newDcf;
       currentRec = newRec;
       currentKpi = newKpi || currentKpi;
@@ -397,6 +481,12 @@ export function renderSummary({
       currentThreeStatement = newThreeStatement || currentThreeStatement;
       if (newMarketPrice !== undefined) {
         currentMarketPrice = newMarketPrice;
+      }
+      if (newVerdict !== undefined) {
+        currentVerdict = newVerdict;
+      }
+      if (newMethods !== undefined) {
+        currentMethods = newMethods;
       }
       render();
     },

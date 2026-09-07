@@ -1,19 +1,19 @@
 /**
- * P2.3 Artifact Contract tests — Debt Schedule (Debt-Free Proof) + SBC Schedule.
+ * P2.3 Artifact Contract tests  -  Debt Schedule (Debt-Free Proof) + SBC Schedule.
  *
  * Covers:
  *  - Complete Schedules scaffold: schedules.build(historical, assumptions) populated
  *    with all five families (workingCapital, ppe, intangibleAmortization, debt, sbc),
  *    with zero remaining null placeholders.
  *  - Debt Schedule: buildDebt(historical):
- *    - hasDebt: false, proven via enumerated scan over all cited balance sheet dates (FY2021–Q2 FY2026).
+ *    - hasDebt: false, proven via enumerated scan over all cited balance sheet dates (FY2021-Q2 FY2026).
  *    - Strict regression tripwire asserting no corpus metric in balance.json matches
  *      borrowing / debt / notes payable / credit facility / term loan patterns.
  *    - Operating-lease transparency lines listed as-filed (ROU assets, long-term lease liabilities)
  *      with explicit disclosure that US GAAP ASC 842 operating leases are not funded borrowings.
  *    - SCHEDULE_FIXTURES tie-outs for FY2025 lease balances.
  *  - SBC Schedule: buildSbc(historical):
- *    - Annual SBC expenses match cf_stock_based_compensation exactly (FY2021–FY2025).
+ *    - Annual SBC expenses match cf_stock_based_compensation exactly (FY2021-FY2025).
  *    - TTM SBC expense derived dynamically via ttm.compute discrete-quarter differencing (144,684).
  *    - SBC % of revenue computed across all historical periods + TTM.
  *    - Dilution-context reference lines carried honestly from cash flow financing rows.
@@ -66,7 +66,7 @@ async function getAssumptions() {
   });
 }
 
-describe('P2.3 — Complete Schedules Engine: schedules.build()', () => {
+describe('P2.3  -  Complete Schedules Engine: schedules.build()', () => {
   test('schedules.build returns complete 5-family ScheduleSet with zero null placeholders', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -82,7 +82,7 @@ describe('P2.3 — Complete Schedules Engine: schedules.build()', () => {
   });
 });
 
-describe('P2.3 — Debt Schedule: buildDebt()', () => {
+describe('P2.3  -  Debt Schedule: buildDebt()', () => {
   test('hasDebt is false and status is debt_free_verified across all 6 balance sheet dates', async () => {
     const historical = await getHistorical();
     const debt = buildDebt(historical);
@@ -141,8 +141,8 @@ describe('P2.3 — Debt Schedule: buildDebt()', () => {
   });
 });
 
-describe('P2.3 — Stock-Based Compensation Schedule: buildSbc()', () => {
-  test('annual SBC expenses match cf_stock_based_compensation exactly for FY2021–FY2025', async () => {
+describe('P2.3  -  Stock-Based Compensation Schedule: buildSbc()', () => {
+  test('annual SBC expenses match cf_stock_based_compensation exactly for FY2021-FY2025', async () => {
     const historical = await getHistorical();
     const sbc = buildSbc(historical);
     const cfRows = extractRows(historical.cashflow);
@@ -225,7 +225,7 @@ describe('P2.3 — Stock-Based Compensation Schedule: buildSbc()', () => {
   });
 });
 
-describe('P2.3 — SBC Projections: projectSbc()', () => {
+describe('P2.3  -  SBC Projections: projectSbc()', () => {
   test('projectSbc applies sbc_target_pct_of_revenue deterministically over forecast revenues', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -267,7 +267,7 @@ describe('P2.3 — SBC Projections: projectSbc()', () => {
   });
 });
 
-describe('P2.3 — Engine purity & anti-literal regression gate: src/engine/schedules.js', () => {
+describe('P2.3  -  Engine purity & anti-literal regression gate: src/engine/schedules.js', () => {
   test('src/engine/schedules.js contains zero forbidden side-effecting APIs', () => {
     const code = fs.readFileSync(fileURLToPath(new URL('../src/engine/schedules.js', import.meta.url)), 'utf8');
 

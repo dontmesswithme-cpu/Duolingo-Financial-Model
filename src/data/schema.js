@@ -3,7 +3,7 @@
  *
  * Every historical figure must satisfy one of these schemas before it can enter
  * the data layer. `validateRecord` is total: it never throws on malformed input,
- * it returns the errors — that property is what lets the loader collect *every*
+ * it returns the errors  -  that property is what lets the loader collect *every*
  * offender in a single pass instead of failing on the first bad row.
  *
  * @module src/data/schema
@@ -54,7 +54,7 @@ function makeError(field, message, origin) {
 
 /**
  * A source citation, per `docs/spec.md` §3.1. This is the object that makes a
- * figure traceable — no historical number may exist without one.
+ * figure traceable  -  no historical number may exist without one.
  *
  * @type {Readonly<Record<string, object>>}
  */
@@ -167,14 +167,14 @@ const ASSUMPTION_DRIVER_FIELDS = Object.freeze({
   notes: { type: 'string', required: true, nonEmpty: true },
 
   /**
-   * P4.1 additive extension — the sanctioned key for market-input provenance.
+   * P4.1 additive extension  -  the sanctioned key for market-input provenance.
    *
    * `marking` is optional, not `requiredWhen: group === 'market'`: `scenarios.apply`
    * rebuilds each driver from a fixed field list that does not (yet) carry
    * `marking`, so requiring it would make every scenario application fail schema
    * validation on the new market drivers. `wacc.build` enforces the marking
-   * discipline fail-closed at the point of use instead — see
-   * `assertMarketDriverDiscipline` — and raises a `ConfigError` naming every
+   * discipline fail-closed at the point of use instead  -  see
+   * `assertMarketDriverDiscipline`  -  and raises a `ConfigError` naming every
    * offender rather than letting an unmarked market input through silently.
    */
   marking: {
@@ -244,7 +244,7 @@ function isRequired(rule, record) {
  * @returns {string}
  */
 function describeRequirement(rule) {
-  if (rule.requiredHint) return `is required — ${rule.requiredHint}.`;
+  if (rule.requiredHint) return `is required  -  ${rule.requiredHint}.`;
   return 'is required.';
 }
 
@@ -344,7 +344,7 @@ function validateFields(container, fields, path, errors, origin) {
  * Validates a single record against a schema.
  *
  * Total function: malformed input of any shape (null, primitive, array, wrong
- * schema) yields `{ ok: false, errors }` — it never throws. This is what allows
+ * schema) yields `{ ok: false, errors }`  -  it never throws. This is what allows
  * the loader to report every bad row in one pass instead of aborting.
  *
  * @param {unknown} rec Record to validate.

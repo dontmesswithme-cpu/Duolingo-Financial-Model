@@ -18,7 +18,7 @@ if errorlevel 1 (
     echo.
 )
 
-echo  [3/3] Starting Duolingo FM static server...
+echo  [3/3] Starting Duolingo FM server (static + /api/price live-pricing proxy)...
 echo.
 echo  ==========================================================
 echo    On this PC:      http://localhost:8484/
@@ -28,7 +28,7 @@ echo    Stop: close this window (or press Ctrl+C)
 echo  ==========================================================
 echo.
 
-node -e "const http=require('http'),fs=require('fs'),path=require('path');const root=process.cwd();const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml'};http.createServer((req,res)=>{let u=req.url.split('?')[0];try{u=decodeURIComponent(u)}catch(e){}if(u==='/')u='/index.html';const fp=path.join(root,u);if(!fp.startsWith(root)||!fs.existsSync(fp)||fs.statSync(fp).isDirectory()){res.writeHead(404);res.end('Not found');return;}res.writeHead(200,{'Content-Type':MIME[path.extname(fp)]||'application/octet-stream'});fs.createReadStream(fp).pipe(res);}).listen(8484,'0.0.0.0',()=>console.log('Serving on LAN: http://192.168.0.102:8484/'));"
+node tools\local_server.mjs
 
 echo.
 echo  Server stopped.

@@ -269,26 +269,26 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     assert.equal(state.marketPrice.fallback, true);
 
     // Initial recommendation math tied out to snapshot price $157.85
-    assert.equal(state.recommendation.label, 'undervalued');
+    assert.equal(state.recommendation.label, 'fair');
     const expectedUpside = (state.dcf.perShare - 157.85) / 157.85;
     assert.ok(Math.abs(state.recommendation.upsidePct - expectedUpside) < 1e-6);
 
-    // Summary tab DOM renders the persistent fallback banner
+    // Summary tab DOM renders the persistent fallback banner (UI sanitizes em dash to hyphen)
     const summaryPane = root.querySelector('#tab-summary');
     assert.ok(summaryPane, 'Summary tab pane must exist');
     assert.match(
       summaryPane.innerHTML,
-      /LIVE PRICE UNAVAILABLE — verdict computed against snapshot close \$157\.85/,
+      /LIVE PRICE UNAVAILABLE - verdict computed against snapshot close \$157\.85/,
       'Summary tab DOM must assert the fallback banner text',
     );
     assert.match(summaryPane.innerHTML, /live-price-banner/);
 
-    // Valuation tab DOM renders the fallback banner
+    // Valuation tab DOM renders the fallback banner (UI sanitizes em dash to hyphen)
     const valPane = root.querySelector('#tab-valuation');
     assert.ok(valPane, 'Valuation tab pane must exist');
     assert.match(
       valPane.innerHTML,
-      /LIVE PRICE UNAVAILABLE — verdict computed against snapshot close \$157\.85/,
+      /LIVE PRICE UNAVAILABLE - verdict computed against snapshot close \$157\.85/,
       'Valuation tab DOM must assert the fallback banner text',
     );
 
@@ -386,7 +386,7 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     assert.equal(state.marketPrice.status, 'intraday');
     assert.equal(state.marketPrice.price, 157.85);
     assert.equal(state.marketPrice.intradayPrice, 180.00);
-    assert.equal(state.recommendation.label, 'undervalued');
+    assert.equal(state.recommendation.label, 'fair');
 
     const summaryPane = root.querySelector('#tab-summary');
     assert.match(summaryPane.innerHTML, /last completed close \$157\.85/);
@@ -414,7 +414,7 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     const state = app.state();
     const expectedUpside = (state.dcf.perShare - 140.00) / 140.00;
     assert.ok(Math.abs(state.recommendation.upsidePct - expectedUpside) < 1e-6);
-    assert.equal(state.recommendation.label, 'undervalued');
+    assert.equal(state.recommendation.label, 'fair');
 
     app.dispose();
   });

@@ -1,5 +1,5 @@
 /**
- * P0.1 Artifact Contract tests — `src/app.js` scaffold.
+ * P0.1 Artifact Contract tests  -  `src/app.js` scaffold.
  *
  * Covers the frozen App interface: dependency validation, the AppState shape,
  * not-implemented call sites, tab wiring, and symmetrical listener disposal.
@@ -43,7 +43,7 @@ function buildApp() {
   return { app: createApp(stubs), links, panes, stubs };
 }
 
-describe('createApp — interface & dependency injection', () => {
+describe('createApp  -  interface & dependency injection', () => {
   test('exposes exactly the four frozen App interface members', () => {
     const { app } = buildApp();
     assert.deepEqual(Object.keys(app).sort(), [

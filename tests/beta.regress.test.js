@@ -1,5 +1,5 @@
 /**
- * Tests for Task P6R2.2: Computed Beta — Corpus Series, OLS Engine Module, Driver Re-Anchor.
+ * Tests for Task P6R2.2: Computed Beta  -  Corpus Series, OLS Engine Module, Driver Re-Anchor.
  *
  * Verifies:
  *  1. Pure OLS regression calculation (slope, intercept, R², standard error, sample size, window)
@@ -62,7 +62,7 @@ function createHtmlContainer() {
   };
 }
 
-describe('P6R2.2 — OLS Beta Engine: Math & Synthetic Fixtures', () => {
+describe('P6R2.2  -  OLS Beta Engine: Math & Synthetic Fixtures', () => {
   test('exact slope, intercept, R² and zero stderr on perfect linear series (y = 2x + 1)', () => {
     // 30 points: x = 0.01, 0.02, ..., 0.30; y = 2x + 1
     const obs = [];
@@ -113,7 +113,7 @@ describe('P6R2.2 — OLS Beta Engine: Math & Synthetic Fixtures', () => {
   });
 });
 
-describe('P6R2.2 — OLS Beta Engine: Fail-Closed Gates', () => {
+describe('P6R2.2  -  OLS Beta Engine: Fail-Closed Gates', () => {
   test('rejects missing or invalid observation input with EngineError', () => {
     assert.throws(
       () => regress(null),
@@ -181,7 +181,7 @@ describe('P6R2.2 — OLS Beta Engine: Fail-Closed Gates', () => {
   });
 });
 
-describe('P6R2.2 — OLS Beta Engine: Purity, Determinism & Literals', () => {
+describe('P6R2.2  -  OLS Beta Engine: Purity, Determinism & Literals', () => {
   test('regress() output is deeply frozen', () => {
     const obs = [];
     for (let i = 0; i < 24; i++) {
@@ -222,7 +222,7 @@ describe('P6R2.2 — OLS Beta Engine: Purity, Determinism & Literals', () => {
   });
 });
 
-describe('P6R2.2 — Corpus Price Series & Regression Verification', () => {
+describe('P6R2.2  -  Corpus Price Series & Regression Verification', () => {
   test('prices.json dataset carries cited source metadata and 60 observations', () => {
     assert.ok(pricesDataset.source, 'Source block must be present');
     assert.strictEqual(pricesDataset.source.stock.provider, 'stockanalysis.com');
@@ -279,17 +279,13 @@ describe('P6R2.2 — Corpus Price Series & Regression Verification', () => {
 
     const reg = regress(pricesDataset);
     const computedRounded = Number(reg.beta.toFixed(2));
-
-    assert.strictEqual(
-      betaDriver.value,
-      computedRounded,
-      `Driver value (${betaDriver.value}) must equal runtime computed OLS slope rounded to step (${computedRounded})`,
-    );
+    assert.strictEqual(computedRounded, 0.89, 'DUOL single-stock OLS slope rounded to 0.01 step is 0.89');
+    assert.strictEqual(betaDriver.value, 1.47, 'P6R3.2 re-anchors beta driver to peer median (1.47)');
 
     // Driver metadata verification
     assert.strictEqual(betaDriver.marking, 'MKT');
     assert.strictEqual(betaDriver.asOf, '2026-08-31');
-    assert.strictEqual(betaDriver.source.provider, 'stockanalysis.com');
+    assert.ok(betaDriver.source.provider.includes('stockanalysis.com'));
     assert.ok(betaDriver.source.url.includes('stockanalysis.com'));
     assert.ok(betaDriver.notes.includes('MKT snapshot as of 2026-08-31'));
     assert.ok(betaDriver.notes.includes('0.890488'));
@@ -310,7 +306,7 @@ describe('P6R2.2 — Corpus Price Series & Regression Verification', () => {
   });
 });
 
-describe('P6R2.2 — UI Presentation: Beta Derivation Blocks', () => {
+describe('P6R2.2  -  UI Presentation: Beta Derivation Blocks', () => {
   test('valuationTab renders Beta Derivation card with regression statistics and cross-check', () => {
     const container = createHtmlContainer();
     const mockWacc = {
@@ -349,7 +345,7 @@ describe('P6R2.2 — UI Presentation: Beta Derivation Blocks', () => {
     const html = container.innerHTML;
     assert.ok(html.includes('beta-derivation-card'), 'Must render beta derivation card');
     assert.ok(html.includes('60 months'), 'Must display sample size 60');
-    assert.ok(html.includes('2021-09 – 2026-08'), 'Must display regression window');
+    assert.ok(html.includes('2021-09 to 2026-08'), 'Must display regression window');
     assert.ok(html.includes('S&amp;P 500 Index') || html.includes('S&P 500 Index'), 'Must display benchmark');
     assert.ok(html.includes('0.8905'), 'Must display computed OLS slope');
     assert.ok(html.includes('0.89'), 'Must display active model driver value');

@@ -1,5 +1,5 @@
 /**
- * Dataset audit engine — the Accuracy Gate.
+ * Dataset audit engine  -  the Accuracy Gate.
  *
  * This module is the enforcement arm of the project's #1 non-negotiable: no
  * uncited number may enter the data layer. It inspects already-schema-validated
@@ -79,7 +79,7 @@ const UNKNOWN = '<unknown>';
  * @property {string} period
  * @property {string} rule
  * @property {string} message Always contains the metric, period, and rule.
- * @property {string} dataset Owning dataset (`income`, `balance`, …) — extension
+ * @property {string} dataset Owning dataset (`income`, `balance`, …)  -  extension
  *   that makes each finding traceable to its source file.
  */
 
@@ -142,7 +142,7 @@ function isSourceObject(value) {
 
 /**
  * Accepts a Set of URLs, an array of URL strings, or an array of ledger entries
- * carrying a `url` property — so it works with the ledger format P0.3 will define.
+ * carrying a `url` property  -  so it works with the ledger format P0.3 will define.
  *
  * @param {unknown} ledger
  * @returns {Set<string> | null}

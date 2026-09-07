@@ -1,12 +1,12 @@
 /**
- * P0.2 Artifact Contract tests — `src/data/schema.js`.
+ * P0.2 Artifact Contract tests  -  `src/data/schema.js`.
  *
  * Covers the happy path for all three schemas, every field-level violation with
  * a precise message, and the totality guarantee that malformed input of any
  * shape returns errors instead of throwing.
  *
  * NOTE ON FIXTURE VALUES: every number below is a synthetic placeholder. Phase 0
- * delivers machinery only — no Duolingo figure is transcribed until P1.
+ * delivers machinery only  -  no Duolingo figure is transcribed until P1.
  */
 
 import { test, describe } from 'node:test';
@@ -71,7 +71,7 @@ function fieldsInError(rec, schema) {
   return validateRecord(rec, schema).errors.map((error) => error.field);
 }
 
-describe('SCHEMAS — happy path', () => {
+describe('SCHEMAS  -  happy path', () => {
   test('accepts a fully-formed historical statement row', () => {
     const result = validateRecord(statementRow(), SCHEMAS.historicalStatement);
     assert.equal(result.ok, true);
@@ -111,7 +111,7 @@ describe('SCHEMAS — happy path', () => {
   });
 });
 
-describe('Historical statement — field violations', () => {
+describe('Historical statement  -  field violations', () => {
   const schema = SCHEMAS.historicalStatement;
 
   test('missing metric, label, period, scale, isEstimate are each reported', () => {
@@ -147,7 +147,7 @@ describe('Historical statement — field violations', () => {
     assert.deepEqual(fieldsInError(statementRow({ periodType: 'annual' }), schema), ['periodType']);
   });
 
-  test('value must be finite — NaN and Infinity are rejected', () => {
+  test('value must be finite  -  NaN and Infinity are rejected', () => {
     assert.deepEqual(fieldsInError(statementRow({ value: Number.NaN }), schema), ['value']);
     assert.deepEqual(fieldsInError(statementRow({ value: Number.POSITIVE_INFINITY }), schema), ['value']);
   });
@@ -219,7 +219,7 @@ describe('Estimate rows & conditional source requirement', () => {
   });
 });
 
-describe('Totality — malformed input never throws', () => {
+describe('Totality  -  malformed input never throws', () => {
   const malformed = [null, undefined, 'a string', 42, true, [], [statementRow()]];
 
   test('returns errors instead of throwing for every malformed record', () => {

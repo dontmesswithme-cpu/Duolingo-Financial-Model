@@ -1,5 +1,5 @@
 /**
- * P1.2 Artifact Contract tests — `src/data/historical/balance.json`.
+ * P1.2 Artifact Contract tests  -  `src/data/historical/balance.json`.
  *
  * Covers the invariants the contract names: every row cited and in-ledger, no
  * audit violations, balance-sheet identity per date (assets = liabilities +
@@ -42,7 +42,7 @@ const FISCAL_YEARS = Object.freeze(['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2
 const QUARTER_END = 'Q2 FY2026';
 const ALL_PERIODS = Object.freeze([...FISCAL_YEARS, QUARTER_END]);
 
-/** Metrics that are sub-totals — excluded from grep-based sum checks as they are totals themselves. */
+/** Metrics that are sub-totals  -  excluded from grep-based sum checks as they are totals themselves. */
 // Not used directly, but defines component vs total distinction for sum checks.
 
 async function loadBalance() {
@@ -65,7 +65,7 @@ function hasMetric(rows, period, metric) {
   return rows.some((r) => r.period === period && r.metric === metric);
 }
 
-describe('P1.2 — dataset loads through the unmodified P0 pipeline (balance)', () => {
+describe('P1.2  -  dataset loads through the unmodified P0 pipeline (balance)', () => {
   test('loadHistorical resolves with the balance dataset under ledger enforcement (combined corpus)', async () => {
     const { rows } = await loadBalance();
     assert.ok(rows.length > 0, 'balance dataset must not be empty');
@@ -150,7 +150,7 @@ describe('P1.2 — dataset loads through the unmodified P0 pipeline (balance)', 
   });
 });
 
-describe('P1.2 — statement identities (balance balances)', () => {
+describe('P1.2  -  statement identities (balance balances)', () => {
   test('assets = liabilities + equity per balance date, recomputed from transcribed totals', async () => {
     const { rows } = await loadBalance();
     for (const period of ALL_PERIODS) {
@@ -187,7 +187,7 @@ describe('P1.2 — statement identities (balance balances)', () => {
           had = true;
         }
       }
-      // Only assert when at least one component present — but contract says total should equal sum of those present
+      // Only assert when at least one component present  -  but contract says total should equal sum of those present
       assert.ok(had, `${period}: no current-asset components found`);
       assert.equal(sum, total, `${period}: current assets components sum ${sum} != total ${total}`);
     }
@@ -263,7 +263,7 @@ describe('P1.2 — statement identities (balance balances)', () => {
   });
 });
 
-describe('P1.2 — known-figure fixtures', () => {
+describe('P1.2  -  known-figure fixtures', () => {
   test('every balance fixture value matches the dataset exactly', async () => {
     const { rows } = await loadBalance();
     assert.ok(BALANCE_KNOWN_FIGURES.length >= 3, 'fixtures must include at least 3 balance anchors');
@@ -291,7 +291,7 @@ describe('P1.2 — known-figure fixtures', () => {
   });
 });
 
-describe('P1.2 — unearned / deferred revenue presence', () => {
+describe('P1.2  -  unearned / deferred revenue presence', () => {
   test('deferred revenues present for every fiscal year-end (P2 WC dependency)', async () => {
     const { rows } = await loadBalance();
     for (const period of FISCAL_YEARS) {
@@ -319,7 +319,7 @@ describe('P1.2 — unearned / deferred revenue presence', () => {
   });
 });
 
-describe('P1.2 — period transcription honesty', () => {
+describe('P1.2  -  period transcription honesty', () => {
   test('fiscal-year rows are fiscal_year periodType cited to a 10-K', async () => {
     const { rows } = await loadBalance();
     for (const period of FISCAL_YEARS) {
@@ -351,13 +351,13 @@ describe('P1.2 — period transcription honesty', () => {
   });
 });
 
-describe('P1.2 — regression: OP FAIL 2026-09-01 (convertible vs bottom-line)', () => {
-  test('FY2021 has no convertible_preferred_stock row — filed cell is dash (zero preferred after IPO)', async () => {
+describe('P1.2  -  regression: OP FAIL 2026-09-01 (convertible vs bottom-line)', () => {
+  test('FY2021 has no convertible_preferred_stock row  -  filed cell is dash (zero preferred after IPO)', async () => {
     const { rows } = await loadBalance();
     assert.equal(hasMetric(rows, 'FY2021', 'convertible_preferred_stock'), false, 'FY2021 must not have convertible_preferred_stock; filed cell is em-dash');
     // also ensure no FY2021 convertible row anywhere (global check)
     const anyConvertible = rows.filter((r) => r.metric === 'convertible_preferred_stock');
-    assert.equal(anyConvertible.length, 0, `no balance date should carry convertible_preferred_stock as filed (found ${anyConvertible.map((r)=>r.period).join(', ')}) — post-IPO zero, dash in filing`);
+    assert.equal(anyConvertible.length, 0, `no balance date should carry convertible_preferred_stock as filed (found ${anyConvertible.map((r)=>r.period).join(', ')})  -  post-IPO zero, dash in filing`);
   });
 
   test('every balance date has total_liabilities_and_stockholders_equity row (including FY2021 bottom line)', async () => {
@@ -406,7 +406,7 @@ describe('P1.2 — regression: OP FAIL 2026-09-01 (convertible vs bottom-line)',
       const actual = new Set(rows.filter((r)=>r.period===period).map((r)=>r.metric));
       const expected = EXPECTED[period];
       assert.ok(expected, `unexpected period ${period}`);
-      assert.equal(actual.size, expected.size, `${period}: metric count ${actual.size} != expected ${expected.size} — actual ${[...actual].sort().join(', ')}`);
+      assert.equal(actual.size, expected.size, `${period}: metric count ${actual.size} != expected ${expected.size}  -  actual ${[...actual].sort().join(', ')}`);
       for (const m of actual) assert.ok(expected.has(m), `${period}: phantom metric ${m} not in expected filed set`);
       for (const m of expected) assert.ok(actual.has(m), `${period}: missing expected metric ${m}`);
     }
@@ -415,7 +415,7 @@ describe('P1.2 — regression: OP FAIL 2026-09-01 (convertible vs bottom-line)',
   });
 });
 
-describe('P1.2 — app boot path wires the Accuracy Gate (combined corpus)', () => {
+describe('P1.2  -  app boot path wires the Accuracy Gate (combined corpus)', () => {
   async function boot(ledger) {
     const { root } = createTabRoot(TAB_KEYS);
     return bootApp({

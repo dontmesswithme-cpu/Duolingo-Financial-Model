@@ -1,5 +1,5 @@
 /**
- * Known-figure fixtures — the anchors no transcription may drift from.
+ * Known-figure fixtures  -  the anchors no transcription may drift from.
  *
  * Every entry is a **cited** figure, transcribed verbatim from the filing named
  * in its `source`. The dataset in `src/data/historical/*.json` is asserted
@@ -8,7 +8,7 @@
  * Two rules shape this module (both from `docs/conventions.md`, Financial Data
  * Integrity):
  *  1. Only *filed* figures live in `KNOWN_FIGURES`. No derived metric is ever
- *     hand-typed — see `GROWTH_FIXTURE` below.
+ *     hand-typed  -  see `GROWTH_FIXTURE` below.
  *  2. `source` mirrors the record citation so a fixture can be re-verified
  *     against the filing without leaving this file.
  *
@@ -18,7 +18,7 @@
 // Node built-ins. This module is test-only and never imported by `src/`, so a
 // filesystem read here cannot reach the browser bundle. The P4.1 market anchors
 // at the bottom of this file are DERIVED from `assumptions.json` at module load
-// per the `GROWTH_FIXTURE` rule — a hand-typed market value is prohibited, and
+// per the `GROWTH_FIXTURE` rule  -  a hand-typed market value is prohibited, and
 // deriving requires reading the driver defaults.
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
  * @type {ReadonlyArray<{metric: string, period: string, value: number, units: string, source: object}>}
  */
 export const KNOWN_FIGURES = Object.freeze([
-  // ── FY2025 — Duolingo, Inc. FY2025 Form 10-K ──────────────────────────
+  // ── FY2025  -  Duolingo, Inc. FY2025 Form 10-K ──────────────────────────
   {
     metric: 'revenue_total',
     period: 'FY2025',
@@ -39,7 +39,7 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -63,7 +63,7 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -75,7 +75,7 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -87,7 +87,7 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -99,7 +99,7 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -111,12 +111,12 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
 
-  // ── FY2024 — the base leg of the YoY growth check ─────────────────────
+  // ── FY2024  -  the base leg of the YoY growth check ─────────────────────
   {
     metric: 'revenue_total',
     period: 'FY2024',
@@ -125,12 +125,12 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2024',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
 
-  // ── FY2023 — Duolingo, Inc. FY2025 Form 10-K (three-year columns) ─────
+  // ── FY2023  -  Duolingo, Inc. FY2025 Form 10-K (three-year columns) ─────
   {
     metric: 'revenue_total',
     period: 'FY2023',
@@ -139,7 +139,7 @@ export const KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2023',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -161,7 +161,7 @@ export const KNOWN_FIGURES = Object.freeze([
  * Anchors for balance-sheet contract (P1.2): FY2025 total assets/equity, FY2023 total
  * assets, plus additional balance fixtures for regression coverage.
  * Kept separate from `KNOWN_FIGURES` so the P1.1 income-only test suite stays green
- * without metric filtering — each suite asserts its own fixture set.
+ * without metric filtering  -  each suite asserts its own fixture set.
  *
  * @type {ReadonlyArray<{metric: string, period: string, value: number, units: string, source: object}>}
  */
@@ -498,7 +498,7 @@ export const KPI_PER_DOC_DEFINITIONS = Object.freeze({
 export const KPI_DEFINITIONS_FIXTURE = KPI_PER_DOC_DEFINITIONS['https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm'];
 
 /**
- * Combined set for global audits — income + balance anchors (P1.2 compatibility).
+ * Combined set for global audits  -  income + balance anchors (P1.2 compatibility).
  *
  * @type {ReadonlyArray<{metric: string, period: string, value: number, units: string, source: object}>}
  */
@@ -523,7 +523,7 @@ export const ALL_DATA_FIXTURES = Object.freeze([
  * YoY revenue growth FY2024 → FY2025.
  *
  * Growth is a *derived* metric, so it is computed from the two cited revenue
- * anchors above rather than hand-typed — `docs/conventions.md` reserves
+ * anchors above rather than hand-typed  -  `docs/conventions.md` reserves
  * `computed` values for the engine and forbids entering them as data. The
  * fixture therefore pins the relationship between two filed figures: if either
  * revenue anchor in the dataset drifts, this check breaks.
@@ -675,7 +675,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-Q',
       period: 'Three months ended September 30, 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm',
     },
   },
@@ -687,7 +687,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-Q',
       period: 'Nine months ended September 30, 2025',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm',
     },
   },
@@ -699,7 +699,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-Q',
       period: 'Three months ended March 31, 2026',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026033482/duol-20260331.htm',
     },
   },
@@ -711,7 +711,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-Q',
       period: 'Three months ended June 30, 2026',
-      statement: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+      statement: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm',
     },
   },
@@ -724,7 +724,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Property and Equipment, Net',
+      statement: 'Notes to Consolidated Financial Statements  -  Property and Equipment, Net',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -736,7 +736,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Property and Equipment, Net',
+      statement: 'Notes to Consolidated Financial Statements  -  Property and Equipment, Net',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -784,7 +784,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Intangible Assets, Net',
+      statement: 'Notes to Consolidated Financial Statements  -  Intangible Assets, Net',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -796,7 +796,7 @@ export const SCHEDULE_KNOWN_FIGURES = Object.freeze([
     source: {
       filing: '10-K',
       period: 'Fiscal Year 2025',
-      statement: 'Notes to Consolidated Financial Statements — Intangible Assets, Net',
+      statement: 'Notes to Consolidated Financial Statements  -  Intangible Assets, Net',
       url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
     },
   },
@@ -1006,14 +1006,14 @@ export const SCHEDULE_FIXTURES = Object.freeze({
 });
 
 /* ────────────────────────────────────────────────────────────────────────────
- * P3.1 — Forecast anchors (Driver-Based Forecast Core).
+ * P3.1  -  Forecast anchors (Driver-Based Forecast Core).
  *
  * Same two rules as the rest of this module:
  *  1. `FORECAST_KNOWN_FIGURES` holds only *filed* figures, each with the source
  *     it was transcribed from. A test asserts the corpus matches them, so a
  *     drift cannot pass the suite.
  *  2. Everything downstream in `FORECAST_FIXTURES` is *derived* from those
- *     cited anchors at module load — never hand-typed (the `GROWTH_FIXTURE`
+ *     cited anchors at module load  -  never hand-typed (the `GROWTH_FIXTURE`
  *     pattern). No forecast output value is ever typed into a fixture: the
  *     `deriveExpectedForecast()` helper below recomputes the cascade from the
  *     anchors and the driver values it is given, independently of
@@ -1040,7 +1040,7 @@ const FORECAST_SOURCE_URLS = Object.freeze({
  * @type {Readonly<Record<string, string>>}
  */
 const FORECAST_STATEMENTS = Object.freeze({
-  disaggregation: 'Notes to Consolidated Financial Statements — Disaggregation of Revenue',
+  disaggregation: 'Notes to Consolidated Financial Statements  -  Disaggregation of Revenue',
   operations: 'Consolidated Statements of Operations and Comprehensive Income',
   quarterlyOperations: 'Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income',
   keyMetrics: "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
@@ -1515,7 +1515,7 @@ function forecastValue(metric, period) {
   return forecastAnchor(metric, period).value;
 }
 
-/** Scale of the corpus `thousands_usd` unit — dollars per stored unit. */
+/** Scale of the corpus `thousands_usd` unit  -  dollars per stored unit. */
 const THOUSANDS_PER_UNIT = 1000;
 
 /** Number of half-year segments in a fiscal year. */
@@ -1622,7 +1622,7 @@ export const FORECAST_FIXTURES = Object.freeze({
   /** H1 FY2025 comparison base (9M YTD − Q3 discrete). */
   h1Fy2025Total: scheduleAnchor('revenue_total', '9M FY2025').value - scheduleAnchor('revenue_total', 'Q3 FY2025').value,
 
-  /** FY2025 cost ratios — the basis the contract anchors the cost drivers on. */
+  /** FY2025 cost ratios  -  the basis the contract anchors the cost drivers on. */
   costRatiosFy2025: Object.freeze({
     cost_of_revenue: forecastValue('cost_of_revenue', 'FY2025') / revenueAnchor('FY2025').value,
     research_and_development: forecastValue('opex_research_and_development', 'FY2025') / revenueAnchor('FY2025').value,
@@ -1632,7 +1632,7 @@ export const FORECAST_FIXTURES = Object.freeze({
     other_income_net: forecastValue('other_income_net', 'FY2025') / revenueAnchor('FY2025').value,
   }),
 
-  /** H1 FY2026 observed cost ratios — carried as context, not as the default. */
+  /** H1 FY2026 observed cost ratios  -  carried as context, not as the default. */
   costRatiosH1Fy2026: Object.freeze({
     cost_of_revenue: h1Fy2026('cost_of_revenue') / (scheduleAnchor('revenue_total', 'Q1 FY2026').value + scheduleAnchor('revenue_total', 'Q2 FY2026').value),
     research_and_development:
@@ -1649,7 +1649,7 @@ export const FORECAST_FIXTURES = Object.freeze({
   /** Tax anchors: FY2024 undistorted vs FY2025 distorted (valuation-allowance). */
   tax: Object.freeze({
     fy2024EffectiveRate: forecastValue('income_tax', 'FY2024') / forecastValue('pretax_income', 'FY2024'),
-    // A one-time valuation-allowance release — the contract prohibits anchoring
+    // A one-time valuation-allowance release  -  the contract prohibits anchoring
     // the tax driver to it. Carried here as the distortion evidence only.
     fy2025EffectiveRate: forecastValue('income_tax', 'FY2025') / forecastValue('pretax_income', 'FY2025'),
   }),
@@ -2021,7 +2021,7 @@ export function deriveExpectedThreeStatement(expectedForecast, drivers, schedule
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * P4.1 — WACC market anchors (GROWTH_FIXTURE derived-anchor pattern)
+ * P4.1  -  WACC market anchors (GROWTH_FIXTURE derived-anchor pattern)
  * ────────────────────────────────────────────────────────────────────────────
  *
  * Every value below is COMPUTED at module load from the market driver defaults
@@ -2029,8 +2029,8 @@ export function deriveExpectedThreeStatement(expectedForecast, drivers, schedule
  * the rule `GROWTH_FIXTURE` established, so these anchors cannot drift from the
  * assumption set and cannot silently disagree with the corpus.
  *
- * The WACC is derived through the GENERAL weighted formula —
- * `(E/V)·Re + (D/V)·Rd·(1−t)` — with an explicit zero debt balance, not by
+ * The WACC is derived through the GENERAL weighted formula  - 
+ * `(E/V)·Re + (D/V)·Rd·(1−t)`  -  with an explicit zero debt balance, not by
  * copying the cost of equity. That way the fixture itself proves the
  * debt-free collapse rather than assuming it.
  */
@@ -2090,13 +2090,13 @@ const PRICE_ANCHOR = MARKET_KNOWN_FIGURES.market_share_price.value;
 const SHARES_ANCHOR = MARKET_KNOWN_FIGURES.shares_outstanding.value;
 const TERMINAL_G_ANCHOR = MARKET_KNOWN_FIGURES.terminal_growth_rate.value;
 
-/** CAPM cost of equity — derived, never typed. */
+/** CAPM cost of equity  -  derived, never typed. */
 const COST_OF_EQUITY_ANCHOR = RF_ANCHOR + BETA_ANCHOR * ERP_ANCHOR;
 
-/** Equity market value E — derived, never typed. */
+/** Equity market value E  -  derived, never typed. */
 const MARKET_CAP_ANCHOR = PRICE_ANCHOR * SHARES_ANCHOR;
 
-/** Funded debt balance D — zero, per the P2.3 debt-free proof. */
+/** Funded debt balance D  -  zero, per the P2.3 debt-free proof. */
 const DEBT_BALANCE_ANCHOR = 0;
 
 /** Total capital V = E + D. */
@@ -2109,7 +2109,7 @@ const TOTAL_CAPITAL_ANCHOR = MARKET_CAP_ANCHOR + DEBT_BALANCE_ANCHOR;
  * @type {Readonly<Record<string, unknown>>}
  */
 export const WACC_FIXTURE = Object.freeze({
-  method: 'CAPM — Re = rf + beta × ERP; WACC = (E/V)·Re + (D/V)·Rd·(1−t)',
+  method: 'CAPM  -  Re = rf + beta × ERP; WACC = (E/V)·Re + (D/V)·Rd·(1−t)',
   riskFreeRate: RF_ANCHOR,
   beta: BETA_ANCHOR,
   equityRiskPremium: ERP_ANCHOR,
@@ -2130,7 +2130,7 @@ export const WACC_FIXTURE = Object.freeze({
 });
 
 /* ────────────────────────────────────────────────────────────────────────────
- * P4.2 — DCF valuation anchors (GROWTH_FIXTURE derived-anchor pattern)
+ * P4.2  -  DCF valuation anchors (GROWTH_FIXTURE derived-anchor pattern)
  * ────────────────────────────────────────────────────────────────────────────
  */
 
@@ -2273,7 +2273,7 @@ export const DCF_KNOWN_FIGURES = Object.freeze({
 });
 
 /* ────────────────────────────────────────────────────────────────────────────
- * P4.3 — Recommendation & Valuation Range Anchors
+ * P4.3  -  Recommendation & Valuation Range Anchors
  * ────────────────────────────────────────────────────────────────────────────
  */
 

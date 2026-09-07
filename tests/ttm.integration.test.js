@@ -1,5 +1,5 @@
 /**
- * P1.4 Full Pipeline Integration Test — `loadHistorical()` -> `ttm.compute()`.
+ * P1.4 Full Pipeline Integration Test  -  `loadHistorical()` -> `ttm.compute()`.
  *
  * Runs over the real 4-dataset corpus: `income.json`, `balance.json`,
  * `cashflow.json`, and `kpis.json`.
@@ -35,7 +35,7 @@ async function loadFullCorpus() {
   });
 }
 
-describe('P1.4 — full pipeline integration (loadHistorical -> ttm.compute)', () => {
+describe('P1.4  -  full pipeline integration (loadHistorical -> ttm.compute)', () => {
   test('ttm.compute runs successfully over real 4-statement corpus', async () => {
     const historical = await loadFullCorpus();
     const result = ttm.compute(historical);

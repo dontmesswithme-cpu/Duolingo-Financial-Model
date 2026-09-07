@@ -145,7 +145,10 @@ export function buildTabulatorColumns(isKpi = false, primaryCitations = {}) {
       formatter: (cell) => {
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
         if (isKpi) {
-          return `<div class="kpi-metric-title"><div class="kpi-name">${row.label} ${row.citationHtml || ''}</div><div class="kpi-def">${row.definition || ''}</div></div>`;
+          const def = typeof row.definition === 'string' ? row.definition : '';
+          const defTitle = def ? ` title="${def.replace(/"/g, '&quot;')}"` : '';
+          const defLine = def ? `<div class="kpi-def"${defTitle}>${def.split(/[.!?]\s/, 1)[0]}</div>` : '';
+          return `<div class="kpi-metric-title"><div class="kpi-name">${row.label} ${row.citationHtml || ''}</div>${defLine}</div>`;
         }
         return `<div class="metric-title">${row.label} ${row.citationHtml || ''}</div>`;
       },
@@ -161,7 +164,7 @@ export function buildTabulatorColumns(isKpi = false, primaryCitations = {}) {
         minWidth: 95,
         formatter: (cell) => {
           const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-          if (!Number.isFinite(val)) return '—';
+          if (!Number.isFinite(val)) return ' - ';
           return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
         },
       };
@@ -181,7 +184,7 @@ export function buildTabulatorColumns(isKpi = false, primaryCitations = {}) {
         minWidth: 95,
         formatter: (cell) => {
           const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-          if (!Number.isFinite(val)) return '—';
+          if (!Number.isFinite(val)) return ' - ';
           return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
         },
       };
@@ -200,7 +203,7 @@ export function buildTabulatorColumns(isKpi = false, primaryCitations = {}) {
       titleFormatter: () => estSuffix('TTM', 'computed'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (!Number.isFinite(val)) return '—';
+        if (!Number.isFinite(val)) return ' - ';
         return isKpi ? val.toLocaleString() : usd(val, { decimals: 0 });
       },
     },
@@ -332,7 +335,7 @@ export function renderHistoricals({
     const incomePrimaries = deriveColumnPrimaryCitations(incomeRows);
     for (const p of ALL_PERIOD_COLUMNS) {
       if (incomePrimaries[p]) {
-        const cit = collectCitation(incomePrimaries[p], `Income Statement — ${p} Primary Filing`);
+        const cit = collectCitation(incomePrimaries[p], `Income Statement; ${p} Primary Filing`);
         incomePrimaries[p].citationHtml = cit.html;
       }
     }
@@ -357,7 +360,7 @@ export function renderHistoricals({
     const balancePrimaries = deriveColumnPrimaryCitations(balanceRows);
     for (const p of ALL_PERIOD_COLUMNS) {
       if (balancePrimaries[p]) {
-        const cit = collectCitation(balancePrimaries[p], `Balance Sheet — ${p} Primary Filing`);
+        const cit = collectCitation(balancePrimaries[p], `Balance Sheet; ${p} Primary Filing`);
         balancePrimaries[p].citationHtml = cit.html;
       }
     }
@@ -382,7 +385,7 @@ export function renderHistoricals({
     const cashflowPrimaries = deriveColumnPrimaryCitations(cashflowRows);
     for (const p of ALL_PERIOD_COLUMNS) {
       if (cashflowPrimaries[p]) {
-        const cit = collectCitation(cashflowPrimaries[p], `Cash Flow Statement — ${p} Primary Filing`);
+        const cit = collectCitation(cashflowPrimaries[p], `Cash Flow Statement; ${p} Primary Filing`);
         cashflowPrimaries[p].citationHtml = cit.html;
       }
     }
@@ -407,7 +410,7 @@ export function renderHistoricals({
     const kpiPrimaries = deriveColumnPrimaryCitations(kpiRows);
     for (const p of ALL_PERIOD_COLUMNS) {
       if (kpiPrimaries[p]) {
-        const cit = collectCitation(kpiPrimaries[p], `KPIs — ${p} Primary Filing`);
+        const cit = collectCitation(kpiPrimaries[p], `KPIs; ${p} Primary Filing`);
         kpiPrimaries[p].citationHtml = cit.html;
       }
     }
@@ -436,9 +439,9 @@ export function renderHistoricals({
       <tr>
         <td class="table-num-cell">[${c.id}]</td>
         <td>${c.metric}</td>
-        <td>${c.statement || '—'}</td>
+        <td>${c.statement || ' - '}</td>
         <td>${c.filing} (${c.period})</td>
-        <td>${c.accessedAt || '—'}</td>
+        <td>${c.accessedAt || ' - '}</td>
         <td><a href="${c.url}" target="_blank" rel="noopener noreferrer" class="source-link">SEC EDGAR Link</a></td>
       </tr>
     `).join('');

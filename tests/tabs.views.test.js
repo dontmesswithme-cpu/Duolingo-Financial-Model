@@ -1,5 +1,5 @@
 /**
- * P5.3 Artifact Contract Tests — Assumptions & Historicals Tab Views.
+ * P5.3 Artifact Contract Tests  -  Assumptions & Historicals Tab Views.
  *
  * Covers:
  *  - renderAssumptions: universal blue cell-input class, range sliders, number inputs,
@@ -65,7 +65,7 @@ function createHtmlContainer() {
   return container;
 }
 
-describe('P5.3 — Assumptions Tab View: renderAssumptions()', () => {
+describe('P5.3  -  Assumptions Tab View: renderAssumptions()', () => {
   test('renders interactive driver controls with universal blue cell-input styling', async () => {
     const assumptions = await getAssumptions();
     const container = createHtmlContainer();
@@ -131,7 +131,7 @@ describe('P5.3 — Assumptions Tab View: renderAssumptions()', () => {
   });
 });
 
-describe('P5.3 — Historicals Tab View: renderHistoricals()', () => {
+describe('P5.3  -  Historicals Tab View: renderHistoricals()', () => {
   test('renders 4 financial statements with Tabulator configs and source drawer', async () => {
     const historical = await getHistorical();
     const container = createHtmlContainer();
@@ -175,7 +175,7 @@ describe('P5.3 — Historicals Tab View: renderHistoricals()', () => {
   });
 });
 
-describe('P5.3 — Engine Purity & Corpus Invariance', () => {
+describe('P5.3  -  Engine Purity & Corpus Invariance', () => {
   test('purity: UI modules contain zero wall-clock reads or non-deterministic APIs', async () => {
     for (const file of [FORMAT_PATH, ASSUMPTIONS_TAB_PATH, HISTORICALS_TAB_PATH]) {
       const source = await readText(file);

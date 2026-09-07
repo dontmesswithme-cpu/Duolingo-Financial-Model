@@ -1,5 +1,5 @@
 /**
- * Vercel Serverless Function — /api/price (Phase 6R2 Task P6R2.5 — Finding G).
+ * Vercel Serverless Function; /api/price (Phase 6R2 Task P6R2.5; Finding G).
  *
  * Server-side proxy for live market share price retrieval from stockanalysis.com.
  * Bypasses browser CORS restrictions while strictly enforcing:

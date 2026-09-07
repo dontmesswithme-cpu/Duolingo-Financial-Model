@@ -5,7 +5,7 @@
  * `source.url` in the data layer must join to a ledger entry. The ledger is
  * markdown for humans, so the join key is kept on a single greppable
  * `- **url**: …` line (see `docs/sources/README.md` §4). This helper turns those
- * lines back into the `Set<string>` that `loadHistorical({ ledger })` consumes —
+ * lines back into the `Set<string>` that `loadHistorical({ ledger })` consumes  - 
  * the same set the production boot path builds, so tests exercise the real
  * gate rather than a hand-maintained copy.
  *
@@ -33,7 +33,7 @@ const URL_LINE = /^-\s+\*\*url\*\*:\s*(\S+)\s*$/gm;
  *
  * @param {string} [ledgerPath] Ledger location; defaults to the project ledger.
  * @returns {Set<string>} The ledger URL set, in document order.
- * @throws {Error} When the ledger is unreadable — a missing ledger is never a
+ * @throws {Error} When the ledger is unreadable  -  a missing ledger is never a
  *   silent pass, because the gate fails closed.
  */
 export function readLedgerUrls(ledgerPath = LEDGER_PATH) {
@@ -52,7 +52,7 @@ export function readLedgerUrls(ledgerPath = LEDGER_PATH) {
 }
 
 /**
- * Reads the ledger as an array of `{ url }` objects — the alternative shape
+ * Reads the ledger as an array of `{ url }` objects  -  the alternative shape
  * accepted by `auditDataset`, exercised by the unit-level gate tests.
  *
  * @param {string} [ledgerPath]

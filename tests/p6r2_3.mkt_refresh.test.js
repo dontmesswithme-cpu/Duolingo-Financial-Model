@@ -29,7 +29,7 @@ const ASSUMPTIONS_PATH = path.join(ROOT, 'src/data/assumptions.json');
 const rawAssumptions = JSON.parse(fs.readFileSync(ASSUMPTIONS_PATH, 'utf8'));
 const driversByName = Object.fromEntries(rawAssumptions.map((d) => [d.name, d]));
 
-describe('P6R2.3 — MKT Anchor Refresh: risk_free_rate (FRED DGS10)', () => {
+describe('P6R2.3  -  MKT Anchor Refresh: risk_free_rate (FRED DGS10)', () => {
   const rf = driversByName.risk_free_rate;
 
   test('rf record exists with refreshed value 0.0479 (4.79%) and asOf 2026-09-01', () => {
@@ -58,26 +58,25 @@ describe('P6R2.3 — MKT Anchor Refresh: risk_free_rate (FRED DGS10)', () => {
   });
 });
 
-describe('P6R2.3 — MKT Anchor Refresh: equity_risk_premium (Damodaran 4.46%)', () => {
+describe('P6R2.3  -  MKT Anchor Refresh: equity_risk_premium (Damodaran 4.25%)', () => {
   const erp = driversByName.equity_risk_premium;
 
-  test('ERP record exists with published value 0.0446 (4.46%) and asOf 2026-01-05', () => {
+  test('ERP record exists with published value 0.0425 (4.25%) and asOf 2026-09-01', () => {
     assert.ok(erp, 'equity_risk_premium driver must exist');
-    assert.equal(erp.value, 0.0446, 'ERP value must be 0.0446');
-    assert.equal(erp.asOf, '2026-01-05', 'ERP asOf must be 2026-01-05');
+    assert.equal(erp.value, 0.0425, 'ERP value must be 0.0425');
+    assert.equal(erp.asOf, '2026-09-01', 'ERP asOf must be 2026-09-01');
     assert.equal(erp.marking, 'MKT', 'ERP marking must be MKT');
   });
 
   test('ERP notes carry published decomposition, historical cross-check, and Finding C remediation', () => {
-    assert.match(erp.notes, /MKT snapshot as of 2026-01-05 via Aswath Damodaran/, 'notes must begin with MKT snapshot as of 2026-01-05');
-    assert.match(erp.notes, /4\.46%/, 'notes must cite 4.46% ERP');
-    assert.match(erp.notes, /4\.23%/, 'notes must cite mature-market 4.23%');
-    assert.match(erp.notes, /0\.23%/, 'notes must cite default spread 0.23%');
+    assert.match(erp.notes, /MKT snapshot as of 2026-09-01 via Aswath Damodaran/, 'notes must begin with MKT snapshot as of 2026-09-01');
+    assert.match(erp.notes, /4\.2500%/, 'notes must cite 4.2500% ERP');
+    assert.match(erp.notes, /trailing 3-month average/, 'notes must cite trailing 3-month average');
     assert.match(erp.notes, /4\.33% \(2024\)/, 'notes must cite 2024 historical cross-check');
     assert.match(erp.notes, /4\.23% \(2025\)/, 'notes must cite 2025 historical cross-check');
-    assert.match(erp.notes, /Finding C/, 'notes must disclose Finding C remediation');
+    assert.match(erp.notes, /Finding-C/, 'notes must disclose Finding C remediation');
     assert.equal(erp.source.provider, 'Aswath Damodaran, NYU Stern');
-    assert.equal(erp.source.url, 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html');
+    assert.equal(erp.source.url, 'https://pages.stern.nyu.edu/~adamodar/pc/implprem/ERPbymonth.xlsx');
   });
 
   test('ERP schema, bounds, step, units, and deltas remain byte-identical', () => {
@@ -91,7 +90,7 @@ describe('P6R2.3 — MKT Anchor Refresh: equity_risk_premium (Damodaran 4.46%)',
   });
 });
 
-describe('P6R2.3 — MKT Anchor Refresh: market_share_price ($157.85 Close)', () => {
+describe('P6R2.3  -  MKT Anchor Refresh: market_share_price ($157.85 Close)', () => {
   const px = driversByName.market_share_price;
 
   test('market_share_price record exists with close value 157.85 and asOf 2026-09-02', () => {
@@ -123,14 +122,14 @@ describe('P6R2.3 — MKT Anchor Refresh: market_share_price ($157.85 Close)', ()
   });
 });
 
-describe('P6R2.3 — Refreshed Anchor Mathematics & Quality Gates', () => {
-  test('Cost of equity / WACC re-derivation at refreshed anchors: Re = 8.7594%', () => {
+describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
+  test('Cost of equity / WACC re-derivation at refreshed anchors: Re = 11.0375%', () => {
     const rf = driversByName.risk_free_rate.value;
     const beta = driversByName.beta.value;
     const erp = driversByName.equity_risk_premium.value;
 
     const re = rf + beta * erp;
-    assert.ok(Math.abs(re - 0.087594) < 1e-6, `Re must equal 0.087594 (got ${re})`);
+    assert.ok(Math.abs(re - 0.110375) < 1e-6, `Re must equal 0.110375 (got ${re})`);
   });
 
   test('Derived market capitalization: 157.85 × 50,031,000 = 7,897,393,350', () => {
@@ -155,6 +154,13 @@ describe('P6R2.3 — Refreshed Anchor Mathematics & Quality Gates', () => {
       assert.ok(
         line.includes('Beta') ||
         line.includes('beta') ||
+        line.includes('0.89') ||
+        line.includes('1.47') ||
+        line.includes('peers_beta') ||
+        line.includes('Spotify') ||
+        line.includes('Hamada') ||
+        line.includes('stockanalysis') ||
+        line.includes('EDGAR') ||
         line.includes('risk_free_rate') ||
         line.includes('4.79%') ||
         line.includes('4.73%') ||
@@ -165,10 +171,13 @@ describe('P6R2.3 — Refreshed Anchor Mathematics & Quality Gates', () => {
         line.includes('equity_risk_premium') ||
         line.includes('0.0446') ||
         line.includes('0.0442') ||
+        line.includes('0.0425') ||
         line.includes('2026-01-05') ||
         line.includes('2026-07-01') ||
         line.includes('4.46%') ||
         line.includes('4.42%') ||
+        line.includes('4.25%') ||
+        line.includes('ERPbymonth') ||
         line.includes('market_share_price') ||
         line.includes('157.85') ||
         line.includes('148.36') ||
@@ -176,6 +185,8 @@ describe('P6R2.3 — Refreshed Anchor Mathematics & Quality Gates', () => {
         line.includes('2026-08-31') ||
         line.includes('notes') ||
         line.includes('value') ||
+        line.includes('provider') ||
+        line.includes('url') ||
         line.includes('asOf'),
         `Unexpected change in assumptions.json: ${line}`,
       );
@@ -204,7 +215,7 @@ describe('P6R2.3 — Refreshed Anchor Mathematics & Quality Gates', () => {
     } catch {
       changedFiles = [];
     }
-    const authorized = ['src/engine/dcf.js', 'src/engine/threeStatement.js'];
+    const authorized = ['src/engine/dcf.js', 'src/engine/threeStatement.js', 'src/engine/beta.js', 'src/engine/market.js'];
     for (const file of changedFiles) {
       assert.ok(authorized.includes(file), `Unauthorized engine modification in ${file}`);
     }

@@ -2,7 +2,7 @@
 
 > **Milestone**: Phase 6R3 — Cost-of-Capital Hardening (Director-directed; continues the 6R2 model-rigor lineage)
 > **Protocol**: 1.0 (internal workflow only — no protocol mentions in the product UI, per standing Director ruling)
-> **Status**: 🟢 Approved by Director — pending kick-off (no DS work starts before Director kick-off prompt)
+> **Status**: 🟡 Active — kicked off 2026-09-04 07:31 (Director-authorized start; DS work begins at P6R3.1)
 > **Owner**: Drafted & audited by Reviewer (`OP`); implemented by Worker (`DS`); **final approval authority: Director**
 > **Objective**: Retire the two standing cost-of-capital weaknesses (Director review): (1) the ERP rides an annual table (January 2026 — structurally stale by construction); (2) beta is a single noisy OLS estimate (t ≈ 1.72, R² 4.8%). Remediation: monthly Damodaran implied ERP with a locked smoothing rule, and a bottom-up median unlevered beta over the locked three-name peer set (Spotify / Roblox / Netflix — Coursera + Udemy removed from ALL peer uses per Director decision). Sequenced: **6R3 first, Phase 7 next** — Phase 7 consumes this phase's re-anchored cost of capital as its baseline. The `v1.0` release block carries forward unchanged.
 >

@@ -1,5 +1,5 @@
 /**
- * P3.2 Artifact Contract Tests — Three-Statement Linkage Engine.
+ * P3.2 Artifact Contract Tests  -  Three-Statement Linkage Engine.
  *
  * Covers:
  *  - `threeStatement.project(schedules, assumptions, forecast)` frozen signature.
@@ -53,7 +53,7 @@ async function getAssumptions() {
   return loadAssumptions({ location: ASSUMPTIONS_PATH, readText });
 }
 
-describe('P3.2 Three-Statement Linkage — Interface & Frozen Signature', () => {
+describe('P3.2 Three-Statement Linkage  -  Interface & Frozen Signature', () => {
   test('threeStatement.project satisfies frozen signature and returns deep-frozen output', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();

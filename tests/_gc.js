@@ -6,7 +6,7 @@
  * can cause run-to-run noise for identical code.
  *
  * settleHeap() runs a triple major GC with a microtask yield and returns
- * the MINIMUM of three snapshots — true retention appears in every snapshot
+ * the MINIMUM of three snapshots  -  true retention appears in every snapshot
  * while transient fragmentation inflates only some, isolating real memory usage
  * and ensuring deterministic test results across environments.
  */

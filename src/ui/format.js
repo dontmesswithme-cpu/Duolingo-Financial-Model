@@ -3,7 +3,7 @@
  *
  * Universal rule (spec §3.2, §3.4):
  *  - Currency, percentages, compact notation, and EST/MKT/computed markings.
- *  - Fail-closed on NaN / Infinity (returns "—", never renders NaN).
+ *  - Fail-closed on NaN / Infinity (returns " - ", never renders NaN).
  *  - Pure functions: zero DOM, zero fetch, zero Date.now, zero Math.random.
  *
  * @module src/ui/format
@@ -22,7 +22,7 @@
  */
 export function usd(value, { decimals = 2, scale = 1, showSign = false, parenthesesNegative = false } = {}) {
   if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
-    return '—';
+    return ' - ';
   }
 
   const scaled = value * scale;
@@ -55,7 +55,7 @@ export function usd(value, { decimals = 2, scale = 1, showSign = false, parenthe
  */
 export function percent(value, { decimals = 2, showSign = false } = {}) {
   if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
-    return '—';
+    return ' - ';
   }
 
   const pctVal = value * 100;
@@ -84,7 +84,7 @@ export function percent(value, { decimals = 2, showSign = false } = {}) {
  */
 export function compact(value, { decimals = 1, currency = '$' } = {}) {
   if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
-    return '—';
+    return ' - ';
   }
 
   const isNegative = value < 0;
@@ -182,7 +182,7 @@ export function humanizeUnits(units) {
  */
 export function formatDriverDisplay(value, units) {
   if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
-    return '—';
+    return ' - ';
   }
   if (isRatioUnit(units)) {
     return percent(value, { decimals: 2 });

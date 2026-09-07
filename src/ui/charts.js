@@ -8,7 +8,7 @@
  *
  * Strict Compliance Rules:
  *  - Pure SVG string generation (zero external chart libraries like Chart.js/ApexCharts)
- *  - Solid stroke for historical actuals (FY2021–FY2025), dashed stroke for forward estimates (FY2026–FY2030)
+ *  - Solid stroke for historical actuals (FY2021-FY2025), dashed stroke for forward estimates (FY2026-FY2030)
  *  - Legends use official EST/MKT badge labeling via format.js
  *  - Zero bare numeric literals > 999 outside comments
  *  - Pure, deterministic, headless-testable
@@ -487,7 +487,7 @@ export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) 
     {
       id: 'explicit',
       label: 'PV of Explicit FCFs',
-      sub: 'FY2026–FY2030 (EST)',
+      sub: 'FY2026-FY2030 (EST)',
       val: pvExplicit,
       start: 0,
       end: pvExplicit,

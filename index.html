@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Duolingo FM — Duolingo, Inc. (NASDAQ: DUOL) Financial Model</title>
+  <title>Duolingo FM; Duolingo, Inc. (NASDAQ: DUOL) Financial Model</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
   <link rel="stylesheet" href="vendor/tabulator/tabulator.min.css" />
   <style>
@@ -508,7 +508,7 @@
       min-width: 40px;
     }
 
-    /* All View Layouts — Shared 1100px Layout Baseline */
+    /* All View Layouts; Shared 1100px Layout Baseline */
     .historicals-view-wrapper,
     .schedules-view-wrapper,
     .projections-view-wrapper,
@@ -617,6 +617,7 @@
     .kpi-metric-title {
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
     .kpi-name {
@@ -627,6 +628,23 @@
       font-size: 11px;
       color: var(--color-muted);
       margin-top: 2px;
+      max-width: 260px;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.4;
+      cursor: help;
+    }
+
+    /* KPI grid needs taller rows for two-line name + subtext */
+    .tabulator-grid-container[data-statement="kpis"] .tabulator-row {
+      height: auto;
+      min-height: 52px;
+    }
+
+    .tabulator-grid-container[data-statement="kpis"] .tabulator-cell {
+      white-space: normal;
+      word-break: break-word;
     }
 
     /* Tabulator Grid Custom Theme Integration */
@@ -976,6 +994,17 @@
       background: #eef5fc;
       border-top: 2px solid #0052cc;
       border-bottom: 2px solid #0052cc;
+    }
+
+    .peer-beta-derivation-section {
+      margin-bottom: 24px;
+    }
+
+    .card-subheading {
+      margin: 12px 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
     }
 
     .bridge-grid-layout {
@@ -1343,11 +1372,270 @@
       background: var(--color-accent-soft);
       border-color: var(--color-accent);
     }
+
+    /* Thesis Defense Panel (P8.0) */
+    .thesis-defense-card {
+      margin-bottom: 24px;
+    }
+
+    .defense-rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .defense-row {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-surface);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      overflow: hidden;
+    }
+
+    .defense-row:hover {
+      border-color: #b0b8c4;
+    }
+
+    .defense-row[open] {
+      border-color: var(--color-accent);
+      box-shadow: 0 1px 4px rgba(26, 79, 214, 0.08);
+    }
+
+    .defense-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      user-select: none;
+      color: var(--color-text);
+      background: #fafbfc;
+      outline: none;
+    }
+
+    .defense-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .defense-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .defense-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      border-radius: 3px;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-weight: 700;
+      transition: transform 0.2s ease;
+    }
+
+    .defense-row[open] .defense-marker {
+      transform: rotate(90deg);
+    }
+
+    .defense-summary-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .defense-summary-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .defense-value-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #f0f2f5;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .defense-content {
+      padding: 14px 16px;
+      border-top: 1px solid var(--color-border);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--color-surface);
+    }
+
+    .defense-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-muted);
+      margin-bottom: 2px;
+    }
+
+    .defense-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .defense-runtime-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      background: #f8f9fa;
+      border: 1px solid #edf0f2;
+    }
+
+    .defense-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .defense-table th,
+    .defense-table td {
+      padding: 6px 10px;
+      border: 1px solid var(--color-border);
+      text-align: left;
+    }
+
+    .defense-table th {
+      background: #f4f6f8;
+      font-weight: 600;
+      color: var(--color-muted);
+    }
+
+    .defense-link {
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .defense-link:hover {
+      text-decoration: underline;
+    }
+
+    .method-switch {
+      cursor: pointer;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .method-switch:hover {
+      border-color: var(--color-accent);
+    }
+
+    .method-card-active {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 2px var(--color-accent-soft);
+    }
+
+    .method-card-active .method-title {
+      color: var(--color-accent);
+    }
+
+    .method-detail-panel {
+      margin-top: 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-surface);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .method-detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .method-detail-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .method-detail-basis {
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .method-detail-head-metrics {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .method-detail-metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-muted);
+    }
+
+    .method-detail-metric-value {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .method-detail-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .method-detail-block-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-muted);
+    }
+
+    .method-detail-note {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-text);
+      margin: 0;
+    }
   </style>
 </head>
 <body>
   <header class="app-header">
-    <h1 class="app-title">Duolingo FM — Duolingo, Inc. (NASDAQ: DUOL)</h1>
+    <h1 class="app-title">Duolingo FM; Duolingo, Inc. (NASDAQ: DUOL)</h1>
     <p class="app-subtitle">Cited 3-Statement Financial Valuation Model · Interactive Valuation Interface</p>
 
     <nav class="tabs" role="tablist" aria-label="Model sections">
@@ -1418,7 +1706,7 @@
               <tr>
                 <td>3</td>
                 <td><a href="#historicals" class="toc-link" data-jump-tab="historicals">Historicals</a></td>
-                <td>FY2021–FY2025 Income Statement, Balance Sheet, Cash Flow, and KPIs with filing citations.</td>
+                <td>FY2021-FY2025 Income Statement, Balance Sheet, Cash Flow, and KPIs with filing citations.</td>
               </tr>
               <tr>
                 <td>4</td>
@@ -1428,32 +1716,17 @@
               <tr>
                 <td>5</td>
                 <td><a href="#projections" class="toc-link" data-jump-tab="projections">Projections (3-Statement)</a></td>
-                <td>FY2026–FY2030 linked IS, BS, and CF with automated balance gate validation.</td>
+                <td>FY2026-FY2030 linked IS, BS, and CF with automated balance gate validation.</td>
               </tr>
               <tr>
                 <td>6</td>
                 <td><a href="#valuation" class="toc-link" data-jump-tab="valuation">Valuation</a></td>
-                <td>Unlevered DCF valuation, CAPM WACC build, enterprise-to-equity bridge, and per-share value.</td>
-              </tr>
-              <tr>
-                <td>—</td>
-                <td><span class="toc-excluded-name">Trading Comparables (Comps)</span></td>
-                <td>Peer multiple analysis — excluded (N/A) per Director decision (spec §3.4, §7).</td>
-              </tr>
-              <tr>
-                <td>—</td>
-                <td><span class="toc-excluded-name">Precedent Transactions</span></td>
-                <td>M&amp;A transaction multiples — excluded (N/A) per Director decision (spec §3.4, §7).</td>
-              </tr>
-              <tr>
-                <td>—</td>
-                <td><span class="toc-excluded-name">LBO Analysis</span></td>
-                <td>Leveraged buyout return modeling — excluded (N/A) per Director decision (spec §3.4, §7).</td>
+                <td>Multi-method valuation synthesis (2-Stage FCFF DCF, EV/Rev, EV/EBITDAR, P/FCF, SOTP, Per-User), CAPM WACC build, enterprise-to-equity bridge, and thesis defense directory.</td>
               </tr>
               <tr>
                 <td>7</td>
                 <td><a href="#summary" class="toc-link" data-jump-tab="summary">Summary / Output</a></td>
-                <td>Executive dashboard, DCF vs market price, upside %, mechanical recommendation, Rule of 40.</td>
+                <td>Executive dashboard, multi-method agreement verdict card, 6-method comparison table, live price state, and key financial ratios.</td>
               </tr>
               <tr>
                 <td>8</td>
@@ -1462,6 +1735,9 @@
               </tr>
             </tbody>
           </table>
+          <div class="disclaimer-box toc-methodology-note">
+            <strong>Methodology Scope Note:</strong> Trading Comparables (Comps) is fully integrated into the Tab 6 multi-method valuation framework. Precedent Transactions and LBO Analysis remain excluded (N/A) per Director decision.
+          </div>
         </div>
 
         <div class="cover-section">
@@ -1475,43 +1751,43 @@
     <!-- Tab 2: Assumptions -->
     <section class="tab-pane" role="tabpanel" id="tab-assumptions" data-tab-pane data-tab="assumptions" aria-labelledby="tab-control-assumptions">
       <h2>Assumptions &amp; Valuation Drivers</h2>
-      <p class="placeholder">Phase 5 — interactive driver controls color-coded blue with range validation.</p>
+      <p class="placeholder">Phase 5, interactive driver controls color-coded blue with range validation.</p>
     </section>
 
     <!-- Tab 3: Historicals -->
     <section class="tab-pane" role="tabpanel" id="tab-historicals" data-tab-pane data-tab="historicals" aria-labelledby="tab-control-historicals">
       <h2>Historical Financial Statements &amp; KPIs</h2>
-      <p class="placeholder">Phase 5 — audited FY2021–FY2025 statements, discrete TTM window, and filing citations.</p>
+      <p class="placeholder">Phase 5, audited FY2021-FY2025 statements, discrete TTM window, and filing citations.</p>
     </section>
 
     <!-- Tab 4: Supporting Schedules -->
     <section class="tab-pane" role="tabpanel" id="tab-schedules" data-tab-pane data-tab="schedules" aria-labelledby="tab-control-schedules">
       <h2>Supporting Financial Schedules</h2>
-      <p class="placeholder">Phase 5 — Working Capital, PP&amp;E roll-forward, Debt, SBC, and Amortization schedules.</p>
+      <p class="placeholder">Phase 5; Working Capital, PP&amp;E roll-forward, Debt, SBC, and Amortization schedules.</p>
     </section>
 
     <!-- Tab 5: Projections -->
     <section class="tab-pane" role="tabpanel" id="tab-projections" data-tab-pane data-tab="projections" aria-labelledby="tab-control-projections">
-      <h2>3-Statement Linked Projections (FY2026–FY2030)</h2>
-      <p class="placeholder">Phase 5 — linked IS → BS → CF projections with balance gate indicators.</p>
+      <h2>3-Statement Linked Projections (FY2026-FY2030)</h2>
+      <p class="placeholder">Phase 5, linked IS → BS → CF projections with balance gate indicators.</p>
     </section>
 
     <!-- Tab 6: Valuation -->
     <section class="tab-pane" role="tabpanel" id="tab-valuation" data-tab-pane data-tab="valuation" aria-labelledby="tab-control-valuation">
       <h2>DCF Valuation &amp; WACC Build</h2>
-      <p class="placeholder">Phase 5 — CAPM WACC build table, explicit FCF schedule, and enterprise value bridge.</p>
+      <p class="placeholder">Phase 5; CAPM WACC build table, explicit FCF schedule, and enterprise value bridge.</p>
     </section>
 
     <!-- Tab 7: Summary -->
     <section class="tab-pane" role="tabpanel" id="tab-summary" data-tab-pane data-tab="summary" aria-labelledby="tab-control-summary">
       <h2>Executive Summary &amp; Output Dashboard</h2>
-      <p class="placeholder">Phase 5 — DCF per share vs market price, upside %, mechanical recommendation, and KPI summary.</p>
+      <p class="placeholder">Phase 5; DCF per share vs market price, upside %, mechanical recommendation, and KPI summary.</p>
     </section>
 
     <!-- Tab 8: Sensitivity -->
     <section class="tab-pane" role="tabpanel" id="tab-sensitivity" data-tab-pane data-tab="sensitivity" aria-labelledby="tab-control-sensitivity">
       <h2>Sensitivity &amp; Scenario Analysis</h2>
-      <p class="placeholder">Phase 5 — 9×5 WACC × Terminal Growth per-share matrix and Downside/Base/Upside bands.</p>
+      <p class="placeholder">Phase 5; 9×5 WACC × Terminal Growth per-share matrix and Downside/Base/Upside bands.</p>
     </section>
   </main>
 

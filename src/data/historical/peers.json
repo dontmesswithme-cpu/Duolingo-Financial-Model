@@ -1,0 +1,377 @@
+{
+  "description": "Phase 8 Historical Peer Corpus: Locked three-peer set (SPOT, RBLX, NFLX) on capitalized lease basis with 100% cited sources, market valuations, financials, lease capitalization components, and native KPIs.",
+  "asOf": "2026-09-02",
+  "provider": "stockanalysis.com & SEC EDGAR",
+  "leaseCapitalizationStandard": "Operating lease liabilities included in Enterprise Value; operating lease cost (rent) added back to EBITDA -> EBITDAR",
+  "peersCount": 3,
+  "peerSymbols": [
+    "SPOT",
+    "RBLX",
+    "NFLX"
+  ],
+  "peers": {
+    "SPOT": {
+      "symbol": "SPOT",
+      "name": "Spotify Technology S.A.",
+      "exchange": "NYSE: SPOT",
+      "currency": "USD",
+      "reportingCurrency": "EUR",
+      "asOf": "2026-09-02",
+      "stockPrice": 559.36,
+      "sharesOutstanding": 205.58,
+      "marketCap": 114993.23,
+      "priceSource": {
+        "provider": "stockanalysis.com",
+        "url": "https://stockanalysis.com/stocks/spot/history/",
+        "asOf": "2026-09-02",
+        "close": 559.36,
+        "volume": 1361655
+      },
+      "revenue": {
+        "ttm": 20690,
+        "ttmEur": 18113,
+        "fyForward": 22320.02,
+        "forwardGrowth": 0.1368,
+        "basis": "FY+1",
+        "periodEnding": "2026-12-31",
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/spot/forecast/",
+          "retrievedAt": "2026-09-04",
+          "notes": "Analyst consensus FY2026 forecast revenue €19.54B (+13.68% YoY) converted to USD at TTM-implied EUR/USD rate (20,690 / 18,113 = 1.14227) -> $22,320.02M"
+        },
+        "fyForwardEur": 19540
+      },
+      "ebitda": {
+        "ttm": 3070,
+        "ttmEur": 2750,
+        "definition": "Operating Income + Depreciation and Amortization",
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/spot/financials/",
+          "notes": "TTM EBITDA $3,070M per stockanalysis.com statistics (EBIT $3,030M + D&A $34.85M; based on €2,653M operating income converted at 1.1423 EUR/USD)"
+        }
+      },
+      "operatingLeaseCost": {
+        "value": 74.1,
+        "valueEur": 65,
+        "period": "FY2025",
+        "source": {
+          "filing": "Form 20-F",
+          "period": "FY2025",
+          "cik": "0001639920",
+          "accession": "0001628280-26-006874",
+          "url": "https://www.sec.gov/edgar/browse/?CIK=0001639920",
+          "notes": "Filed rental/lease expense under IFRS 16: €65.0M (~$74.1M)"
+        }
+      },
+      "operatingLeaseLiabilities": {
+        "current": 70.68,
+        "nonCurrent": 460.56,
+        "total": 531.24,
+        "currentEur": 62,
+        "nonCurrentEur": 404,
+        "totalEur": 466,
+        "source": {
+          "filing": "Form 20-F / 6-K",
+          "period": "Q2 FY2026",
+          "cik": "0001639920",
+          "accession": "0001628280-26-006874",
+          "url": "https://www.sec.gov/edgar/browse/?CIK=0001639920",
+          "notes": "Total lease liabilities €466M (current €62M + non-current €404M); ~$531.24M"
+        }
+      },
+      "debt": {
+        "current": 0,
+        "nonCurrent": 0,
+        "total": 0,
+        "source": {
+          "filing": "Form 6-K Q2 FY2026 / stockanalysis.com",
+          "period": "Q2 FY2026",
+          "notes": "Exchangeable notes matured/settled; funded debt principal $0 (excluding lease liabilities)"
+        }
+      },
+      "cash": {
+        "cashAndEquivalents": 6769.32,
+        "shortTermInvestments": 1193.58,
+        "total": 7962.9,
+        "cashAndEquivalentsEur": 5938,
+        "shortTermInvestmentsEur": 1047,
+        "totalEur": 6985,
+        "source": {
+          "filing": "Form 6-K Q2 FY2026",
+          "period": "Q2 FY2026",
+          "notes": "Cash €5,938M + Short-term investments €1,047M = €6,985M (~$7,962.90M)"
+        }
+      },
+      "capitalizedEnterpriseValue": 107561.57,
+      "ebitdar": {
+        "ttm": 3144.1,
+        "forward": 3574.21,
+        "notes": "TTM: EBITDA $3,070M + Rent $74.1M = $3,144.10M; Forward scaled by +13.68% revenue growth = $3,574.21M"
+      },
+      "freeCashFlow": {
+        "ttm": 3800,
+        "ttmEur": 3267,
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/spot/financials/cash-flow-statement/",
+          "notes": "TTM Operating Cash Flow €3,337M - Capex €70M = €3,267M (~$3,800M)"
+        }
+      },
+      "kpis": {
+        "mau": {
+          "value": 626000000,
+          "display": "626M MAU",
+          "period": "Q2 2026",
+          "source": "Spotify Q2 2026 Shareholder Deck"
+        },
+        "paidSubscribers": {
+          "value": 246000000,
+          "display": "246M Premium Subscribers",
+          "period": "Q2 2026",
+          "source": "Spotify Q2 2026 Shareholder Deck"
+        },
+        "arpu": {
+          "value": 4.62,
+          "display": "€4.62 / month Premium ARPU",
+          "period": "Q2 2026",
+          "source": "Spotify Q2 2026 Shareholder Deck"
+        }
+      }
+    },
+    "RBLX": {
+      "symbol": "RBLX",
+      "name": "Roblox Corporation",
+      "exchange": "NYSE: RBLX",
+      "currency": "USD",
+      "reportingCurrency": "USD",
+      "asOf": "2026-09-02",
+      "stockPrice": 41.21,
+      "sharesOutstanding": 714.38,
+      "marketCap": 29439.6,
+      "priceSource": {
+        "provider": "stockanalysis.com",
+        "url": "https://stockanalysis.com/stocks/rblx/history/",
+        "asOf": "2026-09-02",
+        "close": 41.21,
+        "volume": 6520551
+      },
+      "revenue": {
+        "ttm": 5686,
+        "fyForward": 6890,
+        "forwardGrowth": 0.4089,
+        "basis": "FY+1",
+        "periodEnding": "2026-12-31",
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/rblx/forecast/",
+          "retrievedAt": "2026-09-04",
+          "notes": "Analyst consensus FY2026 forecast revenue $6.89B (+40.89% YoY)"
+        }
+      },
+      "ebitda": {
+        "ttm": -843.52,
+        "definition": "Operating Income + Depreciation and Amortization",
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/rblx/financials/",
+          "notes": "TTM EBITDA -$843.52M; Operating Income -$1,087M + D&A $243.82M"
+        }
+      },
+      "operatingLeaseCost": {
+        "value": 178.7,
+        "period": "FY2025",
+        "source": {
+          "filing": "Form 10-K",
+          "period": "FY2025",
+          "cik": "0001315098",
+          "accession": "0001315098-26-000024",
+          "url": "https://www.sec.gov/edgar/browse/?CIK=0001315098",
+          "notes": "Form 10-K Note 13 Leases: FY2025 Operating Lease Cost $178.697M"
+        }
+      },
+      "operatingLeaseLiabilities": {
+        "current": 158,
+        "nonCurrent": 669,
+        "total": 827,
+        "source": {
+          "filing": "Form 10-Q Q2 FY2026",
+          "period": "Q2 FY2026",
+          "cik": "0001315098",
+          "accession": "0001315098-26-000045",
+          "url": "https://www.sec.gov/edgar/browse/?CIK=0001315098",
+          "notes": "Total lease liabilities $827M (current $158M + non-current $669M)"
+        }
+      },
+      "debt": {
+        "current": 0,
+        "nonCurrent": 1009,
+        "total": 1009,
+        "source": {
+          "filing": "Form 10-Q Q2 FY2026",
+          "period": "Q2 FY2026",
+          "notes": "Senior notes principal $1,009M (excluding lease liabilities)"
+        }
+      },
+      "cash": {
+        "cashAndEquivalents": 991,
+        "shortTermInvestments": 2023,
+        "total": 3014,
+        "source": {
+          "filing": "Form 10-Q Q2 FY2026",
+          "period": "Q2 FY2026",
+          "notes": "Cash $991M + Short-term investments $2,023M = $3,014M"
+        }
+      },
+      "capitalizedEnterpriseValue": 28261.6,
+      "ebitdar": {
+        "ttm": -664.82,
+        "forward": null,
+        "isNegative": true,
+        "notes": "TTM EBITDA -$843.52M + Rent $178.70M = -$664.82M (Negative; non-meaningful EV/EBITDAR multiple)"
+      },
+      "freeCashFlow": {
+        "ttm": 1644,
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/rblx/financials/cash-flow-statement/",
+          "notes": "TTM Operating Cash Flow $2,100M - Capex $455.98M = $1,644M"
+        }
+      },
+      "kpis": {
+        "dau": {
+          "value": 79500000,
+          "display": "79.5M DAU",
+          "period": "Q2 2026",
+          "source": "Roblox Q2 2026 Form 10-Q"
+        },
+        "bookings": {
+          "value": 4100000000,
+          "display": "$4.1B LTM Bookings",
+          "period": "Q2 2026",
+          "source": "Roblox Q2 2026 Form 10-Q"
+        },
+        "abpu": {
+          "value": 12.3,
+          "display": "$12.30 Average Bookings per DAU",
+          "period": "Q2 2026",
+          "source": "Roblox Q2 2026 Form 10-Q"
+        }
+      }
+    },
+    "NFLX": {
+      "symbol": "NFLX",
+      "name": "Netflix, Inc.",
+      "exchange": "NASDAQ: NFLX",
+      "currency": "USD",
+      "reportingCurrency": "USD",
+      "asOf": "2026-09-02",
+      "stockPrice": 82.73,
+      "sharesOutstanding": 4160,
+      "marketCap": 344156.8,
+      "priceSource": {
+        "provider": "stockanalysis.com",
+        "url": "https://stockanalysis.com/stocks/nflx/history/",
+        "asOf": "2026-09-02",
+        "close": 82.73,
+        "volume": 21776493
+      },
+      "revenue": {
+        "ttm": 48371,
+        "fyForward": 51220,
+        "forwardGrowth": 0.1336,
+        "basis": "FY+1",
+        "periodEnding": "2026-12-31",
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/nflx/forecast/",
+          "retrievedAt": "2026-09-04",
+          "notes": "Analyst consensus FY2026 forecast revenue $51.22B (+13.36% YoY)"
+        }
+      },
+      "ebitda": {
+        "ttm": 14727.41,
+        "definition": "Operating Income + Depreciation and Amortization",
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/nflx/financials/",
+          "notes": "TTM EBITDA $14,727.41M; Operating Income $14,355M + D&A $372.41M"
+        }
+      },
+      "operatingLeaseCost": {
+        "value": 503.64,
+        "period": "FY2025",
+        "source": {
+          "filing": "Form 10-K",
+          "period": "FY2025",
+          "cik": "0001065280",
+          "accession": "0001065280-26-000034",
+          "url": "https://www.sec.gov/edgar/browse/?CIK=0001065280",
+          "notes": "Form 10-K Note 8 Leases: FY2025 Operating Lease Cost $503.637M"
+        }
+      },
+      "operatingLeaseLiabilities": {
+        "current": 431.4,
+        "nonCurrent": 1899,
+        "total": 2330.4,
+        "source": {
+          "filing": "Form 10-Q Q2 FY2026",
+          "period": "Q2 FY2026",
+          "cik": "0001065280",
+          "accession": "0001065280-26-000052",
+          "url": "https://www.sec.gov/edgar/browse/?CIK=0001065280",
+          "notes": "Total lease liabilities $2,330.40M (current $431.40M + non-current $1,899.00M)"
+        }
+      },
+      "debt": {
+        "current": 2484,
+        "nonCurrent": 11840,
+        "total": 14324,
+        "source": {
+          "filing": "Form 10-Q Q2 FY2026",
+          "period": "Q2 FY2026",
+          "notes": "Senior notes principal $14,324M ($2,484M current + $11,840M non-current; excluding lease liabilities)"
+        }
+      },
+      "cash": {
+        "cashAndEquivalents": 9099,
+        "shortTermInvestments": 29,
+        "total": 9128,
+        "source": {
+          "filing": "Form 10-Q Q2 FY2026",
+          "period": "Q2 FY2026",
+          "notes": "Cash $9,099M + Short-term investments $29M = $9,128M"
+        }
+      },
+      "capitalizedEnterpriseValue": 351683.2,
+      "ebitdar": {
+        "ttm": 15231.05,
+        "forward": 17265.92,
+        "notes": "TTM: EBITDA $14,727.41M + Rent $503.64M = $15,231.05M; Forward scaled by +13.36% revenue growth = $17,265.92M"
+      },
+      "freeCashFlow": {
+        "ttm": 11152,
+        "source": {
+          "provider": "stockanalysis.com",
+          "url": "https://stockanalysis.com/stocks/nflx/financials/cash-flow-statement/",
+          "notes": "TTM Operating Cash Flow $11,971M - Capex $818.83M = $11,152M"
+        }
+      },
+      "kpis": {
+        "paidMemberships": {
+          "value": 277650000,
+          "display": "277.65M Paid Memberships",
+          "period": "Q2 2026",
+          "source": "Netflix Q2 2026 Shareholder Letter"
+        },
+        "arm": {
+          "value": 12.1,
+          "display": "$12.10 Average Revenue per Membership",
+          "period": "Q2 2026",
+          "source": "Netflix Q2 2026 Shareholder Letter"
+        }
+      }
+    }
+  }
+}

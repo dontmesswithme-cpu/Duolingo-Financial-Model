@@ -1,5 +1,5 @@
 /**
- * P4.3 Artifact Contract Tests — Sensitivity Grids, Bear/Base/Bull Per-Share Ranges
+ * P4.3 Artifact Contract Tests  -  Sensitivity Grids, Bear/Base/Bull Per-Share Ranges
  * & Mechanical Recommendation (Final Sub-Phase).
  *
  * Covers:
@@ -71,7 +71,7 @@ async function getAssumptions() {
   return loadAssumptions({ location: ASSUMPTIONS_PATH, readText });
 }
 
-describe('P4.3 — Mechanical recommendation and threshold boundaries', () => {
+describe('P4.3  -  Mechanical recommendation and threshold boundaries', () => {
   test('evaluate() computes upside percentage and applies fixed thresholds exactly', () => {
     const marketPrice = 100;
 
@@ -111,15 +111,15 @@ describe('P4.3 — Mechanical recommendation and threshold boundaries', () => {
     }
   });
 
-  test('Base DCF output against MKT snapshot price yields undervalued (+19.93%)', async () => {
-    const basePerShare = 189.30871314314004;
+  test('Base DCF output against MKT snapshot price yields fair (-8.72%)', async () => {
+    const basePerShare = 144.08213043589748;
     const marketPrice = 157.85;
 
     const rec = evaluate(basePerShare, marketPrice);
-    assert.equal(rec.label, 'undervalued');
+    assert.equal(rec.label, 'fair');
     const expectedUpside = (basePerShare - marketPrice) / marketPrice;
-    pinned(rec.upsidePct, expectedUpside, 'Base upside percentage (~19.93%)');
-    assert.ok(rec.upsidePct > 0.19 && rec.upsidePct < 0.20);
+    pinned(rec.upsidePct, expectedUpside, 'Base upside percentage (~-8.72%)');
+    assert.ok(rec.upsidePct > -0.09 && rec.upsidePct < -0.08);
 
     // Tie-out against fixture
     const expRec = deriveExpectedRecommendation(basePerShare, marketPrice);
@@ -158,7 +158,7 @@ describe('P4.3 — Mechanical recommendation and threshold boundaries', () => {
   });
 });
 
-describe('P4.3 — Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
+describe('P4.3  -  Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
   test('buildSensitivityGrid generates a 9×5 grid (45 cells) with strict monotonicity', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -272,7 +272,7 @@ describe('P4.3 — Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
   });
 });
 
-describe('P4.3 — Full Valuation Pipeline & Scenario Ranges', () => {
+describe('P4.3  -  Full Valuation Pipeline & Scenario Ranges', () => {
   test('runFullValuation executes end-to-end for Bear, Base, and Bull with strict ordering', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -292,8 +292,8 @@ describe('P4.3 — Full Valuation Pipeline & Scenario Ranges', () => {
     );
 
     // Assert Base per-share matches pinned value
-    pinned(baseVal.perShare, 189.30871314314004, 'Base per-share pin');
-    assert.equal(baseVal.recommendation.label, 'undervalued');
+    pinned(baseVal.perShare, 144.08213043589748, 'Base per-share pin');
+    assert.equal(baseVal.recommendation.label, 'fair');
 
     // Benchmark price invariance: marketPrice remains 157.85 across all scenarios
     assert.equal(bearVal.marketPrice, 157.85);
@@ -301,9 +301,9 @@ describe('P4.3 — Full Valuation Pipeline & Scenario Ranges', () => {
     assert.equal(bullVal.marketPrice, 157.85);
 
     // Scenario recommendations
-    assert.equal(bearVal.recommendation.label, 'overvalued', 'Bear upside is ~ -35.12% (<= -15% overvalued band)');
-    assert.equal(baseVal.recommendation.label, 'undervalued', 'Base upside is ~ +19.93% (>= +15% undervalued band)');
-    assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +157.00% (>= +15% undervalued band)');
+    assert.equal(bearVal.recommendation.label, 'overvalued', 'Bear upside is ~ -46.54% (<= -15% overvalued band)');
+    assert.equal(baseVal.recommendation.label, 'fair', 'Base upside is ~ -8.72% (within +/-15% fair band)');
+    assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +76.01% (>= +15% undervalued band)');
   });
 
   test('hybrid FY2026 valuation honesty under scenarios: cited H1 actuals invariant', async () => {
@@ -346,7 +346,7 @@ describe('P4.3 — Full Valuation Pipeline & Scenario Ranges', () => {
   });
 });
 
-describe('P4.3 — Engine purity, determinism, deep-freeze & zero bare literals', () => {
+describe('P4.3  -  Engine purity, determinism, deep-freeze & zero bare literals', () => {
   test('all outputs are deeply frozen and mutation throws', async () => {
     const rec = evaluate(200, 100);
     assert.ok(Object.isFrozen(rec));

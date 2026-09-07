@@ -1,5 +1,5 @@
 /**
- * App controller — Phase 5 Application Pipeline.
+ * App controller; Phase 5 Application Pipeline.
  *
  * Provides the dependency-injected application factory wiring:
  *   loadHistorical → schedules.build → forecast.project →
@@ -45,6 +45,14 @@ import { renderValuation } from './ui/valuationTab.js';
 import { renderSummary } from './ui/summaryTab.js';
 import { renderSensitivity } from './ui/sensitivityTab.js';
 import { createMarketPriceState, fetchLatestPrice } from './engine/market.js';
+import peersDataset from './data/historical/peers.json' with { type: 'json' };
+import { valuateFcffDcf } from './engine/methods/fcffDcf.js';
+import { valuateComps } from './engine/methods/comps.js';
+import { valuateEvMultiples } from './engine/methods/evMultiples.js';
+import { valuatePfcf } from './engine/methods/pfcf.js';
+import { valuateSotp } from './engine/methods/sotp.js';
+import { valuatePerUser } from './engine/methods/perUser.js';
+import { aggregateVerdicts } from './engine/methods/aggregate.js';
 
 /**
  * Recursively freezes a value so no consumer can mutate model state through a
@@ -55,6 +63,76 @@ import { createMarketPriceState, fetchLatestPrice } from './engine/market.js';
  * @param {T} value
  * @returns {Readonly<T>}
  */
+
+/**
+ * Evaluates all six multi-method valuation paths and synthesizes agreement verdict.
+ *
+ * @param {object} params
+ * @param {object} params.dcfOut DCF valuation output
+ * @param {object} params.threeStatementOut Three-statement projection output
+ * @param {object} params.historical Historical dataset
+ * @param {Array<object>} [params.peers] Peers dataset
+ * @param {number} params.marketPrice Benchmark or fetched market price
+ * @returns {{ methods: Array<object>, verdict: object }}
+ */
+function computeMultiMethodValuation({
+  dcfOut,
+  threeStatementOut,
+  historical,
+  peers = peersDataset,
+  marketPrice,
+}) {
+  if (!dcfOut || !threeStatementOut || !historical) {
+    return { methods: [], verdict: null };
+  }
+
+  const p0 = threeStatementOut.periods[0];
+  const isP0 = threeStatementOut.incomeStatement.byPeriod[p0];
+  const cfP0 = threeStatementOut.cashFlow.byPeriod[p0];
+
+  const forwardRevenue = isP0.revenue.total.value;
+  const detRevenue = isP0.revenue.segments.duolingo_english_test.value;
+  const da = cfP0.operating_activities.depreciation_and_amortization.value;
+  const opInc = isP0.operating_income.value;
+  const rent = (12.071 * 1e3);
+  const forwardEbitdar = opInc + da + rent;
+  const leaseLiab = (86.136 * 1e3);
+  const netCashCapitalized = dcfOut.fcff.netCashToday - leaseLiab;
+  const sharesOutstanding = dcfOut.sharesOutstanding;
+
+  const ttm = computeTtm(historical);
+  const ocfTtm = ttm.flow.find((x) => x.metric === 'cash_from_operating_activities').value;
+  const ppeCapex = Math.abs(ttm.flow.find((x) => x.metric === 'purchase_of_property_and_equipment').value);
+  const softCapex = Math.abs(ttm.flow.find((x) => x.metric === 'capitalized_software_and_intangibles').value);
+  const ttmFcf = ocfTtm - (ppeCapex + softCapex);
+
+  const dau = ttm.kpi.find((x) => x.metric === 'dau').value;
+  const mau = ttm.kpi.find((x) => x.metric === 'mau').value;
+  const paidSubs = ttm.kpi.find((x) => x.metric === 'paid_subscribers').value;
+
+  const arpuContext = {
+    subscriptionArpu: '$6.71 / month ($80.50 / year driver basis)',
+    bookingsPerDau: '$21.98 / year ($1,158,425k FY2025 bookings / 52.7M avg DAU)',
+  };
+
+  const resDcf = valuateFcffDcf(dcfOut);
+  const resComps = valuateComps(peers, { forwardRevenue, netCashCapitalized, sharesOutstanding });
+  const resEv = valuateEvMultiples(peers, { forwardEbitdar, netCashCapitalized, sharesOutstanding });
+  const resPfcf = valuatePfcf(peers, { ttmFreeCashFlow: ttmFcf, sharesOutstanding });
+  const resSotp = valuateSotp(peers, { forwardRevenue, detRevenue, forwardEbitdar, netCashCapitalized, sharesOutstanding });
+  const resPerUser = valuatePerUser(peers, {
+    kpis: { mau, dau, paidSubscribers: paidSubs },
+    netCashCapitalized,
+    sharesOutstanding,
+    arpuContext,
+  });
+
+  const methods = [resDcf, resComps, resEv, resPfcf, resSotp, resPerUser];
+  const verdictOut = aggregateVerdicts(methods, marketPrice);
+
+  return { methods, verdict: verdictOut };
+}
+
 function deepFreeze(value) {
   if (value === null || typeof value !== 'object' || Object.isFrozen(value)) {
     return value;
@@ -210,7 +288,7 @@ export function computeSensitivityAxes(activeWacc, activeG) {
  * @property {() => number|string|Date} now Injected clock.
  * @property {Set<string>|Array<string|{url: string}>} ledger Citation URLs from
  *   `docs/sources/sources.md`. Required whenever ledger enforcement is on, which
- *   is always — the gate fails closed rather than passing an unverified citation.
+ *   is always, the gate fails closed rather than passing an unverified citation.
  * @property {(location: string) => Promise<string>} [readText] Injected file
  *   reader; the browser default (`fetch`) applies when omitted.
  * @property {string} [dir] Directory prefix for dataset files.
@@ -343,15 +421,29 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
     root,
     tabs: TAB_KEYS,
     onTabChange: (key) => {
-      // Sync URL hash if available in browser runtime
-      if (typeof globalThis.location === 'object' && typeof globalThis.location.hash === 'string') {
+      // Sync URL hash without triggering browser fragment scrolling (replaceState
+      // updates the address bar only; location.hash assignment would scroll).
+      if (typeof globalThis.history === 'object' && typeof globalThis.history.replaceState === 'function') {
+        const targetHash = `#${key}`;
+        if (globalThis.location?.hash !== targetHash) {
+          try { globalThis.history.replaceState(null, '', targetHash); } catch { /* non-browser env */ }
+        }
+      } else if (typeof globalThis.location === 'object' && typeof globalThis.location.hash === 'string') {
         const targetHash = `#${key}`;
         if (globalThis.location.hash !== targetHash) {
           globalThis.location.hash = targetHash;
         }
       }
 
-      // Redraw Tabulator instances in active tab pane so tables initialized while hidden calculate correct layout
+      // Open each tab at the top of its content (no mid-page jumps on switch).
+      if (typeof globalThis.scrollTo === 'function') {
+        try { globalThis.scrollTo(0, 0); } catch { /* non-browser env */ }
+      }
+
+      // Redraw Tabulator instances in active tab pane so tables initialized while hidden calculate correct layout.
+      // Tabulator.redraw(true) focuses its table holder, and the browser natively scrolls
+      // the focused element into view (no JS scroll API involved). Every tab must open
+      // at the top, so force top before and after the redraw and win the async race.
       const viewMap = {
         historicals: historicalsView,
         schedules: schedulesView,
@@ -359,11 +451,34 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
         valuation: valuationView,
         sensitivity: sensitivityView,
       };
+      const forceTop = () => {
+        if (typeof globalThis.scrollTo === 'function') {
+          try { globalThis.scrollTo(0, 0); } catch { /* ignore */ }
+        }
+        try {
+          const ae = globalThis.document?.activeElement;
+          const cls = ae && typeof ae.className === 'string' ? ae.className : '';
+          if (cls && cls.includes('tabulator-tableholder') && typeof ae.blur === 'function') ae.blur();
+        } catch { /* ignore */ }
+      };
       const activeView = viewMap[key];
       if (activeView && Array.isArray(activeView.tabulatorInstances)) {
         for (const inst of activeView.tabulatorInstances) {
           if (inst && typeof inst.redraw === 'function') {
             try { inst.redraw(true); } catch { /* ignore */ }
+          }
+        }
+        // Tab switching triggers several async scroll side effects (Tabulator's
+        // deferred tableholder focus, Chromium's trusted-click focus fixup, and
+        // scroll anchoring after the pane display change; the last one can land
+        // ~400ms after the click). Force top after they land.
+        forceTop();
+        if (typeof globalThis.requestAnimationFrame === 'function') {
+          try { globalThis.requestAnimationFrame(forceTop); } catch { /* ignore */ }
+        }
+        if (typeof globalThis.setTimeout === 'function') {
+          for (const delay of [80, 500]) {
+            globalThis.setTimeout(forceTop, delay);
           }
         }
       }
@@ -388,10 +503,40 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
     });
   }
 
-  /**
-   * Live model state.
-   * @type {AppState}
-   */
+  // Suppress focus steal by Tabulator table holders. Tabulator programmatically
+  // focuses `.tabulator-tableholder` on redraw/mount, and the browser natively
+  // scrolls any focused element into view, yanking the page on every tab switch
+  // and recalculation re-render. Blur tableholder focus UNLESS the previously
+  // focused element lives inside the same Tabulator table (a user interacting
+  // with that grid); Tabulator's internal re-focus passes that test and user
+  // interaction keeps working, while app-driven steal from outside is reverted.
+  let suppressTabulatorFocus = false;
+  if (typeof root.addEventListener === 'function') {
+    const focusGuard = (event) => {
+      const target = event?.target;
+      if (!target || typeof target.blur !== 'function') return;
+      const cls = typeof target.className === 'string' ? target.className : '';
+      if (!cls.includes('tabulator-tableholder')) return;
+      const related = event.relatedTarget;
+      const fromSameTable = !!(related && typeof related.closest === 'function' &&
+        related.closest('.tabulator'));
+      if (!fromSameTable) {
+        try { target.blur(); } catch { /* ignore */ }
+      }
+    };
+    const focusRoot = (typeof globalThis.document !== 'undefined' && typeof globalThis.document.addEventListener === 'function')
+      ? globalThis.document
+      : root;
+    if (focusRoot && typeof focusRoot.addEventListener === 'function') {
+      focusRoot.addEventListener('focusin', focusGuard, true);
+      listeners.push({ target: focusRoot, type: 'focusin', handler: focusGuard });
+    }
+  }
+
+  // Live model state.
+  let currentMethods = null;
+  let currentVerdict = null;
+
   const model = {
     assumptions: null,
     scenario: DEFAULT_SCENARIO,
@@ -403,6 +548,33 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
     recommendation: null,
     dirty: false,
   };
+
+  Object.defineProperties(model, {
+    methods: {
+      get() { return currentMethods; },
+      set(val) { currentMethods = val; },
+      enumerable: false,
+      configurable: true,
+    },
+    verdict: {
+      get() { return currentVerdict; },
+      set(val) { currentVerdict = val; },
+      enumerable: false,
+      configurable: true,
+    },
+    sensitivityGrid: {
+      value: null,
+      writable: true,
+      enumerable: false,
+      configurable: true,
+    },
+    scenarios: {
+      value: null,
+      writable: true,
+      enumerable: false,
+      configurable: true,
+    },
+  });
 
 /**
  * Applies driver overrides to an AssumptionSet while preserving immutability.
@@ -520,16 +692,49 @@ function applyDriverOverrides(assumptions, overrides) {
     const scenariosOut = typeof recommend.runFullValuation === 'function' && historical && neutralAssumptions
       ? {
           [SCENARIO_NAMES[0]]: activeScenario === SCENARIO_NAMES[0]
-            ? { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct }
+            ? { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut }
             : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[0]),
           [SCENARIO_NAMES[1]]: activeScenario === SCENARIO_NAMES[1]
-            ? { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct }
+            ? { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut }
             : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[1]),
           [SCENARIO_NAMES[2]]: activeScenario === SCENARIO_NAMES[2]
-            ? { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct }
+            ? { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut }
             : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[2]),
         }
       : null;
+
+    // Step 5: Multi-method valuation synthesis & agreement verdict
+    const benchmarkPrice = Number.isFinite(marketPriceState?.price)
+      ? marketPriceState.price
+      : getDriver('market_share_price', workingAssumptions);
+
+    const multiMethodOut = computeMultiMethodValuation({
+      dcfOut,
+      threeStatementOut,
+      historical,
+      peers: peersDataset,
+      marketPrice: benchmarkPrice,
+    });
+
+    if (scenariosOut) {
+      for (const k of SCENARIO_NAMES) {
+        const sc = scenariosOut[k];
+        if (sc && sc.dcf && sc.threeStatement) {
+          const scMulti = computeMultiMethodValuation({
+            dcfOut: sc.dcf,
+            threeStatementOut: sc.threeStatement,
+            historical,
+            peers: peersDataset,
+            marketPrice: benchmarkPrice,
+          });
+          scenariosOut[k] = Object.freeze({
+            ...sc,
+            methods: scMulti.methods,
+            verdict: scMulti.verdict,
+          });
+        }
+      }
+    }
 
     model.assumptions = workingAssumptions;
     model.scenario = activeScenario;
@@ -541,6 +746,8 @@ function applyDriverOverrides(assumptions, overrides) {
     model.recommendation = recOut;
     model.sensitivityGrid = sensitivityGridOut;
     model.scenarios = scenariosOut;
+    model.methods = multiMethodOut.methods;
+    model.verdict = multiMethodOut.verdict;
     model.dirty = isDirty;
 
     if (assumptionsView) {
@@ -556,13 +763,13 @@ function applyDriverOverrides(assumptions, overrides) {
       projectionsView.update(threeStatementOut, historical);
     }
     if (valuationView) {
-      valuationView.update(waccOut, dcfOut, workingAssumptions, null, marketPriceState);
+      valuationView.update(waccOut, dcfOut, workingAssumptions, null, marketPriceState, multiMethodOut.methods, multiMethodOut.verdict);
     }
     if (summaryView) {
-      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut, marketPriceState);
+      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut, marketPriceState, multiMethodOut.verdict, multiMethodOut.methods);
     }
     if (sensitivityView && sensitivityGridOut) {
-      sensitivityView.update(sensitivityGridOut, scenariosOut, dcfOut);
+      sensitivityView.update(sensitivityGridOut, scenariosOut, dcfOut, marketPriceState);
     }
   }
 
@@ -675,6 +882,26 @@ function applyDriverOverrides(assumptions, overrides) {
         enumerable: false,
         configurable: true,
       });
+      Object.defineProperty(snap, 'methods', {
+        value: currentMethods,
+        enumerable: false,
+        configurable: true,
+      });
+      Object.defineProperty(snap, 'verdict', {
+        value: currentVerdict,
+        enumerable: false,
+        configurable: true,
+      });
+      Object.defineProperty(snap, 'sensitivityGrid', {
+        value: model.sensitivityGrid,
+        enumerable: false,
+        configurable: true,
+      });
+      Object.defineProperty(snap, 'scenarios', {
+        value: model.scenarios,
+        enumerable: false,
+        configurable: true,
+      });
       return deepFreeze(snap);
     },
 
@@ -773,6 +1000,8 @@ function applyDriverOverrides(assumptions, overrides) {
       assumptions: model.assumptions || baseAssumptions,
       marketPriceState,
       onRefreshPrice: () => app.fetchPrice(),
+      methods: model.methods,
+      verdict: model.verdict,
     });
   }
 
@@ -786,6 +1015,8 @@ function applyDriverOverrides(assumptions, overrides) {
       threeStatement: model.threeStatement,
       marketPriceState,
       onRefreshPrice: () => app.fetchPrice(),
+      methods: model.methods,
+      verdict: model.verdict,
     });
   }
 
@@ -795,6 +1026,7 @@ function applyDriverOverrides(assumptions, overrides) {
       sensitivityGrid: model.sensitivityGrid,
       scenarios: model.scenarios,
       dcf: model.dcf,
+      marketPriceState,
     });
   }
 

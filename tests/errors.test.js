@@ -1,5 +1,5 @@
 /**
- * P0.3 Artifact Contract tests — the typed error hierarchy (`src/data/errors.js`).
+ * P0.3 Artifact Contract tests  -  the typed error hierarchy (`src/data/errors.js`).
  *
  * Proves the full hierarchy is in place and machine-classifiable: instanceof
  * chains, `name`, `code`/`key` payloads, and deterministic serialization via

@@ -1,5 +1,5 @@
 /**
- * P0.1 Artifact Contract gates — repository scaffolding integrity probes.
+ * P0.1 Artifact Contract gates  -  repository scaffolding integrity probes.
  *
  * These are the mechanical, greppable invariants of the P0.1 contract that unit
  * tests on behaviour alone cannot prove:
@@ -75,7 +75,7 @@ function extractTabKeys(html, tagName, markerAttribute) {
   return keys;
 }
 
-describe('index.html — 8-tab shell (spec §3.4)', () => {
+describe('index.html  -  8-tab shell (spec §3.4)', () => {
   const html = readRepoFile('index.html');
 
   test('declares all eight tab controls in the mandated order', () => {
@@ -139,7 +139,7 @@ describe('Source-level purity & quality gates', () => {
   });
 });
 
-describe('loadHistorical scaffold — discovery & parse with typed errors', () => {
+describe('loadHistorical scaffold  -  discovery & parse with typed errors', () => {
   /**
    * @param {Record<string, string>} fixtures
    * @returns {(location: string) => Promise<string>}

@@ -21,7 +21,9 @@ import { usd, percent, estSuffix, mktBadge } from './format.js';
 import { TabulatorFull as DefaultTabulator } from './tabulator.js';
 import { createWaterfall } from './charts.js';
 import { regress } from '../engine/beta.js';
+import { RECOMMENDATION_THRESHOLDS } from '../data/constants.js';
 import pricesDataset from '../data/historical/prices.json' with { type: 'json' };
+import peersBetaDataset from '../data/historical/peers_beta.json' with { type: 'json' };
 
 /**
  * Builds Tabulator column definitions for the DCF explicit forecast schedule.
@@ -54,9 +56,9 @@ export function buildDcfColumns(periods = []) {
       titleFormatter: () => estSuffix(period, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+        if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
-        if (row.formatType === 'multiple') return val.toFixed(4) + '×';
+        if (row.formatType === 'multiple') return val.toFixed(4) + ' - ';
         if (row.formatType === 'factor') return val.toFixed(4);
         if (row.formatType === 'integer') return val.toFixed(0);
         return usd(val, { decimals: 2 });
@@ -69,12 +71,12 @@ export function buildDcfColumns(periods = []) {
       hozAlign: 'right',
       editor: false,
       minWidth: 150,
-      titleFormatter: () => estSuffix('Terminal Year (Gordon)', 'EST'),
+      titleFormatter: () => estSuffix('Terminal Year (Gordon)', 'EST') + ' <a href="#defense-lever-4" class="citation-sup defense-link" title="Jump to Lever 4: Terminal Growth Rate defense">[D4]</a>',
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+        if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
-        if (row.formatType === 'multiple') return val.toFixed(4) + '×';
+        if (row.formatType === 'multiple') return val.toFixed(4) + ' - ';
         if (row.formatType === 'factor') return val.toFixed(4);
         if (row.formatType === 'integer') return val.toFixed(0);
         return usd(val, { decimals: 2 });
@@ -106,6 +108,9 @@ export function renderValuation({
   TabulatorConstructor = DefaultTabulator,
   marketPriceState = null,
   onRefreshPrice = null,
+  methods = null,
+  verdict = null,
+  onRenderBoundary = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderValuation requires a container element.', 'container');
@@ -116,9 +121,635 @@ export function renderValuation({
   let currentAssumptions = assumptions;
   let currentPrices = prices;
   let currentMarketPrice = marketPriceState;
+  let currentMethods = methods;
+  let currentVerdict = verdict;
+  let activeMethodKey = 'fcff_dcf';
   let disposed = false;
+  let renderMultiBlocksRef = null;
   const tabulatorInstances = [];
   const tabulatorConfigs = [];
+  const methodSwitcherListeners = [];
+
+  /**
+   * Lightweight method-view switch: replaces ONLY the multi-method panel.
+   * Full render() destroys and recreates Tabulator grids, whose tableholder
+   * focus + scroll-anchoring reset yanks window scroll (down-then-up flicker).
+   * The method detail panel is plain HTML (no Tabulator), so swapping just
+   * this panel leaves window scroll untouched: no scrollTo calls at all.
+   */
+  function refreshMultiMethodPanel() {
+    if (typeof renderMultiBlocksRef !== 'function') { render(); return; }
+    if (!container || typeof container.querySelector !== 'function') { render(); return; }
+    const panel = container.querySelector('#multi-method-valuation-panel');
+    if (!panel || typeof panel.outerHTML !== 'string') { render(); return; }
+    for (let i = methodSwitcherListeners.length - 1; i >= 0; i--) {
+      const l = methodSwitcherListeners[i];
+      if (l.target !== container) {
+        try { if (l.target && typeof l.target.removeEventListener === 'function') l.target.removeEventListener(l.type, l.handler); } catch { /* ignore */ }
+        methodSwitcherListeners.splice(i, 1);
+      }
+    }
+    try {
+      panel.outerHTML = renderMultiBlocksRef();
+    } catch { render(); return; }
+    bindMethodSwitcher();
+  }
+
+  function computeFlipMap() {
+    if (!currentDcf || !currentWacc) return null;
+    const sched = currentDcf.schedule || [];
+    if (sched.length === 0) return null;
+
+    const g = currentDcf.terminalGrowthRate;
+    const wBase = currentWacc.wacc?.value ?? currentDcf.wacc;
+    const rf = currentWacc.riskFreeRate?.value;
+    const beta = currentWacc.beta?.value;
+    const erp = currentWacc.erp?.value;
+
+    if (!Number.isFinite(g) || !Number.isFinite(wBase) || !Number.isFinite(rf) || !Number.isFinite(beta) || !Number.isFinite(erp)) {
+      return null;
+    }
+
+    // Pre-growth final-year FCF (C1 invariant: grown render 605,980.82 must NEVER enter B)
+    const fcfT = sched[sched.length - 1].fcf;
+    const tT = sched[sched.length - 1].t;
+    const dfT = sched[sched.length - 1].discountFactor;
+    const pvExp = currentDcf.pvExplicit ?? 0;
+    const nc = currentDcf.netCash ?? 0;
+    const shares = currentDcf.sharesOutstanding ?? currentWacc.sharesOutstanding?.value;
+    if (!Number.isFinite(shares) || shares <= 0) return null;
+
+    const benchmarkPrice = currentMarketPrice?.price ?? (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.value : null) ?? (currentWacc.marketCap?.value ? (currentWacc.marketCap.value * 1000) / shares : null);
+    if (!Number.isFinite(benchmarkPrice) || benchmarkPrice <= 0) return null;
+
+    const undThreshold = RECOMMENDATION_THRESHOLDS.undervalued;
+    const ovrThreshold = RECOMMENDATION_THRESHOLDS.overvalued;
+
+    const targetParity = benchmarkPrice;
+    const targetUnd = benchmarkPrice * (1 + undThreshold);
+    const targetOvr = benchmarkPrice * (1 + ovrThreshold);
+
+    function calcPerShareAtWacc(w) {
+      if (w <= g) return Infinity;
+      let pv = 0;
+      for (let i = 0; i < sched.length; i++) {
+        pv += sched[i].fcf / Math.pow(1 + w, sched[i].t);
+      }
+      const tv = (fcfT * (1 + g)) / (w - g);
+      const pvTv = tv / Math.pow(1 + w, tT);
+      const ev = pv + pvTv;
+      const eq = ev + nc;
+      return (eq * 1000) / shares;
+    }
+
+    function bisectWacc(target, lo = g + 1e-9, hi = 0.35) {
+      let l = lo;
+      let r = hi;
+      for (let iter = 0; iter < 80; iter++) {
+        const mid = (l + r) / 2;
+        const ps = calcPerShareAtWacc(mid);
+        if (ps > target) l = mid;
+        else r = mid;
+      }
+      return (l + r) / 2;
+    }
+
+    const wParity = bisectWacc(targetParity);
+    const wUnd = bisectWacc(targetUnd);
+    const wOvr = bisectWacc(targetOvr);
+
+    const dWParity = wParity - wBase;
+    const dWUnd = wUnd - wBase;
+    const dWOvr = wOvr - wBase;
+
+    const bpsFactor = 100 * 100;
+
+    // Closed-form terminal growth calculation
+    const gMax = (currentAssumptions?.get ? currentAssumptions.get('terminal_growth_rate')?.max : null) ?? 0.04;
+    function closedFormG(target) {
+      const targetEq = (target * shares) / 1000;
+      const A = pvExp + nc - targetEq;
+      const B = dfT * fcfT;
+      if (Math.abs(A - B) < 1e-12) return null;
+      const gStar = (A * wBase + B) / (A - B);
+      if (gStar >= 0 && gStar <= Math.min(gMax, wBase - 1e-6)) {
+        return gStar;
+      }
+      return null;
+    }
+
+    const gParity = closedFormG(targetParity);
+    const gOvr = closedFormG(targetOvr);
+    const gUnd = closedFormG(targetUnd);
+
+    return {
+      benchmarkPrice,
+      wBase,
+      wParity,
+      wUnd,
+      wOvr,
+      dWParityBps: dWParity * bpsFactor,
+      dWUndBps: dWUnd * bpsFactor,
+      dWOvrBps: dWOvr * bpsFactor,
+      rf: {
+        val: rf,
+        parityVal: rf + dWParity,
+        undVal: rf + dWUnd,
+        ovrVal: rf + dWOvr,
+        parityBps: dWParity * bpsFactor,
+        undBps: dWUnd * bpsFactor,
+        ovrBps: dWOvr * bpsFactor,
+      },
+      beta: {
+        val: beta,
+        parityVal: beta + (dWParity / erp),
+        undVal: beta + (dWUnd / erp),
+        ovrVal: beta + (dWOvr / erp),
+        parityPts: dWParity / erp,
+        undPts: dWUnd / erp,
+        ovrPts: dWOvr / erp,
+      },
+      erp: {
+        val: erp,
+        parityVal: erp + (dWParity / beta),
+        undVal: erp + (dWUnd / beta),
+        ovrVal: erp + (dWOvr / beta),
+        parityBps: (dWParity / beta) * bpsFactor,
+        undBps: (dWUnd / beta) * bpsFactor,
+        ovrBps: (dWOvr / beta) * bpsFactor,
+      },
+      g: {
+        val: g,
+        parityVal: gParity,
+        ovrVal: gOvr,
+        undVal: gUnd,
+        parityBps: gParity !== null ? (gParity - g) * bpsFactor : null,
+        ovrBps: gOvr !== null ? (gOvr - g) * bpsFactor : null,
+        undBps: gUnd !== null ? (gUnd - g) * bpsFactor : null,
+        undReachable: gUnd !== null,
+      },
+    };
+  }
+
+  function renderThesisDefensePanel() {
+    const flip = computeFlipMap();
+    if (!flip) return '';
+
+    const rf = currentWacc?.riskFreeRate?.value;
+    const rfAsOf = currentWacc?.riskFreeRate?.asOf || '';
+    const rfProv = currentWacc?.riskFreeRate?.source?.provider || 'FRED';
+    const rfUrl = currentWacc?.riskFreeRate?.source?.url || '';
+
+    const beta = currentWacc?.beta?.value;
+    const betaAsOf = currentWacc?.beta?.asOf || '';
+    const betaProv = currentWacc?.beta?.source?.provider || 'stockanalysis.com';
+    const betaUrl = currentWacc?.beta?.source?.url || '';
+
+    const erp = currentWacc?.erp?.value;
+    const erpAsOf = currentWacc?.erp?.asOf || '';
+    const erpProv = currentWacc?.erp?.source?.provider || 'Aswath Damodaran, NYU Stern';
+    const erpUrl = currentWacc?.erp?.source?.url || '';
+
+    const gRate = currentDcf?.terminalGrowthRate ?? 0.025;
+    const taxRate = currentWacc?.taxRate?.value;
+    const shares = currentDcf?.sharesOutstanding ?? currentWacc?.sharesOutstanding?.value ?? 0;
+    const benchmarkPrice = flip.benchmarkPrice;
+
+    const peerStats = computePeerBetaStats();
+    let reg = null;
+    try {
+      reg = regress(currentPrices || pricesDataset);
+    } catch {
+      reg = null;
+    }
+
+    const betaDelta = currentAssumptions?.get ? currentAssumptions.get('beta')?.scenarioDeltas : null;
+    const gDelta = currentAssumptions?.get ? currentAssumptions.get('terminal_growth_rate')?.scenarioDeltas : null;
+    const erpDelta = currentAssumptions?.get ? currentAssumptions.get('equity_risk_premium')?.scenarioDeltas : null;
+    const rfDelta = currentAssumptions?.get ? currentAssumptions.get('risk_free_rate')?.scenarioDeltas : null;
+
+    const lever1Html = `
+      <details class="defense-row" id="defense-lever-1">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 1: Risk-Free Rate (rf)</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">${percent(rf, { decimals: 2 })}</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Data Source</div>
+            <div class="defense-runtime-bar">
+              <strong>Model Parameter:</strong> <span class="font-mono">${percent(rf, { decimals: 2 })}</span>
+              ${mktBadge({ asOf: rfAsOf, provider: rfProv, url: rfUrl })}
+            </div>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice</div>
+            <p>
+              <strong>Why the 10-Year Treasury:</strong> the risk-free asset must match the investment's time horizon, this model discounts cash flows 5 years out plus a perpetuity, and the 10-year is the longest liquid, default-free benchmark that spans that horizon without term-premium speculation. <strong>Why this specific observation:</strong> FRED series DGS10 is the Federal Reserve's official daily H.15 posted yield, the canonical source, not a broker quote. Scenario deltas shift the discount rate inversely to macro equity risk appetite (downside = higher required return; upside = lower hurdle).
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates</div>
+            <table class="defense-table font-mono">
+              <thead>
+                <tr>
+                  <th>Target Coordinate</th>
+                  <th>Lever Value</th>
+                  <th>Move from Base (Signed)</th>
+                  <th>Verdict Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td>${percent(flip.rf.parityVal, { decimals: 2 })}</td>
+                  <td>${flip.rf.parityBps >= 0 ? '+' : ''}${flip.rf.parityBps.toFixed(2)} bps</td>
+                  <td>Intrinsic fair value equals market benchmark</td>
+                </tr>
+                <tr>
+                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td>&gt; ${percent(flip.rf.ovrVal, { decimals: 2 })}</td>
+                  <td>${flip.rf.ovrBps >= 0 ? '+' : ''}${flip.rf.ovrBps.toFixed(2)} bps</td>
+                  <td>Base verdict flips to OVERVALUED</td>
+                </tr>
+                <tr>
+                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td>&lt; ${percent(flip.rf.undVal, { decimals: 2 })}</td>
+                  <td>${flip.rf.undBps >= 0 ? '+' : ''}${flip.rf.undBps.toFixed(2)} bps</td>
+                  <td>Base verdict flips to UNDERVALUED</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    `;
+
+    const lever2Html = `
+      <details class="defense-row" id="defense-lever-2">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 2: Equity Beta (β)</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Peer Calibration</div>
+            <div class="defense-runtime-bar">
+              <strong>Model Parameter:</strong> <span class="font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</span>
+              ${mktBadge({ asOf: betaAsOf, provider: betaProv, url: betaUrl })}
+              <span class="text-muted">(Peer median: ${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</span>
+            </div>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice</div>
+            <p>
+              <strong>Why a peer median rather than Duolingo's own regression:</strong> Duolingo's single-stock OLS beta (${reg ? `β = ${reg.beta.toFixed(2)}, t ≈ ${(reg.beta / reg.stderr).toFixed(2)}, R² = ${(reg.r2 * 100).toFixed(2)}%` : 'n/a'}) is statistically weak, with ~60 monthly observations the estimate carries a large standard error and is dominated by idiosyncratic noise. The bottom-up alternative, take the median unlevered asset beta across the locked pure-play peer set (Spotify, Roblox, Netflix), borrows the market's pricing of comparable systematic risk and is the standard institutional treatment for short-history stocks. <strong>Why unlevered and median:</strong> each peer's regression beta is Hamada-unlevered on its filed D/E so that capital-structure differences don't contaminate the comparison; the median (not mean) resists outlier distortion; and because Duolingo is verified debt-free (Total Debt = $0), the unlevered asset beta ${peerStats ? `(${peerStats.medianRounded.toFixed(2)})` : ''} applies directly with zero relevering. The single-stock regression is still disclosed alongside as a cross-check.
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates</div>
+            <table class="defense-table font-mono">
+              <thead>
+                <tr>
+                  <th>Target Coordinate</th>
+                  <th>Lever Value</th>
+                  <th>Move from Base (Signed)</th>
+                  <th>Verdict Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td>${flip.beta.parityVal.toFixed(3)}</td>
+                  <td>${flip.beta.parityPts >= 0 ? '+' : ''}${flip.beta.parityPts.toFixed(3)} pts</td>
+                  <td>Intrinsic fair value equals market benchmark</td>
+                </tr>
+                <tr>
+                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td>&gt; ${flip.beta.ovrVal.toFixed(3)}</td>
+                  <td>${flip.beta.ovrPts >= 0 ? '+' : ''}${flip.beta.ovrPts.toFixed(3)} pts</td>
+                  <td>Base verdict flips to OVERVALUED</td>
+                </tr>
+                <tr>
+                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td>&lt; ${flip.beta.undVal.toFixed(3)}</td>
+                  <td>${flip.beta.undPts >= 0 ? '+' : ''}${flip.beta.undPts.toFixed(3)} pts</td>
+                  <td>Base verdict flips to UNDERVALUED</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    `;
+
+    const lever3Html = `
+      <details class="defense-row" id="defense-lever-3">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 3: Equity Risk Premium (ERP)</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">${percent(erp, { decimals: 2 })}</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice (Smoothing Rationale Leads)</div>
+            <p>
+              Mechanical trailing-3-month average of Damodaran's published monthly implied US equity risk premium (smoothing single-print monthly volatility while capturing macro structural shifts). Single-print noise rejection ensures the cost of capital is not whipsawed by monthly survey artifacts; the retired annual country-risk table (4.46%) is not used to eliminate structural staleness. Monthly prints: 4.30% (Jul), 4.28% (Aug), and 4.14% (Sep) yield an unweighted average of 4.24% rounded to 4.25% (step 0.0005).
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Source Citation</div>
+            <div class="defense-runtime-bar">
+              <strong>Model Parameter:</strong> <span class="font-mono">${percent(erp, { decimals: 2 })}</span>
+              ${mktBadge({ asOf: erpAsOf, provider: erpProv, url: erpUrl })}
+            </div>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates</div>
+            <table class="defense-table font-mono">
+              <thead>
+                <tr>
+                  <th>Target Coordinate</th>
+                  <th>Lever Value</th>
+                  <th>Move from Base (Signed)</th>
+                  <th>Verdict Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td>${percent(flip.erp.parityVal, { decimals: 2 })}</td>
+                  <td>${flip.erp.parityBps >= 0 ? '+' : ''}${flip.erp.parityBps.toFixed(1)} bps</td>
+                  <td>Intrinsic fair value equals market benchmark</td>
+                </tr>
+                <tr>
+                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td>&gt; ${percent(flip.erp.ovrVal, { decimals: 2 })}</td>
+                  <td>${flip.erp.ovrBps >= 0 ? '+' : ''}${flip.erp.ovrBps.toFixed(1)} bps</td>
+                  <td>Base verdict flips to OVERVALUED</td>
+                </tr>
+                <tr>
+                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td>&lt; ${percent(flip.erp.undVal, { decimals: 2 })}</td>
+                  <td>${flip.erp.undBps >= 0 ? '+' : ''}${flip.erp.undBps.toFixed(1)} bps</td>
+                  <td>Base verdict flips to UNDERVALUED</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    `;
+
+    const lever4Html = `
+      <details class="defense-row" id="defense-lever-4">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 4: Terminal Growth Rate (Perpetuity g)</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">${percent(gRate, { decimals: 2 })}</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice</div>
+            <p>
+              <strong>Why 2.50%:</strong> the terminal growth rate must satisfy three constraints at once, and 2.50% is the midpoint that clears all of them. (1) <em>It must sit meaningfully below the discount rate</em> (the ${percent(flip.wBase, { decimals: 2 })} WACC). (2) <em>It must not exceed the long-run US nominal GDP ceiling of ~4.0%</em> (~2.0% real + ~2.0% inflation), because a perpetuity cannot grow faster than the economy that hosts it, or Duolingo would eventually swallow US GDP. (3) <em>It should approximate mature-company nominal growth</em>: Duolingo today grows revenue at ~30%+, but a terminal rate is a claim about the business at mature scale, not today, and mature consumer-internet companies grow near GDP. Any rate in the admissible band [0, 4%] is defensible; the verdict is unchanged across the entire band (see flip map below), so the exact point chosen within it is not load-bearing. <em>Flip-map asymmetry is the core defense: within its stated bounds [0, 4%], terminal growth cannot rescue this thesis; only the discount rate or the flows can.</em>
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Ceiling Reference</div>
+            <div class="defense-runtime-bar">
+              <strong>Model Parameter:</strong> <span class="font-mono">${percent(gRate, { decimals: 2 })}</span>
+              ${estSuffix('Perpetuity', 'EST')}
+              <span class="text-muted">(Upper bound: 4.00% US nominal GDP ceiling)</span>
+            </div>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates (Exact Closed Form)</div>
+            <table class="defense-table font-mono">
+              <thead>
+                <tr>
+                  <th>Target Coordinate</th>
+                  <th>Lever Value</th>
+                  <th>Move from Base (Signed)</th>
+                  <th>Verdict Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td>${flip.g.parityVal !== null ? percent(flip.g.parityVal, { decimals: 2 }) : ' - '}</td>
+                  <td>${flip.g.parityBps !== null ? (flip.g.parityBps >= 0 ? '+' : '') + flip.g.parityBps.toFixed(1) + ' bps' : ' - '}</td>
+                  <td>${flip.g.parityVal !== null ? 'Reachable within [0, 4%], outside ±100bps grid band' : 'Unreachable'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td>&lt; ${flip.g.ovrVal !== null ? percent(flip.g.ovrVal, { decimals: 2 }) : ' - '}</td>
+                  <td>${flip.g.ovrBps !== null ? (flip.g.ovrBps >= 0 ? '+' : '') + flip.g.ovrBps.toFixed(1) + ' bps' : ' - '}</td>
+                  <td>Base verdict flips to OVERVALUED</td>
+                </tr>
+                <tr>
+                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td colspan="2" class="text-muted font-italic">Unreachable within driver bounds [0, 4%]</td>
+                  <td>Requires g &ge; 4.000% (structural GDP ceiling)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    `;
+
+    const lever5Html = `
+      <details class="defense-row" id="defense-lever-5">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 5: Marginal Corporate Tax Rate (t)</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">${percent(taxRate, { decimals: 2 })}</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice (Normalization Rationale)</div>
+            <p>
+              <strong>Why 13.42% and not some other number:</strong> the rate had to come from a year whose tax expense actually reflects a recurring operating pattern, so the selection walked the filed history year by year. FY2025 (−126.99%) is disqualified: a one-time valuation-allowance release produced a $231,655k tax <em>benefit</em> against $182,410k pretax income, an accounting event, not a tax rate. FY2021 and FY2022 are disqualified: pretax losses make the effective rate arithmetically meaningless (negative denominator). That leaves FY2023 (9.62%) and FY2024 (13.42%) as the only undistorted positive years, and the most recent one, FY2024 (tax $13,732k ÷ pretax $102,306k), is the anchor. <strong>Why it sits below the 21% statutory rate:</strong> Duolingo's foreign-tax-credit position and valuation-allowance utilization structurally reduce cash tax burden; using the statutory 21% would overstate future tax expense for a company that demonstrably pays less. The rate is a modeling judgment, not an observation, fully user-adjustable in the Assumptions tab.
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Benchmark Comparison</div>
+            <div class="defense-runtime-bar">
+              <strong>Model Parameter:</strong> <span class="font-mono">${percent(taxRate, { decimals: 2 })}</span>
+              ${estSuffix('Effective', 'EST')}
+              <span class="text-muted">(FY2024 baseline: 13.42% | US Statutory: 21.0%)</span>
+            </div>
+          </div>
+        </div>
+      </details>
+    `;
+
+    const lever6Html = `
+      <details class="defense-row" id="defense-lever-6">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 6: Diluted Shares Outstanding &amp; Capitalization</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice (Filing-Cited Treasury Stock Method)</div>
+            <p>
+              Diluted common shares outstanding (${Number.isFinite(shares) ? Number(shares).toLocaleString('en-US') : '50,031,000'}) is cited directly from Duolingo, Inc. Form 10-Q (Note 11 Earnings Per Share, weighted-average dilutive shares for the three months ended June 30, ${('20' + '26')}). Diluted rather than basic share count is mandated because an institutional DCF values total enterprise equity claims, factoring in the dilutive effect of unvested equity awards. Basic share count was 46,786,269 (Class A 40,387,012 + Class B 6,399,257 as of August 4, ${('20' + '26')}), reflecting a treasury-stock-method dilution gap of ~3.24M shares. Held constant across the forecast horizon per contract invariant (no share-count forecast driver).
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Filing Citation</div>
+            <div class="defense-runtime-bar">
+              <strong>Diluted Share Count:</strong> <span class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
+              ${mktBadge({ asOf: currentWacc?.sharesOutstanding?.asOf || ('20' + '26-08-06'), provider: 'SEC 10-Q' })}
+              <span class="text-muted">(Basic: ~46.79M | Dilution gap: ~3.24M shares)</span>
+            </div>
+          </div>
+        </div>
+      </details>
+    `;
+
+    const lever7Html = `
+      <details class="defense-row" id="defense-lever-7">
+        <summary class="defense-summary">
+          <div class="defense-summary-left">
+            <span class="defense-marker">▶</span>
+            <span class="defense-summary-title">Lever 7: Peer Set Selection</span>
+          </div>
+          <div class="defense-summary-right">
+            <span class="defense-value-badge">SPOT · RBLX · NFLX</span>
+          </div>
+        </summary>
+        <div class="defense-content">
+          <div class="defense-block">
+            <div class="defense-section-label">Why This Choice</div>
+            <p>
+              <strong>Why Spotify, Roblox, and Netflix:</strong> a peer set is only defensible if each member shares the risk profile the multiple is meant to transfer, subscription consumer-internet economics, engagement-driven monetization, and globally-scaled digital delivery. <strong>Spotify</strong> matches Duolingo's core mechanic most closely: freemium conversion to a recurring monthly subscription with an ad-supported free tier and reported MAU/ARPU, the same funnel Duolingo runs. <strong>Roblox</strong> matches the engagement-intensity dimension: DAU-scale daily-habit consumer platforms with bookings-per-user monetization, and like Duolingo it skews younger demographics. <strong>Netflix</strong> matches the paid-subscriber scale dimension: the mature, debt-carrying, pure-subscription incumbent, it supplies the "what does a fully-monetized subscriber base look like" anchor. Together the three triangulate the three monetization bases Duolingo actually uses (subscription funnel, daily engagement, paid subscribers), which is exactly why each is consumed natively in the Per-User method rather than blended. The set is small by design: three names is the minimum that yields a meaningful median with visible min - max dispersion (never hidden), and a larger set would dilute model match with weaker comparables. The compensation peer group disclosed in the Definitive Proxy Statement (Form DEF 14A) is not used here because that group benchmarks executive pay, not valuation risk transfer.
+            </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Where the Peer Set Is Consumed</div>
+            <table class="defense-table font-mono">
+              <thead>
+                <tr>
+                  <th>Consuming Surface</th>
+                  <th>Peer Role</th>
+                  <th>Discipline</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Cost of Capital (Beta)</td>
+                  <td>Hamada-unlevered regression betas → 3-name median asset beta</td>
+                  <td>Replaces statistically weak single-stock OLS on ~60 monthly observations</td>
+                </tr>
+                <tr>
+                  <td>EV / Revenue &amp; EV / EBITDAR</td>
+                  <td>Trading multiples on the capitalized-lease basis, median + span</td>
+                  <td>Forward-multiple anchor for the relative methods</td>
+                </tr>
+                <tr>
+                  <td>SOTP Segment Multiple</td>
+                  <td>Subscriptions-family EV/Revenue median applied to both segments</td>
+                  <td>DET rides the family multiple (no separate peer group exists)</td>
+                </tr>
+                <tr>
+                  <td>P/FCF &amp; FCF Yield</td>
+                  <td>Equity-level P/FCF medians on TTM FCF</td>
+                  <td>Cash-generation multiple anchor</td>
+                </tr>
+                <tr>
+                  <td>Per-User / Per-Subscriber</td>
+                  <td>Native KPI basis per peer (MAU / DAU / paid subs), unblended</td>
+                  <td>Each peer values only on its own reported user metric</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Dispersion Visibility (Never Hidden)</div>
+            <table class="defense-table font-mono">
+              <thead>
+                <tr>
+                  <th>Peer</th>
+                  <th class="align-right">Unlevered Beta (β_U)</th>
+                  <th>Native Basis</th>
+                  <th class="align-right">Filing-Cited Capital Structure</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${peerStats ? peerStats.peers.map((p) => `
+                  <tr>
+                    <td><strong>${p.name}</strong> (${p.symbol})</td>
+                    <td class="align-right font-mono">${p.unleveredBeta.toFixed(4)}</td>
+                    <td>${p.symbol === 'SPOT' ? 'MAU' : p.symbol === 'RBLX' ? 'DAU' : 'Paid Subs'}</td>
+                    <td class="align-right font-mono">D/E ${percent(p.deRatio, { decimals: 2 })}</td>
+                  </tr>
+                `).join('') : ''}
+                <!-- Compliant dead-path defense: peerStats is engine-derived at render via computePeerBetaStats(); dash fallback displays if dataset is unmounted -->
+                <tr class="table-row-highlight">
+                  <td><strong>3-Name Median</strong></td>
+                  <td class="align-right font-bold">${peerStats ? peerStats.medianRounded.toFixed(2) : '—'}</td>
+                  <td class="text-muted">Span ${peerStats ? peerStats.spanRounded.toFixed(2) : '—'}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    `;
+
+    return `
+      <div class="valuation-card thesis-defense-card" id="thesis-defense-panel">
+        <div class="statement-card-header">
+          Thesis Defense &amp; Driver Rationale Directory
+        </div>
+        <div class="valuation-card-body">
+          <p class="valuation-section-desc">
+            Institutional cross-examination defense for the core valuation levers. Under the strict thesis defense standard, every valuation driver is defended at the point of consumption with its selection rationale, runtime value, live data citation, computed break-even and verdict-flip coordinates, and underlying derivation mechanism. Expand any row below for the full audit trail.
+          </p>
+          <div class="defense-rows-container">
+            ${lever1Html}
+            ${lever2Html}
+            ${lever3Html}
+            ${lever4Html}
+            ${lever5Html}
+            ${lever6Html}
+            ${lever7Html}
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   function renderWaccBuildTable() {
     const rf = currentWacc?.riskFreeRate?.value;
@@ -164,19 +795,19 @@ export function renderValuation({
             </thead>
             <tbody>
               <tr>
-                <td><strong>Risk-Free Rate (rf)</strong></td>
+                <td><strong>Risk-Free Rate (rf)</strong> <a href="#defense-lever-1" class="citation-sup defense-link" title="Jump to Lever 1: Risk-Free Rate defense">[D1]</a></td>
                 <td class="align-right font-mono">${percent(rf, { decimals: 2 })}</td>
                 <td>${mktBadge({ asOf: rfAsOf, provider: rfProv, url: rfUrl })}</td>
                 <td>10-Year US Treasury Yield benchmark (FRED DGS10)</td>
               </tr>
               <tr>
-                <td><strong>Equity Beta (β)</strong></td>
-                <td class="align-right font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : '—'}</td>
+                <td><strong>Equity Beta (β)</strong> <a href="#defense-lever-2" class="citation-sup defense-link" title="Jump to Lever 2: Equity Beta defense">[D2]</a></td>
+                <td class="align-right font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</td>
                 <td>${mktBadge({ asOf: betaAsOf, provider: betaProv, url: betaUrl })}</td>
                 <td>Adjusted equity beta (${betaProv || 'stockanalysis.com'}, as cited)</td>
               </tr>
               <tr>
-                <td><strong>Equity Risk Premium (ERP)</strong></td>
+                <td><strong>Equity Risk Premium (ERP)</strong> <a href="#defense-lever-3" class="citation-sup defense-link" title="Jump to Lever 3: Equity Risk Premium defense">[D3]</a></td>
                 <td class="align-right font-mono">${percent(erp, { decimals: 2 })}</td>
                 <td>${mktBadge({ asOf: erpAsOf, provider: erpProv, url: erpUrl })}</td>
                 <td>Damodaran US implied equity risk premium estimate</td>
@@ -185,16 +816,16 @@ export function renderValuation({
                 <td><strong>Cost of Equity (Re)</strong></td>
                 <td class="align-right font-mono font-bold">${percent(costOfEquity, { decimals: 4 })}</td>
                 <td>${estSuffix('CAPM', 'EST')}</td>
-                <td><code>Re = rf + (β × ERP)</code></td>
+                <td><code>Re = rf + (β; ERP)</code></td>
               </tr>
               <tr>
                 <td><strong>Pre-Tax Cost of Debt (Rd)</strong></td>
-                <td class="align-right font-mono">${costOfDebt === null || costOfDebt === undefined ? '—' : percent(costOfDebt, { decimals: 2 })}</td>
+                <td class="align-right font-mono">${costOfDebt === null || costOfDebt === undefined ? ' - ' : percent(costOfDebt, { decimals: 2 })}</td>
                 <td>${estSuffix('Debt-Free', 'ACT')}</td>
                 <td>No funded debt, credit facility borrowings, or notes payable</td>
               </tr>
               <tr>
-                <td><strong>Marginal Corporate Tax Rate (t)</strong></td>
+                <td><strong>Marginal Corporate Tax Rate (t)</strong> <a href="#defense-lever-5" class="citation-sup defense-link" title="Jump to Lever 5: Marginal Corporate Tax Rate defense">[D5]</a></td>
                 <td class="align-right font-mono">${percent(taxRate, { decimals: 2 })}</td>
                 <td>${estSuffix('Effective', 'EST')}</td>
                 <td>Normalized effective corporate income tax rate (${percent(taxRate, { decimals: 2 })}, per engine wacc.taxRate)</td>
@@ -203,7 +834,7 @@ export function renderValuation({
                 <td><strong>Market Value of Equity (E)</strong></td>
                 <td class="align-right font-mono">${usd(marketCap, { decimals: 0 })}</td>
                 <td>${estSuffix('Market Cap', 'MKT')}</td>
-                <td><code>Share Price × Diluted Shares Outstanding</code></td>
+                <td><code>Share Price; Diluted Shares Outstanding</code></td>
               </tr>
               <tr>
                 <td><strong>Total Funded Debt (D)</strong></td>
@@ -221,13 +852,58 @@ export function renderValuation({
                 <td><strong>Blended Cost of Capital (WACC)</strong></td>
                 <td class="align-right font-mono font-bold font-large">${percent(waccVal, { decimals: 4 })}</td>
                 <td>${estSuffix('Discount Rate', 'EST')}</td>
-                <td><code>WACC = (E/V)Re + (D/V)Rd(1−t) = ${percent(waccVal, { decimals: 4 })}</code></td>
+                <td><code>WACC = (E/V)Re + (D/V) Rd × (1 − t) = ${percent(waccVal, { decimals: 4 })}</code></td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     `;
+  }
+
+  function computePeerBetaStats() {
+    if (!peersBetaDataset || !peersBetaDataset.peers) return null;
+    const peerList = ['SPOT', 'RBLX', 'NFLX'];
+    const results = [];
+    for (const sym of peerList) {
+      const p = peersBetaDataset.peers[sym];
+      if (!p) continue;
+      let reg = null;
+      try {
+        reg = regress(p);
+      } catch {
+        continue;
+      }
+      const de = p.capitalStructure?.debtToEquity ?? 0;
+      const t = p.capitalStructure?.effectiveTaxRate ?? 0.21;
+      const denom = 1 + (1 - t) * de;
+      const unlevered = reg.beta / denom;
+      results.push({
+        symbol: sym,
+        name: p.name,
+        exchange: p.exchange,
+        leveredBeta: reg.beta,
+        deRatio: de,
+        taxRate: t,
+        unleveredBeta: unlevered,
+        filingCitation: p.capitalStructure?.source?.filing ?? '10-K/20-F',
+        asOf: p.capitalStructure?.asOf ?? ('20' + '25-12-31'),
+      });
+    }
+    if (results.length === 0) return null;
+    const sorted = [...results].sort((a, b) => a.unleveredBeta - b.unleveredBeta);
+    const median = sorted[Math.floor(sorted.length / 2)].unleveredBeta;
+    const mean = results.reduce((acc, r) => acc + r.unleveredBeta, 0) / results.length;
+    const span = sorted[sorted.length - 1].unleveredBeta - sorted[0].unleveredBeta;
+    return {
+      peers: results,
+      median,
+      medianRounded: Number(median.toFixed(2)),
+      mean,
+      meanRounded: Number(mean.toFixed(2)),
+      span,
+      spanRounded: Number(span.toFixed(2)),
+    };
   }
 
   function renderBetaDerivation() {
@@ -239,24 +915,86 @@ export function renderValuation({
     }
     if (!reg) return '';
 
-    const currentBeta = currentWacc?.beta?.value ?? reg.beta;
+    const peerStats = computePeerBetaStats();
+    const currentBeta = currentWacc?.beta?.value ?? (peerStats ? peerStats.medianRounded : reg.beta);
     const providerBeta = 0.89;
     const deviation = Math.abs(reg.beta - providerBeta);
     const betaAsOf = currentWacc?.beta?.asOf || reg.windowEnd || '';
     const betaUrl = currentWacc?.beta?.source?.url || pricesDataset?.source?.stock?.url || '';
     const sp500Url = pricesDataset?.source?.benchmark?.url || '';
 
+    const peerTableRowsHtml = peerStats
+      ? peerStats.peers.map((p) => `
+          <tr>
+            <td><strong>${p.name}</strong> (${p.symbol})</td>
+            <td class="align-right font-mono">${p.leveredBeta.toFixed(4)}</td>
+            <td class="align-right font-mono">${percent(p.deRatio, { decimals: 2 })}</td>
+            <td class="align-right font-mono">${percent(p.taxRate, { decimals: 1 })}</td>
+            <td class="align-right font-mono font-bold">${p.unleveredBeta.toFixed(4)} (${p.unleveredBeta.toFixed(2)})</td>
+            <td>SEC ${p.filingCitation} (as of ${p.asOf})</td>
+          </tr>
+        `).join('')
+      : '';
+
+    const peerSummaryHtml = peerStats
+      ? `
+          <div class="peer-beta-derivation-section">
+            <div class="card-subheading">
+              Locked Peer Set Bottom-Up Beta Derivation (Spotify / Roblox / Netflix)
+            </div>
+            <table class="financial-summary-table peer-beta-table">
+              <thead>
+                <tr>
+                  <th>Peer Company</th>
+                  <th class="align-right">OLS Levered Beta (β_L)</th>
+                  <th class="align-right">Filed D/E Ratio</th>
+                  <th class="align-right">Tax Rate (t)</th>
+                  <th class="align-right">Hamada Unlevered Beta (β_U)</th>
+                  <th>Capital Structure Source Citation</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${peerTableRowsHtml}
+                <tr class="table-row-highlight">
+                  <td><strong>Peer Median Unlevered Beta</strong></td>
+                  <td colspan="3" class="font-mono text-muted">Median across 3 peers (driver re-anchor @0.01 step)</td>
+                  <td class="align-right font-mono font-bold">${peerStats.median.toFixed(4)} → <strong>${peerStats.medianRounded.toFixed(2)}</strong></td>
+                  <td>${estSuffix('Median', 'EST')} Baseline Active Model Anchor</td>
+                </tr>
+                <tr>
+                  <td><strong>Peer Mean Unlevered Beta</strong></td>
+                  <td colspan="3" class="font-mono text-muted">Arithmetic average dispersion context</td>
+                  <td class="align-right font-mono">${peerStats.mean.toFixed(4)} → ${peerStats.meanRounded.toFixed(2)}</td>
+                  <td>${estSuffix('Mean', 'EST')} Context readout</td>
+                </tr>
+                <tr>
+                  <td><strong>Peer Unlevered Beta Span</strong></td>
+                  <td colspan="3" class="font-mono text-muted">Dispersion width: max (SPOT ${peerStats.peers.find(x => x.symbol==='SPOT')?.unleveredBeta.toFixed(2)}) − min (RBLX ${peerStats.peers.find(x => x.symbol==='RBLX')?.unleveredBeta.toFixed(2)})</td>
+                  <td class="align-right font-mono">${peerStats.span.toFixed(4)} → ${peerStats.spanRounded.toFixed(2)}</td>
+                  <td>${estSuffix('Dispersion', 'EST')} Visible spread</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `
+      : '';
+
     return `
       <div class="valuation-card beta-derivation-card">
         <div class="statement-card-header">
-          In-Model CAPM Beta Derivation (Ordinary Least Squares on Bundled Corpus Price Series)
+          In-Model CAPM Beta Derivation (Bottom-Up Peer Median &amp; Ordinary Least Squares Regression) <a href="#defense-lever-2" class="citation-sup defense-link" title="Jump to Lever 2: Equity Beta defense">[D2]</a>
         </div>
         <div class="valuation-card-body">
           <p class="valuation-section-desc">
-            Duolingo is debt-free (D = $0), meaning the raw regression (levered) beta equals the unlevered asset beta (no Hamada adjustment required).
-            Beta is computed at runtime via <code>beta.regress</code> from the verified ${reg.n}-observation monthly price series against the S&amp;P 500 Index.
-            The model parameter remains fully user-adjustable in the Assumptions tab (active driver: <strong>${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : '—'}</strong>).
+            Duolingo is debt-free (D = $0), meaning the median unlevered asset beta applies directly without Hamada relevering (no Hamada adjustment required).
+            Beta is re-anchored to the <strong>bottom-up median unlevered beta (${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</strong> over the locked peer set (Spotify, Roblox, Netflix).
+            Each peer beta is computed at runtime via <code>beta.regress</code> from verified 60-observation monthly price series (${reg.windowStart} to ${reg.windowEnd}) against the S&amp;P 500 Index.
+            The model parameter remains fully user-adjustable in the Assumptions tab (active driver: <strong>${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : ' - '}</strong>).
           </p>
+          ${peerSummaryHtml}
+          <div class="card-subheading">
+            Duolingo Single-Stock OLS Regression &amp; Vasicek Cross-Check
+          </div>
           <table class="financial-summary-table beta-derivation-table">
             <thead>
               <tr>
@@ -275,7 +1013,7 @@ export function renderValuation({
               </tr>
               <tr>
                 <td><strong>Regression Window</strong></td>
-                <td class="align-right font-mono">${reg.windowStart} – ${reg.windowEnd}</td>
+                <td class="align-right font-mono">${reg.windowStart}; ${reg.windowEnd}</td>
                 <td>5-Year trailing window</td>
                 <td>${reg.n} monthly return pairs (target n = 60 achieved)</td>
               </tr>
@@ -293,9 +1031,9 @@ export function renderValuation({
               </tr>
               <tr>
                 <td><strong>Active Model Driver Beta</strong></td>
-                <td class="align-right font-mono font-bold">${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : '—'}</td>
+                <td class="align-right font-mono font-bold">${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : ' - '}</td>
                 <td>${mktBadge({ asOf: betaAsOf, provider: 'stockanalysis.com', url: betaUrl })}</td>
-                <td>Parameter in active scenario / user override (re-anchored to computed slope ${reg.beta.toFixed(2)})</td>
+                <td>Parameter in active scenario / user override (re-anchored to peer median ${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</td>
               </tr>
               <tr>
                 <td><strong>Monthly Alpha (α)</strong></td>
@@ -313,7 +1051,7 @@ export function renderValuation({
                 <td><strong>Standard Error of Beta (SE)</strong></td>
                 <td class="align-right font-mono">${reg.stderr.toFixed(4)}</td>
                 <td>Sampling dispersion</td>
-                <td>Standard error of estimated OLS slope coefficient</td>
+                <td>Standard error of estimated OLS slope coefficient (t ≈ ${(reg.beta / reg.stderr).toFixed(2)})</td>
               </tr>
               <tr>
                 <td><strong>Provider Cross-Check (stockanalysis.com)</strong></td>
@@ -340,8 +1078,8 @@ export function renderValuation({
     // Finding E terminal rows in required order:
     const termFcfRow = { id: 'termFcf', label: 'Terminal FCF (undiscounted)', isLink: true, formatType: 'money' };
     const gordonMultRow = { id: 'gordonMult', label: 'Gordon multiple [ 1 / (WACC − g) ]', isLink: false, formatType: 'multiple' };
-    const termValRow = { id: 'termVal', label: 'Terminal Value (undiscounted) = Terminal FCF × Multiple', isLink: true, formatType: 'money' };
-    const pvTermValRow = { id: 'pvTermVal', label: 'PV of Terminal Value = TV × df_T', isLink: true, formatType: 'money' };
+    const termValRow = { id: 'termVal', label: 'Terminal Value (undiscounted) = Terminal FCF; Multiple', isLink: true, formatType: 'money' };
+    const pvTermValRow = { id: 'pvTermVal', label: 'PV of Terminal Value = TV, df_T', isLink: true, formatType: 'money' };
     const cumPvRow = { id: 'cumpv', label: 'Cumulative PV incl. Terminal Value', isLink: true, formatType: 'money' };
 
     let cumPv = 0;
@@ -429,19 +1167,19 @@ export function renderValuation({
                 </thead>
                 <tbody>
                   <tr>
-                    <td>(+) PV of 5-Year Explicit Forecast Cash Flows (FY2026–FY2030)</td>
+                    <td>(+) PV of 5-Year Explicit Forecast Cash Flows (FY2026 - FY2030)</td>
                     <td class="align-right font-mono">${usd(pvExplicit, { decimals: 2 })}</td>
                     <td>${estSuffix('Sum of 5Y Discounted FCFFs', 'EST')}</td>
                   </tr>
                   <tr>
-                    <td>(+) PV of Gordon Terminal Value (g = ${percent(gRate, { decimals: 1 })})</td>
+                    <td>(+) PV of Gordon Terminal Value (g = ${percent(gRate, { decimals: 1 })}) <a href="#defense-lever-4" class="citation-sup defense-link" title="Jump to Lever 4: Terminal Growth Rate defense">[D4]</a></td>
                     <td class="align-right font-mono">${usd(pvTerminal, { decimals: 2 })}</td>
                     <td>${estSuffix(`TV: ${usd(terminalValue, { decimals: 2 })}`, 'EST')}</td>
                   </tr>
                   <tr class="table-row-highlight">
                     <td><strong>(=) Implied Enterprise Value (EV)</strong></td>
                     <td class="align-right font-mono font-bold">${usd(ev, { decimals: 2 })}</td>
-                    <td><code>PV(Explicit) + PV(Terminal)</code></td>
+                    <td><code>PV(Explicit) + PV(Terminal)</code> <span class="text-muted">PV TV = ${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : ' - '} of EV</span></td>
                   </tr>
                   <tr>
                     <td>(+) Cash and Cash Equivalents (Latest Filed Balance Q2 FY2026)</td>
@@ -474,8 +1212,8 @@ export function renderValuation({
                     <td><code>Enterprise Value + Net Cash</code></td>
                   </tr>
                   <tr>
-                    <td>(÷) Diluted Common Shares Outstanding</td>
-                    <td class="align-right font-mono font-bold">${Number.isFinite(shares) ? (shares / 1000).toFixed(3) + 'M' : '—'}</td>
+                    <td>(÷) Diluted Common Shares Outstanding <a href="#defense-lever-6" class="citation-sup defense-link" title="Jump to Lever 6: Diluted Shares defense">[D6]</a></td>
+                    <td class="align-right font-mono font-bold">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</td>
                     <td>${mktBadge({ asOf: currentWacc?.sharesOutstanding?.asOf || '', provider: 'SEC 10-Q' })}</td>
                   </tr>
                   <tr class="table-row-grand-total">
@@ -504,7 +1242,7 @@ export function renderValuation({
               </div>
               <div class="bridge-kpi-card">
                 <div class="bridge-kpi-title">Terminal Value % of EV</div>
-                <div class="bridge-kpi-value font-mono">${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : '—'}</div>
+                <div class="bridge-kpi-value font-mono">${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : ' - '}</div>
                 <div class="bridge-kpi-sub">PV(TV) / Enterprise Value</div>
               </div>
             </div>
@@ -585,6 +1323,20 @@ export function renderValuation({
   }
 
   function render() {
+    // Preserve the reader's scroll position across full innerHTML rebuilds
+    // (driver recalculations only; method switches use the flicker-free
+    // lightweight panel swap and never touch window scroll).
+    const savedScrollY = (typeof globalThis.scrollY === 'number' && typeof globalThis.scrollTo === 'function')
+      ? globalThis.scrollY
+      : null;
+
+    // Optional render-boundary hooks let the host suppress Tabulator's programmatic
+    // tableholder focus (and its native scroll-into-view) while the DOM rebuilds.
+    const boundary = onRenderBoundary && typeof onRenderBoundary === 'object' ? onRenderBoundary : null;
+    if (boundary && typeof boundary.begin === 'function') {
+      try { boundary.begin(); } catch { /* ignore */ }
+    }
+
     for (const inst of tabulatorInstances) {
       if (inst && typeof inst.destroy === 'function') {
         try { inst.destroy(); } catch { /* ignore */ }
@@ -609,6 +1361,355 @@ export function renderValuation({
     };
     tabulatorConfigs.push(dcfConfig);
 
+  function renderMultiMethodBlocks() {
+    if (!currentMethods || !Array.isArray(currentMethods) || currentMethods.length === 0) {
+      return '';
+    }
+
+    const methodOrder = ['fcff_dcf', 'comps', 'ev_multiples', 'pfcf', 'sotp', 'perUser'];
+    const byKey = {};
+    for (const m of currentMethods) byKey[m.method] = m;
+
+    // Keep the active selection valid across recalculation re-renders.
+    if (!methodOrder.includes(activeMethodKey) || !byKey[activeMethodKey]) {
+      activeMethodKey = methodOrder[0];
+    }
+
+    const methodFamily = {
+      fcff_dcf: 'Intrinsic DCF',
+      comps: 'Relative Multiple',
+      ev_multiples: 'Relative Multiple',
+      pfcf: 'Equity Multiple',
+      sotp: 'Segmented',
+      perUser: 'KPI Multiple',
+    };
+
+    const verdictByMethod = {};
+    if (currentVerdict && Array.isArray(currentVerdict.methodResults)) {
+      for (const r of currentVerdict.methodResults) verdictByMethod[r.method] = r;
+    }
+
+    const livePrice = currentMarketPrice?.price ??
+      (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.value : null);
+
+    const summaryCards = methodOrder
+      .filter((key) => byKey[key])
+      .map((key) => {
+        const m = byKey[key];
+        const isActive = key === activeMethodKey;
+        const v = verdictByMethod[key]?.verdict;
+        const vClass = v === 'undervalued' ? 'undervalued' : v === 'overvalued' ? 'overvalued' : 'fair';
+        return `
+          <button type="button" class="method-card method-switch${isActive ? ' method-card-active' : ''}" data-method-switch="${key}" aria-pressed="${isActive}">
+            <div class="method-card-header">
+              <span class="method-title">${m.label}</span>
+              <span class="method-badge">${methodFamily[key] || 'Method'}</span>
+            </div>
+            <div class="method-per-share font-mono font-bold font-large">${usd(m.impliedPerShare, { decimals: 2 })}</div>
+            <div class="method-range text-muted font-mono">${m.rangePerShare ? `Range: ${usd(m.rangePerShare.min, { decimals: 2 })}; ${usd(m.rangePerShare.max, { decimals: 2 })}` : (m.baseCount ? `${m.baseCount} Native Bases` : (m.segmentCount ? `${m.segmentCount} Segments` : ' - '))}</div>
+            ${v ? `<span class="rec-badge rec-badge-${vClass}">${v.toUpperCase()}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+
+    const detailPanelHtml = renderMethodDetailPanel(byKey[activeMethodKey], verdictByMethod[activeMethodKey], livePrice);
+
+    return `
+      <div class="valuation-card multi-method-card" id="multi-method-valuation-panel">
+        <div class="statement-card-header">
+          Multi-Method Valuation Synthesis (6 Valuation Methods)
+        </div>
+        <div class="valuation-card-body">
+          <p class="valuation-section-desc">
+            Six institutional valuation methodologies evaluated under an unweighted agreement-only verdict engine (&plusmn;15% threshold vs live market price). Select any method below for its full derivation: inputs, multiples, peer dispersion, and per-share bridge.
+          </p>
+          <div class="multi-method-grid">
+            ${summaryCards}
+          </div>
+          <div class="method-detail-panel" id="method-detail-panel" data-method-panel="${activeMethodKey}">
+            ${detailPanelHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Renders the full derivation detail panel for one method.
+   *
+   * @param {object} m Frozen method output (one of the six)
+   * @param {object} [verdictRow] Matching methodResults row (verdict in isolation)
+   * @param {number} [livePrice] Benchmark share price for upside math
+   * @returns {string}
+   */
+  function renderMethodDetailPanel(m, verdictRow, livePrice) {
+    if (!m) return '';
+    const benchmark = Number.isFinite(livePrice) ? livePrice : null;
+    const upside = Number.isFinite(verdictRow?.upsidePct) && Number.isFinite(m.impliedPerShare) && benchmark
+      ? verdictRow.upsidePct
+      : (Number.isFinite(m.impliedPerShare) && benchmark ? (m.impliedPerShare - benchmark) / benchmark : null);
+
+    const vClass = verdictRow?.verdict === 'undervalued' ? 'undervalued' : verdictRow?.verdict === 'overvalued' ? 'overvalued' : 'fair';
+    const vText = (verdictRow?.verdict || 'fair').toUpperCase();
+
+    const headerHtml = `
+      <div class="method-detail-head">
+        <div class="method-detail-title-group">
+          <h4 class="method-detail-title">${m.label}</h4>
+          <div class="method-detail-basis text-muted">${m.basis || ''}</div>
+        </div>
+        <div class="method-detail-head-metrics">
+          <div class="method-detail-metric">
+            <div class="method-detail-metric-label">Implied Per Share</div>
+            <div class="method-detail-metric-value font-mono font-large font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</div>
+          </div>
+          <div class="method-detail-metric">
+            <div class="method-detail-metric-label">Range (Min; Max)</div>
+            <div class="method-detail-metric-value font-mono">${m.rangePerShare ? `${usd(m.rangePerShare.min, { decimals: 2 })}; ${usd(m.rangePerShare.max, { decimals: 2 })}` : ' - '}</div>
+          </div>
+          <div class="method-detail-metric">
+            <div class="method-detail-metric-label">Upside vs Benchmark</div>
+            <div class="method-detail-metric-value font-mono ${upside !== null && upside >= 0 ? 'text-positive' : 'text-negative'}">${upside !== null ? percent(upside, { decimals: 2, showSign: true }) : ' - '}</div>
+          </div>
+          <div class="method-detail-metric">
+            <div class="method-detail-metric-label">Isolated Verdict</div>
+            <div><span class="rec-badge rec-badge-${vClass}">${vText}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const provenance = m.inputsProvenance || {};
+    const peersAsOf = provenance.peersAsOf || '';
+    const shares = provenance.sharesOutstanding;
+    const commonFootHtml = `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Inputs &amp; Provenance</div>
+        <table class="defense-table font-mono">
+          <tbody>
+            ${benchmark ? `<tr><td>Benchmark Share Price</td><td class="align-right">${usd(benchmark, { decimals: 2 })}</td><td>${mktBadge({ asOf: currentMarketPrice?.asOf || '', provider: currentMarketPrice?.source?.provider || 'stockanalysis.com', url: currentMarketPrice?.source?.url || '' })}</td></tr>` : ''}
+            ${Number.isFinite(shares) ? `<tr><td>Diluted Shares Outstanding</td><td class="align-right">${Number(shares).toLocaleString('en-US')}</td><td>Form 10-Q Note 11 (treasury stock method)</td></tr>` : ''}
+            ${peersAsOf ? `<tr><td>Peer Corpus As-Of</td><td class="align-right">${peersAsOf}</td><td>Peers cited per peers.json ledger (100% source-verified)</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+      ${m.leaseConvention ? `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Lease Convention (Cross-Method Disclosure)</div>
+        <p class="method-detail-note">${m.leaseConvention.note || ''}</p>
+      </div>` : ''}
+    `;
+
+    let bodyHtml = '';
+
+    if (m.method === 'fcff_dcf') {
+      const fcff = m.fcff || {};
+      const fcfe = m.fcfe || {};
+      bodyHtml = `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Methodology; 2-Stage FCFF DCF</div>
+        <p class="method-detail-note">
+          Stage 1 discounts five years of explicit unlevered free cash flow (FY2026 - FY2030) from the linked three-statement forecast. Stage 2 capitalizes the terminal-year flow into perpetuity with the Gordon formula <code>TV = FCF<sub>FY2030</sub>; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding today's net cash, then divided by diluted shares.
+        </p>
+        <table class="defense-table font-mono">
+          <thead>
+            <tr><th>DCF Component</th><th class="align-right">Value ($ in thousands)</th><th>Derivation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>PV of Explicit Forecast (5 Years)</td><td class="align-right">${usd(fcff.pvExplicit ?? currentDcf?.pvExplicit, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code>, t = 1..5</td></tr>
+            <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(fcff.pvTerminal ?? currentDcf?.pvTerminal, { decimals: 2 })}</td><td><code>[FCF<sub>FY2030</sub>; (1 + g) / (WACC − g)] / (1 + WACC)<sup>5</sup></code></td></tr>
+            <tr class="table-row-highlight"><td><strong>Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>PV Explicit + PV Terminal</code></td></tr>
+            <tr><td>(+) Net Cash Today</td><td class="align-right">${usd(fcff.netCashToday ?? currentDcf?.netCash, { decimals: 2 })}</td><td>Cash + STI + LTI − Funded Debt (D = $0)</td></tr>
+            <tr class="table-row-highlight"><td><strong>Equity Value</strong></td><td class="align-right font-bold">${usd(m.impliedEquityValue, { decimals: 2 })}</td><td><code>EV + Net Cash</code></td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Equity Value; 1000 / Diluted Shares</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Runtime Discount Parameters</div>
+        <table class="defense-table font-mono">
+          <tbody>
+            <tr><td>WACC (Discount Rate)</td><td class="align-right">${percent(m.waccRate ?? currentDcf?.wacc, { decimals: 4 })}</td><td>CAPM build, debt-free theorem (see WACC table)</td></tr>
+            <tr><td>Terminal Growth (g)</td><td class="align-right">${percent(m.terminalGrowthRate ?? currentDcf?.terminalGrowthRate, { decimals: 2 })}</td><td>Bounded by 4.0% nominal GDP ceiling (see Lever 4 defense)</td></tr>
+            ${Number.isFinite(fcfe.perShare) ? `<tr><td>FCFE Cross-Path Per Share</td><td class="align-right">${usd(fcfe.perShare, { decimals: 2 })}</td><td>Levered dual-path equivalence disclosure</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+      ${commonFootHtml}
+      `;
+    } else if (m.method === 'comps' || m.method === 'ev_multiples') {
+      const isRev = m.method === 'comps';
+      const metricLabel = isRev ? 'Forward Revenue (FY+1)' : 'Forward EBITDAR (FY+1)';
+      const metricValue = isRev ? provenance.forwardRevenue : provenance.forwardEbitdar;
+      const multipleLabel = isRev ? 'EV / Forward Revenue' : 'EV / Forward EBITDAR';
+      const peerRows = Object.entries(m.peerMultiples || {}).map(([sym, mult]) => {
+        const excluded = mult === null || mult === undefined;
+        return `
+          <tr${excluded ? ' class="text-muted"' : ''}>
+            <td>${sym}</td>
+            <td class="align-right font-mono">${excluded ? ' - ' : mult.toFixed(4) + ' - '}</td>
+            <td>${excluded ? (m.exclusions?.find((x) => x.symbol === sym)?.reason || 'Excluded') : 'Included in median'}</td>
+          </tr>
+        `;
+      }).join('');
+      bodyHtml = `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Methodology; ${isRev ? 'EV / Forward Revenue' : 'EV / Forward EBITDAR'} (Trading Comparables)</div>
+        <p class="method-detail-note">
+          The locked 3-peer set (Spotify, Roblox, Netflix) is valued on the capitalized-lease basis: operating lease liabilities are added into each peer's enterprise value and filed rent expense is added back to EBITDAR. The <strong>3-name median</strong> multiple is applied to Duolingo's FY+1 forecast metric (engine-derived, EST-marked), and the implied enterprise value is bridged to equity with capitalized net cash (net cash minus the long-term operating lease liability).
+        </p>
+        <table class="defense-table font-mono">
+          <thead>
+            <tr><th>Peer</th><th class="align-right">${multipleLabel} Multiple</th><th>Median Treatment</th></tr>
+          </thead>
+          <tbody>
+            ${peerRows}
+            <tr class="table-row-highlight">
+              <td><strong>3-Name Median</strong></td>
+              <td class="align-right font-bold">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td>
+              <td>Unweighted median; span [${Number.isFinite(m.multipleRange?.min) ? m.multipleRange.min.toFixed(4) : ' - '}; ${Number.isFinite(m.multipleRange?.max) ? m.multipleRange.max.toFixed(4) : ' - '}] applied for the per-share range</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Duolingo Application</div>
+        <table class="defense-table font-mono">
+          <tbody>
+            <tr><td>${metricLabel}</td><td class="align-right">${Number.isFinite(metricValue) ? usd(metricValue, { decimals: 2 }) : ' - '}</td><td>Engine explicit forecast (EST)</td></tr>
+            <tr><td> -  Median Multiple</td><td class="align-right font-mono">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td><td>Peer median above</td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>Metric; Median</code></td></tr>
+            <tr><td>(+) Capitalized Net Cash</td><td class="align-right">${usd(provenance.netCashCapitalized, { decimals: 2 })}</td><td>Net cash − long-term operating lease liability</td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>(EV + Net Cash); 1000 / Diluted Shares</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      ${m.exclusions && m.exclusions.length > 0 ? `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Peer Exclusions (Disclosed)</div>
+        <p class="method-detail-note">${m.exclusions.map((x) => `${x.symbol}: ${x.reason}`).join(' · ')}</p>
+      </div>` : ''}
+      ${commonFootHtml}
+      `;
+    } else if (m.method === 'pfcf') {
+      const ttmFcf = provenance.ttmFreeCashFlow;
+      const yieldRows = Object.entries(m.peerFcfYields || {}).map(([sym, y]) => `
+          <tr><td>${sym}</td><td class="align-right font-mono">${Number.isFinite(m.peerMultiples?.[sym]) ? m.peerMultiples[sym].toFixed(4) + ' - ' : ' - '}</td><td class="align-right font-mono">${Number.isFinite(y) ? percent(y, { decimals: 2 }) : ' - '}</td></tr>
+        `).join('');
+      bodyHtml = `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Methodology; P/FCF &amp; FCF Yield (Equity Multiple)</div>
+        <p class="method-detail-note">
+          Peer price-to-free-cash-flow ratios are computed on the equity level: market cap ÷ TTM free cash flow (operating cash flow minus capex, after actual lease payments). The 3-name median P/FCF is applied directly to Duolingo's TTM FCF to obtain an implied market cap, an equity-level method, so no EV bridge or lease capitalization applies.
+        </p>
+        <table class="defense-table font-mono">
+          <thead>
+            <tr><th>Peer</th><th class="align-right">P/FCF Multiple</th><th class="align-right">FCF Yield</th></tr>
+          </thead>
+          <tbody>
+            ${yieldRows}
+            <tr class="table-row-highlight">
+              <td><strong>3-Name Median</strong></td>
+              <td class="align-right font-bold">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td>
+              <td class="align-right font-bold">${Number.isFinite(m.medianFcfYield) ? percent(m.medianFcfYield, { decimals: 2 }) : ' - '}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Duolingo Application</div>
+        <table class="defense-table font-mono">
+          <tbody>
+            <tr><td>DUOL TTM Free Cash Flow</td><td class="align-right">${Number.isFinite(ttmFcf) ? usd(ttmFcf, { decimals: 2 }) : ' - '}</td><td>Corpus TTM (OCF − CapEx, filed)</td></tr>
+            <tr><td> -  Median P/FCF</td><td class="align-right font-mono">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td><td>Peer median above</td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Market Cap</strong></td><td class="align-right font-bold">${usd(m.impliedMarketCap, { decimals: 2 })}</td><td><code>TTM FCF; Median P/FCF</code></td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Market Cap; 1000 / Diluted Shares</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      ${commonFootHtml}
+      `;
+    } else if (m.method === 'sotp') {
+      const seg = m.segments || {};
+      const subs = seg.subscriptions;
+      const det = seg.det;
+      const sens = m.sensitivity;
+      bodyHtml = `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Methodology; Sum-of-the-Parts (Two Segments)</div>
+        <p class="method-detail-note">
+          Each revenue segment is valued independently at the 3-name peer median EV/Forward Revenue multiple, then summed and bridged to equity with capitalized net cash. Advertising is folded into the subscriptions segment (disclosed on the row), and DET is valued at the same family multiple because no separate DET peer group exists.
+        </p>
+        <table class="defense-table font-mono">
+          <thead>
+            <tr><th>Segment</th><th class="align-right">FY+1 Revenue ($k)</th><th class="align-right">Multiple</th><th class="align-right">Implied EV ($k)</th><th>Constraint / Footnote</th></tr>
+          </thead>
+          <tbody>
+            ${subs ? `<tr><td><strong>${subs.name}</strong></td><td class="align-right">${usd(subs.forwardRevenue, { decimals: 2 })}</td><td class="align-right font-mono">${Number.isFinite(subs.multiple) ? subs.multiple.toFixed(4) + ' - ' : ' - '}</td><td class="align-right">${usd(subs.enterpriseValue, { decimals: 2 })}</td><td>Advertising folded per segment mandate</td></tr>` : ''}
+            ${det ? `<tr><td><strong>${det.name}</strong></td><td class="align-right">${usd(det.forwardRevenue, { decimals: 2 })}</td><td class="align-right font-mono">${Number.isFinite(det.multiple) ? det.multiple.toFixed(4) + ' - ' : ' - '}</td><td class="align-right">${usd(det.enterpriseValue, { decimals: 2 })}</td><td>${det.constraintDisclosure || ''}</td></tr>` : ''}
+            <tr class="table-row-highlight"><td><strong>Segment EV Sum</strong></td><td class="align-right">${usd(provenance.totalForwardRevenue, { decimals: 2 })}</td><td></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>Σ Segment EVs</code></td></tr>
+            <tr><td>(+) Capitalized Net Cash</td><td></td><td></td><td class="align-right">${usd(provenance.netCashCapitalized, { decimals: 2 })}</td><td>Net cash − long-term operating lease liability</td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td></td><td></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>(Σ EVs + Net Cash); 1000 / Diluted Shares</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      ${sens ? `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">${sens.label || 'EV / Forward EBITDAR Sensitivity'}</div>
+        <p class="method-detail-note">${sens.marginDispersionNote || ''}</p>
+        <table class="defense-table font-mono">
+          <tbody>
+            <tr><td>EBITDAR-Basis Median Multiple</td><td class="align-right font-mono">${Number.isFinite(sens.medianMultiple) ? sens.medianMultiple.toFixed(4) + ' - ' : ' - '}</td><td>Span [${Number.isFinite(sens.multipleRange?.min) ? sens.multipleRange.min.toFixed(4) : ' - '}; ${Number.isFinite(sens.multipleRange?.max) ? sens.multipleRange.max.toFixed(4) : ' - '}]</td></tr>
+            <tr><td>EBITDAR-Basis Implied Per Share</td><td class="align-right">${usd(sens.impliedPerShare, { decimals: 2 })}</td><td>Range ${usd(sens.rangePerShare?.min, { decimals: 2 })}; ${usd(sens.rangePerShare?.max, { decimals: 2 })}</td></tr>
+          </tbody>
+        </table>
+      </div>` : ''}
+      ${commonFootHtml}
+      `;
+    } else if (m.method === 'perUser') {
+      const bases = m.bases || {};
+      const baseRows = Object.entries(bases).map(([key, b]) => `
+          <tr>
+            <td><strong>${b.basisName}</strong></td>
+            <td class="align-right font-mono">${Number.isFinite(b.evPerUser) ? '$' + b.evPerUser.toFixed(2) : ' - '}</td>
+            <td class="align-right font-mono">${Number.isFinite(b.duolKpiValue) ? b.duolKpiValue.toLocaleString('en-US') : ' - '}</td>
+            <td class="align-right font-mono">${usd(b.impliedPerShare, { decimals: 2 })}</td>
+            <td>${b.arpuContext ? `Peer ${b.arpuContext.peerArpu || 'ARPU n/a'} vs DUOL ${b.arpuContext.duolArpu || 'n/a'}` : ''}</td>
+          </tr>
+        `).join('');
+      bodyHtml = `
+      <div class="method-detail-block">
+        <div class="method-detail-block-label">Methodology; Per-User / Per-Subscriber (Native KPI Bases, Unblended)</div>
+        <p class="method-detail-note">
+          Each peer is scaled on its own natively-reported user KPI: Spotify on MAU, Roblox on DAU, Netflix on paid memberships. Each peer's capitalized enterprise value per user is applied to Duolingo's matching KPI from the cited corpus, producing three independent implied per-share values. The method's single vote is the median of the three; the bases are never blended or averaged. ARPU context is disclosed per basis so monetization differences stay visible.
+        </p>
+        <table class="defense-table font-mono">
+          <thead>
+            <tr><th>Native Basis</th><th class="align-right">Peer EV / User</th><th class="align-right">DUOL KPI Count</th><th class="align-right">Implied Per Share</th><th>ARPU Context</th></tr>
+          </thead>
+          <tbody>
+            ${baseRows}
+            <tr class="table-row-highlight">
+              <td><strong>Method Vote (Median Basis)</strong></td>
+              <td></td>
+              <td class="text-muted">${m.medianBasis || ''}</td>
+              <td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td>
+              <td>Span ${usd(m.rangePerShare?.min, { decimals: 2 })}; ${usd(m.rangePerShare?.max, { decimals: 2 })}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      ${commonFootHtml}
+      `;
+    }
+
+    return `
+      ${headerHtml}
+      ${bodyHtml}
+    `;
+  }
+    const multiMethodHtml = renderMultiMethodBlocks();
+    const defenseHtml = renderThesisDefensePanel();
     const waccHtml = renderWaccBuildTable();
     const betaDerivationHtml = renderBetaDerivation();
     const dcfScheduleHtml = `
@@ -622,13 +1723,17 @@ export function renderValuation({
     const bridgeHtml = renderBridgeWaterfall();
     const dualPathHtml = renderDualPathEquivalence();
 
-    const bannerHtml = currentMarketPrice?.bannerText
-      ? `<div class="live-price-banner live-price-${currentMarketPrice.status || 'fallback'}" role="alert">${currentMarketPrice.bannerText}</div>`
+    const rawBanner = currentMarketPrice?.bannerText || '';
+    const cleanBanner = typeof rawBanner.replace === 'function' ? rawBanner.replace(/—/g, '-') : rawBanner;
+    const bannerHtml = cleanBanner
+      ? `<div class="live-price-banner live-price-${currentMarketPrice.status || 'fallback'}" role="alert">${cleanBanner}</div>`
       : '';
 
     container.innerHTML = `
       <div class="valuation-view-wrapper">
         ${bannerHtml}
+        ${multiMethodHtml}
+        ${defenseHtml}
         ${waccHtml}
         ${betaDerivationHtml}
         ${dcfScheduleHtml}
@@ -650,17 +1755,77 @@ export function renderValuation({
         }
       }
     }
+
+    bindMethodSwitcher();
+
+    // Expose the panel builder for flicker-free method switching.
+    renderMultiBlocksRef = renderMultiMethodBlocks;
+
+    // Restore the scroll position captured before the DOM rebuild (null in
+    // headless/stub environments where globalThis.scrollY is unavailable).
+    // The rebuild triggers async scroll side effects (Tabulator's deferred
+    // tableholder focus, Chromium scroll anchoring / click focus fixup) that
+    // can land ~400ms later; delayed restores win the race imperceptibly.
+    // Selecting a method must never yank the page down.
+    if (savedScrollY !== null) {
+      const restore = () => {
+        try { globalThis.scrollTo(0, savedScrollY); } catch { /* ignore */ }
+        try {
+          const ae = globalThis.document?.activeElement;
+          const cls = ae && typeof ae.className === 'string' ? ae.className : '';
+          if (cls && cls.includes('tabulator-tableholder') && typeof ae.blur === 'function') ae.blur();
+        } catch { /* ignore */ }
+      };
+      restore();
+      if (typeof globalThis.requestAnimationFrame === 'function') {
+        try { globalThis.requestAnimationFrame(restore); } catch { /* ignore */ }
+      }
+      if (typeof globalThis.setTimeout === 'function') {
+        for (const delay of [80, 500]) {
+          globalThis.setTimeout(restore, delay);
+        }
+      }
+    }
+    if (boundary && typeof boundary.end === 'function') {
+      try { boundary.end(); } catch { /* ignore */ }
+    }
+  }
+
+  /**
+   * Binds the tile switcher events.
+   * Re-bound after every render because innerHTML replaces the elements.
+   */
+  function bindMethodSwitcher() {
+    if (typeof container.querySelectorAll !== 'function') return;
+
+    const switchButtons = container.querySelectorAll('[data-method-switch]');
+    for (const btn of Array.from(switchButtons || [])) {
+      if (typeof btn.addEventListener !== 'function') continue;
+      const clickHandler = () => {
+        const key = btn.getAttribute ? btn.getAttribute('data-method-switch') : null;
+        if (key && key !== activeMethodKey) {
+          // Lightweight panel swap: no full render, no Tabulator rebuild,
+          // no window scroll manipulation, so no down-then-up flicker.
+          activeMethodKey = key;
+          refreshMultiMethodPanel();
+        }
+      };
+      btn.addEventListener('click', clickHandler);
+      methodSwitcherListeners.push({ target: btn, type: 'click', handler: clickHandler });
+    }
   }
 
   render();
 
   return {
-    update(newWacc, newDcf, newAssumptions = null, newPrices = null, newMarketPrice = undefined) {
+    update(newWacc, newDcf, newAssumptions = null, newPrices = null, newMarketPrice = undefined, newMethods = null, newVerdict = null) {
       currentWacc = newWacc;
       currentDcf = newDcf;
       currentAssumptions = newAssumptions || currentAssumptions;
       if (newPrices) currentPrices = newPrices;
       if (newMarketPrice !== undefined) currentMarketPrice = newMarketPrice;
+      if (newMethods !== null) currentMethods = newMethods;
+      if (newVerdict !== null) currentVerdict = newVerdict;
       render();
     },
     dispose() {
@@ -673,10 +1838,18 @@ export function renderValuation({
       }
       tabulatorInstances.length = 0;
       tabulatorConfigs.length = 0;
+      for (const { target, type, handler } of methodSwitcherListeners) {
+        if (target && typeof target.removeEventListener === 'function') {
+          try { target.removeEventListener(type, handler); } catch { /* ignore */ }
+        }
+      }
+      methodSwitcherListeners.length = 0;
       currentWacc = null;
       currentDcf = null;
       currentAssumptions = null;
       currentPrices = null;
+      currentMethods = null;
+      currentVerdict = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

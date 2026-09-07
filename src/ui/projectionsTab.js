@@ -83,7 +83,7 @@ export function buildProjectionColumns({ isPct = false } = {}) {
       minWidth: 95,
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+        if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
         const isRatio = row.isPct || isPct;
         return isRatio ? percent(val) : usd(val, { decimals: 0 });
@@ -99,7 +99,7 @@ export function buildProjectionColumns({ isPct = false } = {}) {
       titleFormatter: () => estSuffix(period, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+        if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
         const isRatio = row.isPct || isPct;
         return isRatio ? percent(val) : usd(val, { decimals: 0 });
@@ -520,7 +520,7 @@ export function renderProjections({
       <div class="projections-charts-grid">
         <div class="summary-card projection-chart-card">
           <div class="statement-card-header">
-            Revenue &amp; Unlevered Free Cash Flow Progression (FY2021–FY2030)
+            Revenue &amp; Unlevered Free Cash Flow Progression (FY2021-FY2030)
           </div>
           <div class="summary-card-body chart-card-body">
             ${revFcfChart.svg}

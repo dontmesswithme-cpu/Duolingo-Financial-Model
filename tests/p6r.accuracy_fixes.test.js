@@ -1,5 +1,5 @@
 /**
- * P6R.1 — Engine-State Accuracy Fixes Verification Suite.
+ * P6R.1  -  Engine-State Accuracy Fixes Verification Suite.
  *
  * Automated verification for Phase 6R Task P6R.1:
  *  1. Scenario comparison semantics & state integrity across all interactive states (anti-double-delta)
@@ -66,7 +66,7 @@ function createHtmlContainer() {
   };
 }
 
-describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti-Double-Delta)', () => {
+describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti-Double-Delta)', () => {
   test('default state (base active): comparison table and active state match authoritative pins', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
@@ -88,26 +88,26 @@ describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti
 
     const s = app.state();
     assert.equal(s.scenario, 'base');
-    assert.ok(Math.abs(s.dcf.perShare - 189.30871314314004) < 1e-6, 'Base active perShare must match pin');
-    assert.ok(Math.abs(s.wacc.wacc.value - 0.087594) < 1e-6, 'Base active WACC must match pin');
+    assert.ok(Math.abs(s.dcf.perShare - 144.082130498451) < 1e-6, 'Base active perShare must match pin');
+    assert.ok(Math.abs(s.wacc.wacc.value - 0.110375) < 1e-6, 'Base active WACC must match pin');
 
     const sc = s.scenarios;
     assert.ok(sc, 'Scenarios object must be present');
 
-    // Bear pin: $102.41, WACC 10.45%, g 2.0%
+    // Bear pin: $84.39, WACC 12.985%, g 2.0%
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
-    assert.ok(Math.abs(bearPerShare - 102.41326051479186) < 1e-4, `Bear target price must be ~$102.41, got ${bearPerShare}`);
-    assert.ok(Math.abs((sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value) - 0.104484) < 1e-4);
+    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4, `Bear target price must be ~$84.39, got ${bearPerShare}`);
+    assert.ok(Math.abs((sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value) - 0.129850) < 1e-4);
 
-    // Base pin: $189.31, WACC 8.76%, g 2.5%
+    // Base pin: $144.08, WACC 11.0375%, g 2.5%
     const basePerShare = sc.base?.perShare ?? sc.base?.dcf?.perShare;
-    assert.ok(Math.abs(basePerShare - 189.30871314314004) < 1e-4, `Base target price must be ~$189.31, got ${basePerShare}`);
-    assert.ok(Math.abs((sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value) - 0.087594) < 1e-4);
+    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-4, `Base target price must be ~$144.08, got ${basePerShare}`);
+    assert.ok(Math.abs((sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value) - 0.110375) < 1e-4);
 
-    // Bull pin: $405.68, WACC 7.22%, g 3.0%
+    // Bull pin: $277.84, WACC 9.24%, g 3.0%
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
-    assert.ok(Math.abs(bullPerShare - 405.6797934948002) < 1e-4, `Bull target price must be ~$405.68, got ${bullPerShare}`);
-    assert.ok(Math.abs((sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value) - 0.072204) < 1e-4);
+    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4, `Bull target price must be ~$277.84, got ${bullPerShare}`);
+    assert.ok(Math.abs((sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value) - 0.092400) < 1e-4);
 
     // Strict ordering
     assert.ok(bearPerShare < basePerShare && basePerShare < bullPerShare, 'Bear < Base < Bull must hold');
@@ -136,8 +136,8 @@ describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti
     app.setScenario('bear');
     const s = app.state();
     assert.equal(s.scenario, 'bear');
-    assert.ok(Math.abs(s.dcf.perShare - 102.41326051479186) < 1e-4, 'Active DCF perShare must be Bear');
-    assert.ok(Math.abs(s.wacc.wacc.value - 0.104484) < 1e-4, 'Active WACC must be Bear WACC');
+    assert.ok(Math.abs(s.dcf.perShare - 84.3890501794256) < 1e-4, 'Active DCF perShare must be Bear');
+    assert.ok(Math.abs(s.wacc.wacc.value - 0.129850) < 1e-4, 'Active WACC must be Bear WACC');
 
     const sc = s.scenarios;
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
@@ -145,14 +145,14 @@ describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
 
     // Critical anti-double-delta assertions: Base must NOT mutate to Bear, Bull must NOT mutate to Base
-    assert.ok(Math.abs(bearPerShare - 102.41326051479186) < 1e-4, 'Bear row in comparison must be 102.41');
-    assert.ok(Math.abs(basePerShare - 189.30871314314004) < 1e-4, `Base row in comparison must remain 189.31, got ${basePerShare}`);
-    assert.ok(Math.abs(bullPerShare - 405.6797934948002) < 1e-4, `Bull row in comparison must remain 405.68, got ${bullPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4, 'Bear row in comparison must be 84.39');
+    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-4, `Base row in comparison must remain 144.08, got ${basePerShare}`);
+    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4, `Bull row in comparison must remain 277.84, got ${bullPerShare}`);
 
     const baseWacc = sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value;
     const bullWacc = sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value;
-    assert.ok(Math.abs(baseWacc - 0.087594) < 1e-4, `Base WACC in comparison must be 8.76%, got ${baseWacc}`);
-    assert.ok(Math.abs(bullWacc - 0.072204) < 1e-4, `Bull WACC in comparison must be 7.22%, got ${bullWacc}`);
+    assert.ok(Math.abs(baseWacc - 0.110375) < 1e-4, `Base WACC in comparison must be 11.04%, got ${baseWacc}`);
+    assert.ok(Math.abs(bullWacc - 0.092400) < 1e-4, `Bull WACC in comparison must be 9.24%, got ${bullWacc}`);
 
     // No row equals another row's WACC or growth
     assert.notEqual(sc.bear.wacc, sc.base.wacc);
@@ -182,8 +182,8 @@ describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti
     app.setScenario('bull');
     const s = app.state();
     assert.equal(s.scenario, 'bull');
-    assert.ok(Math.abs(s.dcf.perShare - 405.6797934948002) < 1e-4, 'Active DCF perShare must be Bull');
-    assert.ok(Math.abs(s.wacc.wacc.value - 0.072204) < 1e-4, 'Active WACC must be Bull WACC');
+    assert.ok(Math.abs(s.dcf.perShare - 277.8370238128362) < 1e-4, 'Active DCF perShare must be Bull');
+    assert.ok(Math.abs(s.wacc.wacc.value - 0.092400) < 1e-4, 'Active WACC must be Bull WACC');
 
     const sc = s.scenarios;
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
@@ -191,14 +191,14 @@ describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
 
     // Critical anti-double-delta assertions: Bear must NOT shift to Base, Bull must NOT double-delta to 1373
-    assert.ok(Math.abs(bearPerShare - 102.41326051479186) < 1e-4, `Bear row in comparison must remain 102.41, got ${bearPerShare}`);
-    assert.ok(Math.abs(basePerShare - 189.30871314314004) < 1e-4, `Base row in comparison must remain 189.31, got ${basePerShare}`);
-    assert.ok(Math.abs(bullPerShare - 405.6797934948002) < 1e-4, `Bull row in comparison must remain 405.68, got ${bullPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4, `Bear row in comparison must remain 84.39, got ${bearPerShare}`);
+    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-4, `Base row in comparison must remain 144.08, got ${basePerShare}`);
+    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4, `Bull row in comparison must remain 277.84, got ${bullPerShare}`);
 
     const bearWacc = sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value;
     const baseWacc = sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value;
-    assert.ok(Math.abs(bearWacc - 0.104484) < 1e-4, `Bear WACC in comparison must be 10.45%, got ${bearWacc}`);
-    assert.ok(Math.abs(baseWacc - 0.087594) < 1e-4, `Base WACC in comparison must be 8.76%, got ${baseWacc}`);
+    assert.ok(Math.abs(bearWacc - 0.129850) < 1e-4, `Bear WACC in comparison must be 12.98%, got ${bearWacc}`);
+    assert.ok(Math.abs(baseWacc - 0.110375) < 1e-4, `Base WACC in comparison must be 11.04%, got ${baseWacc}`);
     app.dispose();
   });
 
@@ -242,7 +242,7 @@ describe('P6R.1 — Scenario-State Integrity Across All Interactive States (Anti
   });
 });
 
-describe('P6R.1 — Sensitivity 9×5 Grid Tracks Active Scenario WACC', () => {
+describe('P6R.1  -  Sensitivity 9×5 Grid Tracks Active Scenario WACC', () => {
   test('sensitivity matrix row highlight badge relabels BASE -> ACTIVE', () => {
     const container = createHtmlContainer();
     const sensitivityGrid = {
@@ -283,7 +283,7 @@ describe('P6R.1 — Sensitivity 9×5 Grid Tracks Active Scenario WACC', () => {
   });
 });
 
-describe('P6R.1 — Debt Schedule Lease Rows, Footnotes & Balance Gate', () => {
+describe('P6R.1  -  Debt Schedule Lease Rows, Footnotes & Balance Gate', () => {
   test('historical lease cells equal filed corpus values ($k) and forecast cells hold Q2 FY2026', async () => {
     const { historical, assumptions } = await getDatasets();
     const schedules = buildSchedules(historical, assumptions);
@@ -323,7 +323,7 @@ describe('P6R.1 — Debt Schedule Lease Rows, Footnotes & Balance Gate', () => {
 
     // Footnote assertions
     const html = container.innerHTML;
-    assert.match(html, /held at last filed Q2 FY2026 level; no lease forecast driver — see methodology/);
+    assert.match(html, /held at last filed Q2 FY2026 level; no lease forecast driver, see methodology/);
     assert.match(html, /Duolingo, Inc\. has zero funded debt/);
 
     // Funded-debt zero rows visually distinct (badges and tags)
@@ -352,7 +352,7 @@ describe('P6R.1 — Debt Schedule Lease Rows, Footnotes & Balance Gate', () => {
   });
 });
 
-describe('P6R.1 — Quality Gates: Frozen Engine, Zero UI Literals & Zero style=', () => {
+describe('P6R.1  -  Quality Gates: Frozen Engine, Zero UI Literals & Zero style=', () => {
   test('git diff v1.0-P6R-base -- src/engine/ touched only authorized files for P6R2', () => {
     try {
       const changedFiles = execSync('git diff --name-only v1.0-P6R-base -- src/engine/', { cwd: ROOT, encoding: 'utf8' })
@@ -438,7 +438,7 @@ describe('P6R.1 — Quality Gates: Frozen Engine, Zero UI Literals & Zero style=
   });
 });
 
-describe('P6R.2 — Cover/TOC Protocol Removal & Product Disclaimer', () => {
+describe('P6R.2  -  Cover/TOC Protocol Removal & Product Disclaimer', () => {
   test('index.html contains zero protocol mentions, zero preparer attributions, no Status column, and no legend', () => {
     const indexPath = path.join(ROOT, 'index.html');
     const html = fs.readFileSync(indexPath, 'utf8');
@@ -515,7 +515,7 @@ describe('P6R.2 — Cover/TOC Protocol Removal & Product Disclaimer', () => {
   });
 });
 
-describe('P6R.3 — Assumptions Tab: Scenario Naming, Percent Display & Slider Styling', () => {
+describe('P6R.3  -  Assumptions Tab: Scenario Naming, Percent Display & Slider Styling', () => {
   test('scenario selector displays DOWNSIDE, BASE, UPSIDE and zero bear|bull in user-visible text', async () => {
     const { assumptions } = await getDatasets();
     const container = createHtmlContainer();
@@ -658,7 +658,7 @@ describe('P6R.3 — Assumptions Tab: Scenario Naming, Percent Display & Slider S
   });
 });
 
-describe('P6R.4 — Historicals Citation Hybrid & Cross-Tab Calibration', () => {
+describe('P6R.4  -  Historicals Citation Hybrid & Cross-Tab Calibration', () => {
   test('deriveColumnPrimaryCitations identifies exact majority filing URL per column', async () => {
     const { historical } = await getDatasets();
 

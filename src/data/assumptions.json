@@ -252,7 +252,7 @@
       "bear": -0.06,
       "bull": 0.06
     },
-    "notes": "EST judgment — equal-weight blend of the two cited paid-subscriber observations: FY2025 full-year growth +28.4211% (9,500,000 FY2024 → 12,200,000 FY2025, 10-K FY2025) and H1 FY2026 annualized +8.3647% (12,200,000 → 12,700,000 over two quarters, 10-Q Q2 FY2026, compounded to an annual rate). Labeled EST: forward subscriber growth is judgment, not a filed figure. The two anchors bracket a sharp deceleration, so neither alone is a safe default; the blend is the disclosed middle."
+    "notes": "EST judgment - equal-weight blend of the two cited paid-subscriber observations: FY2025 full-year growth +28.4211% (9,500,000 FY2024 → 12,200,000 FY2025, 10-K FY2025) and H1 FY2026 annualized +8.3647% (12,200,000 → 12,700,000 over two quarters, 10-Q Q2 FY2026, compounded to an annual rate). Labeled EST: forward subscriber growth is judgment, not a filed figure. The two anchors bracket a sharp deceleration, so neither alone is a safe default; the blend is the disclosed middle."
   },
   {
     "name": "subscription_arpu",
@@ -267,7 +267,7 @@
       "bear": -4,
       "bull": 4
     },
-    "notes": "FY2025 actual: subscription revenue 873,442 (thousands USD) / average paid subscribers 10,850,000 ((9,500,000 FY2024 + 12,200,000 FY2025) / 2) = $80.5016 per average subscriber per year. Held flat across the horizon (conservative — no assumed price/mix expansion). The H1 FY2026 implied ARPU (~$81.76) is carried as a context output for cross-checking, not as an anchor."
+    "notes": "FY2025 actual: subscription revenue 873,442 (thousands USD) / average paid subscribers 10,850,000 ((9,500,000 FY2024 + 12,200,000 FY2025) / 2) = $80.5016 per average subscriber per year. Held flat across the horizon (conservative - no assumed price/mix expansion). The H1 FY2026 implied ARPU (~$81.76) is carried as a context output for cross-checking, not as an anchor."
   },
   {
     "name": "advertising_revenue_growth",
@@ -282,7 +282,7 @@
       "bear": -0.05,
       "bull": 0.05
     },
-    "notes": "EST judgment — H1 like-for-like YoY: H1 FY2026 advertising 41,666 (Q1 20,614 + Q2 21,052, cited 10-Q) / H1 FY2025 38,485 (9M FY2025 − Q3 FY2025, cited) − 1 = +8.2656%. The half-year like-for-like comparison is the freshest anchor available in the corpus; FY2025 full-year YoY was +45.20%, which extrapolates implausibly."
+    "notes": "EST judgment - H1 like-for-like YoY: H1 FY2026 advertising 41,666 (Q1 20,614 + Q2 21,052, cited 10-Q) / H1 FY2025 38,485 (9M FY2025 − Q3 FY2025, cited) − 1 = +8.2656%. The half-year like-for-like comparison is the freshest anchor available in the corpus; FY2025 full-year YoY was +45.20%, which extrapolates implausibly."
   },
   {
     "name": "det_revenue_growth",
@@ -297,7 +297,7 @@
       "bear": -0.05,
       "bull": 0.05
     },
-    "notes": "EST judgment — H1 like-for-like YoY: H1 FY2026 DET 21,426 (Q1 11,317 + Q2 10,109, cited 10-Q) / H1 FY2025 22,074 (9M FY2025 − Q3 FY2025, cited) − 1 = −2.9356%. The half-year like-for-like comparison is the freshest anchor available in the corpus."
+    "notes": "EST judgment - H1 like-for-like YoY: H1 FY2026 DET 21,426 (Q1 11,317 + Q2 10,109, cited 10-Q) / H1 FY2025 22,074 (9M FY2025 − Q3 FY2025, cited) − 1 = −2.9356%. The half-year like-for-like comparison is the freshest anchor available in the corpus."
   },
   {
     "name": "iap_revenue_growth",
@@ -312,7 +312,7 @@
       "bear": -0.06,
       "bull": 0.08
     },
-    "notes": "EST judgment — H1 like-for-like YoY: H1 FY2026 IAP 16,448 (Q1 8,446 + Q2 8,002, cited 10-Q) / H1 FY2025 19,832 (9M FY2025 − Q3 FY2025, cited) − 1 = −17.0633%. The half-year like-for-like comparison is the freshest anchor available in the corpus."
+    "notes": "EST judgment - H1 like-for-like YoY: H1 FY2026 IAP 16,448 (Q1 8,446 + Q2 8,002, cited 10-Q) / H1 FY2025 19,832 (9M FY2025 − Q3 FY2025, cited) − 1 = −17.0633%. The half-year like-for-like comparison is the freshest anchor available in the corpus."
   },
   {
     "name": "other_revenue_growth",
@@ -327,7 +327,7 @@
       "bear": -0.25,
       "bull": 0.5
     },
-    "notes": "EST judgment — held constant by explicit design (default growth 0): revenue_other is the footnote residual line, FY2025 actual 1,937, i.e. 0.19% of total revenue. The H1 like-for-like observation is +103.57% (952 → 1,938) but off an immaterial base; extrapolating it would distort the revenue mix. Growth 0 = held constant at the cited FY2025 value; the driver remains adjustable and is never dropped from the cascade."
+    "notes": "EST judgment - held constant by explicit design (default growth 0): revenue_other is the footnote residual line, FY2025 actual 1,937, i.e. 0.19% of total revenue. The H1 like-for-like observation is +103.57% (952 → 1,938) but off an immaterial base; extrapolating it would distort the revenue mix. Growth 0 = held constant at the cited FY2025 value; the driver remains adjustable and is never dropped from the cascade."
   },
   {
     "name": "cost_of_revenue_pct_revenue",
@@ -417,7 +417,7 @@
       "bear": 0.03,
       "bull": -0.03
     },
-    "notes": "EST judgment — normalized structural rate, NOT an observed effective rate. FY2025's effective rate of −126.997% (tax −231,655 on pretax 182,410) is a one-time valuation-allowance release and is prohibited as an anchor. FY2021 (−0.2952%) and FY2022 (−1.5997%) are not meaningful because both years had pretax losses. FY2023 9.6192% and FY2024 13.4225% are the only two positive-rate years in the corpus; the default takes FY2024, the most recent undistorted fiscal year (tax 13,732 / pretax 102,306 = 13.4225%). The rate sits below the 21% US federal statutory rate because of the valuation-allowance and foreign-tax-credit position — a modeling judgment the user can override."
+    "notes": "EST judgment - normalized structural rate, NOT an observed effective rate. FY2025's effective rate of −126.997% (tax −231,655 on pretax 182,410) is a one-time valuation-allowance release and is prohibited as an anchor. FY2021 (−0.2952%) and FY2022 (−1.5997%) are not meaningful because both years had pretax losses. FY2023 9.6192% and FY2024 13.4225% are the only two positive-rate years in the corpus; the default takes FY2024, the most recent undistorted fiscal year (tax 13,732 / pretax 102,306 = 13.4225%). The rate sits below the 21% US federal statutory rate because of the valuation-allowance and foreign-tax-credit position - a modeling judgment the user can override."
   },
   {
     "name": "share_repurchases",
@@ -432,7 +432,7 @@
       "bear": -40000,
       "bull": 40000
     },
-    "notes": "EST judgment — H1 FY2026 cited repurchases 69,603 (6M FY2026 YTD cash-flow row; Q1 24,331 + Q2 45,272, an accelerating pace) × 2 = 139,206 annualized. Held constant in absolute terms across the horizon — conservative, so buyback intensity declines as revenue grows. Stored as a positive magnitude; the engine applies the financing-outflow sign explicitly."
+    "notes": "EST judgment - H1 FY2026 cited repurchases 69,603 (6M FY2026 YTD cash-flow row; Q1 24,331 + Q2 45,272, an accelerating pace) × 2 = 139,206 annualized. Held constant in absolute terms across the horizon - conservative, so buyback intensity declines as revenue grows. Stored as a positive magnitude; the engine applies the financing-outflow sign explicitly."
   },
   {
     "name": "option_proceeds",
@@ -447,7 +447,7 @@
       "bear": -3000,
       "bull": 3000
     },
-    "notes": "FY2025 actual: proceeds from stock option exercise 12,570 (cited 10-K FY2025 consolidated statement of cash flows, financing activities). Held constant across the horizon — EST. Stored as a positive magnitude; the engine applies the financing-inflow sign explicitly."
+    "notes": "FY2025 actual: proceeds from stock option exercise 12,570 (cited 10-K FY2025 consolidated statement of cash flows, financing activities). Held constant across the horizon - EST. Stored as a positive magnitude; the engine applies the financing-inflow sign explicitly."
   },
   {
     "name": "net_share_settlement_taxes",
@@ -462,7 +462,7 @@
       "bear": -8000,
       "bull": 8000
     },
-    "notes": "FY2025 actual magnitude: taxes paid related to net share settlement of equity awards 41,617 (cited 10-K FY2025 cash-flow statement, where it is signed −41,617 as a financing outflow). Held constant across the horizon — EST. Stored as a positive magnitude; the engine applies the financing-outflow sign explicitly."
+    "notes": "FY2025 actual magnitude: taxes paid related to net share settlement of equity awards 41,617 (cited 10-K FY2025 cash-flow statement, where it is signed −41,617 as a financing outflow). Held constant across the horizon - EST. Stored as a positive magnitude; the engine applies the financing-outflow sign explicitly."
   },
   {
     "name": "interest_income_rate",
@@ -477,7 +477,7 @@
       "bear": -0.01,
       "bull": 0.01
     },
-    "notes": "FY2025 actual: interest income 45,231 / average invested cash 1,125,751 — where invested cash is cash and cash equivalents + short-term investments + long-term investments, averaged across the FY2024 balance (975,937) and the FY2025 balance (1,275,565) — = 4.0179%. Drives the P3.2 income-statement ↔ balance-sheet interest-income linkage."
+    "notes": "FY2025 actual: interest income 45,231 / average invested cash 1,125,751 - where invested cash is cash and cash equivalents + short-term investments + long-term investments, averaged across the FY2024 balance (975,937) and the FY2025 balance (1,275,565) - = 4.0179%. Drives the P3.2 income-statement ↔ balance-sheet interest-income linkage."
   },
   {
     "name": "risk_free_rate",
@@ -492,11 +492,11 @@
       "bear": 0.005,
       "bull": -0.005
     },
-    "notes": "MKT snapshot as of 2026-09-01 via FRED (Federal Reserve Bank of St. Louis), series DGS10 — Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis: 4.79%. 2026-09-01 is the posted official observation (the release flagged as pending in prior snapshot notes is now published). Bear/bull deltas move the discount rate inversely to equity risk appetite (bear = higher required return).",
+    "notes": "MKT snapshot as of 2026-09-01 via FRED (Federal Reserve Bank of St. Louis), series DGS10 - Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis: 4.79%. 2026-09-01 is the posted official observation (the release flagged as pending in prior snapshot notes is now published). Bear/bull deltas move the discount rate inversely to equity risk appetite (bear = higher required return).",
     "marking": "MKT",
     "asOf": "2026-09-01",
     "source": {
-      "provider": "FRED — Federal Reserve Bank of St. Louis (Board of Governors of the Federal Reserve System, H.15 Selected Interest Rates)",
+      "provider": "FRED - Federal Reserve Bank of St. Louis (Board of Governors of the Federal Reserve System, H.15 Selected Interest Rates)",
       "url": "https://fred.stlouisfed.org/series/DGS10"
     }
   },
@@ -504,7 +504,7 @@
     "name": "beta",
     "label": "Levered Equity Beta",
     "group": "market",
-    "value": 0.89,
+    "value": 1.47,
     "min": 0.2,
     "max": 2.5,
     "step": 0.01,
@@ -513,19 +513,19 @@
       "bear": 0.15,
       "bull": -0.15
     },
-    "notes": "MKT snapshot as of 2026-08-31 (OLS regression): Beta = 0.89 (computed OLS slope 0.890488 rounded to 0.01 step) derived from the bundled corpus monthly price series over a 60-observation window (2021-09 to 2026-08) regressed against the S&P 500 Index benchmark. Monthly alpha = 0.9421%, R² = 4.83%, stderr(β) = 0.519187. Cross-check vs published aggregator provider: stockanalysis.com 5Y monthly beta = 0.89; absolute deviation |computed − provider| = 0.000488 (< 0.05% deviation, 0.22 bps cost-of-equity impact). Duolingo is debt-free (D = 0), so the raw regression (levered) beta equals the asset beta — no Hamada adjustment applies. Bear/bull deltas widen or narrow the systematic-risk input.",
+    "notes": "MKT snapshot as of 2026-08-31: Bottom-up median unlevered beta = 1.47 across locked peer set (Spotify, Roblox, Netflix). Per-peer 60-month OLS regressions against S&P 500 (2021-09 to 2026-08) and Hamada unlevering on filed FY2025 D/E: (1) Spotify (SPOT): levered β = 1.5860, D/E = 1.64% (€1,956M total debt / $119,529M market cap), t = 21.0% -> unlevered β = 1.5657 (1.57); (2) Roblox (RBLX): levered β = 1.4742, D/E = 3.12% ($1,788M total debt / $57,398M market cap), t = 21.0% -> unlevered β = 1.4387 (1.44); (3) Netflix (NFLX): levered β = 1.5258, D/E = 4.29% ($16,976M total debt / $395,870M market cap), t = 13.7% -> unlevered β = 1.4713 (1.47). Peer statistics: median = 1.4713 (rounded to step 0.01 = 1.47), mean = 1.4919 (1.49), span = 0.1270 (0.13). Duolingo is debt-free (D = 0), so the median unlevered asset beta (1.47) applies directly without relevering (no Hamada adjustment applies). Cross-checks: Vasicek-shrunk own-regression (DUOL 60-observation window 2021-09 to 2026-08 OLS β = 0.890488, rounded to 0.89, t ≈ 1.72, R² = 4.83%, stderr = 0.519187 against S&P 500 Index) disclosed alongside; peer dispersion visible. Bear/bull deltas widen or narrow the systematic-risk input.",
     "marking": "MKT",
     "asOf": "2026-08-31",
     "source": {
-      "provider": "stockanalysis.com",
-      "url": "https://stockanalysis.com/stocks/duol/statistics/"
+      "provider": "stockanalysis.com / SEC EDGAR",
+      "url": "https://stockanalysis.com/stocks/spot/statistics/"
     }
   },
   {
     "name": "equity_risk_premium",
     "label": "Equity Risk Premium (US)",
     "group": "market",
-    "value": 0.0446,
+    "value": 0.0425,
     "min": 0,
     "max": 0.12,
     "step": 0.0005,
@@ -534,12 +534,12 @@
       "bear": 0.005,
       "bull": -0.005
     },
-    "notes": "MKT snapshot as of 2026-01-05 via Aswath Damodaran (NYU Stern) — implied ERP for the United States of 4.46%, from the published January 5, 2026 update. Decomposition: mature-market (Aaa) premium 4.23% plus US Aa1 sovereign default spread 0.23% = 4.46%. Cross-check against Damodaran's historical implied-ERP series: 4.33% (2024) and 4.23% (2025). The January 5, 2026 table is the latest official available update; retired 4.42%/July-2026 citation remediated per Finding C. Bear/bull deltas widen or narrow the premium.",
+    "notes": "MKT snapshot as of 2026-09-01 via Aswath Damodaran (NYU Stern) - trailing 3-month average of Damodaran's published monthly implied ERP for the United States (trailing 12-month with adjusted payout). Trailing 3-month monthly prints: 4.30% (2026-07-01), 4.28% (2026-08-01), and 4.14% (2026-09-01); unweighted average = (4.30% + 4.28% + 4.14%) / 3 = 4.2400%, rounded to driver step (0.0005) = 4.2500% (0.0425). Smoothing rule: value is the mechanical unweighted average of the trailing 3 monthly prints rounded to the driver step (0.0005). The annual January 5, 2026 country risk premium table (4.46%) is retired to eliminate structural staleness (Finding-C lineage remediation). Cross-check against Damodaran's historical implied-ERP series: 4.33% (2024) and 4.23% (2025). Series URL: https://pages.stern.nyu.edu/~adamodar/pc/implprem/ERPbymonth.xlsx. Bear/bull deltas widen or narrow the premium.",
     "marking": "MKT",
-    "asOf": "2026-01-05",
+    "asOf": "2026-09-01",
     "source": {
       "provider": "Aswath Damodaran, NYU Stern",
-      "url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html"
+      "url": "https://pages.stern.nyu.edu/~adamodar/pc/implprem/ERPbymonth.xlsx"
     }
   },
   {
@@ -555,7 +555,7 @@
       "bear": -0.005,
       "bull": 0.005
     },
-    "notes": "EST judgment — long-run perpetuity growth for the Gordon terminal value. Set at 2.5%: strictly below the Base WACC (8.6638%, ~616bps of Gordon headroom) and below the long-run US nominal GDP growth ceiling of ~4.0% (~2.0% real + ~2.0% inflation), so the perpetuity never implies Duolingo outgrowing the economy that hosts it. Max bound is TERMINAL_GROWTH_BOUNDS.max (0.04) from constants.js. Not an MKT input — no market price reveals long-run growth — so it carries no as-of date. Contract-reading note: the P4.1 contract text says this driver is 'bounded below US nominal GDP growth'; that reads as an inversion of the standard Gordon ceiling (a perpetuity cannot grow faster than nominal GDP forever), so it is implemented here as an UPPER bound. OP ruling requested.",
+    "notes": "EST judgment - long-run perpetuity growth for the Gordon terminal value. Set at 2.5%: strictly below the Base WACC (11.0375%, ~853.75bps of Gordon headroom) and below the long-run US nominal GDP growth ceiling of ~4.0% (~2.0% real + ~2.0% inflation), so the perpetuity never implies Duolingo outgrowing the economy that hosts it. Max bound is TERMINAL_GROWTH_BOUNDS.max (0.04) from constants.js. Not an MKT input - no market price reveals long-run growth - so it carries no as-of date. Contract-reading note: the P4.1 contract text says this driver is 'bounded below US nominal GDP growth'; that reads as an inversion of the standard Gordon ceiling (a perpetuity cannot grow faster than nominal GDP forever), so it is implemented here as an UPPER bound. OP ruling requested.",
     "marking": "EST"
   },
   {
@@ -571,7 +571,7 @@
       "bear": 0,
       "bull": 0
     },
-    "notes": "MKT snapshot as of 2026-09-02 via stockanalysis.com: official closing price $157.85 (open 155.00, high 159.20, low 154.50, volume 752,400). 2026-09-02 is the last COMPLETED trading session close; 2026-09-03 intraday print is excluded per the driver's close-only convention and disclosed as such. Scenario deltas remain 0: benchmark price immobility rationale unchanged.",
+    "notes": "MKT snapshot as of 2026-09-02 via stockanalysis.com: official closing price $157.85 (open 156.24, high 158.47, low 154.30, volume 1,294,851). 2026-09-02 is the last COMPLETED trading session close; 2026-09-03 intraday print is excluded per the driver's close-only convention and disclosed as such. Scenario deltas remain 0: benchmark price immobility rationale unchanged.",
     "marking": "MKT",
     "asOf": "2026-09-02",
     "source": {
@@ -592,11 +592,11 @@
       "bear": 0,
       "bull": 0
     },
-    "notes": "MKT snapshot as of 2026-08-06 from the latest cited filing — Duolingo, Inc. Form 10-Q for the quarter ended 2026-06-30 (accession 0001628280-26-053603, filed 2026-08-06), Note 11 Earnings Per Share: 'Denominator for dilutive net income per common share - weighted-average shares' = 50,031 thousand for the three months ended June 30, 2026, i.e. 50,031,000 diluted shares. Diluted (not basic) is used because a DCF values the whole enterprise, including the dilutive effect of outstanding equity awards. Cross-check: the same filing's cover page reports basic shares outstanding of 40,387,012 Class A + 6,399,257 Class B = 46,786,269 as of August 4, 2026; the ~3.24M gap is treasury-stock-method dilution. Scenario deltas are 0: the share count is a filing fact, not an operating-scenario variable. Held constant across the forecast horizon — the P4 contract sanctions no share-count forecast driver.",
+    "notes": "MKT snapshot as of 2026-08-06 from the latest cited filing - Duolingo, Inc. Form 10-Q for the quarter ended 2026-06-30 (accession 0001628280-26-053603, filed 2026-08-06), Note 11 Earnings Per Share: 'Denominator for dilutive net income per common share - weighted-average shares' = 50,031 thousand for the three months ended June 30, 2026, i.e. 50,031,000 diluted shares. Diluted (not basic) is used because a DCF values the whole enterprise, including the dilutive effect of outstanding equity awards. Cross-check: the same filing's cover page reports basic shares outstanding of 40,387,012 Class A + 6,399,257 Class B = 46,786,269 as of August 4, 2026; the ~3.24M gap is treasury-stock-method dilution. Scenario deltas are 0: the share count is a filing fact, not an operating-scenario variable. Held constant across the forecast horizon - the P4 contract sanctions no share-count forecast driver.",
     "marking": "MKT",
     "asOf": "2026-08-06",
     "source": {
-      "provider": "U.S. Securities and Exchange Commission — Form 10-Q, Duolingo, Inc. (CIK 0001562088)",
+      "provider": "U.S. Securities and Exchange Commission - Form 10-Q, Duolingo, Inc. (CIK 0001562088)",
       "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm"
     }
   }

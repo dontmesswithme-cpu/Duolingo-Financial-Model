@@ -54,7 +54,7 @@ export function buildSensitivityColumns(growthValues = []) {
         titleFormatter: () => estSuffix(titleText, 'EST'),
         formatter: (cell) => {
           const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-          if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+          if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
           const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
           const targetG = row.activeGrowth ?? row.baseGrowth ?? 0.02;
           const isHighlightCell = (row.isActiveWacc || row.isBaseWacc) && Math.abs(gVal - targetG) < 0.0001;
@@ -74,14 +74,16 @@ export function buildSensitivityColumns(growthValues = []) {
  * @param {object} options.sensitivityGrid SensitivityGrid output from recommend.buildSensitivityGrid
  * @param {object} [options.scenarios] Scenario summary comparisons
  * @param {object} [options.dcf] Base DcfOutput
+ * @param {object} [options.marketPriceState] Live market price state (auto-updates benchmark)
  * @param {typeof DefaultTabulator} [options.TabulatorConstructor]
- * @returns {{ update: (sensitivityGrid: object, scenarios?: object, dcf?: object) => void, dispose: () => void, tabulatorInstances: object[], tabulatorConfigs: object[] }}
+ * @returns {{ update: (sensitivityGrid: object, scenarios?: object, dcf?: object, marketPriceState?: object) => void, dispose: () => void, tabulatorInstances: object[], tabulatorConfigs: object[] }}
  */
 export function renderSensitivity({
   container,
   sensitivityGrid,
   scenarios = null,
   dcf = null,
+  marketPriceState = null,
   TabulatorConstructor = DefaultTabulator,
 } = {}) {
   if (!container) {
@@ -91,6 +93,7 @@ export function renderSensitivity({
   let currentGrid = sensitivityGrid;
   let currentScenarios = scenarios;
   let currentDcf = dcf;
+  let currentMarketPrice = marketPriceState;
   let disposed = false;
   const tabulatorInstances = [];
   const tabulatorConfigs = [];
@@ -147,18 +150,21 @@ export function renderSensitivity({
     const bearPrice = bear?.perShare ?? bear?.dcf?.perShare ?? null;
     const bearUpside = bear?.upsidePct ?? bear?.recommendation?.upsidePct ?? null;
     const bearRecLabel = bear?.recommendation?.label || 'fair';
+    const bearVerdict = bear?.verdict?.verdict || bear?.verdict || bearRecLabel;
 
     const baseWacc = base?.wacc?.wacc?.value ?? base?.wacc?.value ?? currentGrid?.base?.wacc ?? null;
     const baseG = (base?.assumptions?.getValue ? base?.assumptions?.getValue('terminal_growth_rate') : base?.assumptions?.get?.('terminal_growth_rate')?.value) ?? currentGrid?.base?.growth ?? null;
     const basePrice = base?.perShare ?? base?.dcf?.perShare ?? currentDcf?.perShare ?? null;
     const baseUpside = base?.upsidePct ?? base?.recommendation?.upsidePct ?? currentScenarios?.base?.upsidePct ?? null;
     const baseRecLabel = base?.recommendation?.label || 'undervalued';
+    const baseVerdict = base?.verdict?.verdict || base?.verdict || baseRecLabel;
 
     const bullWacc = bull?.wacc?.wacc?.value ?? bull?.wacc?.value ?? null;
     const bullG = bull?.assumptions?.getValue ? bull?.assumptions?.getValue('terminal_growth_rate') : bull?.assumptions?.get?.('terminal_growth_rate')?.value;
     const bullPrice = bull?.perShare ?? bull?.dcf?.perShare ?? null;
     const bullUpside = bull?.upsidePct ?? bull?.recommendation?.upsidePct ?? null;
     const bullRecLabel = bull?.recommendation?.label || 'undervalued';
+    const bullVerdict = bull?.verdict?.verdict || bull?.verdict || bullRecLabel;
 
     const scenarioRows = [
       {
@@ -172,6 +178,8 @@ export function renderSensitivity({
         upside: bearUpside,
         rec: bearRecLabel.toUpperCase(),
         recClass: bearRecLabel,
+        verdict: bearVerdict.toUpperCase(),
+        verdictClass: bearVerdict.toLowerCase(),
       },
       {
         id: baseKey,
@@ -184,6 +192,8 @@ export function renderSensitivity({
         upside: baseUpside,
         rec: baseRecLabel.toUpperCase(),
         recClass: baseRecLabel,
+        verdict: baseVerdict.toUpperCase(),
+        verdictClass: baseVerdict.toLowerCase(),
       },
       {
         id: bullKey,
@@ -196,12 +206,15 @@ export function renderSensitivity({
         upside: bullUpside,
         rec: bullRecLabel.toUpperCase(),
         recClass: bullRecLabel,
+        verdict: bullVerdict.toUpperCase(),
+        verdictClass: bullVerdict.toLowerCase(),
       },
     ];
 
     const baseMktDriver = base?.assumptions?.get ? base?.assumptions?.get('market_share_price') : null;
-    const benchmarkPrice = baseMktDriver?.value ?? 157.85;
-    const benchmarkAsOf = baseMktDriver?.asOf || '';
+    const livePrice = Number.isFinite(currentMarketPrice?.price) ? currentMarketPrice.price : null;
+    const benchmarkPrice = livePrice ?? baseMktDriver?.value ?? 157.85;
+    const benchmarkAsOf = (livePrice !== null ? (currentMarketPrice?.asOf || '') : (baseMktDriver?.asOf || ''));
 
     return `
       <div class="sensitivity-card scenario-card">
@@ -211,7 +224,7 @@ export function renderSensitivity({
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
             Full-path end-to-end valuation runs parameterized across three macroeconomic and operating scenarios (preserving <code>Downside &lt; Base &lt; Upside</code> intrinsic value ordering).
-            <span class="scenario-benchmark-caption">Benchmark share price: $${benchmarkPrice.toFixed(2)}${benchmarkAsOf ? ` (${benchmarkAsOf})` : ''} snapshot driver. All scenario comparison upsides evaluate versus this neutral benchmark.</span>
+            <span class="scenario-benchmark-caption">Benchmark share price: $${benchmarkPrice.toFixed(2)}${benchmarkAsOf ? ` (${benchmarkAsOf})` : ''} snapshot driver. All scenario comparison upsides evaluate versus this neutral benchmark. Multi-Method Verdict reflects unweighted agreement across all six valuation methods.</span>
           </p>
           <table class="financial-summary-table scenario-table">
             <thead>
@@ -222,6 +235,7 @@ export function renderSensitivity({
                 <th class="align-right">Terminal Growth (g)</th>
                 <th class="align-right">DCF Target Price</th>
                 <th class="align-right">Implied Upside</th>
+                <th>Multi-Method Verdict</th>
                 <th>Mechanical Recommendation</th>
               </tr>
             </thead>
@@ -236,6 +250,7 @@ export function renderSensitivity({
                   <td class="align-right font-mono font-bold ${s.upside >= 0 ? 'text-positive' : 'text-negative'}">
                     ${percent(s.upside, { decimals: 2, showSign: true })}
                   </td>
+                  <td><span class="rec-badge rec-badge-${s.verdictClass}">${s.verdict}</span></td>
                   <td><span class="rec-badge rec-badge-${s.recClass}">${s.rec}</span></td>
                 </tr>
               `).join('')}
@@ -286,7 +301,7 @@ export function renderSensitivity({
         </div>
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
-            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
+            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Evaluates valuation sensitivity across the active systematic risk beta range (Bear β = 1.62, Base β = 1.47, Bull β = 1.32; peer unlevered asset beta range: 1.44 to 1.57). Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
           </p>
           <div class="tabulator-grid-container financial-table" data-statement="sensitivityGrid"></div>
           ${narrowingFootnoteHtml}
@@ -320,10 +335,11 @@ export function renderSensitivity({
   render();
 
   return {
-    update(newGrid, newScenarios = null, newDcf = null) {
+    update(newGrid, newScenarios = null, newDcf = null, newMarketPrice = undefined) {
       currentGrid = newGrid;
       currentScenarios = newScenarios || currentScenarios;
       currentDcf = newDcf || currentDcf;
+      if (newMarketPrice !== undefined) currentMarketPrice = newMarketPrice;
       render();
     },
     dispose() {
@@ -339,6 +355,7 @@ export function renderSensitivity({
       currentGrid = null;
       currentScenarios = null;
       currentDcf = null;
+      currentMarketPrice = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

@@ -1,12 +1,12 @@
 /**
- * Project constants — the single source of truth for shared values.
+ * Project constants  -  the single source of truth for shared values.
  *
  * `docs/conventions.md` requires every constant used in `src/data/` and
  * `src/engine/` to originate here, and the P0.3 grep gate (scoped per the
  * reviewer's binding ruling in `docs/inbox_ds.md` 2026-08-31) forbids bare
  * configuration values elsewhere: thresholds, scale factors, limits, URL
- * fragments, scenario names. Structural literals — array indices, `.length`
- * comparisons, `index + 1` row numbering, regex quantifiers — are exempt.
+ * fragments, scenario names. Structural literals  -  array indices, `.length`
+ * comparisons, `index + 1` row numbering, regex quantifiers  -  are exempt.
  * Scale factors below are the documented exception that lives here rather
  * than at the call sites.
  *
@@ -18,7 +18,7 @@
  *
  * `scale` is the multiplier that converts a stored `value` into whole US dollars
  * (or whole units for `count`). As-reported filing units are preserved verbatim
- * in the data layer — `scale` documents them, it never converts them.
+ * in the data layer  -  `scale` documents them, it never converts them.
  *
  * @type {Readonly<Record<string, { scale: number, label: string }>>}
  */
@@ -67,14 +67,14 @@ export const DEFAULT_SCENARIO = 'base';
 
 /**
  * Visible marking appended to every estimate/forecast value. `docs/conventions.md`
- * requires the mark to flow through `format.estSuffix` — this constant is the
+ * requires the mark to flow through `format.estSuffix`  -  this constant is the
  * canonical label text so the UI can never render an unmarked estimate.
  * @type {string}
  */
 export const EST_BADGE_LABEL = 'EST';
 
 /**
- * Fiscal calendar notes — the transcription-honesty facts the data layer is
+ * Fiscal calendar notes  -  the transcription-honesty facts the data layer is
  * built on (`docs/spec.md` §4.4). Recorded here so the loader, the engine, and
  * the UI render pipeline share one description instead of re-deriving it.
  * @type {Readonly<Record<string, string>>}
@@ -83,7 +83,7 @@ export const FISCAL_CALENDAR_NOTES = Object.freeze({
   fiscalYearEnd:
     "Duolingo's fiscal year is the calendar year ending December 31.",
   annualFilings:
-    'FY2021–FY2025 annuals come from 10-K filings; FY2026 is a hybrid year (H1 actual + H2 estimate).',
+    'FY2021-FY2025 annuals come from 10-K filings; FY2026 is a hybrid year (H1 actual + H2 estimate).',
   quarterlyIncome:
     '10-Q income statements present discrete 3-month columns and are transcribed directly (cited).',
   quarterlyCashFlow:
@@ -95,7 +95,7 @@ export const FISCAL_CALENDAR_NOTES = Object.freeze({
 /**
  * Ledger enforcement flag: when `true`, citation URLs must exist in
  * `docs/sources/sources.md` (`SOURCE_NOT_IN_LEDGER`). Consumed via dependency
- * injection — `loadHistorical({ requireLedger, ledger })` — so the audit engine
+ * injection  -  `loadHistorical({ requireLedger, ledger })`  -  so the audit engine
  * never imports project configuration and can be tested in an explicit
  * ledger-free mode (contract B, P0.3). From P0.3 on, the app boots with this
  * flag enabled.
@@ -181,7 +181,7 @@ export const FORECAST_BASE_YEAR = 2026;
 
 /**
  * Forecast horizon bounds and default, per `docs/spec.md` §7 decision 1
- * (5 forward years FY2026–FY2030, user-extensible 3–10).
+ * (5 forward years FY2026-FY2030, user-extensible 3-10).
  * @type {number}
  */
 export const FORECAST_HORIZON_MIN = 3;
@@ -203,9 +203,9 @@ export const HALVES_PER_YEAR = 2;
 
 /**
  * Cited corpus periods the forecast anchors on. Every key names a period that
- * exists in the P1 corpus — no forecast row is ever added to the data layer.
+ * exists in the P1 corpus  -  no forecast row is ever added to the data layer.
  *
- * - `baseFiscalYear`: last fully-reported fiscal year (FY2025) — the base every
+ * - `baseFiscalYear`: last fully-reported fiscal year (FY2025)  -  the base every
  *   growth driver compounds from.
  * - `subscriberOpening` / `subscriberMidYear`: paid-subscriber stock anchors
  *   (FY2025 year-end and Q2 FY2026), the two cited points in the cascade.
@@ -247,7 +247,7 @@ export const HISTORICAL_DATASETS = Object.freeze(['income', 'balance', 'cashflow
 export const MARKING_VALUES = Object.freeze(['MKT', 'EST']);
 
 /**
- * Documentation of the P4.1 WACC build — the method statement the Valuation tab
+ * Documentation of the P4.1 WACC build  -  the method statement the Valuation tab
  * renders alongside the build table. Reference notes only; no engine reads a
  * number from here.
  *
@@ -260,7 +260,7 @@ export const MARKING_VALUES = Object.freeze(['MKT', 'EST']);
 export const WACC_BUILD_DEFAULTS = Object.freeze({
   method:
     'CAPM cost of equity = risk-free rate + beta × equity risk premium; WACC = (E/V)·Re + (D/V)·Rd·(1−t).',
-  costOfEquitySource: 'CAPM — rf + beta × ERP, every leg a MKT-labeled driver with an as-of date.',
+  costOfEquitySource: 'CAPM  -  rf + beta × ERP, every leg a MKT-labeled driver with an as-of date.',
   weightsBasis:
     'Market-value weights: E = share price × diluted shares outstanding; D = funded debt balance resolved from the debt schedule.',
   debtFreeNote:
@@ -273,8 +273,8 @@ export const WACC_BUILD_DEFAULTS = Object.freeze({
 
 /**
  * Bounds for the `terminal_growth_rate` driver. The `max` is the long-run US
- * nominal GDP growth ceiling — a perpetuity cannot outgrow the economy that
- * hosts it — and it stays far below any plausible WACC so the Gordon guard
+ * nominal GDP growth ceiling  -  a perpetuity cannot outgrow the economy that
+ * hosts it  -  and it stays far below any plausible WACC so the Gordon guard
  * `WACC > g` holds across the whole slider range.
  * @type {Readonly<{ min: number, max: number, step: number }>}
  */
@@ -286,8 +286,8 @@ export const TERMINAL_GROWTH_BOUNDS = Object.freeze({
 
 /**
  * Mechanical recommendation thresholds, per `docs/spec.md` §7 (the model
- * states an output, never an opinion). `recommend.js` imports these — it never
- * re-types them — so the label boundaries have exactly one home.
+ * states an output, never an opinion). `recommend.js` imports these  -  it never
+ * re-types them  -  so the label boundaries have exactly one home.
  *
  * `upsidePct >= undervalued` → `undervalued`; `upsidePct <= overvalued` →
  * `overvalued`; anything between → `fair`.

@@ -59,7 +59,7 @@ export function buildScheduleColumns({ isPct = false } = {}) {
       minWidth: 95,
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+        if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
         const isRatio = row.isPct || isPct;
         return isRatio ? percent(val) : usd(val, { decimals: 0 });
@@ -75,7 +75,7 @@ export function buildScheduleColumns({ isPct = false } = {}) {
       titleFormatter: () => estSuffix(period, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-        if (val === null || val === undefined || !Number.isFinite(val)) return '—';
+        if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
         const isRatio = row.isPct || isPct;
         return isRatio ? percent(val) : usd(val, { decimals: 0 });
@@ -310,9 +310,9 @@ export function renderSchedules({
       const bc = currentThreeStatement?.balanceCheck?.byPeriod?.[p];
       const passed = bc ? (bc.ok === true || bc.passed === true) : true;
       const diff = bc?.difference ?? 0;
-      const assetsVal = bc?.assets ? usd(bc.assets, { decimals: 2 }) : '—';
+      const assetsVal = bc?.assets ? usd(bc.assets, { decimals: 2 }) : ' - ';
       const totalLiabEquity = bc ? (bc.liabilities || 0) + (bc.equity || 0) : null;
-      const liabEquityVal = totalLiabEquity !== null ? usd(totalLiabEquity, { decimals: 2 }) : '—';
+      const liabEquityVal = totalLiabEquity !== null ? usd(totalLiabEquity, { decimals: 2 }) : ' - ';
 
       return `
         <div class="balance-check-item ${passed ? 'check-pass' : 'check-fail'}">
@@ -437,7 +437,7 @@ export function renderSchedules({
     const sbcHtml = renderCard('Stock-Based Compensation (SBC) Schedule ($ in thousands)', 'sbc');
 
     const debtBasisText = currentSchedules?.debt?.statementBasis ||
-      'Duolingo, Inc. has zero funded debt, zero bank borrowings, zero credit facility drawings, and zero promissory notes outstanding across all reported periods (FY2021–Q2 FY2026).';
+      'Duolingo, Inc. has zero funded debt, zero bank borrowings, zero credit facility drawings, and zero promissory notes outstanding across all reported periods (FY2021-Q2 FY2026).';
 
     const debtFootnoteHtml = `
       <div class="disclaimer-box schedule-footnote debt-footnote">
@@ -445,7 +445,7 @@ export function renderSchedules({
           <strong>Funded Debt Status (Debt-Free Verified):</strong> ${debtBasisText}
         </p>
         <p class="footnote-line">
-          <strong>Operating Leases (ASC 842):</strong> Historical values reflect filed non-current operating lease liabilities ($k). FY2026–FY2030 lease values are <em>held at last filed Q2 FY2026 level; no lease forecast driver — see methodology</em>. Operating lease obligations do not constitute funded debt or borrowings.
+          <strong>Operating Leases (ASC 842):</strong> Historical values reflect filed non-current operating lease liabilities ($k). FY2026-FY2030 lease values are <em>held at last filed Q2 FY2026 level; no lease forecast driver, see methodology</em>. Operating lease obligations do not constitute funded debt or borrowings.
         </p>
       </div>
     `;

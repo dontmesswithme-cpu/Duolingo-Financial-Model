@@ -1,9 +1,9 @@
 /**
- * P5.4 Artifact Contract Tests — Schedules & Projections Tab Views & Linkages.
+ * P5.4 Artifact Contract Tests  -  Schedules & Projections Tab Views & Linkages.
  *
  * Comprehensive verification against docs/phases/phase_5.md §3 Task P5.4 & DIR Validation Standards:
  *  1. Live Tabulator Grid Instantiation for all 5 Schedules and 3 Projections statements
- *  2. 10-Year Span (FY2021–FY2025 Historical + FY2026–FY2030 Projected with EST badges)
+ *  2. 10-Year Span (FY2021-FY2025 Historical + FY2026-FY2030 Projected with EST badges)
  *  3. Tabulator Schema Contracts: selectableRange: true, clipboard: true, keybindings: true, editor: false, frozen: true
  *  4. Balance Check Hard Gate Indicator (A === L + E across all forecast years)
  *  5. Data Content Gate: grid cells match engine-derived figures (zero invented numbers)
@@ -72,7 +72,7 @@ function createHtmlContainer() {
   return container;
 }
 
-describe('P5.4 — Schedules Tab: Tabulator Instantiation & Schema Contracts', () => {
+describe('P5.4  -  Schedules Tab: Tabulator Instantiation & Schema Contracts', () => {
   test('invokes TabulatorConstructor for all 5 schedule families with full options and frozen columns', async () => {
     const { schedules, threeStatement } = await getDatasets();
     const container = createHtmlContainer();
@@ -181,7 +181,7 @@ describe('P5.4 — Schedules Tab: Tabulator Instantiation & Schema Contracts', (
   });
 });
 
-describe('P5.4 — Projections Tab: Linked IS → BS → CF Grids & Hybrid FY2026 Split', () => {
+describe('P5.4  -  Projections Tab: Linked IS → BS → CF Grids & Hybrid FY2026 Split', () => {
   test('invokes TabulatorConstructor for all 3 financial statements and renders hybrid FY2026 card', async () => {
     const { threeStatement, historical } = await getDatasets();
     const container = createHtmlContainer();
@@ -298,7 +298,7 @@ describe('P5.4 — Projections Tab: Linked IS → BS → CF Grids & Hybrid FY202
   });
 });
 
-describe('P5.4 — Live App Mounting & Integration', () => {
+describe('P5.4  -  Live App Mounting & Integration', () => {
   test('createApp mounts schedules and projections views and executes reactive updates', async () => {
     const { historical, assumptions } = await getDatasets();
     const { root, panes } = createTabRoot(['cover', 'assumptions', 'historicals', 'schedules', 'projections', 'valuation', 'summary', 'sensitivity']);
@@ -329,7 +329,7 @@ describe('P5.4 — Live App Mounting & Integration', () => {
   });
 });
 
-describe('P5.4 — Quality Gates: Zero style=, Zero UI Bare Literals, Purity & Corpus Invariance', () => {
+describe('P5.4  -  Quality Gates: Zero style=, Zero UI Bare Literals, Purity & Corpus Invariance', () => {
   test('zero style= inline attributes across all src/ui/ files', () => {
     const uiFiles = fs.readdirSync(UI_DIR).filter((f) => f.endsWith('.js'));
     for (const file of uiFiles) {

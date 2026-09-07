@@ -3,8 +3,8 @@
  *
  * `src/app.js` touches the DOM exclusively through the injected `root` and a
  * deliberately small surface: `querySelectorAll`, attribute accessors, and
- * `add`/`removeEventListener`. This stub implements exactly that surface — no
- * jsdom, no browser, zero dependencies — which keeps the whole suite headless
+ * `add`/`removeEventListener`. This stub implements exactly that surface  -  no
+ * jsdom, no browser, zero dependencies  -  which keeps the whole suite headless
  * and deterministic.
  *
  * Convention: files prefixed with `_` are helpers, not test files, so the Node

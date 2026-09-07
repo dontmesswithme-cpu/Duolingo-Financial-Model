@@ -1,5 +1,5 @@
 /**
- * P1.1 Artifact Contract tests — `src/data/historical/income.json`.
+ * P1.1 Artifact Contract tests  -  `src/data/historical/income.json`.
  *
  * Covers the invariants the contract names: every row cited and in-ledger, no
  * audit violations, segment sums equal to total revenue, the income-statement
@@ -29,7 +29,7 @@ import { KNOWN_FIGURES, GROWTH_FIXTURE } from './fixtures/duolingo_facts.js';
 /** Absolute path of the historical dataset directory. */
 const DATA_DIR = fileURLToPath(new URL('../src/data/historical/', import.meta.url));
 
-/** Reads dataset files from disk — the Node counterpart of the browser's fetch. */
+/** Reads dataset files from disk  -  the Node counterpart of the browser's fetch. */
 const readText = (location) => fs.promises.readFile(location, 'utf8');
 
 /** The eight model tabs, per `docs/spec.md` §3.4. */
@@ -79,7 +79,7 @@ function valueOf(rows, period, metric) {
   return row.value;
 }
 
-describe('P1.1 — dataset loads through the unmodified P0 pipeline', () => {
+describe('P1.1  -  dataset loads through the unmodified P0 pipeline', () => {
   test('loadHistorical resolves with the income dataset under ledger enforcement', async () => {
     const { rows } = await loadIncome();
     assert.ok(rows.length > 0, 'income dataset must not be empty');
@@ -154,7 +154,7 @@ describe('P1.1 — dataset loads through the unmodified P0 pipeline', () => {
   });
 });
 
-describe('P1.1 — statement identities', () => {
+describe('P1.1  -  statement identities', () => {
   test('revenue components sum exactly to total revenue per period', async () => {
     const { rows } = await loadIncome();
     const periodsToTest = [...FISCAL_YEARS, ...QUARTERS, '9M FY2025'];
@@ -216,7 +216,7 @@ describe('P1.1 — statement identities', () => {
   test('annual rows: the five fiscal years are positive-revenue and loss-making early', async () => {
     const { rows } = await loadIncome();
     // Sanity anchors on the shape of Duolingo's history: revenue grows every
-    // year, FY2021–FY2023 were loss-making at the operating line.
+    // year, FY2021-FY2023 were loss-making at the operating line.
     for (const period of FISCAL_YEARS) {
       assert.ok(valueOf(rows, period, 'revenue_total') > 0, period);
     }
@@ -232,7 +232,7 @@ describe('P1.1 — statement identities', () => {
   });
 });
 
-describe('P1.1 — known-figure fixtures', () => {
+describe('P1.1  -  known-figure fixtures', () => {
   test('every fixture value matches the dataset exactly', async () => {
     const { rows } = await loadIncome();
     for (const figure of KNOWN_FIGURES) {
@@ -268,7 +268,7 @@ describe('P1.1 — known-figure fixtures', () => {
   });
 });
 
-describe('P1.1 — period transcription honesty', () => {
+describe('P1.1  -  period transcription honesty', () => {
   test('annual rows are fiscal_year rows cited to a 10-K', async () => {
     const { rows } = await loadIncome();
     for (const period of FISCAL_YEARS) {
@@ -322,7 +322,7 @@ describe('P1.1 — period transcription honesty', () => {
   });
 });
 
-describe('P1.1 — app boot path wires the Accuracy Gate', () => {
+describe('P1.1  -  app boot path wires the Accuracy Gate', () => {
   /**
    * @returns {Promise<object>}
    */

@@ -1,5 +1,5 @@
 /**
- * P6.2 Artifact Contract Tests — Performance, Responsiveness & Accessibility Budgets.
+ * P6.2 Artifact Contract Tests  -  Performance, Responsiveness & Accessibility Budgets.
  *
  * Comprehensive verification against docs/phases/phase_6.md §3 Task P6.2:
  *  1. Recalculation Latency Budget (< 16ms median over 100 iterations, zero async in hot path).
@@ -44,7 +44,7 @@ async function getAssumptions() {
   return loadAssumptions({ location: ASSUMPTIONS_PATH, readText });
 }
 
-describe('P6.2 — Recalculation Latency Budget (< 16ms)', () => {
+describe('P6.2  -  Recalculation Latency Budget (< 16ms)', () => {
   test('full recalc path (setDriver -> schedules -> forecast -> threeStatement -> wacc -> dcf -> recommend -> sensitivity -> views) is median < 16ms over 100 iterations', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -111,7 +111,7 @@ describe('P6.2 — Recalculation Latency Budget (< 16ms)', () => {
   });
 });
 
-describe('P6.2 — Cold-Boot / Initial Render Budget (< 500ms)', () => {
+describe('P6.2  -  Cold-Boot / Initial Render Budget (< 500ms)', () => {
   test('bootApp cold boot (data loading + all engine stages + 8 tabs mounted) completes in < 500ms', async () => {
     const times = [];
 
@@ -146,7 +146,7 @@ describe('P6.2 — Cold-Boot / Initial Render Budget (< 500ms)', () => {
   });
 });
 
-describe('P6.2 — Memory & Symmetrical Disposal Budgets', () => {
+describe('P6.2  -  Memory & Symmetrical Disposal Budgets', () => {
   test('steady-state heap is bounded and 20 mount/dispose cycles produce zero listener leaks', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -225,7 +225,7 @@ describe('P6.2 — Memory & Symmetrical Disposal Budgets', () => {
   });
 });
 
-describe('P6.2 — Zero Runtime Network Dependencies', () => {
+describe('P6.2  -  Zero Runtime Network Dependencies', () => {
   test('index.html contains zero external scripts, stylesheets, or CDN references', async () => {
     const html = await fs.promises.readFile(INDEX_PATH, 'utf8');
 
@@ -275,7 +275,7 @@ describe('P6.2 — Zero Runtime Network Dependencies', () => {
   });
 });
 
-describe('P6.2 — Responsiveness & Accessibility Contracts', () => {
+describe('P6.2  -  Responsiveness & Accessibility Contracts', () => {
   test('createTabs manages keyboard navigation, ARIA roles, and active panel synchronization', () => {
     const { root, links, panes } = createTabRoot(TAB_KEYS);
     const tabs = createTabs({ root, tabs: TAB_KEYS });
@@ -335,7 +335,7 @@ describe('P6.2 — Responsiveness & Accessibility Contracts', () => {
   });
 });
 
-describe('P6.2 — Quality Gates: Corpus Invariance & UI Cleanliness', () => {
+describe('P6.2  -  Quality Gates: Corpus Invariance & UI Cleanliness', () => {
   test('corpus invariant: 706 historical records unchanged', async () => {
     const historical = await getHistorical();
     const allRows = [

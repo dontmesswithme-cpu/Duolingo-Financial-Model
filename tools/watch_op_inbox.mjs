@@ -1,4 +1,4 @@
-// OP Watcher — monitors docs/status_op.json for DS signal updates.
+// OP Watcher  -  monitors docs/status_op.json for DS signal updates.
 // Uses fast non-blocking polling (1s interval) on structured JSON state.
 // Wakes immediately when DS increments seq (seq > baselineSeq) or sets state to 'review_pending'.
 // Supports explicit baseline via CLI argument (e.g. node tools/watch_op_inbox.mjs 4).

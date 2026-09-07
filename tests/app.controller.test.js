@@ -1,5 +1,5 @@
 /**
- * P5.2 Artifact Contract Tests — App Controller & Tab Shell Interface.
+ * P5.2 Artifact Contract Tests  -  App Controller & Tab Shell Interface.
  *
  * Covers:
  *  - DI-constructor `createApp({ data, engine, root, now, historical, assumptions })`
@@ -42,7 +42,7 @@ async function getAssumptions() {
   return loadAssumptions({ location: ASSUMPTIONS_PATH, readText });
 }
 
-describe('P5.2 — DI Constructor & Dependency Validation', () => {
+describe('P5.2  -  DI Constructor & Dependency Validation', () => {
   test('createApp constructs cleanly with injected dependencies and full pipeline', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -73,8 +73,8 @@ describe('P5.2 — DI Constructor & Dependency Validation', () => {
     assert.ok(state.wacc);
     assert.ok(state.dcf);
     assert.ok(state.recommendation);
-    assert.equal(state.recommendation.label, 'undervalued');
-    assert.ok(Math.abs(state.dcf.perShare - 189.30871314314004) < 1e-6);
+    assert.equal(state.recommendation.label, 'fair');
+    assert.ok(Math.abs(state.dcf.perShare - 144.082130498451) < 1e-6);
 
     app.dispose();
   });
@@ -119,7 +119,7 @@ describe('P5.2 — DI Constructor & Dependency Validation', () => {
   });
 });
 
-describe('P5.2 — Clamped Driver Inputs & Range Enforcement', () => {
+describe('P5.2  -  Clamped Driver Inputs & Range Enforcement', () => {
   test('setDriver clamps values to driver min and max bounds', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -182,7 +182,7 @@ describe('P5.2 — Clamped Driver Inputs & Range Enforcement', () => {
   });
 });
 
-describe('P5.2 — Scenario Management & Delta Clamping', () => {
+describe('P5.2  -  Scenario Management & Delta Clamping', () => {
   test('setScenario switches between Bear, Base, Bull and recalibrates model output', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -199,21 +199,21 @@ describe('P5.2 — Scenario Management & Delta Clamping', () => {
 
     // Base valuation
     const basePerShare = app.state().dcf.perShare;
-    assert.ok(Math.abs(basePerShare - 189.30871314314004) < 1e-6);
+    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-6);
 
     // Switch to Bear
     app.setScenario('bear');
     const bearPerShare = app.state().dcf.perShare;
     assert.equal(app.state().scenario, 'bear');
     assert.ok(bearPerShare < basePerShare);
-    assert.ok(Math.abs(bearPerShare - 102.41326051479186) < 1e-4);
+    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4);
 
     // Switch to Bull
     app.setScenario('bull');
     const bullPerShare = app.state().dcf.perShare;
     assert.equal(app.state().scenario, 'bull');
     assert.ok(bullPerShare > basePerShare);
-    assert.ok(Math.abs(bullPerShare - 405.6797934948002) < 1e-4);
+    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4);
 
     // Rejects invalid scenario name
     assert.throws(
@@ -225,7 +225,7 @@ describe('P5.2 — Scenario Management & Delta Clamping', () => {
   });
 });
 
-describe('P5.2 — Synchronous Recalculation Performance (<16ms)', () => {
+describe('P5.2  -  Synchronous Recalculation Performance (<16ms)', () => {
   test('schedules -> forecast -> threeStatement -> wacc -> dcf -> recommend recalc < 16ms median over 100 runs', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -261,7 +261,7 @@ describe('P5.2 — Synchronous Recalculation Performance (<16ms)', () => {
   });
 });
 
-describe('P5.2 — Symmetrical Lifecycle & Teardown', () => {
+describe('P5.2  -  Symmetrical Lifecycle & Teardown', () => {
   test('dispose removes all listeners and is idempotent', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -292,7 +292,7 @@ describe('P5.2 — Symmetrical Lifecycle & Teardown', () => {
   });
 });
 
-describe('P5.2 — Tab Shell Navigation & Keyboard Routing', () => {
+describe('P5.2  -  Tab Shell Navigation & Keyboard Routing', () => {
   test('createTabs correctly manages 8-tab shell navigation and ARIA state', () => {
     const { root, links, panes } = createTabRoot(TAB_KEYS);
     const tabs = createTabs({ root, tabs: TAB_KEYS });
@@ -324,7 +324,7 @@ describe('P5.2 — Tab Shell Navigation & Keyboard Routing', () => {
   });
 });
 
-describe('P5.2 — Cover/TOC Markup, EST/MKT Legend & Invariants', () => {
+describe('P5.2  -  Cover/TOC Markup, EST/MKT Legend & Invariants', () => {
   test('index.html contains 8 tab sections and required Cover/TOC metadata', async () => {
     const html = await readText(INDEX_PATH);
 

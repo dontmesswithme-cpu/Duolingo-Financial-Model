@@ -1,5 +1,5 @@
 /**
- * P0.2 Artifact Contract tests — `src/data/audit.js` (the Accuracy Gate).
+ * P0.2 Artifact Contract tests  -  `src/data/audit.js` (the Accuracy Gate).
  *
  * Proves the gate cannot be bypassed: uncited historicals are rejected, cited
  * ones pass, estimates are flagged rather than trusted, and every finding names
@@ -7,7 +7,7 @@
  * through `loadHistorical()`.
  *
  * NOTE ON FIXTURE VALUES: every number below is a synthetic placeholder. Phase 0
- * delivers machinery only — no Duolingo figure is transcribed until P1.
+ * delivers machinery only  -  no Duolingo figure is transcribed until P1.
  */
 
 import { test, describe } from 'node:test';
@@ -61,7 +61,7 @@ function rules(report) {
   return report.violations.map((violation) => violation.rule);
 }
 
-describe('Accuracy Gate — cited data passes', () => {
+describe('Accuracy Gate  -  cited data passes', () => {
   test('a fully-cited dataset yields ok === true with no violations', () => {
     const report = auditDataset(dataset([citedRow()]));
     assert.equal(report.ok, true);
@@ -84,7 +84,7 @@ describe('Accuracy Gate — cited data passes', () => {
   });
 });
 
-describe('HIST_NO_SOURCE / SOURCE_URL_MISSING — uncited data is rejected', () => {
+describe('HIST_NO_SOURCE / SOURCE_URL_MISSING  -  uncited data is rejected', () => {
   test('a single uncited historical record is rejected', () => {
     const row = citedRow();
     delete row.source;
@@ -151,7 +151,7 @@ describe('HIST_MARKED_ESTIMATE & the EST_ROW flag', () => {
   });
 });
 
-describe('DUP_KEY — record identity is unique', () => {
+describe('DUP_KEY  -  record identity is unique', () => {
   test('the same metric/period/periodType twice is rejected', () => {
     const report = auditDataset(dataset([citedRow(), citedRow()]));
     assert.equal(report.ok, false);
@@ -180,7 +180,7 @@ describe('DUP_KEY — record identity is unique', () => {
   });
 });
 
-describe('BAD_UNITS — as-reported units stay consistent', () => {
+describe('BAD_UNITS  -  as-reported units stay consistent', () => {
   test('an unknown unit is rejected', () => {
     const report = auditDataset(dataset([citedRow({ units: 'euros' })]));
     assert.deepEqual(rules(report), ['BAD_UNITS']);
@@ -199,7 +199,7 @@ describe('BAD_UNITS — as-reported units stay consistent', () => {
   });
 });
 
-describe('SOURCE_NOT_IN_LEDGER — injected ledger enforcement', () => {
+describe('SOURCE_NOT_IN_LEDGER  -  injected ledger enforcement', () => {
   test('a citation present in the ledger passes', () => {
     const report = auditDataset(dataset([citedRow()]), {
       requireLedger: true,
@@ -287,7 +287,7 @@ describe('AuditReport shape & determinism', () => {
   });
 });
 
-describe('End-to-end — the gate is wired into loadHistorical()', () => {
+describe('End-to-end  -  the gate is wired into loadHistorical()', () => {
   /**
    * @param {Object.<string, Array<object>>} datasets
    * @returns {Object.<string, string>}
@@ -345,7 +345,7 @@ describe('End-to-end — the gate is wired into loadHistorical()', () => {
       (error) => {
         assert.ok(error instanceof DataValidationError);
         // The schema layer rejects the missing `source` before the audit engine
-        // sees the row — defence in depth, with HIST_NO_SOURCE as the second
+        // sees the row  -  defence in depth, with HIST_NO_SOURCE as the second
         // line of defence for any caller that audits without validating first.
         assert.ok(
           error.records.some((record) => record.metric === 'cost_of_revenue'),
@@ -362,7 +362,7 @@ describe('End-to-end — the gate is wired into loadHistorical()', () => {
     );
   });
 
-  test('the audit stage is reachable end-to-end — citation alone is not enough', async () => {
+  test('the audit stage is reachable end-to-end  -  citation alone is not enough', async () => {
     // Both rows are fully cited and schema-valid; only the audit engine can
     // catch this, proving auditDataset is genuinely wired into the pipeline.
     const broken = {

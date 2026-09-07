@@ -1,16 +1,16 @@
 /**
- * P4.1 Artifact Contract Tests — WACC Build (CAPM, MKT-Labeled Market Inputs,
+ * P4.1 Artifact Contract Tests  -  WACC Build (CAPM, MKT-Labeled Market Inputs,
  * As-Of Dates, Debt-Schedule Cost of Debt).
  *
  * Covers:
  *  - `wacc.build(input)` interface, frozen output, and the full contract leg set.
  *  - **MKT labeling with as-of dates**: every market driver carries `marking: "MKT"`,
- *    a `YYYY-MM-DD` `asOf`, and a `source.provider` — a violation raises a
+ *    a `YYYY-MM-DD` `asOf`, and a `source.provider`  -  a violation raises a
  *    `ConfigError` listing every offender.
  *  - **CAPM arithmetic independently recomputed and pinned**: `Re = rf + beta × ERP`
  *    checked against a hand-computed pin, not just against itself.
  *  - **Debt-free collapse proven**: `costOfDebt` null, `debtWeight` 0, `equityWeight` 1,
- *    `wacc === costOfEquity` — and the GENERAL weighted formula is exercised with a
+ *    `wacc === costOfEquity`  -  and the GENERAL weighted formula is exercised with a
  *    synthetic levered schedule so the collapse is a theorem, not a deleted branch.
  *  - **Capital weights recomputed and pinned**: `marketCap = price × shares`.
  *  - **Borrowing-pattern tripwire**: no corpus metric matches the debt pattern.
@@ -41,7 +41,7 @@ const LEDGER = readLedgerUrls();
 const P3_CORPUS_RECORD_COUNT = 706;
 
 /**
- * Independent hand-computed pins. These are typed on purpose — an anti-tautology
+ * Independent hand-computed pins. These are typed on purpose  -  an anti-tautology
  * pin must be an assertion about the answer, not a restatement of the code that
  * produced it. The fixture file supplies the DERIVED anchors; these supply the
  * independent check that those anchors are the right numbers.
@@ -57,10 +57,10 @@ const P3_CORPUS_RECORD_COUNT = 706;
  */
 const PIN = Object.freeze({
   riskFreeRate: 0.0479,
-  beta: 0.89,
-  equityRiskPremium: 0.0446,
-  costOfEquity: 0.087594,
-  wacc: 0.087594,
+  beta: 1.47,
+  equityRiskPremium: 0.0425,
+  costOfEquity: 0.110375,
+  wacc: 0.110375,
   sharePrice: 157.85,
   sharesOutstanding: 50031000,
   marketCap: 7897393350,
@@ -70,7 +70,7 @@ const PIN = Object.freeze({
   taxRate: 0.134225,
 });
 
-/** Absolute tolerance for float pins (rates and weights — magnitude <= 1). */
+/** Absolute tolerance for float pins (rates and weights  -  magnitude <= 1). */
 const TOL = 1e-12;
 
 /**
@@ -80,7 +80,7 @@ const TOL = 1e-12;
  * Why this exists: `marketCap = 157.85 × 50,031,000` is exactly 7,897,393,350
  * in decimal, but 157.85 is not exactly representable as a IEEE-754 double, so
  * the product lands on ...350.000001. A flat 1e-12 absolute tolerance is
- * unreachable at a magnitude of 7.8e9 — not because the answer is wrong, but
+ * unreachable at a magnitude of 7.8e9  -  not because the answer is wrong, but
  * because a double carries ~1e-16 of *relative* error. Scaling by magnitude is
  * the correct fix; loosening the number by hand would be the lazy one.
  *
@@ -140,7 +140,7 @@ function assumptionSetFrom(drivers) {
   });
 }
 
-describe('P4.1 — MKT labeling with as-of dates', () => {
+describe('P4.1  -  MKT labeling with as-of dates', () => {
   test('every market driver carries marking MKT, an ISO asOf, and a source.provider', async () => {
     const assumptions = await getAssumptions();
 
@@ -206,7 +206,7 @@ describe('P4.1 — MKT labeling with as-of dates', () => {
   });
 });
 
-describe('P4.1 — CAPM arithmetic and the debt-free collapse', () => {
+describe('P4.1  -  CAPM arithmetic and the debt-free collapse', () => {
   test('cost of equity is rf + beta × ERP, pinned and independently recomputed', async () => {
     const assumptions = await getAssumptions();
     const waccBuild = build({ assumptions });
@@ -233,7 +233,7 @@ describe('P4.1 — CAPM arithmetic and the debt-free collapse', () => {
     const waccBuild = build({ assumptions });
 
     assert.equal(waccBuild.debtFree, true, 'Duolingo is debt-free per P2.3');
-    assert.equal(waccBuild.costOfDebt.value, null, 'cost of debt is undefined — null, not zero');
+    assert.equal(waccBuild.costOfDebt.value, null, 'cost of debt is undefined  -  null, not zero');
     pinned(waccBuild.debtWeight.value, PIN.debtWeight, 'debtWeight');
     pinned(waccBuild.equityWeight.value, PIN.equityWeight, 'equityWeight');
     pinned(waccBuild.wacc.value, PIN.wacc, 'wacc (debt-free pin)');
@@ -271,7 +271,7 @@ describe('P4.1 — CAPM arithmetic and the debt-free collapse', () => {
         step: 0.001,
         units: 'pct_decimal',
         scenarioDeltas: Object.freeze({ bear: 0.01, bull: -0.01 }),
-        notes: 'synthetic levered probe — not a corpus driver',
+        notes: 'synthetic levered probe  -  not a corpus driver',
       }),
     ]);
 
@@ -312,7 +312,7 @@ describe('P4.1 — CAPM arithmetic and the debt-free collapse', () => {
   });
 });
 
-describe('P4.1 — capital weights and build table', () => {
+describe('P4.1  -  capital weights and build table', () => {
   test('marketCap = share price × diluted shares outstanding, pinned', async () => {
     const assumptions = await getAssumptions();
     const waccBuild = build({ assumptions });
@@ -383,7 +383,7 @@ describe('P4.1 — capital weights and build table', () => {
   });
 });
 
-describe('P4.1 — debt-free tripwire (borrowing-pattern scan)', () => {
+describe('P4.1  -  debt-free tripwire (borrowing-pattern scan)', () => {
   test('no balance-sheet metric in the corpus matches the debt pattern', async () => {
     const historical = await getHistorical();
     const balanceRows = extractRows(historical.balance);
@@ -407,16 +407,16 @@ describe('P4.1 — debt-free tripwire (borrowing-pattern scan)', () => {
   });
 });
 
-describe('P4.1 — fail-closed inputs', () => {
+describe('P4.1  -  fail-closed inputs', () => {
   test('a removed driver fails closed and names it, through whichever gate fires first', async () => {
     const assumptions = await getAssumptions();
 
     /*
      * `build()` enforces two gates, in this order:
-     *   1. assertMarketDriverDiscipline — the MKT regime, over the fixed
+     *   1. assertMarketDriverDiscipline  -  the MKT regime, over the fixed
      *      MARKET_DRIVER_NAMES list. A driver that is *absent* is an offender
      *      here, so removal of a market input surfaces as ConfigError.
-     *   2. requireDriverValue — the fail-closed value gate. Reached only once
+     *   2. requireDriverValue  -  the fail-closed value gate. Reached only once
      *      the set is well-formed; fires on a non-finite value, or on any
      *      non-market driver that is missing outright.
      *
@@ -426,7 +426,7 @@ describe('P4.1 — fail-closed inputs', () => {
      * pinned here instead, each against the case that actually reaches it.
      */
 
-    // Gate 1: a removed MKT driver — ConfigError, still naming the driver and
+    // Gate 1: a removed MKT driver  -  ConfigError, still naming the driver and
     // still refusing to proceed. Never a silent fallback to 0.
     for (const name of ['risk_free_rate', 'beta', 'equity_risk_premium', 'market_share_price', 'shares_outstanding']) {
       const without = assumptions.drivers.filter((d) => d.name !== name);
@@ -446,7 +446,7 @@ describe('P4.1 — fail-closed inputs', () => {
       );
     }
 
-    // Gate 2: a removed non-market driver — the value gate, unobstructed.
+    // Gate 2: a removed non-market driver  -  the value gate, unobstructed.
     assert.throws(
       () => build({ assumptions: assumptionSetFrom(assumptions.drivers.filter((d) => d.name !== 'effective_tax_rate')) }),
       (err) =>
@@ -525,7 +525,7 @@ describe('P4.1 — fail-closed inputs', () => {
   });
 });
 
-describe('P4.1 — engine purity, determinism and corpus gates', () => {
+describe('P4.1  -  engine purity, determinism and corpus gates', () => {
   test('wacc.build is deterministic and the output is deeply frozen', async () => {
     const assumptions = await getAssumptions();
 
@@ -588,7 +588,7 @@ describe('P4.1 — engine purity, determinism and corpus gates', () => {
     );
   });
 
-  test('market inputs live only in assumptions.json — no market value in the engine', () => {
+  test('market inputs live only in assumptions.json  -  no market value in the engine', () => {
     const engineDir = fileURLToPath(new URL('../src/engine/', import.meta.url));
     const engineFiles = fs.readdirSync(engineDir).filter((f) => f.endsWith('.js'));
 

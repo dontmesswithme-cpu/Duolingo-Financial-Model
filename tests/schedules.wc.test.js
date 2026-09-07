@@ -1,5 +1,5 @@
 /**
- * P2.1 Artifact Contract tests — Assumptions Infrastructure + Working Capital Schedule.
+ * P2.1 Artifact Contract tests  -  Assumptions Infrastructure + Working Capital Schedule.
  *
  * Covers:
  *  - Assumptions layer: loadAssumptions(), driver schema validation, fail-closed ConfigError
@@ -52,7 +52,7 @@ async function getAssumptions() {
   });
 }
 
-describe('P2.1 — Assumptions Infrastructure: schema & validation', () => {
+describe('P2.1  -  Assumptions Infrastructure: schema & validation', () => {
   test('SCHEMAS.assumptionDriver validates valid working capital driver', async () => {
     const validDriver = {
       name: 'test_dso_days',
@@ -162,21 +162,21 @@ describe('P2.1 — Assumptions Infrastructure: schema & validation', () => {
   });
 });
 
-describe('P2.1 — Assumptions Infrastructure: loadAssumptions() loader', () => {
+describe('P2.1  -  Assumptions Infrastructure: loadAssumptions() loader', () => {
   test('loads assumptions.json cleanly and validates all drivers', async () => {
     const assumptions = await getAssumptions();
     assert.ok(assumptions);
     assert.ok(Array.isArray(assumptions.drivers));
     assert.ok(assumptions.drivers.length >= 9, 'must contain at least the working capital drivers');
 
-    // P3.1 amendment (2026-09-01 — disclosed at P3.1 submission for OP ruling):
+    // P3.1 amendment (2026-09-01  -  disclosed at P3.1 submission for OP ruling):
     // the recognized-group whitelist is extended ADDITIVELY with the four groups
     // the P3.1 artifact contract mandates (`revenue`, `costs`, `tax`,
     // `financing`) and that `DRIVER_GROUPS` in constants.js now registers. The
-    // assertion is unchanged in kind — every driver's group must be recognized —
+    // assertion is unchanged in kind  -  every driver's group must be recognized  - 
     // only the recognized set grows. No existing group was removed or weakened.
     //
-    // P4.1 amendment (2026-09-01 — disclosed at P4.1 submission for OP ruling):
+    // P4.1 amendment (2026-09-01  -  disclosed at P4.1 submission for OP ruling):
     // `market` is added for the same reason and by the same rule. The P4.1
     // artifact contract mandates `group: "market"` for all six valuation
     // drivers, `DRIVER_GROUPS` in constants.js has registered `market` since
@@ -200,13 +200,13 @@ describe('P2.1 — Assumptions Infrastructure: loadAssumptions() loader', () => 
   });
 
   test('honest-defaults rule: every default notes field documents corpus figures or EST judgment', async () => {
-    // P4.1 amendment (2026-09-01 — disclosed at P4.1 submission for OP ruling):
+    // P4.1 amendment (2026-09-01  -  disclosed at P4.1 submission for OP ruling):
     // the accepted vocabulary is extended ADDITIVELY with `MKT snapshot as of`,
     // the P4.1 contract's honest-defaults wording for a market-sourced driver
     // ("notes states the market source + as-of date"). The rule predates the
     // market group, so a corpus-figure or EST-judgment phrase was previously
-    // the only legal provenance text. The assertion is unchanged in kind —
-    // every driver must document where its default came from — only the
+    // the only legal provenance text. The assertion is unchanged in kind  - 
+    // every driver must document where its default came from  -  only the
     // recognized vocabulary grows. No previously accepted phrase was removed.
     const assumptions = await getAssumptions();
     for (const driver of assumptions.drivers) {
@@ -295,7 +295,7 @@ describe('P2.1 — Assumptions Infrastructure: loadAssumptions() loader', () => 
   });
 });
 
-describe('P2 — Schedules Engine: schedules.build() scaffold', () => {
+describe('P2  -  Schedules Engine: schedules.build() scaffold', () => {
   test('schedules.build returns complete ScheduleSet with all five families populated', async () => {
     const historical = await getHistorical();
     const assumptions = await getAssumptions();
@@ -312,7 +312,7 @@ describe('P2 — Schedules Engine: schedules.build() scaffold', () => {
 });
 
 
-describe('P2.1 — Working Capital Schedule: buildWorkingCapital()', () => {
+describe('P2.1  -  Working Capital Schedule: buildWorkingCapital()', () => {
   test('covers all 6 balance sheet dates in chronological order', async () => {
     const historical = await getHistorical();
     const wc = buildWorkingCapital(historical);
@@ -505,7 +505,7 @@ describe('P2.1 — Working Capital Schedule: buildWorkingCapital()', () => {
   });
 });
 
-describe('P2.1 — Working Capital Projections: projectWorkingCapital()', () => {
+describe('P2.1  -  Working Capital Projections: projectWorkingCapital()', () => {
   test('pure projection applies DSO, DPO, and % drivers deterministically', async () => {
     const historical = await getHistorical();
     const baseWc = buildWorkingCapital(historical);

@@ -14,6 +14,9 @@
 | **P6** | **End-to-End Verification, Performance & Release** | 🟡 Sub-phases approved (P6.1 ✅ P6.2 ✅ P6.3 ✅); gate HELD — P6R polish phase drafting |
 | **P6R** | **Release Readiness Polish** | 🟢 Sub-phases approved 4/4 (P6R.1 ✅ P6R.2 ✅ P6R.3 ✅ P6R.4 ✅ 2026-09-03; suite 533/533) — gate HELD, merged into P6R2 completion + Director final pass |
 | **P6R2** | **Model-Rigor Revision & Live Market Pricing** | 🟢 Sub-phases approved 5/5 (P6R2.1 ✅ P6R2.2 ✅ P6R2.3 ✅ P6R2.4 ✅ P6R2.5 ✅ 2026-09-04; suite 618/618) — gate HELD for Director FINAL PASS (no archive/tag/`v1.0` before explicit approval) |
+| **P6R3** | **Cost-of-Capital Hardening — Monthly ERP & Peer Beta** | 🟢 Done (Gate Passed 2026-09-04 18:27 per Director order — P6R3.1 ✅ · P6R3.2 ✅ after 1 FAIL→resubmission; suite 636/636 ×3; NO archive/tag/`v1.0` — release held for Director FINAL PASS) |
+| **P7** | **Driver-Defense Solution Design — Practitioner Deliberation** | 🟢 Done (Gate Passed 2026-09-04 23:43 — **Director-approved**; converged R1–R3 + fidelity PASS 2 cycles (1 correction); zero open questions; solution = permanent design authority for P8.0 panel work; NO archive/tag/`v1.0` — release block carries) |
+| **P8** | **Multi-Method Valuation — Six Methods, Agreement-Only Verdict** | 🚢 **RELEASED as `v1.0` (Director order 2026-09-08)** — P8.0–P8.3 ✅ gate 2026-09-05 + P8.4–P8.5a ✅ OP-approved 2026-09-08; inboxes archived to `docs/logs/inboxes/phase_8/`; suite 696/696 ×3 at release |
 
 ---
 
@@ -30,4 +33,5 @@
 - **Circuit Breaker**: Tripped once (P5.3, 2026-09-02 15:29 — 3 consecutive FAILs) → stood down by Director resolution 16:14 (Option A live-mount plan). Final P5 state: reset; P5.4/P5.5/P5.6 each 1 FAIL → 1 resubmission → PASS.
 
 ## Next
-- **P6R2 Model-Rigor Revision & Live Market Pricing** — 🟢 SUB-PHASES APPROVED 5/5 (matrix centered · beta self-computed · anchors live-verified · FCFF 189.31/FCFE 186.58/legacy 246.30 · live-price plumbing; suite 618/618 ×3). **Gate HELD: `v1.0` tags only on Director's final pass — no archive, no tag, no release before explicit Director approval.** Pending Director items: (a) interface review (8 tabs × states + live-price states); (b) GitHub push (Pages + Vercel live; `/api/price` live behavior + deployed-URL smoke still pending); (c) canonical repo URL; (d) disclaimer wording approval; (e) explicit FINAL PASS. P6/P6R gates remain held (merged into the P6R2 completion + Director final-pass sequence).
+- **Phase 8 REOPENED by Director order 2026-09-06.** P8.4 (Multi-Method Detail Presentation — dropdown switcher + per-method derivation panels in valuationTab) and P8.5 (Defense-Panel Prose Remediation — rationale-first rewrites for Levers 1/2/4/5; removal of "(Skeptic Defense)" labels, all 10 Enforcement-Mechanism boxes, and the Coursera/Udemy sentence from UI + assumptions beta note) contracted in `docs/phases/phase_8.md` §3. Further Director backlog items signaled as pending — each requires its own contract text before DS touches it. Engine + methods modules byte-frozen; all P8.4/P8.5 work is UI + one assumptions `notes` string + test amendments only.
+- **Awaiting DIRECTOR — kick-off prompt for P8.4/P8.5** (DS does not start before it; protocol §6). Thereafter: DS submission → OP audit (external-truth re-derivation + real-browser sweep) → per-task PASS → updated FINAL PASS queue.

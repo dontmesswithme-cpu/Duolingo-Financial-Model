@@ -1,5 +1,5 @@
 /**
- * P5.5 Artifact Contract Tests — Valuation, Summary, and Sensitivity Tab Views & Linkages.
+ * P5.5 Artifact Contract Tests  -  Valuation, Summary, and Sensitivity Tab Views & Linkages.
  *
  * Comprehensive verification against docs/phases/phase_5.md §3 Task P5.5 & DIR Validation Standards:
  *  1. Live Tabulator Grid Instantiation for DCF explicit schedule and 9×5 Sensitivity matrix
@@ -87,7 +87,7 @@ function createHtmlContainer() {
   return container;
 }
 
-describe('P5.5 — Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
+describe('P5.5  -  Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
   test('invokes TabulatorConstructor for DCF schedule and renders WACC build table & EV bridge', async () => {
     const { wacc, dcf, assumptions } = await getDatasets();
     const container = createHtmlContainer();
@@ -133,9 +133,9 @@ describe('P5.5 — Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
     // WACC Build Table assertions
     assert.match(html, /Weighted Average Cost of Capital \(WACC\)/);
     assert.match(html, /4\.79%/); // Risk-Free Rate
-    assert.match(html, /0\.89/); // Beta
-    assert.match(html, /4\.46%/); // ERP
-    assert.match(html, /8\.7594%/); // Cost of Equity / WACC
+    assert.match(html, /1\.47/); // Beta
+    assert.match(html, /4\.25%/); // ERP
+    assert.match(html, /11\.0375%/); // Cost of Equity / WACC
     assert.match(html, /\$7,897,393,350/); // Market Cap
     assert.match(html, /Normalized effective corporate income tax rate/);
     assert.match(html, /13\.42%/); // Engine wacc.taxRate
@@ -144,12 +144,12 @@ describe('P5.5 — Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
     assert.doesNotMatch(html, /21\.00%/); // No 21% statutory tax text
 
     // Bridge Waterfall assertions
-    assert.match(html, /\$1,692,767\.30/); // PV Explicit
-    assert.match(html, /\$6,361,977\.93/); // PV Terminal
-    assert.match(html, /\$8,054,745\.23/); // EV
+    assert.match(html, /\$1,586,880\.58/); // PV Explicit
+    assert.match(html, /\$4,205,133\.49/); // PV Terminal
+    assert.match(html, /\$5,792,014\.07/); // EV
     assert.match(html, /\$1,416,559\.00/); // Net Cash
-    assert.match(html, /\$9,471,304\.23/); // Equity Value
-    assert.match(html, /\$189\.31/); // DCF Target Price
+    assert.match(html, /\$7,208,573\.07/); // Equity Value
+    assert.match(html, /\$144\.08/); // DCF Target Price
 
     // DCF schedule Terminal column has valid terminal FCF in Finding E termFcf row
     const termFcfRow = dcfCall.config.data.find((r) => r.id === 'termFcf');
@@ -161,7 +161,7 @@ describe('P5.5 — Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
   });
 });
 
-describe('P5.5 — Summary Tab: Mechanical Recommendation & KPI Dashboard', () => {
+describe('P5.5  -  Summary Tab: Mechanical Recommendation & KPI Dashboard', () => {
   test('renders mechanical recommendation using RECOMMENDATION_THRESHOLDS and KPI metrics', async () => {
     const { dcf, recommendation, historical, assumptions, threeStatement } = await getDatasets();
     const container = createHtmlContainer();
@@ -179,10 +179,10 @@ describe('P5.5 — Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
     const html = container.innerHTML;
 
     // Recommendation card assertions
-    assert.match(html, /UNDERVALUED/);
-    assert.match(html, /\$189\.31/); // DCF Target Price
+    assert.match(html, /FAIR/);
+    assert.match(html, /\$144\.08/); // DCF Target Price
     assert.match(html, /\$157\.85/); // Market Price
-    assert.match(html, /\+19\.93%/); // Implied Upside
+    assert.match(html, /-8\.72%/); // Implied Upside
 
     // Operating KPIs derived from corpus and engine
     const kpiRows = extractRows(historical.kpis);
@@ -216,7 +216,7 @@ describe('P5.5 — Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
   });
 });
 
-describe('P5.5 — Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () => {
+describe('P5.5  -  Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () => {
   test('invokes TabulatorConstructor for 9×5 matrix with 45 cells satisfying monotonicity', async () => {
     const { sensitivityGrid, scenarios, dcf } = await getDatasets();
     const container = createHtmlContainer();
@@ -270,11 +270,11 @@ describe('P5.5 — Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () 
     const html = container.innerHTML;
     // Scenario Comparison table assertions (P6R.3 display labels: Downside, Base, Upside)
     assert.match(html, /Downside Case/);
-    assert.match(html, /\$102\.41/);
+    assert.match(html, /\$84\.39/);
     assert.match(html, /Base Case/);
-    assert.match(html, /\$189\.31/);
+    assert.match(html, /\$144\.08/);
     assert.match(html, /Upside Case/);
-    assert.match(html, /\$405\.68/);
+    assert.match(html, /\$277\.84/);
 
     // Hybrid FY2026 Invariance Footnote with OCF $239,031
     assert.match(html, /Hybrid FY2026 Invariance Invariant/);
@@ -286,7 +286,7 @@ describe('P5.5 — Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () 
   });
 });
 
-describe('P5.5 — Live App Mounting & Integration', () => {
+describe('P5.5  -  Live App Mounting & Integration', () => {
   test('createApp mounts valuation, summary, and sensitivity views and handles reactive driver changes', async () => {
     const { historical, assumptions } = await getDatasets();
     const { root, panes } = createTabRoot(['cover', 'assumptions', 'historicals', 'schedules', 'projections', 'valuation', 'summary', 'sensitivity']);
@@ -307,7 +307,7 @@ describe('P5.5 — Live App Mounting & Integration', () => {
 
     assert.ok(valuationPane.innerHTML.includes('WACC'));
     assert.ok(valuationPane.innerHTML.includes('Enterprise Value'));
-    assert.ok(summaryPane.innerHTML.includes('UNDERVALUED'));
+    assert.ok(summaryPane.innerHTML.includes('FAIR'));
     assert.ok(sensitivityPane.innerHTML.includes('Sensitivity Matrix'));
 
     // Changing driver updates model and views
@@ -318,7 +318,7 @@ describe('P5.5 — Live App Mounting & Integration', () => {
   });
 });
 
-describe('P5.5 — Quality Gates: Zero style=, Zero UI Bare Literals, Purity & Corpus Invariance', () => {
+describe('P5.5  -  Quality Gates: Zero style=, Zero UI Bare Literals, Purity & Corpus Invariance', () => {
   test('zero style= inline attributes across all src/ui/ files', () => {
     const uiFiles = fs.readdirSync(UI_DIR).filter((f) => f.endsWith('.js'));
     for (const file of uiFiles) {

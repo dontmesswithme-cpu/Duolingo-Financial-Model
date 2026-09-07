@@ -1,5 +1,5 @@
 /**
- * P1.4 Artifact Contract tests — `src/data/historical/kpis.json`.
+ * P1.4 Artifact Contract tests  -  `src/data/historical/kpis.json`.
  *
  * Covers:
  * - Dataset totality and schema validation under `SCHEMAS.kpi`.
@@ -54,7 +54,7 @@ async function loadKpis() {
   return { dataset, rows: extractRows(dataset.kpis) };
 }
 
-describe('P1.4 — dataset loads through the unmodified P0 pipeline (kpis)', () => {
+describe('P1.4  -  dataset loads through the unmodified P0 pipeline (kpis)', () => {
   test('loadHistorical resolves with the KPI dataset under ledger enforcement (full corpus)', async () => {
     const { rows } = await loadKpis();
     assert.ok(rows.length > 0, 'kpi dataset must not be empty');
@@ -133,7 +133,7 @@ describe('P1.4 — dataset loads through the unmodified P0 pipeline (kpis)', () 
   });
 });
 
-describe('P1.4 — verbatim definitions (kpis)', () => {
+describe('P1.4  -  verbatim definitions (kpis)', () => {
   test('DAU definition matches the filed verbatim wording from its own cited filing', async () => {
     const { rows } = await loadKpis();
     const dauRows = rows.filter((r) => r.metric === 'dau');
@@ -190,7 +190,7 @@ describe('P1.4 — verbatim definitions (kpis)', () => {
   });
 });
 
-describe('P1.4 — known-figure fixtures (kpis)', () => {
+describe('P1.4  -  known-figure fixtures (kpis)', () => {
   test('every KPI fixture value matches the dataset exactly', async () => {
     const { rows } = await loadKpis();
     for (const fixture of KPI_KNOWN_FIGURES) {
@@ -216,7 +216,7 @@ describe('P1.4 — known-figure fixtures (kpis)', () => {
   });
 });
 
-describe('P1.4 — quarterly continuity and engagement metrics', () => {
+describe('P1.4  -  quarterly continuity and engagement metrics', () => {
   test('DAU and Paid subscribers are present across all TTM window quarters', async () => {
     const { rows } = await loadKpis();
     for (const q of TTM_QUARTERS) {
@@ -260,7 +260,7 @@ describe('P1.4 — quarterly continuity and engagement metrics', () => {
   });
 });
 
-describe('P1.4 — app boot path wires the Accuracy Gate (full corpus)', () => {
+describe('P1.4  -  app boot path wires the Accuracy Gate (full corpus)', () => {
   async function boot(ledger) {
     const { root } = createTabRoot(TAB_KEYS);
     return bootApp({
