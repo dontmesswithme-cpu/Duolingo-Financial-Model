@@ -38,7 +38,7 @@ function getValuation(scenName = 'base') {
   const fc = projectForecast({ historical, assumptions: activeAssump });
   const ts = projectThreeStatement(sched, activeAssump, fc);
   const wacc = buildWacc({ assumptions: activeAssump, debtSchedule: sched.debt });
-  const dcf = valuateDcf(ts, wacc, { assumptions: activeAssump });
+  const dcf = valuateDcf(ts, wacc, { assumptions: activeAssump, corpus: historical });
   return { sched, fc, ts, wacc, dcf, assump: activeAssump };
 }
 
@@ -112,9 +112,9 @@ describe('P6R2.4  -  Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
       dcf.fcff.perShare < dcf.legacy.perShare,
       `FCFF per share (${dcf.fcff.perShare}) must be less than legacy (${dcf.legacy.perShare})`,
     );
-    // Base: $144.08 < $193.82
-    assert.ok(Math.abs(dcf.fcff.perShare - 144.082130) < 0.01, `Base FCFF perShare ~144.08 (got ${dcf.fcff.perShare})`);
-    assert.ok(Math.abs(dcf.legacy.perShare - 193.823467) < 0.01, `Base legacy perShare ~193.82 (got ${dcf.legacy.perShare})`);
+    // Base: $118.60 < $162.34 (EP.3 normalised terminal, rolled shares)
+    assert.ok(Math.abs(dcf.fcff.perShare - 118.601677) < 0.01, `Base FCFF perShare ~118.60 (got ${dcf.fcff.perShare})`);
+    assert.ok(Math.abs(dcf.legacy.perShare - 162.336313) < 0.01, `Base legacy perShare ~162.34 (got ${dcf.legacy.perShare})`);
   });
 
   test('equivalence block confirms debt-free theorem and quantifies divergence', () => {
@@ -136,9 +136,9 @@ describe('P6R2.4  -  Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
       bear.perShare < base.perShare && base.perShare < bull.perShare,
       `Strict ordering Bear (${bear.perShare}) < Base (${base.perShare}) < Bull (${bull.perShare})`,
     );
-    assert.ok(Math.abs(bear.perShare - 84.389050) < 0.01, `Bear perShare ~84.39 (got ${bear.perShare})`);
-    assert.ok(Math.abs(base.perShare - 144.082130) < 0.01, `Base perShare ~144.08 (got ${base.perShare})`);
-    assert.ok(Math.abs(bull.perShare - 277.837024) < 0.01, `Bull perShare ~277.84 (got ${bull.perShare})`);
+    assert.ok(Math.abs(bear.perShare - 72.383596) < 0.01, `Bear perShare ~72.38 (got ${bear.perShare})`);
+    assert.ok(Math.abs(base.perShare - 118.601677) < 0.01, `Base perShare ~118.60 (got ${base.perShare})`);
+    assert.ok(Math.abs(bull.perShare - 217.983871) < 0.01, `Bull perShare ~217.98 (got ${bull.perShare})`);
   });
 });
 
@@ -177,8 +177,9 @@ describe('P6R2.4  -  Finding E Presentation Restructure & DOM Reconstruction', (
     assert.match(container.innerHTML, /DISCLOSED FLOOR/, 'Disclosed floor badge must be present');
     assert.match(container.innerHTML, /Debt-Free Equivalence Theorem/, 'Equivalence theorem must be present');
 
-    // DOM Reconstruction of terminal column rows:
-    const termFcf = dcf.schedule[dcf.schedule.length - 1].fcf * (1 + dcf.terminalGrowthRate);
+    // DOM Reconstruction of terminal column rows (EP.3 normalised terminal):
+    const norm = dcf.fcff.terminalNormalization;
+    const termFcf = (dcf.schedule[dcf.schedule.length - 1].fcf - norm.wcInflowTerminal + norm.wcInflowSteadyState) * (1 + dcf.terminalGrowthRate);
     const multiple = 1 / (dcf.wacc - dcf.terminalGrowthRate);
     const tvUndiscounted = termFcf * multiple;
     const df_T = dcf.schedule[dcf.schedule.length - 1].discountFactor;

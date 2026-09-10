@@ -166,8 +166,8 @@ describe('P5.3  -  Historicals Tab: Live Tabulator Grid Instantiation & Schema C
     assert.match(html, /Balance Sheet/i);
     assert.match(html, /Cash Flow Statement/i);
     assert.match(html, /Key Performance Indicators/i);
-    assert.match(html, /<details class="source-drawer">/);
-    assert.match(html, /Audit &amp; Filing Citations Directory/);
+    assert.match(html, /<div class="audit-center"/);
+    assert.match(html, /SEC Audit Center &amp; Primary Source Filings/);
 
     const expectedStatements = ['income', 'balance', 'cashflow', 'kpis'];
     for (let i = 0; i < expectedStatements.length; i++) {
@@ -266,7 +266,7 @@ describe('P5.3  -  Live App Mounting & Integration', () => {
 
     assert.ok(assumptionsPane.innerHTML.includes('Active Model Scenario'));
     assert.ok(historicalsPane.innerHTML.includes('Income Statement'));
-    assert.ok(historicalsPane.innerHTML.includes('Audit &amp; Filing Citations Directory'));
+    assert.ok(historicalsPane.innerHTML.includes('SEC Audit Center &amp; Primary Source Filings'));
 
     result.app.dispose();
   });

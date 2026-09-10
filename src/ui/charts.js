@@ -235,7 +235,7 @@ export function createRevenueFcfChart({
     .join('');
 
   const svg = `
-    <svg viewBox="0 0 ${width} ${height}" class="chart-svg financial-chart svg-revenue-fcf" width="100%" height="100%" role="img" aria-label="Revenue and Free Cash Flow Historical vs Forecast Chart">
+    <svg id="revenue-fcf-svg" viewBox="0 0 ${width} ${height}" class="chart-svg financial-chart svg-revenue-fcf" width="100%" height="100%" role="img" aria-label="Revenue and Free Cash Flow Historical vs Forecast Chart">
       <rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff" rx="6" />
       <g class="chart-grid">${gridLines}</g>
       <g class="chart-transition">${transitionGuide}</g>
@@ -379,7 +379,7 @@ export function createMarginChart({
         <text x="${x}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-family="monospace" font-weight="${isEst ? 'bold' : 'normal'}" fill="${isEst ? '#7c3aed' : '#1e293b'}">
           ${escapeXml(pt.displayPeriod)}
         </text>
-        <text x="${x}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="9" font-weight="600" fill="${isEst ? '#8b5cf6' : '#64748b'}">
+        <text x="${x}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="9" font-weight="600" fill="${isEst ? '#3b82f6' : '#64748b'}">
           ${isEst ? 'EST' : 'ACT'}
         </text>
       `;
@@ -420,7 +420,7 @@ export function createMarginChart({
     .join('');
 
   const svg = `
-    <svg viewBox="0 0 ${width} ${height}" class="chart-svg financial-chart svg-margins" width="100%" height="100%" role="img" aria-label="Gross and Operating Margin Progression Chart">
+    <svg id="margin-expansion-svg" viewBox="0 0 ${width} ${height}" class="chart-svg financial-chart svg-margins" width="100%" height="100%" role="img" aria-label="Gross and Operating Margin Progression Chart">
       <rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff" rx="6" />
       <g class="chart-grid">${gridLines}</g>
       <g class="chart-transition">${transitionGuide}</g>
@@ -614,8 +614,595 @@ export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) 
   };
 }
 
+/**
+ * Supported metrics in the Trend Explorer (Redesign Phase 3.3).
+ */
+export const TREND_EXPLORER_METRICS = Object.freeze({
+  revenue: Object.freeze({
+    id: 'revenue',
+    name: 'Revenue',
+    title: 'Total Revenue (Annual)',
+    unit: 'USD millions',
+    statement: 'income',
+    metricKey: 'revenue_total',
+    divisor: 1e3,
+    decimals: 1,
+  }),
+  gross_profit: Object.freeze({
+    id: 'gross_profit',
+    name: 'Gross Profit',
+    title: 'Gross Profit (Annual)',
+    unit: 'USD millions',
+    statement: 'income',
+    metricKey: 'gross_profit',
+    divisor: 1e3,
+    decimals: 1,
+  }),
+  operating_income: Object.freeze({
+    id: 'operating_income',
+    name: 'Operating Income',
+    title: 'Operating Income (Annual)',
+    unit: 'USD millions',
+    statement: 'income',
+    metricKey: 'operating_income',
+    divisor: 1e3,
+    decimals: 1,
+  }),
+  net_income: Object.freeze({
+    id: 'net_income',
+    name: 'Net Income',
+    title: 'Net Income (Annual)',
+    unit: 'USD millions',
+    statement: 'income',
+    metricKey: 'net_income',
+    divisor: 1e3,
+    decimals: 1,
+  }),
+  cash: Object.freeze({
+    id: 'cash',
+    name: 'Cash',
+    title: 'Cash & Cash Equivalents (Annual)',
+    unit: 'USD millions',
+    statement: 'balance',
+    metricKey: 'cash_and_cash_equivalents',
+    divisor: 1e3,
+    decimals: 1,
+  }),
+  daus: Object.freeze({
+    id: 'daus',
+    name: 'DAUs',
+    title: 'Daily Active Users (Annual)',
+    unit: 'Users in millions',
+    statement: 'kpis',
+    metricKey: 'dau',
+    divisor: 1e6,
+    decimals: 1,
+  }),
+});
+
+export const REVENUE_SEGMENT_COLORS = Object.freeze([
+  '#2563eb', // Subscription: Blue
+  '#ec4899', // Advertising: Pink/Coral
+  '#10b981', // DET: Emerald
+  '#f59e0b', // IAP: Amber
+  '#94a3b8', // Other: Slate
+]);
+
+/**
+ * Computes exact percentage shares summing strictly to 100.0% via the largest remainder method.
+ *
+ * @param {Array<{ value: number, [key: string]: any }>} items
+ * @param {number} [precision=1]
+ * @returns {Array<object>}
+ */
+export function computeExactPercentages(items = [], precision = 1) {
+  const factor = Math.pow(10, precision);
+  const total = items.reduce((sum, item) => sum + (item.value || 0), 0);
+  if (total <= 0) {
+    return items.map((item) => ({ ...item, share: 0, percent: 0, percentStr: '0.0%' }));
+  }
+
+  let allocated = 0;
+  const withRem = items.map((item) => {
+    const rawShare = (item.value || 0) / total;
+    const rawPct = rawShare * 100;
+    const floored = Math.floor(rawPct * factor);
+    const remainder = (rawPct * factor) - floored;
+    allocated += floored;
+    return { item, rawShare, rawPct, floored, remainder };
+  });
+
+  const diff = Math.round(100 * factor) - allocated;
+  withRem.sort((a, b) => b.remainder - a.remainder);
+  for (let i = 0; i < diff; i++) {
+    withRem[i % withRem.length].floored += 1;
+  }
+
+  return items.map((original) => {
+    const entry = withRem.find((e) => e.item === original);
+    const finalPct = entry.floored / factor;
+    return {
+      ...original,
+      share: entry.rawShare,
+      percent: finalPct,
+      percentStr: `${finalPct.toFixed(precision)}%`,
+    };
+  });
+}
+
+/**
+ * Creates a dynamic SVG Trend Bar Chart component for the Trend Explorer (Task RP3.3).
+ * Supports in-place metric updates without canvas recreation leaks.
+ *
+ * @param {object} options
+ * @param {HTMLElement|object} [options.container]
+ * @param {string} [options.metric='revenue']
+ * @param {object} [options.historical={}]
+ * @param {number} [options.width=620]
+ * @param {number} [options.height=300]
+ * @returns {object} Chart instance with update(), getActiveMetric(), dispose(), and svg getter
+ */
+export function createTrendBarChart({
+  container = null,
+  metric = 'revenue',
+  historical = {},
+  selectedYear = 'FY2025',
+  onYearSelect = null,
+  width = 620,
+  height = 300,
+} = {}) {
+  let activeMetricKey = metric in TREND_EXPLORER_METRICS ? metric : 'revenue';
+  let currentHistorical = historical;
+  let currentSelectedYear = selectedYear || 'FY2025';
+  let currentWidth = width;
+  let disposed = false;
+
+  function renderSvg() {
+    const config = TREND_EXPLORER_METRICS[activeMetricKey] || TREND_EXPLORER_METRICS.revenue;
+    const stmtRows = extractRows(currentHistorical?.[config.statement]) || [];
+    const periods = ['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025'];
+
+    const series = periods.map((period) => {
+      const row = stmtRows.find((r) => r.metric === config.metricKey && r.period === period);
+      const raw = row && Number.isFinite(row.value) ? row.value : null;
+      let displayVal = 0;
+      let formatted = ' — ';
+      if (raw !== null) {
+        displayVal = raw / config.divisor;
+        formatted = displayVal.toLocaleString('en-US', {
+          minimumFractionDigits: config.decimals,
+          maximumFractionDigits: config.decimals,
+        });
+      }
+      return {
+        period,
+        displayPeriod: period,
+        rawValue: raw,
+        displayVal,
+        formatted,
+      };
+    });
+
+    const padLeft = 60;
+    const padRight = 30;
+    const padTop = 55;
+    const padBottom = 45;
+    const chartW = Math.max(100, currentWidth - padLeft - padRight);
+    const chartH = Math.max(80, height - padTop - padBottom);
+
+    const values = series.map((s) => s.displayVal);
+    const minVal = Math.min(0, ...values);
+    const maxVal = Math.max(10, ...values);
+
+    const range = maxVal - minVal;
+    let step = 200;
+    if (range <= 15) step = 2;
+    else if (range <= 30) step = 5;
+    else if (range <= 75) step = 10;
+    else if (range <= 150) step = 25;
+    else if (range <= 300) step = 50;
+    else if (range <= 600) step = 100;
+    else if (range <= 1.5e3) step = 200;
+    else step = 500;
+
+    const yMin = Math.floor(minVal / step) * step;
+    const yMax = Math.ceil((maxVal * 1.15) / step) * step;
+    const ySpan = Math.max(1, yMax - yMin);
+
+    const getY = (val) => padTop + chartH - ((val - yMin) / ySpan) * chartH;
+    const yZero = getY(0);
+
+    const ticks = [];
+    for (let t = yMin; t <= yMax + 0.001; t += step) {
+      ticks.push(t);
+    }
+
+    const gridLines = ticks
+      .map((tick) => {
+        const y = getY(tick);
+        const isZero = Math.abs(tick) < 0.001;
+        const lineStroke = isZero ? '#64748b' : '#e2e8f0';
+        const lineDash = isZero ? '' : 'stroke-dasharray="3,3"';
+        const strokeWidth = isZero ? '1.5' : '1';
+        return `
+          <line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${(padLeft + chartW).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${lineStroke}" stroke-width="${strokeWidth}" ${lineDash} />
+          <text x="${(padLeft - 10).toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" font-family="monospace" fill="#64748b">${tick.toLocaleString('en-US')}</text>
+        `;
+      })
+      .join('');
+
+    const barCount = series.length;
+    const slotW = chartW / barCount;
+    const barW = Math.min(60, slotW * 0.55);
+
+    const barElements = series
+      .map((s, idx) => {
+        const x = padLeft + idx * slotW + (slotW - barW) / 2;
+        const val = s.displayVal;
+        const isNegative = val < 0;
+        const yVal = getY(val);
+
+        const yTop = isNegative ? yZero : yVal;
+        const bHeight = Math.max(2, Math.abs(yVal - yZero));
+        const barColor = isNegative ? '#ef4444' : '#2563eb';
+        const labelY = isNegative ? (yVal + 14) : (yVal - 6);
+        const isSelected = s.period === currentSelectedYear;
+        const selectedClass = isSelected ? ' selected' : '';
+        const strokeAttr = isSelected ? ' stroke="#0f172a" stroke-width="2.5"' : '';
+
+        return `
+          <g class="trend-bar-item" data-period="${s.period}">
+            <rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${bHeight.toFixed(1)}" fill="${barColor}" rx="3" class="trend-bar-rect${selectedClass}"${strokeAttr} data-period="${s.period}">
+              <title>${escapeXml(config.name)} ${s.period}: ${s.formatted} (${escapeXml(config.unit)})</title>
+            </rect>
+            <text x="${(x + barW / 2).toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="11" font-family="monospace" font-weight="${isSelected ? '900' : 'bold'}" fill="#0f172a">
+              ${s.formatted}
+            </text>
+            <text x="${(x + barW / 2).toFixed(1)}" y="${(padTop + chartH + 18).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="${isSelected ? '700' : '600'}" fill="${isSelected ? '#0f172a' : '#64748b'}">
+              ${s.period}
+            </text>
+          </g>
+        `;
+      })
+      .join('');
+
+    return `
+      <svg viewBox="0 0 ${currentWidth} ${height}" class="chart-svg financial-chart trend-bar-chart" width="100%" height="100%" role="img" aria-label="${escapeXml(config.title)}">
+        <rect x="0" y="0" width="${currentWidth}" height="${height}" fill="#ffffff" rx="6" />
+        <g class="chart-header">
+          <text x="${padLeft}" y="24" font-size="13" font-weight="bold" fill="#0f172a">${escapeXml(config.title)}</text>
+          <text x="${padLeft}" y="40" font-size="11" fill="#64748b">${escapeXml(config.unit)}</text>
+        </g>
+        <g class="chart-grid">${gridLines}</g>
+        <g class="chart-bars">${barElements}</g>
+      </svg>
+    `.trim();
+  }
+
+  function bindBarClicks() {
+    if (container && typeof container.querySelectorAll === 'function') {
+      const barItems = container.querySelectorAll('.trend-bar-item, .trend-bar-rect');
+      for (const item of barItems) {
+        if (typeof item.addEventListener === 'function') {
+          item.addEventListener('click', (e) => {
+            const p = item.getAttribute ? item.getAttribute('data-period') : item.dataset?.period;
+            if (p && p !== currentSelectedYear) {
+              currentSelectedYear = p;
+              update(activeMetricKey, currentHistorical, currentSelectedYear);
+              if (typeof onYearSelect === 'function') {
+                onYearSelect(p);
+              }
+            }
+          });
+        }
+      }
+    }
+  }
+
+  function update(newMetric = null, newHistorical = null, newYear = null, newWidth = null) {
+    if (disposed) return;
+    if (newMetric && newMetric in TREND_EXPLORER_METRICS) {
+      activeMetricKey = newMetric;
+    }
+    if (newHistorical) {
+      currentHistorical = newHistorical;
+    }
+    if (newYear) {
+      currentSelectedYear = newYear;
+    }
+    if (newWidth && Number.isFinite(newWidth)) {
+      currentWidth = newWidth;
+    }
+    const svgHtml = renderSvg();
+    if (container && typeof container === 'object') {
+      container.innerHTML = svgHtml;
+      bindBarClicks();
+    }
+    return svgHtml;
+  }
+
+  update();
+
+  return {
+    get svg() {
+      return renderSvg();
+    },
+    update,
+    getActiveMetric() {
+      return activeMetricKey;
+    },
+    getSelectedYear() {
+      return currentSelectedYear;
+    },
+    dispose() {
+      disposed = true;
+      currentHistorical = null;
+      if (container && typeof container === 'object') {
+        container.innerHTML = '';
+      }
+    },
+  };
+}
+
+/**
+ * Creates an interactive SVG Revenue Composition Donut Chart (Task RP3.3).
+ * Disaggregates FY2025 revenue streams into an exact 100.0% pie with interactive legend.
+ *
+ * @param {object} options
+ * @param {HTMLElement|object} [options.container]
+ * @param {object} [options.dataset={}]
+ * @param {number} [options.width=380]
+ * @param {number} [options.height=300]
+ * @returns {object} Chart instance with update(), getSegments(), isolateSegment(), getIsolatedSegment(), dispose(), and svg getter
+ */
+export function createRevenueDonutChart({
+  container = null,
+  dataset = {},
+  selectedYear = 'FY2025',
+  width = 380,
+  height = 300,
+} = {}) {
+  let currentDataset = dataset;
+  let currentYear = selectedYear || 'FY2025';
+  let isolatedName = null;
+  let disposed = false;
+
+  function isDimmed(segName) {
+    return isolatedName !== null && isolatedName !== undefined && segName !== isolatedName;
+  }
+
+  function renderSvg() {
+    const incRows = extractRows(currentDataset?.income) || [];
+    const year = currentYear;
+
+    const segmentsMeta = [
+      { key: 'revenue_subscription', name: 'Subscription', color: REVENUE_SEGMENT_COLORS[0] },
+      { key: 'revenue_advertising', name: 'Advertising', color: REVENUE_SEGMENT_COLORS[1] },
+      { key: 'revenue_duolingo_english_test', name: 'Duolingo English Test', color: REVENUE_SEGMENT_COLORS[2] },
+      { key: 'revenue_in_app_purchases', name: 'In-App Purchases', color: REVENUE_SEGMENT_COLORS[3] },
+      { key: 'revenue_other', name: 'Other', color: REVENUE_SEGMENT_COLORS[4] },
+    ];
+
+    const rawSegments = segmentsMeta.map((meta) => {
+      const row = incRows.find((r) => r.metric === meta.key && r.period === year);
+      return {
+        ...meta,
+        value: row && Number.isFinite(row.value) ? row.value : 0,
+      };
+    });
+
+    const segments = computeExactPercentages(rawSegments, 1);
+    const totalVal = segments.reduce((s, i) => s + (i.value || 0), 0);
+    const totalInMillions = (totalVal / 1e3).toLocaleString('en-US', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+    const totalDisplay = `$${totalInMillions}M`;
+
+    const cx = 115;
+    const cy = 150;
+    const R = 85;
+    const r = 55;
+
+    let currentAngle = -Math.PI / 2;
+    const pathElements = segments.map((seg) => {
+      if (totalVal <= 0) return '';
+      const sliceAngle = (seg.value / totalVal) * 2 * Math.PI;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sliceAngle;
+      currentAngle = endAngle;
+
+      const x1 = cx + R * Math.cos(startAngle);
+      const y1 = cy + R * Math.sin(startAngle);
+      const x2 = cx + R * Math.cos(endAngle);
+      const y2 = cy + R * Math.sin(endAngle);
+      const x3 = cx + r * Math.cos(endAngle);
+      const y3 = cy + r * Math.sin(endAngle);
+      const x4 = cx + r * Math.cos(startAngle);
+      const y4 = cy + r * Math.sin(startAngle);
+
+      const largeArc = sliceAngle > Math.PI ? 1 : 0;
+      const d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${R} ${R} 0 ${largeArc} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} L ${x3.toFixed(1)} ${y3.toFixed(1)} A ${r} ${r} 0 ${largeArc} 0 ${x4.toFixed(1)} ${y4.toFixed(1)} Z`;
+
+      return `
+        <path d="${d}" fill="${seg.color}" class="donut-slice${isDimmed(seg.name) ? ' donut-dimmed' : ''}" data-segment="${escapeXml(seg.name)}" role="graphics-symbol" aria-label="${escapeXml(seg.name)}: ${seg.percentStr}">
+          <title>${escapeXml(seg.name)}: ${seg.percentStr} ($${(seg.value / 1e3).toFixed(1)}M)</title>
+        </path>
+      `;
+    }).join('');
+
+    const legendY0 = 75;
+    const legendItemH = 34;
+    const legendElements = segments.map((seg, idx) => {
+      const y = legendY0 + idx * legendItemH;
+      const lx = 225;
+      const pressed = isolatedName === seg.name ? 'true' : 'false';
+      return `
+        <g class="donut-legend-entry${isDimmed(seg.name) ? ' donut-dimmed' : ''}" data-segment="${escapeXml(seg.name)}" transform="translate(${lx}, ${y})" role="button" tabindex="0" aria-pressed="${pressed}" aria-label="Isolate ${escapeXml(seg.name)} segment">
+          <rect x="0" y="2" width="10" height="10" rx="2" fill="${seg.color}" />
+          <text x="16" y="11" font-size="11" fill="#1e293b">${escapeXml(seg.name)}</text>
+          <text x="195" y="11" text-anchor="end" font-size="11" font-family="monospace" font-weight="bold" fill="#0f172a">${seg.percentStr}</text>
+        </g>
+      `;
+    }).join('');
+
+    return `
+      <svg viewBox="0 0 ${width} ${height}" class="chart-svg financial-chart revenue-donut-chart" width="100%" height="100%" role="img" aria-label="Revenue Composition (${escapeXml(year)}) Donut Chart">
+        <rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff" rx="6" />
+        <text x="24" y="24" font-size="13" font-weight="bold" fill="#0f172a">Revenue Composition (${escapeXml(year)})</text>
+        <text x="24" y="40" font-size="11" fill="#64748b">Breakdown by reporting stream ($M)</text>
+
+        <g class="donut-slices">${pathElements}</g>
+
+        <!-- Center cutout hole text -->
+        <g class="donut-center-label">
+          <text x="${cx}" y="${cy - 3}" text-anchor="middle" font-size="15" font-weight="bold" fill="#0f172a">${totalDisplay}</text>
+          <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="11" fill="#64748b">Total</text>
+        </g>
+
+        <!-- Legend -->
+        <g class="donut-legend">${legendElements}</g>
+      </svg>
+    `.trim();
+  }
+
+  function rerender() {
+    const svgHtml = renderSvg();
+    if (container && typeof container === 'object') {
+      container.innerHTML = svgHtml;
+    }
+    return svgHtml;
+  }
+
+  function readSegments(forYear = null) {
+    const y = forYear || currentYear;
+    const incRows = extractRows(currentDataset?.income) || [];
+    const segmentsMeta = [
+      { key: 'revenue_subscription', name: 'Subscription', color: REVENUE_SEGMENT_COLORS[0] },
+      { key: 'revenue_advertising', name: 'Advertising', color: REVENUE_SEGMENT_COLORS[1] },
+      { key: 'revenue_duolingo_english_test', name: 'Duolingo English Test', color: REVENUE_SEGMENT_COLORS[2] },
+      { key: 'revenue_in_app_purchases', name: 'In-App Purchases', color: REVENUE_SEGMENT_COLORS[3] },
+      { key: 'revenue_other', name: 'Other', color: REVENUE_SEGMENT_COLORS[4] },
+    ];
+    const raw = segmentsMeta.map((m) => {
+      const r = incRows.find((row) => row.metric === m.key && row.period === y);
+      return { ...m, value: r?.value || 0 };
+    });
+    return computeExactPercentages(raw, 1);
+  }
+
+  function update(newDataset = null, newYear = null) {
+    if (disposed) return;
+    if (newDataset) {
+      currentDataset = newDataset;
+    }
+    if (newYear) {
+      currentYear = newYear;
+    }
+    return rerender();
+  }
+
+  /**
+   * Isolates one revenue segment (B2: click-to-isolate legend behavior).
+   * All other slices and legend entries render dimmed; isolation survives
+   * year-switch re-renders. Unknown names are ignored; null clears.
+   *
+   * @param {string|null} name Segment display name (e.g. 'Subscription')
+   * @returns {string|null} Active isolated segment name (null when cleared)
+   */
+  function isolateSegment(name) {
+    if (disposed) return isolatedName;
+    if (name === null || name === undefined || name === '') {
+      isolatedName = null;
+    } else {
+      const known = readSegments().map((s) => s.name);
+      if (known.includes(String(name))) {
+        isolatedName = String(name);
+      }
+    }
+    rerender();
+    return isolatedName;
+  }
+
+  function legendNameOf(entry) {
+    if (entry && typeof entry.getAttribute === 'function') {
+      const name = entry.getAttribute('data-segment');
+      if (typeof name === 'string' && name.length > 0) return name;
+    }
+    return null;
+  }
+
+  function findLegendEntry(target) {
+    if (target && typeof target.closest === 'function') {
+      try {
+        const hit = target.closest('.donut-legend-entry');
+        if (hit) return hit;
+      } catch { /* non-DOM stub without selector support */ }
+    }
+    return null;
+  }
+
+  function toggleIsolation(name) {
+    isolateSegment(isolatedName === name ? null : name);
+  }
+
+  function handleContainerClick(e) {
+    const name = legendNameOf(findLegendEntry(e?.target));
+    if (!name) return;
+    toggleIsolation(name);
+  }
+
+  function handleContainerKeydown(e) {
+    if (!e || (e.key !== 'Enter' && e.key !== ' ')) return;
+    const name = legendNameOf(findLegendEntry(e.target));
+    if (!name) return;
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    toggleIsolation(name);
+  }
+
+  if (container && typeof container.addEventListener === 'function') {
+    container.addEventListener('click', handleContainerClick);
+    container.addEventListener('keydown', handleContainerKeydown);
+  }
+
+  update();
+
+  return {
+    get svg() {
+      return renderSvg();
+    },
+    update,
+    getSegments(forYear = null) {
+      return readSegments(forYear);
+    },
+    getSelectedYear() {
+      return currentYear;
+    },
+    getIsolatedSegment() {
+      return isolatedName;
+    },
+    isolateSegment,
+    dispose() {
+      disposed = true;
+      isolatedName = null;
+      if (container && typeof container.removeEventListener === 'function') {
+        container.removeEventListener('click', handleContainerClick);
+        container.removeEventListener('keydown', handleContainerKeydown);
+      }
+      currentDataset = null;
+      if (container && typeof container === 'object') {
+        container.innerHTML = '';
+      }
+    },
+  };
+}
+
 export default Object.freeze({
   createRevenueFcfChart,
   createMarginChart,
   createWaterfall,
+  createTrendBarChart,
+  createRevenueDonutChart,
+  TREND_EXPLORER_METRICS,
+  computeExactPercentages,
 });

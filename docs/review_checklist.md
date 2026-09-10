@@ -60,3 +60,25 @@ When conducting an audit, the Reviewer (`OP`) executes:
 3. **Standalone External-Truth Probes**: Write and execute standalone probe scripts in `scratch/` that would **fail even if DS's suite is green**: call the engine with missing/non-finite `MKT` drivers and assert typed `ConfigError`/`missing_driver` (do not rely on DS's discipline gate masking a fallback), grep **all** `src/engine/*.js` outside comments for bare numerics `>999` and buried `\?\?` fallbacks on market drivers, re-derive every `MKT`/`EST` anchor from raw `assumptions.json`/`historical`/`SEC` filings (reverse `GROWTH_FIXTURE`), re-run `WACC×g` monotonicity and `Bear<Base<Bull` ordering.
 4. **Visual Audit** *(if visual deliverable)*: Inspect rendered screenshots in `docs/screenshots/phase_X/v(n)/` against benchmarks.
 5. **Issue Verdict**: Format review response with clear PASS/FAIL header and `[END_OF_MESSAGE]` delimiter — a `412/412` green suite that contains a tautology (`plug ≡ residual`, `wacc ≡ costOfEquity` without levered probe) or a bullcrap gate (`“no market value in the engine”` that only greps `wacc.js`) is a **FAIL**.
+
+---
+
+## 4. Redesign Program Verification Map (RP0–RP9) — Final Gate Reference
+
+> **Purpose**: Per-tab audit index for the redesigned 8-tab terminal. Added in RP9.2 per `docs/phases/redesign_phase_9.md` §3. Refs are STRUCTURE-only authority (R2); all figures engine/corpus-derived (R1 top-tab shell everywhere, no sidebars).
+
+| Tab | Phase | Suite File (contract tests) | Binding Pins & Gates |
+|---|---|---|---|
+| Shell | RP0 | `tests/redesign.shell.test.js` | Tokens, Helvetica stack, top tab bar, footer; `assets/branding/duolingo-logo.svg` wordmark |
+| 01 Cover & TOC | RP1 | `tests/redesign.tab1.test.js` | 3-col top, directory + rail, ground-truth image set, no protocol mentions |
+| 02 Assumptions / Drivers | RP2 | `tests/redesign.tab2.test.js` | Segmented pills, sliders/table modes, per-MAU scale, B1 snap+no-op (`B1:` tests) |
+| 03 Historicals | RP3 | `tests/redesign.tab3.test.js` | Terminal workspace, donut 100.0% largest-remainder, B2 legend isolate (`B2:` tests) |
+| 04 Schedules | RP4 | `tests/redesign.tab4.test.js` | Hard-gate cards, canonical headers (15px/700 + blue bar), units pill |
+| 05 Projections | RP5 | `tests/redesign.tab5.test.js` | CAGR/margin KPIs, BS $0 tie-out, units toggle with figure rescale (RP5.2 fix) |
+| 06 Valuation | RP6 | `tests/redesign.tab6.test.js` | 6-method strip, 7-lever inspector, O1 polarity guard |
+| 07 Summary | RP7 | `tests/redesign.tab7.test.js` | Verdict header + agreement table, sparklines, R40 FY2022 trailing label |
+| 08 Sensitivity | RP8 | `tests/redesign.tab8.test.js` | Heatmap tiers, active cell, dropdown, spectrum bands, invariance callout |
+| E2E + Gates | RP9 | `tests/redesign.e2e.test.js`, `tools/verify_redesign_gates.mjs` | Cross-tab sync, switch <16ms, churn bounded, `runGateScan()` clean |
+
+**Standing live-truth pins (re-derive, never trust)**: DCF $144.08 · Bear $84.39 · Bull $277.84 · benchmark $157.85 · WACC 11.0375% · H1 FY2026 590,421 / 78,472 / 239,031 · corpus 706 records.
+**Standing render gates**: zero `style=` (source + rendered app markup; rendered `[style]` elements must all be Tabulator-internal) · zero bare numerics >999 in `src/ui/` (exemptions: 1000/1280/1900/2000) · zero em dashes in user-visible copy · Downside/Base/Upside display vocabulary (never Bear/Bull Case strings) · agreement-only verdicts (zero averages/weights).

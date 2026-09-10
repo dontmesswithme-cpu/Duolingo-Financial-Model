@@ -1,27 +1,17 @@
-# DS Memory — Operational State & Protocol Tracking (Phase 8 Reopened Scope COMPLETE)
+# DS Memory — Operational State & Protocol Tracking (EP-FIX1 PASS, HALTED)
 
-## Active Sub-Phase & Role
+## Active State & Role
 - **Agent**: Worker `DS`
-- **Current Phase**: Phase 8 — Multi-Method Valuation (REOPENED SCOPE COMPLETE)
-- **Status**: **P8.4 + P8.5a GATE PASSED [PASS ✅] — HALTED awaiting Director FINAL PASS**.
-- **Reviewer**: Operating Partner (`OP`); **Release Authority**: Director-only.
-- **Signal State**: `docs/status_op.json`: `state: "idle"`, `seq: 39`, `phase: "P8"`, `subphase: "P8.4-P8.5a"`. `docs/status_ds.json`: `state: "completed"`, `seq: 46`.
+- **Current Milestone**: **EP-FIX1 — Gate-layer hardening — 🟢 Done (Gate Passed 2026-09-10)**
+- **Active Sub-Phase**: none (program complete; awaiting Director release orders)
+- **Status**: **COMPLETED 2026-09-10 — `REVIEW: EP-FIX1 [PASS ✅]` (first-review) — HALT per §3.7**
+- **Review state**: consecutive_fails 0. EP-FIX1 PASS first-review (0 FAILs). EP overall: 1 FAIL total (EP.4 cycle 1).
 
-## Protocol State & Checklist
-- [x] P8.4 Multi-Method Detail Presentation: Approved. 6 method cards with direct tile-switching (dropdown retired per Director decision). Full derivation panels for all 6 methods, selection persists across re-render/recalculate, negative tripwires verified.
-- [x] P8.5 / P8.5a Defense Directory & Prose Remediation: Approved. Retitled "Thesis Defense & Driver Rationale Directory", 7 core levers (#defense-lever-1..7), Lever 7 Peer Set Selection (Spotify, Roblox, Netflix), 4 secondary levers retired per Director decision. All Skeptic/Enforcement-Mechanism/Coursera/Udemy terms removed; zero new literals.
-- [x] Test suite: `npm test` × 3 consecutive passes (**696/696 passing**, 212 suites, 0 flakes).
-- [x] Engine frozen surfaces diff empty; methods modules untouched; corpus 706 unchanged; zero style= / bare literals >999 / /protocol/i.
-- [x] Watcher: **NOT ARMED** (terminal milestone state; DS is HALTED).
+## EP-FIX1 Delivery Record
+- `tests/_scope_gate.js` (new): EP_AUTHORIZED_ENGINE + union tracked/untracked scope + fail-closed baseline.
+- Repaired F1/F2/F3 gates (erp.monthly, p6r2_3, p6r.accuracy_fixes, p6r2.centered_grid, market.fetch) + negative controls.
+- F4 deploy.yml `fetch-depth: 0`. F5 status.md Next refreshed to EP gate truth.
+- Suite 940/940 ×271. No engine/data/corpus/UI/pins moved. Log: `docs/logs/ds/economy_phase.md`.
 
-## Next Steps
-- **DS is HALTED per protocol.** Watcher not armed.
-- Standing by for Director FINAL PASS queue:
-  1. Interface review (aesthetic / UX check)
-  2. Cost-of-capital sign-off
-  3. GitHub push + deployed-URL smoke check (including `/api/price` live behavior)
-  4. Canonical repository URL
-  5. Disclaimer wording
-  6. Local server contract disposition (D3)
-  7. Explicit Director FINAL PASS → archive phase (`archive_phase.mjs`) + tag `v1.0`.
-- Release block carries: NO archive, NO tag, NO `v1.0`, NO push without explicit Director FINAL PASS.
+## Next Action
+- HALT. Do not arm watcher. Do NOT commit/tag — release authority sits with the Director. Next signal is Director release orders (release sign-off / push / tag / URL).

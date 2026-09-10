@@ -18,7 +18,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+
+import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
 import { createApp, computeSensitivityAxes } from '../src/app.js';
@@ -162,7 +163,7 @@ describe('P6R2.1  -  Axis Derivation & Shrink Guard Unit Mechanics (computeSensi
 });
 
 describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp)', () => {
-  test('default (base) state: center cell is exactly row 5, col 3 and equals active valuation pin $144.08', async () => {
+  test('default (base) state: center cell is exactly row 5, col 3 and equals active valuation pin $118.60', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -189,12 +190,12 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6, 'Center cell perShare must match active pin');
-    assert.ok(Math.abs(centerCell.perShare - 144.082130498451) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 118.60167662384697) < 1e-4);
 
     app.dispose();
   });
 
-  test('bear-active state: center cell is row 5, col 3 and equals active Bear pin $84.39', async () => {
+  test('bear-active state: center cell is row 5, col 3 and equals active Bear pin $72.38', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -221,12 +222,12 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6);
-    assert.ok(Math.abs(centerCell.perShare - 84.3890501794256) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 72.38359613050305) < 1e-4);
 
     app.dispose();
   });
 
-  test('bull-active state: center cell is row 5, col 3 and equals active Bull pin $277.84', async () => {
+  test('bull-active state: center cell is row 5, col 3 and equals active Bull pin $217.98', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -253,7 +254,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6);
-    assert.ok(Math.abs(centerCell.perShare - 277.8370238128362) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 217.98387088789931) < 1e-4);
 
     app.dispose();
   });
@@ -374,8 +375,14 @@ describe('P6R2.1  -  UI Rendering, Highlights, Purged Literals & Narrowing Footn
     assert.doesNotMatch(html, /1\.0%[-\-]3\.0%/, 'Fixed 1.0%-3.0% literal must be purged');
   });
 
-  test('center cell receives cell-highlight-base and center WACC row receives ACTIVE badge', () => {
+  // RP8.1 maintenance: the matrix is a semantic `.sensitivity-matrix-table`
+  // heatmap (contract §B), not a Tabulator grid — assertions moved from the
+  // captured column formatters to the rendered table (`.active-cell` plus the
+  // ACTIVE row badge).
+  test('center cell receives active-cell and center WACC row receives ACTIVE badge', () => {
     const container = createHtmlContainer();
+    // Synthetic vector (249.36-era mock coords, not a live pin): exercises the
+    // center-binding logic without asserting engine truth.
     const sensitivityGrid = {
       base: { wacc: 0.086638, growth: 0.025, perShare: 249.36 },
       waccValues: [0.066638, 0.076638, 0.086638, 0.096638, 0.106638],
@@ -391,47 +398,25 @@ describe('P6R2.1  -  UI Rendering, Highlights, Purged Literals & Narrowing Footn
       },
     };
 
-    let capturedConfig = null;
-    class MockTabulator {
-      constructor(el, cfg) {
-        capturedConfig = cfg;
-      }
-    }
-
-    renderSensitivity({
+    const view = renderSensitivity({
       container,
       sensitivityGrid,
-      TabulatorConstructor: MockTabulator,
     });
 
-    assert.ok(capturedConfig);
-    const labelCol = capturedConfig.columns[0];
-    const gColCenter = capturedConfig.columns[3]; // col 0 is label, col 3 is index 2 (g=0.025)
-    const gColOffCenter = capturedConfig.columns[2]; // col 2 is index 1 (g=0.020)
+    assert.ok(view);
+    const html = container.innerHTML;
 
-    const centerRow = {
-      isActiveWacc: true,
-      isBaseWacc: true,
-      activeGrowth: 0.025,
-      waccLabel: '8.66%',
-    };
+    // Center WACC row header carries the ACTIVE badge
+    assert.match(html, /<th class="matrix-wacc-label" scope="row">8\.66% <span class="badge badge-est">ACTIVE<\/span><\/th>/);
 
-    const labelHtml = labelCol.formatter(centerRow);
-    assert.match(labelHtml, /ACTIVE/);
+    // Center cell (active WACC x active growth) carries .active-cell with the pin
+    assert.match(html, /<td class="heatmap-cell heatmap-tier-5 active-cell" data-wacc="0\.086638" data-growth="0\.025" data-per-share="249\.36">\$249\.36<\/td>/);
 
-    const cellValueCenter = 249.36;
-    const centerCellHtml = gColCenter.formatter({
-      getValue: () => cellValueCenter,
-      getRow: () => ({ getData: () => centerRow }),
-    });
-    assert.match(centerCellHtml, /cell-highlight-base/);
+    // Off-center cell on the same row carries its tier class but no active-cell
+    assert.match(html, /<td class="heatmap-cell heatmap-tier-3" data-wacc="0\.086638" data-growth="0\.02" data-per-share="228">\$228\.00<\/td>/);
 
-    const cellValueOff = 228.0;
-    const offCellHtml = gColOffCenter.formatter({
-      getValue: () => cellValueOff,
-      getRow: () => ({ getData: () => centerRow }),
-    });
-    assert.doesNotMatch(offCellHtml, /cell-highlight-base/);
+    // Exactly one active-cell in the rendered matrix
+    assert.equal((html.match(/active-cell/g) || []).length, 1);
   });
 
   test('narrowing footnote appears when axisNarrowed is true', () => {
@@ -493,6 +478,7 @@ describe('P6R2.1  -  Engine Invariance & Quality Gates', () => {
       threeStatement: ts,
       assumptions,
       wacc: waccOut,
+      corpus: historical,
     });
 
     assert.deepEqual(
@@ -505,23 +491,38 @@ describe('P6R2.1  -  Engine Invariance & Quality Gates', () => {
     assert.equal(defaultGrid.cells.length, 45);
   });
 
-  test('git diff v1.0-P6R-base -- src/engine/ touched only authorized files for P6R2', () => {
-    try {
-      const changedFiles = execSync('git diff --name-only v1.0-P6R-base -- src/engine/', {
-        cwd: ROOT,
-        encoding: 'utf8',
-      })
-        .trim()
-        .split('\n')
-        .map((s) => s.trim().replace(/\\/g, '/'))
-        .filter(Boolean);
-      const authorized = ['src/engine/beta.js', 'src/engine/dcf.js', 'src/engine/threeStatement.js'];
-      for (const file of changedFiles) {
-        assert.ok(authorized.includes(file), `Unauthorized engine modification in ${file}`);
-      }
-    } catch {
-      // ignore
-    }
+  test('git diff v1.0-P6R-base -- src/engine/ touched only authorized files', () => {
+    // Authorized drift from the P6R baseline: the P6R2 model-rigor revision
+    // (threeStatement.js), the P6R2.3/P6R3 cost-of-capital files (market.js,
+    // beta.js), the P8 method modules (excluded by the helper), and the Economy
+    // Phase set. EP authorization: Director un-park order 2026-09-10,
+    // `docs/logs/ds/economy_phase.md` §5.
+    //
+    // Structural repair (EP-FIX1, F2): the assertion used to sit INSIDE the
+    // `try` block, so its AssertionError was swallowed by the `catch` and the
+    // test could never go red. It now runs outside any `try`.
+    // See tests/_scope_gate.js.
+    const authorized = [
+      'src/engine/beta.js',
+      'src/engine/market.js',
+      'src/engine/threeStatement.js',
+      ...EP_AUTHORIZED_ENGINE,
+    ];
+    const unauthorized = unauthorizedEngineFiles('v1.0-P6R-base', authorized);
+    assert.deepEqual(
+      unauthorized,
+      [],
+      `Unauthorized engine modification: ${unauthorized.join(', ')}`,
+    );
+  });
+
+  test('NEGATIVE CONTROL: narrowing the allowlist makes the gate go red', () => {
+    const flagged = unauthorizedEngineFiles('v1.0-P6R-base', []);
+    assert.ok(flagged.length > 0, 'helper must report drift when nothing is authorized');
+    assert.ok(
+      flagged.includes('src/engine/threeStatement.js') || flagged.includes('src/engine/dcf.js'),
+      'known-differing tracked file must be flagged',
+    );
   });
 
   test('zero bare numeric literals > 999 outside comments in touched UI files', () => {

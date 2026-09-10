@@ -41,6 +41,7 @@ import { extractRows } from '../src/data/schema.js';
 import { STOCKANALYSIS_DUOL_URL } from '../src/data/constants.js';
 import { parseUpstreamDate } from '../api/price.js';
 import { readLedgerUrls } from './_ledger.js';
+import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 import { createTabRoot } from './_dom_stub.js';
 import { TAB_KEYS } from '../src/ui/tabs.js';
 
@@ -269,7 +270,8 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     assert.equal(state.marketPrice.fallback, true);
 
     // Initial recommendation math tied out to snapshot price $157.85
-    assert.equal(state.recommendation.label, 'fair');
+    // (EP.2 rolled shares: perShare ~$126.68 vs $157.85 → overvalued)
+    assert.equal(state.recommendation.label, 'overvalued');
     const expectedUpside = (state.dcf.perShare - 157.85) / 157.85;
     assert.ok(Math.abs(state.recommendation.upsidePct - expectedUpside) < 1e-6);
 
@@ -335,16 +337,16 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     assert.equal(updatedState.marketPrice.price, 165.00);
 
     // Verdict math recalculated against live close $165.00
-    // dcf.perShare = 189.30871314314004
-    // upside = (189.308713 - 165.00) / 165.00 = +14.73% -> 'fair' (since < 15%)
+    // dcf.perShare = 118.60167662384697 (EP.3 normalised terminal)
+    // upside = (118.602 - 165.00) / 165.00 = -28.12% -> 'overvalued'
     const expectedLiveUpside = (updatedState.dcf.perShare - 165.00) / 165.00;
     assert.ok(Math.abs(updatedState.recommendation.upsidePct - expectedLiveUpside) < 1e-6);
-    assert.equal(updatedState.recommendation.label, 'fair');
+    assert.equal(updatedState.recommendation.label, 'overvalued');
 
-    // Summary tab DOM reflects $165.00, FAIR VALUE badge, and banner is cleared
+    // Summary tab DOM reflects $165.00, OVERVALUED badge, and banner is cleared
     const summaryPane = root.querySelector('#tab-summary');
     assert.match(summaryPane.innerHTML, /\$165\.00/);
-    assert.match(summaryPane.innerHTML, /FAIR VALUE/);
+    assert.match(summaryPane.innerHTML, /OVERVALUED/);
     assert.doesNotMatch(summaryPane.innerHTML, /LIVE PRICE UNAVAILABLE/);
 
     app.dispose();
@@ -383,10 +385,11 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     const state = app.state();
 
     // CLOSE-ONLY RULE: verdict math remains on official close $157.85!
+    // (EP.2 rolled shares: perShare ~$126.68 vs $157.85 → overvalued)
     assert.equal(state.marketPrice.status, 'intraday');
     assert.equal(state.marketPrice.price, 157.85);
     assert.equal(state.marketPrice.intradayPrice, 180.00);
-    assert.equal(state.recommendation.label, 'fair');
+    assert.equal(state.recommendation.label, 'overvalued');
 
     const summaryPane = root.querySelector('#tab-summary');
     assert.match(summaryPane.innerHTML, /last completed close \$157\.85/);
@@ -409,12 +412,13 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     });
 
     // User explicitly tests a $140.00 benchmark price
+    // (EP.3 normalised terminal: perShare ~$118.60 vs $140 → −15.28% overvalued)
     app.setDriver('market_share_price', 140.00);
 
     const state = app.state();
     const expectedUpside = (state.dcf.perShare - 140.00) / 140.00;
     assert.ok(Math.abs(state.recommendation.upsidePct - expectedUpside) < 1e-6);
-    assert.equal(state.recommendation.label, 'fair');
+    assert.equal(state.recommendation.label, 'overvalued');
 
     app.dispose();
   });
@@ -573,7 +577,7 @@ describe('P6R2.5 — Standing Quality Gates: Synchrony, Bare Literals & Scoped D
     );
   });
 
-  test('scoped engine diff: git diff against base tag is limited to authorized engine files', async () => {
+  test('scoped engine diff: engine changes since v1.0 are limited to the EP-authorized set', async () => {
     const baseEngineFiles = ['wacc.js', 'recommend.js', 'forecast.js', 'schedules.js'];
     const engineDir = path.dirname(MARKET_ENGINE_PATH);
 
@@ -581,6 +585,28 @@ describe('P6R2.5 — Standing Quality Gates: Synchrony, Bare Literals & Scoped D
       const filePath = path.join(engineDir, file);
       assert.ok(fs.existsSync(filePath), `${file} must exist`);
     }
+
+    // Structural repair (EP-FIX1, F3): this test was named "scoped engine diff"
+    // but ran no diff at all — it only asserted four engine files exist, so it
+    // could never detect an engine change. It now performs the real check,
+    // anchored to the v1.0 release tag so the allowlist stays tight: only the
+    // Economy Phase modules may differ (Director un-park order 2026-09-10,
+    // `docs/logs/ds/economy_phase.md` §5). See tests/_scope_gate.js.
+    const unauthorized = unauthorizedEngineFiles('v1.0', EP_AUTHORIZED_ENGINE);
+    assert.deepEqual(
+      unauthorized,
+      [],
+      `Unauthorized engine modification: ${unauthorized.join(', ')}`,
+    );
+  });
+
+  test('NEGATIVE CONTROL: narrowing the allowlist makes the gate go red', async () => {
+    const flagged = unauthorizedEngineFiles('v1.0', []);
+    assert.ok(flagged.length > 0, 'helper must report drift when nothing is authorized');
+    assert.ok(
+      flagged.includes('src/engine/dcf.js'),
+      'known-differing tracked file must be flagged',
+    );
   });
 
   test('corpus invariant: 706 historical statement/kpi records unchanged', async () => {

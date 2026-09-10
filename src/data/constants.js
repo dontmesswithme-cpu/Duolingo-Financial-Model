@@ -120,6 +120,82 @@ export const LEDGER_URLS = Object.freeze(
 );
 
 /**
+ * Verified SEC filings covering historical statements and audit citations.
+ * Direct references to canonical SEC EDGAR URLs in LEDGER_URLS.
+ *
+ * @type {ReadonlyArray<object>}
+ */
+export const AUDIT_FILINGS = Object.freeze([
+  Object.freeze({
+    id: 'LED-002',
+    form: '10-K',
+    period: 'FY2025',
+    filed: '2026-02-27',
+    accession: '0001628280-26-012494',
+    url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm',
+    statements: Object.freeze(['Income Statement', 'Balance Sheet', 'Cash Flow', 'KPIs']),
+    title: 'FY2025 Annual Report (Form 10-K)',
+    notes: 'Primary anchor for FY2025, FY2024, FY2023 across IS, BS, CF, and operating KPIs.',
+  }),
+  Object.freeze({
+    id: 'LED-003',
+    form: '10-K',
+    period: 'FY2023',
+    filed: '2024-02-29',
+    accession: '0001562088-24-000050',
+    url: 'https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm',
+    statements: Object.freeze(['Income Statement', 'Balance Sheet', 'Cash Flow', 'KPIs']),
+    title: 'FY2023 Annual Report (Form 10-K)',
+    notes: 'Primary anchor for FY2022 and FY2021 comparative figures restated on gross presentation basis.',
+  }),
+  Object.freeze({
+    id: 'LED-004',
+    form: '10-Q',
+    period: 'Q3 FY2025',
+    filed: '2025-11-06',
+    accession: '0001628280-25-049743',
+    url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm',
+    statements: Object.freeze(['Income Statement', 'Cash Flow', 'KPIs']),
+    title: 'Q3 FY2025 Quarterly Report (Form 10-Q)',
+    notes: 'Discrete Q3 FY2025 income statement and 9M YTD cash flow statement.',
+  }),
+  Object.freeze({
+    id: 'LED-005',
+    form: '10-Q',
+    period: 'Q1 FY2026',
+    filed: '2026-05-05',
+    accession: '0001628280-26-029976',
+    url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm',
+    statements: Object.freeze(['Income Statement', 'Cash Flow', 'KPIs']),
+    title: 'Q1 FY2026 Quarterly Report (Form 10-Q)',
+    notes: 'Discrete Q1 FY2026 income statement and 3M YTD cash flow statement.',
+  }),
+  Object.freeze({
+    id: 'LED-006',
+    form: '10-Q',
+    period: 'Q2 FY2026',
+    filed: '2026-08-06',
+    accession: '0001628280-26-053603',
+    url: 'https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm',
+    statements: Object.freeze(['Income Statement', 'Balance Sheet', 'Cash Flow', 'KPIs']),
+    title: 'Q2 FY2026 Quarterly Report (Form 10-Q)',
+    notes: 'Discrete Q2 FY2026 income statement, June 30, 2026 balance sheet, and 6M YTD cash flow.',
+  }),
+  Object.freeze({
+    id: 'LED-007',
+    form: '10-K',
+    period: 'FY2021',
+    filed: '2022-03-04',
+    accession: '0001562088-22-000039',
+    url: 'https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm',
+    statements: Object.freeze(['Balance Sheet', 'KPIs']),
+    title: 'FY2021 Annual Report (Form 10-K)',
+    notes: 'December 31, 2021 balance sheet and initial public company operating metrics.',
+  }),
+]);
+
+
+/**
  * Directory containing the historical dataset JSON files. Relative to the
  * document root when served statically. A URL fragment, so it is a
  * configuration value and lives here per the grep gate.
@@ -297,6 +373,16 @@ export const RECOMMENDATION_THRESHOLDS = Object.freeze({
   undervalued: 0.15,
   overvalued: -0.15,
 });
+
+/**
+ * SBC fade steady-state endpoint for the EP.4 verdict-sensitivity band
+ * (economy_phase.md §8): the faded treatment declines the SBC-to-revenue
+ * ratio linearly from the `sbc_target_pct_of_revenue` driver to this
+ * steady-state ratio across the forecast horizon. A named assumption, not a
+ * forecast revision — the model drivers themselves never fade (see §10.4).
+ * @type {number}
+ */
+export const SBC_FADE_STEADY_STATE_PCT = 0.08;
 
 /**
  * Git tag prefix and fallback model version for Cover/TOC metadata.

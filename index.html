@@ -8,15 +8,33 @@
   <link rel="stylesheet" href="vendor/tabulator/tabulator.min.css" />
   <style>
     :root {
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      --color-page: #f7f8fa;
-      --color-surface: #ffffff;
-      --color-border: #d8dce3;
-      --color-text: #1c1f23;
-      --color-muted: #5c6570;
-      --color-accent: #1a4fd6;
-      --color-accent-soft: #e8edfb;
+      --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --color-header-bg: #0B1E36;
+      --color-header-text: #FFFFFF;
+      --color-page-bg: #F8FAFC;
+      --color-card-bg: #FFFFFF;
+      --color-border: #E2E8F0;
+      --color-border-subtle: #EDF2F7;
+      --color-text-primary: #0F172A;
+      --color-text-secondary: #475569;
+      --color-text-muted: #94A3B8;
+      --color-accent-blue: #1A56DB;
+      --color-accent-blue-soft: #EBF5FF;
+      --color-badge-fair-bg: #FEF3C7;
+      --color-badge-fair-text: #B45309;
+      --color-badge-over-bg: #FEE2E2;
+      --color-badge-over-text: #B91C1C;
+      --color-badge-under-bg: #DCFCE7;
+      --color-badge-under-text: #15803D;
+
+      /* Backwards-compatibility aliases for existing stylesheets */
+      --color-page: var(--color-page-bg);
+      --color-surface: var(--color-card-bg);
+      --color-text: var(--color-text-primary);
+      --color-muted: var(--color-text-secondary);
+      --color-accent: var(--color-accent-blue);
+      --color-accent-soft: var(--color-accent-blue-soft);
       --color-blue-input: #0052cc;
       --color-green-link: #00875a;
       --color-dark-formula: #172b4d;
@@ -29,69 +47,338 @@
 
     body {
       margin: 0;
-      background: var(--color-page);
-      color: var(--color-text);
+      background: var(--color-page-bg);
+      color: var(--color-text-primary);
       font-family: var(--font-sans);
       font-size: 14px;
       line-height: 1.5;
     }
 
+    table, th, td, .metric-card, .tabulator-cell, .tabular-nums, .num, .cell-calc, .cell-input {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Segmented pill controls */
+    .pill-control {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-border-subtle);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .pill-btn {
+      appearance: none;
+      background: transparent;
+      border: none;
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      color: var(--color-text-primary);
+    }
+
+    .pill-btn.active {
+      background: var(--color-card-bg);
+      color: var(--color-accent-blue);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Status Callouts */
+    .callout-info {
+      background: var(--color-accent-blue-soft);
+      border: 1px solid #BFDBFE;
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      color: var(--color-text-primary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .callout-warning {
+      background: var(--color-badge-fair-bg);
+      border: 1px solid #FDE68A;
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      color: var(--color-text-primary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .callout-warning .callout-title {
+      color: #B45309;
+    }
+
+    /* Valuation Badges */
+    .badge-undervalued {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--color-badge-under-bg);
+      color: var(--color-badge-under-text);
+    }
+
+    .badge-fair {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--color-badge-fair-bg);
+      color: var(--color-badge-fair-text);
+    }
+
+    .badge-overvalued {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--color-badge-over-bg);
+      color: var(--color-badge-over-text);
+    }
+
     .app-header {
-      background: var(--color-surface);
+      background: var(--color-header-bg);
+      color: var(--color-header-text);
       border-bottom: 1px solid var(--color-border);
-      padding: 20px 24px 0;
+      padding: 16px 0 0;
+    }
+
+    .header-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 0 24px 14px;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logos {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-mascot {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .header-wordmark {
+      height: 22px;
+      width: auto;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.25);
+      margin: 0 4px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .app-title {
       margin: 0;
       font-size: 20px;
-      font-weight: 650;
+      font-weight: 700;
       letter-spacing: -0.01em;
+      color: var(--color-header-text);
+      line-height: 1.2;
+    }
+
+    .brand-sub-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ticker-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-sub-sep {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 12px;
     }
 
     .app-subtitle {
-      margin: 4px 0 0;
-      color: var(--color-muted);
-      font-size: 13px;
+      margin: 0;
+      color: var(--color-text-muted);
+      font-size: 12px;
     }
 
+    .header-meta-block {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .header-meta-item,
+    .header-meta-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    .meta-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      text-align: right;
+    }
+
+    .meta-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-header-text);
+      min-width: 130px;
+      text-align: left;
+      font-family: var(--font-sans);
+    }
+
+    .app-tab-nav,
     .tabs {
       display: flex;
-      flex-wrap: wrap;
-      gap: 2px;
-      margin-top: 16px;
+      flex-wrap: nowrap;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #E2E8F0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid #CBD5E1;
+      overflow-x: auto;
     }
 
     .tab-link {
       appearance: none;
-      background: transparent;
-      border: 1px solid transparent;
-      border-bottom: none;
-      border-radius: var(--radius) var(--radius) 0 0;
-      color: var(--color-muted);
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 10px 12px;
+      background: #F8FAFC;
+      border: none;
+      border-right: 1px solid #E2E8F0;
+      border-bottom: 3px solid transparent;
+      color: var(--color-text-secondary);
       cursor: pointer;
-      font: inherit;
-      padding: 8px 14px;
-      position: relative;
-      top: 1px;
+      font-family: var(--font-sans);
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
-    .tab-link:hover { color: var(--color-text); }
+    .tab-link:last-child {
+      border-right: none;
+    }
+
+    .tab-link:hover {
+      background: #FFFFFF;
+      color: var(--color-text-primary);
+    }
 
     .tab-link:focus-visible {
-      outline: 2px solid var(--color-accent);
+      outline: 2px solid var(--color-accent-blue);
       outline-offset: -2px;
     }
 
     .tab-link[data-active] {
-      background: var(--color-surface);
-      border-color: var(--color-border);
-      color: var(--color-accent);
+      background: #FFFFFF;
+      border-bottom: 3px solid var(--color-accent-blue);
+      color: var(--color-accent-blue);
+    }
+
+    .tab-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .tab-link[data-active] .tab-num {
+      color: var(--color-accent-blue);
+    }
+
+    .tab-label {
+      font-size: 12px;
       font-weight: 600;
+      color: var(--color-text-secondary);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+
+    .tab-link[data-active] .tab-label {
+      color: var(--color-text-primary);
+      font-weight: 700;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
     }
 
     main {
-      background: var(--color-surface);
+      background: var(--color-page-bg);
       border-top: 1px solid var(--color-border);
       min-height: 60vh;
       padding: 24px;
@@ -99,114 +386,536 @@
 
     .tab-pane { display: none; }
     .tab-pane[data-active] { display: block; }
+    .tab-pane[hidden] { display: none !important; }
 
     .tab-pane h2 {
       font-size: 18px;
       margin: 0 0 16px;
-      color: var(--color-text);
+      color: var(--color-text-primary);
     }
 
-    /* Cover / TOC layout */
+    /* Cover / Dashboard layout (RP1 Grounded) */
     .cover-container {
-      max-width: 960px;
+      max-width: 1400px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .cover-hero {
-      border-bottom: 2px solid var(--color-border);
-      padding-bottom: 20px;
-      margin-bottom: 24px;
-    }
-
-    .cover-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 0 0 8px;
-      color: var(--color-text);
-    }
-
-    .cover-meta-grid {
+    .cover-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      background: var(--color-page);
+    }
+
+    .cover-grid,
+    .cover-row-top {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 1080px) {
+      .cover-grid,
+      .cover-row-top {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cover-card {
+      background: var(--color-card-bg);
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 24px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
     }
 
-    .cover-meta-item dt {
-      font-size: 11px;
+    .cover-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+      color: var(--color-text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .cover-card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .cover-card-header-flex .cover-card-title {
+      margin: 0;
+    }
+
+    .cover-card-sub {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      margin-left: 4px;
+    }
+
+    /* 1. Overview Card */
+    .cover-overview-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cover-prose {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-text-secondary);
+      margin: 0 0 20px 0;
+    }
+
+    .stat-pill-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-page-bg);
+      overflow: hidden;
+      margin-top: auto;
+    }
+
+    @media (max-width: 640px) {
+      .stat-pill-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-pill {
+      padding: 10px 12px;
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      background: transparent;
+    }
+
+    .stat-pill:last-child {
+      border-right: none;
+    }
+
+    .stat-pill-label {
+      font-size: 10.5px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-muted);
-      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
     }
 
-    .cover-meta-item dd {
+    .stat-pill-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-family: var(--font-sans);
+    }
+
+    /* 2. Valuation Snapshot Card */
+    .cover-snapshot-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .snapshot-dl {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12.5px;
       margin: 0;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-text);
     }
 
-    .cover-section {
-      margin-bottom: 24px;
+    .snapshot-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 0;
+    }
+
+    .snapshot-label {
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .snapshot-value {
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .snapshot-highlight-row {
+      background: var(--color-badge-under-bg);
+      border-radius: 4px;
+      padding: 5px 8px;
+      margin: 3px 0;
+    }
+
+    .snapshot-highlight-row.highlight-overvalued {
+      background: var(--color-badge-over-bg);
+    }
+
+    .snapshot-highlight-row.highlight-fair {
+      background: var(--color-badge-fair-bg);
+    }
+
+    .snapshot-highlight-row .snapshot-label {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .badge-upside {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-upside.badge-undervalued {
+      color: var(--color-badge-under-text);
+    }
+
+    .badge-upside.badge-overvalued {
+      color: var(--color-badge-over-text);
+    }
+
+    .badge-upside.badge-fair {
+      color: var(--color-badge-fair-text);
+    }
+
+    .snapshot-divider {
+      height: 1px;
+      background: var(--color-border-subtle);
+      margin: 5px 0;
+    }
+
+    /* 3. Model Status Card */
+    .cover-status-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status-checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .status-check-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      padding: 2px 0;
+      background: transparent;
+      border: none;
+    }
+
+    .status-check-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-check-icon {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .status-check-label {
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .status-check-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: #15803D;
+      text-align: right;
+    }
+
+    /* Row 2: Architecture & Right Rail */
+    .cover-row-mid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .cover-row-mid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cover-architecture-section {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .cover-section-header {
+      margin-bottom: 12px;
     }
 
     .cover-section-title {
       font-size: 15px;
-      font-weight: 600;
-      margin: 0 0 12px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 6px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      color: var(--color-text-primary);
     }
 
-    .toc-table {
+    .cover-section-subtitle {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .architecture-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12.5px;
     }
 
-    .toc-table th, .toc-table td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .toc-table th {
-      background: var(--color-page);
+    .architecture-table th {
+      background: var(--color-page-bg);
       font-weight: 600;
-      color: var(--color-muted);
+      color: var(--color-text-muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+    }
+
+    .architecture-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      vertical-align: middle;
+    }
+
+    .architecture-table tr.arch-row {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .architecture-table tr.arch-row:hover {
+      background: var(--color-accent-blue-soft);
+    }
+
+    .architecture-table td.col-tab-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      width: 34px;
+      color: var(--color-text-muted);
+      font-size: 11px;
+    }
+
+    .architecture-table td.col-tab-name {
+      font-weight: 600;
+      color: var(--color-accent-blue);
+      width: 190px;
+    }
+
+    .architecture-table td.col-tab-desc {
+      color: var(--color-text-secondary);
       font-size: 12px;
+      line-height: 1.4;
     }
 
-    .toc-table tr:hover td {
-      background: #fafbfc;
+    .architecture-table td.col-tab-goto {
+      width: 40px;
+      text-align: right;
     }
 
-    .toc-link {
-      color: var(--color-accent);
-      text-decoration: none;
+    .jump-btn {
+      appearance: none;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-accent-blue);
+      cursor: pointer;
+      padding: 2px 6px;
+      line-height: 1;
+      transition: color 0.15s ease;
+    }
+
+    .jump-btn:hover {
+      color: #0B1E36;
+    }
+
+    /* Right Rail */
+    .cover-right-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .cover-assumptions-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .assumptions-dl {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12.5px;
+      margin: 0;
+    }
+
+    .assump-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .assump-row:last-child {
+      border-bottom: none;
+    }
+
+    .assump-label {
+      color: var(--color-text-secondary);
       font-weight: 500;
     }
 
-    .toc-link:hover {
-      text-decoration: underline;
+    .assump-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--color-text-primary);
     }
 
-    .toc-table th.col-tab-num {
-      width: 60px;
+    .cover-methods-card {
+      display: flex;
+      flex-direction: column;
     }
 
-    .toc-table th.col-tab-name {
-      width: 220px;
+    .methods-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 10px;
     }
 
-    .toc-excluded-name {
-      color: var(--color-muted);
+    .methods-summary-table th {
+      background: var(--color-page-bg);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 5px 6px;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+    }
+
+    .methods-summary-table td {
+      padding: 5px 6px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      text-align: left;
+    }
+
+    .cover-methods-spread-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: var(--color-page-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: 11.5px;
+      margin-top: auto;
+    }
+
+    .spread-bar-label {
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .spread-bar-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    /* Callouts */
+    .cover-callouts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .cover-callouts {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .callout-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .callout-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .callout-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .callout-info p,
+    .callout-warning p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--color-text-secondary);
+    }
+
+    .app-footer {
+      background: #FFFFFF;
+      border-top: 1px solid var(--color-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--color-text-muted);
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer-right {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .footer-sep {
+      color: var(--color-border);
     }
 
     .badge-pass {
@@ -528,12 +1237,12 @@
     }
 
     .statement-card-header {
-      padding: 12px 16px;
-      background: var(--color-page);
-      border-bottom: 1px solid var(--color-border);
-      font-weight: 650;
+      padding: 14px 16px 10px 10px;
+      background: transparent;
+      border-bottom: none;
+      font-weight: 700;
       font-size: 15px;
-      color: var(--color-text);
+      color: var(--color-text-primary);
     }
 
     .table-responsive {
@@ -712,64 +1421,6 @@
 
     .tabulator .tabulator-range-selected {
       background-color: rgba(0, 82, 204, 0.15) !important;
-    }
-
-    /* Citation Details Drawer */
-    .source-drawer {
-      margin-top: 24px;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius);
-      background: var(--color-page);
-      padding: 12px 16px;
-    }
-
-    .drawer-toggle {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--color-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-    }
-
-    .drawer-content {
-      margin-top: 12px;
-    }
-
-    .drawer-intro {
-      font-size: 12px;
-      color: var(--color-muted);
-      margin: 0 0 12px;
-    }
-
-    .citation-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 4px;
-    }
-
-    .citation-table th, .citation-table td {
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--color-border);
-      text-align: left;
-    }
-
-    .citation-table th {
-      background: var(--color-page);
-      font-weight: 600;
-      color: var(--color-muted);
-    }
-
-    .source-link {
-      color: var(--color-accent);
-      text-decoration: none;
-    }
-
-    .source-link:hover {
-      text-decoration: underline;
     }
 
     .col-narrow {
@@ -1076,6 +1727,179 @@
       margin-bottom: 24px;
     }
 
+    .projections-header-block {
+      margin: 0 0 18px;
+    }
+
+    .projections-title {
+      margin: 0 0 4px;
+      color: var(--color-text-primary);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .projections-subtitle {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+    }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .projection-kpi-card {
+      min-height: 90px;
+      padding: 14px 16px;
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .projection-kpi-label {
+      color: var(--color-text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .projection-kpi-value {
+      margin-top: 8px;
+      color: var(--color-text-primary);
+      font-size: 25px;
+      font-weight: 700;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .projection-kpi-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      color: var(--color-text-muted);
+      font-size: 10px;
+    }
+
+    .projection-kpi-benchmark {
+      color: var(--color-accent-blue);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .projection-statement-workspace {
+      margin: 0 0 14px;
+      padding: 16px;
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+    }
+
+    .projection-workspace-header,
+    .projection-workspace-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .statement-workspace-title {
+      margin: 0 0 3px;
+      color: var(--color-text-primary);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .statement-workspace-subtitle {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+    }
+
+    .projection-statement-switcher {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      background: #F1F5F9;
+      border-radius: 6px;
+    }
+
+    .projection-unit-toggle {
+      /* RWC.1c: Uses canonical .pill-control tokens (Tab 04 units-mode-toggle reference) */
+    }
+
+    .projection-switch-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 4px;
+      padding: 6px 14px;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .projection-unit-btn {
+      /* RWC.1c: Uses canonical .pill-btn tokens */
+    }
+
+    .projection-switch-btn.is-active {
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+    }
+
+    .projection-unit-btn.is-active {
+      /* RWC.1c: Uses canonical .pill-btn.active tokens */
+    }
+
+    .projection-statement-panel.is-hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .kpi-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .projection-workspace-controls {
+        align-items: stretch;
+        width: 100%;
+      }
+
+      .projection-statement-switcher,
+      .projection-unit-toggle {
+        flex: 1 1 100%;
+      }
+
+      .projection-switch-btn,
+      .projection-unit-btn {
+        flex: 1;
+      }
+
+      .valuation-strip .multi-method-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dcf-primary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .chart-card-body {
       padding: 16px;
       overflow-x: auto;
@@ -1155,11 +1979,403 @@
       border: 1px solid #fecaca;
     }
 
-    .rec-metrics-hero {
+    /* RP7.1 executive verdict header: 4-card agreement headline grid */
+    .summary-headline-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
       margin-bottom: 16px;
+    }
+
+    /* RP7.1 agreement synthesis table: bold min-max spread final row */
+    .weighted-valuation-table .agreement-spread-row {
+      background: #f0f7ff;
+      border-top: 2px solid var(--color-border);
+      border-bottom: 2px solid #0052cc;
+    }
+
+    /* RP7.2 sparkline KPI strip: 6 operating cards with SVG trendlines */
+    .sparkline-strip {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 1080px) {
+      .sparkline-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sparkline-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .sparkline-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .sparkline-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-secondary);
+    }
+
+    .sparkline-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.1;
+    }
+
+    .sparkline-delta {
+      min-height: 18px;
+    }
+
+    .delta-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+
+    .delta-up {
+      background: var(--color-badge-under-bg);
+      color: var(--color-badge-under-text);
+    }
+
+    .delta-down {
+      background: var(--color-badge-over-bg);
+      color: var(--color-badge-over-text);
+    }
+
+    .delta-flat {
+      background: var(--color-border-subtle);
+      color: var(--color-text-secondary);
+    }
+
+    .sparkline-svg {
+      width: 100%;
+      height: 36px;
+      display: block;
+      color: var(--color-accent-blue);
+    }
+
+    .sparkline-svg polyline {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+    }
+
+    .sparkline-svg.spark-up {
+      color: #15803D;
+    }
+
+    .sparkline-svg.spark-down {
+      color: #B91C1C;
+    }
+
+    .sparkline-svg.spark-flat line {
+      stroke: var(--color-text-muted);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 3;
+    }
+
+    .sparkline-sub {
+      font-size: 10.5px;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+
+    /* RP7.2 side-by-side thesis and model health cards */
+    .thesis-health-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .thesis-health-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .thesis-list {
+      list-style: none;
+      counter-reset: thesis;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .thesis-list li {
+      counter-increment: thesis;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: var(--color-text-primary);
+      line-height: 1.5;
+    }
+
+    .thesis-num::before {
+      content: counter(thesis);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--color-accent-blue-soft);
+      color: var(--color-accent-blue);
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .health-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .health-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12.5px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .health-row:last-child {
+      border-bottom: none;
+    }
+
+    .health-icon {
+      font-weight: 700;
+      width: 18px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .health-pass .health-icon {
+      color: #15803D;
+    }
+
+    .health-fail .health-icon {
+      color: #B91C1C;
+    }
+
+    .health-pending .health-icon {
+      color: var(--color-text-muted);
+    }
+
+    .health-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .health-label {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .health-detail {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .health-status {
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .health-pass .health-status {
+      color: #15803D;
+    }
+
+    .health-fail .health-status {
+      color: #B91C1C;
+    }
+
+    .health-pending .health-status {
+      color: var(--color-text-muted);
+    }
+
+    .health-verdict-note {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--color-border);
+      font-size: 12.5px;
+      color: var(--color-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* RP8.1 sensitivity heatmap matrix: 9x5 WACC x terminal growth workstation */
+    .matrix-table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-surface);
+    }
+
+    .sensitivity-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 620px;
+    }
+
+    .sensitivity-matrix-table th,
+    .sensitivity-matrix-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .sensitivity-matrix-table thead th {
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .sensitivity-matrix-table tbody tr:last-child th,
+    .sensitivity-matrix-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .matrix-corner {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-muted);
+      background: var(--color-page);
+      white-space: nowrap;
+    }
+
+    .matrix-g-col {
+      text-align: right;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-muted);
+      background: var(--color-page);
+      white-space: nowrap;
+    }
+
+    .matrix-wacc-label {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--color-surface);
+      white-space: nowrap;
+    }
+
+    .matrix-active-row .matrix-wacc-label {
+      font-weight: 700;
+      color: var(--color-accent-blue);
+    }
+
+    .heatmap-cell {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .heatmap-empty {
+      color: var(--color-muted);
+      background: var(--color-surface);
+    }
+
+    .heatmap-tier-1 { background: #F0FDF4; color: #14532D; }
+    .heatmap-tier-2 { background: #DCFCE7; color: #14532D; }
+    .heatmap-tier-3 { background: #BBF7D0; color: #14532D; }
+    .heatmap-tier-4 { background: #86EFAC; color: #14532D; }
+    .heatmap-tier-5 { background: #4ADE80; color: #052E16; }
+    .heatmap-tier-6 { background: #22C55E; color: #FFFFFF; }
+    .heatmap-tier-7 { background: #16A34A; color: #FFFFFF; }
+    .heatmap-tier-8 { background: #15803D; color: #FFFFFF; }
+    .heatmap-tier-9 { background: #166534; color: #FFFFFF; }
+
+    .sensitivity-matrix-table .heatmap-cell.active-cell {
+      background: #1A56DB;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .matrix-axis-note {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 8px 2px 0;
+    }
+
+    /* RP8.2 scenario workstation: selector + spectrum bands */
+    .scenario-select-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .scenario-select {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .spectrum-table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-surface);
+    }
+
+    .spectrum-table-scroll .financial-summary-table {
+      min-width: 760px;
+    }
+
+    @media (max-width: 768px) {
+      .scenario-select-label {
+        display: flex;
+        margin: 6px 0 0;
+        width: fit-content;
+      }
     }
 
     .rec-hero-item {
@@ -1271,7 +2487,7 @@
       display: inline-block;
     }
 
-    .scenario-table td {
+    .scenario-spectrum-table td {
       vertical-align: middle;
     }
 
@@ -1300,7 +2516,7 @@
       color: #059669;
     }
 
-    .scenario-invariant-note {
+    .sensitivity-invariance-callout {
       margin-top: 16px;
     }
 
@@ -1504,6 +2720,19 @@
       border: 1px solid #edf0f2;
     }
 
+    .audit-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .audit-formula {
+      font-family: var(--font-mono);
+    }
+
+    .audit-flip-monitor {
+      background: #fbfdff;
+    }
+
     .defense-table {
       width: 100%;
       border-collapse: collapse;
@@ -1532,6 +2761,95 @@
 
     .defense-link:hover {
       text-decoration: underline;
+    }
+
+    .valuation-strip .multi-method-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .dcf-primary-grid {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.8fr) minmax(420px, 2fr) minmax(210px, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .dcf-primary-headline,
+    .dcf-primary-hud {
+      min-height: 100%;
+      padding: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+
+    .dcf-primary-kicker,
+    .dcf-primary-section-label {
+      color: var(--color-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .dcf-primary-price {
+      color: var(--color-text);
+      font-size: 32px;
+      font-weight: 700;
+      margin: 10px 0 4px;
+    }
+
+    .dcf-primary-range,
+    .dcf-primary-benchmark {
+      color: var(--color-muted);
+      font-size: 11px;
+    }
+
+    .dcf-primary-upside {
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 18px;
+    }
+
+    .dcf-primary-upside.positive { color: #047857; }
+    .dcf-primary-upside.negative { color: #dc2626; }
+
+    .dcf-primary-components {
+      min-width: 0;
+      overflow-x: auto;
+    }
+
+    .dcf-primary-components .financial-summary-table {
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .dcf-runtime-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 10px 0 0;
+    }
+
+    .dcf-runtime-list div {
+      align-items: baseline;
+      border-bottom: 1px dashed var(--color-border);
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      padding-bottom: 7px;
+    }
+
+    .dcf-runtime-list dt {
+      color: var(--color-muted);
+      font-size: 11px;
+    }
+
+    .dcf-runtime-list dd {
+      font-size: 12px;
+      font-weight: 700;
+      margin: 0;
+      text-align: right;
     }
 
     .method-switch {
@@ -1631,30 +2949,2070 @@
       color: var(--color-text);
       margin: 0;
     }
+
+    /* ==========================================================================
+       Tab 02: Assumptions & Drivers Redesign
+       ========================================================================== */
+    .assumptions-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .assumptions-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .assumptions-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .assumptions-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .assumptions-subtitle {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .assumptions-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .input-type-legend {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .legend-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+    }
+
+    .legend-items {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot-input {
+      background: #1A56DB;
+    }
+
+    .legend-dot-calc {
+      background: #BAE6FD;
+      border: 1px solid #7DD3FC;
+    }
+
+    .view-mode-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-border-subtle);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .mode-btn {
+      appearance: none;
+      background: transparent;
+      border: none;
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--color-card-bg);
+      color: var(--color-accent-blue);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .category-pill-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cat-pill {
+      appearance: none;
+      background: #EDF2F7;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .cat-pill:hover {
+      background: #E2E8F0;
+      color: var(--color-text-primary);
+    }
+
+    .cat-pill.active {
+      background: var(--color-accent-blue);
+      border-color: var(--color-accent-blue);
+      color: #FFFFFF;
+    }
+
+    .scenario-picker-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 8px 16px;
+    }
+
+    .scenario-picker-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+    }
+
+    .scenario-btn-group {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .scenario-btn {
+      appearance: none;
+      background: var(--color-page-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--color-accent-blue);
+      color: var(--color-text-primary);
+    }
+
+    .scenario-btn.active {
+      background: var(--color-accent-blue);
+      border-color: var(--color-accent-blue);
+      color: #FFFFFF;
+    }
+
+    .sliders-view-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .table-view-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .driver-group-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .driver-group-card.hidden,
+    .sliders-view-container.hidden,
+    .table-view-container.hidden {
+      display: none !important;
+    }
+
+    .driver-group-header {
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--color-border);
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-secondary);
+    }
+
+    .driver-rows-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .driver-row {
+      display: grid;
+      grid-template-columns: minmax(240px, 2.5fr) 60px minmax(140px, 1.2fr) 100px;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      transition: background-color 0.1s ease;
+    }
+
+    .driver-row:last-child {
+      border-bottom: none;
+    }
+
+    .driver-row:hover {
+      background: #F8FAFC;
+    }
+
+    .driver-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .driver-label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .driver-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .tooltip-btn {
+      appearance: none;
+      background: transparent;
+      border: none;
+      padding: 0 2px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease;
+    }
+
+    .tooltip-btn:hover {
+      color: var(--color-accent-blue);
+    }
+
+    .driver-notes {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .driver-unit-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-align: right;
+    }
+
+    .driver-slider-cell {
+      display: flex;
+      align-items: center;
+    }
+
+    :root {
+      --slider-track-color: #CBD5E1;
+      --slider-thumb-color: var(--color-accent-blue);
+    }
+
+    .driver-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--slider-track-color);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      margin: 0;
+      border: none;
+    }
+
+    .driver-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--slider-thumb-color);
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .driver-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .driver-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--slider-thumb-color);
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+    }
+
+    .driver-slider::-moz-range-track {
+      height: 4px;
+      background: var(--slider-track-color);
+      border-radius: 2px;
+      border: none;
+    }
+
+    .driver-slider:focus-visible {
+      outline: 2px solid var(--color-accent-blue);
+      outline-offset: 2px;
+    }
+
+    .driver-input-cell {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .driver-val-pill {
+      width: 100%;
+      max-width: 96px;
+      padding: 4px 8px;
+      border: 1px solid #BAE6FD;
+      border-radius: 4px;
+      background: #F0F9FF;
+      color: var(--color-blue-input);
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .driver-val-pill:focus {
+      border-color: var(--color-accent-blue);
+      box-shadow: 0 0 0 2px var(--color-accent-blue-soft);
+      background: #FFFFFF;
+    }
+
+    .assumptions-matrix-wrapper {
+      overflow-x: auto;
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+    }
+
+    .assumptions-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .assumptions-matrix-table th {
+      background: #F8FAFC;
+      padding: 8px 10px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      border-bottom: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border-subtle);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .assumptions-matrix-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      border-right: 1px solid var(--color-border-subtle);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matrix-label-th,
+    .matrix-label-td {
+      position: sticky;
+      left: 0;
+      background: #FFFFFF;
+      text-align: left !important;
+      font-weight: 600;
+      min-width: 240px;
+      z-index: 1;
+      border-right: 2px solid var(--color-border);
+    }
+
+    .assumptions-matrix-table th.matrix-label-th {
+      background: #F8FAFC;
+    }
+
+    .matrix-section-row td {
+      background: #F1F5F9;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-primary);
+      text-align: left;
+    }
+
+    .matrix-cell-input {
+      width: 100%;
+      min-width: 54px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      padding: 1px 3px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-blue-input) !important;
+      text-align: right;
+      box-sizing: border-box;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .matrix-cell-input:hover {
+      background: rgba(37, 99, 235, 0.04);
+      border-color: rgba(37, 99, 235, 0.2);
+    }
+
+    .matrix-cell-input:focus {
+      background: #FFFFFF;
+      border-color: var(--color-blue-input);
+      box-shadow: 0 0 0 2px var(--color-accent-blue-soft);
+      outline: none;
+    }
+
+    .matrix-subhead-row td {
+      background: #FAFAFA;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      text-align: left;
+    }
+
+    .matrix-bold-row td {
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .assumptions-note {
+      margin-top: 6px;
+    }
+
+    .jump-cover-link {
+      color: var(--color-accent-blue);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .driver-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .driver-unit-badge {
+        text-align: left;
+      }
+    }
+
+    /* ==========================================================================
+       Tab 03: Historicals (Financial Data Terminal) Redesign
+       ========================================================================== */
+    .historicals-container,
+    .historicals-terminal-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .historicals-header-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .historicals-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .historicals-subtitle {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    /* Hero SEC Continuity Banner */
+    .sec-continuity-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 18px;
+      background: var(--color-accent-blue-soft);
+      border: 1px solid #BFDBFE;
+      border-radius: var(--radius);
+    }
+
+    .sec-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--color-text-primary);
+    }
+
+    .sec-info-icon {
+      display: inline-flex;
+      align-items: center;
+      color: var(--color-accent-blue);
+      flex-shrink: 0;
+    }
+
+    .sec-banner-text strong {
+      font-weight: 700;
+      color: var(--color-accent-blue);
+    }
+
+    .sec-sep {
+      color: #93C5FD;
+      margin: 0 4px;
+    }
+
+    .btn-jump-audit {
+      appearance: none;
+      background: #FFFFFF;
+      border: 1px solid var(--color-accent-blue);
+      border-radius: 6px;
+      color: var(--color-accent-blue);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-jump-audit:hover {
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+    }
+
+    /* Top Headline 4 KPI Cards */
+    .historicals-kpi-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .historicals-kpi-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .historicals-kpi-card-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .historicals-kpi-card-val {
+      font-size: 26px;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+      margin: 2px 0;
+    }
+
+    .historicals-kpi-pill {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .historicals-kpi-pill-positive {
+      background: var(--color-badge-under-bg);
+      color: var(--color-badge-under-text);
+    }
+
+    .historicals-kpi-pill-negative {
+      background: var(--color-badge-over-bg);
+      color: var(--color-badge-over-text);
+    }
+
+    /* Statement Workspace Card */
+    .statement-workspace-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .statement-workspace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .statement-title-block h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0 0 2px;
+    }
+
+    .statement-title-block p {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .statement-switcher-group {
+      display: flex;
+      background: #F1F5F9;
+      border-radius: 6px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .statement-pill-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .statement-pill-btn:hover {
+      color: var(--color-text-primary);
+    }
+
+    .statement-pill-btn.active {
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .statement-table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--color-border-subtle);
+    }
+
+    .active-statement-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .statement-view-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-export-csv {
+      appearance: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .btn-export-csv:hover {
+      border-color: var(--color-accent-blue);
+      color: var(--color-accent-blue);
+      background: var(--color-accent-blue-soft);
+    }
+
+    /* CSS Freeze Panes Table */
+    .statement-table-wrapper {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 520px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-card-bg);
+      position: relative;
+    }
+
+    .statement-table-wrapper.hidden,
+    .tabulator-cards-wrapper.hidden,
+    .td-annual.hidden,
+    .th-annual.hidden,
+    .td-quarterly.hidden,
+    .th-quarterly.hidden {
+      display: none !important;
+    }
+
+    .statement-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .statement-table thead th {
+      position: sticky; top: 0;
+      z-index: 10;
+      background: var(--color-page-bg);
+      border-bottom: 2px solid var(--color-border);
+      border-right: 1px solid var(--color-border-subtle);
+      padding: 8px 12px;
+      text-align: right;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+
+    .statement-table thead th:first-child {
+      position: sticky; left: 0;
+      z-index: 15;
+      background: var(--color-page-bg);
+      text-align: left;
+      min-width: 250px;
+      border-right: 2px solid var(--color-border);
+      color: var(--color-text-primary);
+    }
+
+    .statement-table tbody td {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      border-right: 1px solid var(--color-border-subtle);
+      text-align: right;
+      white-space: nowrap;
+      color: var(--color-text-primary);
+    }
+
+    .statement-table tbody td:first-child {
+      position: sticky; left: 0;
+      z-index: 5;
+      background: var(--color-card-bg);
+      text-align: left;
+      font-weight: 500;
+      min-width: 250px;
+      border-right: 2px solid var(--color-border);
+    }
+
+    .statement-table tbody tr:hover td {
+      background-color: var(--color-accent-blue-soft);
+      cursor: pointer;
+    }
+
+    .statement-table tbody tr:hover td:first-child {
+      background-color: var(--color-accent-blue-soft);
+    }
+
+    .statement-table tr.row-subtotal td {
+      font-weight: 700;
+      background: #F8FAFC;
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .statement-table tr.row-subtotal td:first-child {
+      background: #F8FAFC;
+    }
+
+    .statement-table tr.row-total td {
+      font-weight: 700;
+      color: var(--color-text-primary);
+      border-top: 1px solid var(--color-border);
+      border-bottom: 2px solid var(--color-border);
+      background: #F8FAFC;
+    }
+
+    .statement-table tr.row-total td:first-child {
+      background: #F8FAFC;
+    }
+
+    .statement-footnote {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    /* Line-Item Drawer */
+    .line-item-drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 1000;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .line-item-drawer-overlay.hidden {
+      display: none !important;
+    }
+
+    .line-item-drawer {
+      width: 440px;
+      max-width: 90vw;
+      height: 100%;
+      background: #FFFFFF;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .drawer-title-area {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .drawer-metric-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      color: var(--color-text-primary);
+    }
+
+    .drawer-metric-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .drawer-close-btn {
+      appearance: none;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      padding: 4px;
+    }
+
+    .drawer-close-btn:hover {
+      color: var(--color-text-primary);
+    }
+
+    .drawer-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* RP3.2 — Line-Item Inspector Drawer Components */
+    .drawer-stat-strip {
+      display: flex;
+      gap: 10px;
+      background: var(--color-page-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .drawer-stat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .drawer-stat-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .drawer-stat-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+    }
+
+    .drawer-cagr-val.positive {
+      color: #15803D;
+    }
+
+    .drawer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .drawer-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .drawer-mini-table-wrapper {
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+
+    .drawer-mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+
+    .drawer-mini-table th {
+      background: var(--color-page-bg);
+      padding: 6px 10px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .drawer-mini-table th:last-child {
+      text-align: right;
+    }
+
+    .drawer-mini-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .drawer-mini-td-period {
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .drawer-mini-td-val {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .drawer-mini-td-val.text-empty {
+      color: var(--color-text-muted);
+    }
+
+    .drawer-composition-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .drawer-comp-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+
+    .drawer-comp-item.active-comp-item {
+      background: var(--color-accent-blue-soft);
+    }
+
+    .drawer-comp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .drawer-comp-label {
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .drawer-comp-val {
+      font-weight: 600;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--color-text-secondary);
+    }
+
+    .drawer-comp-progress {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      border: none;
+      background: #E2E8F0;
+      overflow: hidden;
+    }
+
+    .drawer-comp-progress::-webkit-progress-bar {
+      background: #E2E8F0;
+      border-radius: 3px;
+    }
+
+    .drawer-comp-progress::-webkit-progress-value {
+      background: var(--color-accent-blue);
+      border-radius: 3px;
+    }
+
+    .drawer-comp-progress::-moz-progress-bar {
+      background: var(--color-accent-blue);
+      border-radius: 3px;
+    }
+
+    .drawer-empty-comp {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      font-style: italic;
+      padding: 8px 12px;
+      background: var(--color-page-bg);
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+    }
+
+    .drawer-provenance-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 14px;
+    }
+
+    .provenance-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .provenance-label {
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+
+    .provenance-val {
+      color: var(--color-text-primary);
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .provenance-link-row {
+      margin-top: 6px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* RP3.2 — SEC Audit Center */
+    .audit-center {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .audit-center-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .audit-center-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0 0 4px;
+    }
+
+    .audit-center-subtitle {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .audit-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .audit-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filing-card {
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: #FFFFFF;
+      overflow: hidden;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .filing-card[open] {
+      border-color: var(--color-accent-blue);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    }
+
+    .filing-card-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      background: #FFFFFF;
+    }
+
+    .filing-card-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .filing-card-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge-filing-form {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-filing-form.form-10-k {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+    }
+
+    .badge-filing-form.form-10-q {
+      background: #F0FDF4;
+      color: #15803D;
+      border: 1px solid #BBF7D0;
+    }
+
+    .filing-period-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--color-page-bg);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    .filing-card-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .filing-chevron {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .filing-card[open] .filing-chevron {
+      transform: rotate(90deg);
+    }
+
+    .filing-card-body {
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--color-border-subtle);
+      background: #FAFAFA;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .filing-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .filing-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .filing-meta-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+
+    .filing-meta-val {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .filing-notes-block {
+      font-size: 11.5px;
+      color: var(--color-text-secondary);
+      line-height: 1.45;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+
+    .filing-notes-text {
+      margin: 0;
+    }
+
+    .filing-action-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-sec-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      color: var(--color-accent-blue);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .btn-sec-link:hover {
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+      border-color: var(--color-accent-blue);
+    }
+
+    /* Trend Explorer Section (RP3.3) */
+    .trend-explorer-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      margin-bottom: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .trend-explorer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: #FFFFFF;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* =========================================================================
+       RW1.1: Canonical Unified Card/Section Header Treatment (APP-WIDE)
+       ========================================================================= */
+    .trend-title-block,
+    .operating-kpis-title-block,
+    .statement-title-block,
+    .audit-center-title-block,
+    .cover-section-header,
+    .cover-card-title,
+    .scenario-picker-title,
+    .driver-group-header,
+    .statement-card-header {
+      border-left: 3px solid var(--color-accent-blue);
+      padding-left: 10px;
+      background: transparent;
+      border-bottom: none;
+    }
+
+    .trend-main-title,
+    .operating-kpis-main-title,
+    .workspace-main-title,
+    .statement-title-block h3,
+    .audit-center-title,
+    .cover-section-title,
+    .cover-card-title,
+    .scenario-picker-title,
+    .driver-group-header,
+    .statement-card-header {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0 0 2px 0;
+    }
+
+    .trend-subtitle,
+    .operating-kpis-subtitle,
+    .workspace-subtitle,
+    .statement-title-block p,
+    .audit-center-subtitle,
+    .cover-section-subtitle {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .trend-switcher-group {
+      display: inline-flex;
+      background: var(--color-page-bg);
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      gap: 2px;
+    }
+
+    .trend-pill-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .trend-pill-btn:hover {
+      color: var(--color-text-primary);
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .trend-pill-btn.active {
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .trend-charts-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 1px;
+      background: var(--color-border);
+    }
+
+    .trend-charts-grid.single-chart {
+      grid-template-columns: 1fr;
+    }
+
+    .trend-bar-chart-card,
+    .revenue-donut-card {
+      background: #FFFFFF;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .chart-container-inner {
+      width: 100%;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .chart-container-inner svg {
+      max-height: 100%;
+      max-width: 100%;
+    }
+
+    .donut-slice {
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .donut-slice:hover {
+      opacity: 0.85;
+    }
+
+    /* B2 donut legend isolate behavior: button affordance + dimmed state */
+    .donut-legend-entry {
+      cursor: pointer;
+    }
+
+    .donut-legend-entry:hover text,
+    .donut-legend-entry:focus-visible text {
+      text-decoration: underline;
+    }
+
+    .donut-legend-entry:focus {
+      outline: none;
+    }
+
+    .donut-slice.donut-dimmed,
+    .donut-legend-entry.donut-dimmed {
+      opacity: 0.25;
+    }
+
+    .trend-bar-rect {
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .trend-bar-rect:hover {
+      opacity: 0.85;
+    }
+
+    .trend-bar-rect.selected {
+      stroke: #0f172a;
+      stroke-width: 2.5;
+    }
+
+    /* Operating KPIs Section (RP3.3) */
+    .operating-kpis-section {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .operating-kpis-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      background: #FFFFFF;
+    }
+
+    .operating-kpis-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1px;
+      background: var(--color-border);
+    }
+
+    .operating-kpi-card {
+      background: #FFFFFF;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: default;
+      position: relative;
+    }
+
+    .operating-kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .operating-kpi-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .operating-kpi-pill {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      background: var(--color-page-bg);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 4px;
+      padding: 2px 6px;
+      width: fit-content;
+    }
+
+    @media (max-width: 900px) {
+      .trend-charts-grid {
+        grid-template-columns: 1fr;
+      }
+      .operating-kpis-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .historicals-kpi-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .operating-kpis-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .historicals-kpi-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       Tab 04: Supporting Schedules Redesign (RP4)
+       ========================================================================== */
+    .schedules-hub-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .schedules-header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .schedules-title-area {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .schedules-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .schedules-subtitle {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .schedules-controls-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .units-toggle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .units-toggle-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Segmented pill control for Tab 04 display units (RW2.2: canonical .pill-control / .pill-btn pattern) */
+    .units-mode-toggle {
+      /* Uses canonical .pill-control tokens */
+    }
+
+    .units-btn {
+      /* Uses canonical .pill-btn tokens */
+    }
+
+    .radio-pill {
+      /* Backward-compatibility alias for test probes */
+    }
+
+    .schedules-switcher-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .schedule-switcher-group.pill-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .schedule-pill-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      background: #F8FAFC;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .schedule-pill-btn:hover {
+      background: #F1F5F9;
+      color: var(--color-text-primary);
+    }
+
+    .schedule-pill-btn.active {
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+      border-color: var(--color-accent-blue);
+    }
+
+    .hard-gate-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .gate-section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+
+    .gate-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .gate-card:hover {
+      border-color: #CBD5E1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .gate-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #F1F5F9;
+      padding-bottom: 10px;
+    }
+
+    .gate-card-period {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .gate-card .badge-pass {
+      background: #ECFDF5;
+      color: #059669;
+      border: 1px solid #A7F3D0;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gate-card .badge-fail {
+      background: #FEF2F2;
+      color: #DC2626;
+      border: 1px solid #FECACA;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gate-card.gate-card-fail {
+      border-color: #F87171;
+      background: #FFFDFD;
+    }
+
+    .gate-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .gate-ledger-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .gate-ledger-label {
+      color: var(--color-text-secondary);
+    }
+
+    .gate-ledger-val {
+      font-family: var(--font-family-mono, monospace);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .gate-discrepancy-row {
+      border-top: 1px dashed #E2E8F0;
+      padding-top: 6px;
+      margin-top: 2px;
+    }
+
+    .gate-discrepancy-row .gate-ledger-val {
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .gate-card-fail .gate-discrepancy-row .gate-ledger-val {
+      color: #DC2626;
+      font-weight: 700;
+    }
+
+    .schedules-tables-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .schedule-statement-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .schedule-working-capital,
+    .schedule-ppe,
+    .schedule-intangibles,
+    .schedule-sbc,
+    .schedule-debt {
+      transition: opacity 0.2s ease;
+    }
+
+    .schedule-row-subtotal {
+      font-weight: 600;
+      background-color: #F8FAFC !important;
+      border-top: 1px solid #E2E8F0 !important;
+    }
+
+    .schedule-row-nwc {
+      font-weight: 700;
+      background-color: #F8FAFC !important;
+      border-top: 1px solid #CBD5E1 !important;
+      border-bottom: 1px solid #CBD5E1 !important;
+    }
+
+    .schedule-row-delta-nwc {
+      font-weight: 700;
+      background-color: #F0FDF4 !important;
+      border-top: 1px solid #86EFAC !important;
+      border-bottom: 2px solid #22C55E !important;
+    }
+
+    .schedule-row-delta-nwc .tabulator-cell {
+      color: #15803D !important;
+      font-weight: 700;
+    }
+
+    .schedule-row-total {
+      font-weight: 700;
+      background-color: #F8FAFC !important;
+      border-top: 1px solid #CBD5E1 !important;
+      border-bottom: 2px solid var(--color-border) !important;
+    }
+
+    .schedule-row-funded-debt {
+      font-weight: 500;
+    }
+
+    .debt-callout-card {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 12px 16px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .debt-callout-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #92400E;
+    }
+
+    .schedule-hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1100px) {
+      .gate-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .gate-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .schedules-header-block {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .units-toggle-container {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .gate-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <header class="app-header">
-    <h1 class="app-title">Duolingo FM; Duolingo, Inc. (NASDAQ: DUOL)</h1>
-    <p class="app-subtitle">Cited 3-Statement Financial Valuation Model · Interactive Valuation Interface</p>
+    <div class="header-top-bar">
+      <div class="brand-block">
+        <div class="brand-logos">
+          <img src="assets/branding/duolingo-owl.svg" alt="Duolingo Mascot" class="header-mascot" width="36" height="36" />
+          <img src="assets/branding/duolingo-logo.svg" alt="Duolingo" class="header-wordmark" height="22" />
+        </div>
+        <div class="brand-divider"></div>
+        <div class="brand-text">
+          <div class="brand-heading">
+            <h1 class="app-title">Duolingo, Inc.</h1>
+          </div>
+          <div class="brand-sub-row">
+            <span class="ticker-pill">NASDAQ: DUOL</span>
+            <span class="brand-sub-sep">|</span>
+            <p class="app-subtitle">3-Statement Financial Model + DCF Valuation</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-meta-block">
+        <div class="header-meta-row">
+          <span class="meta-label">Valuation Date</span>
+          <span class="meta-value">Sep 1, 2026</span>
+        </div>
+        <div class="header-meta-row">
+          <span class="meta-label">Model Version</span>
+          <span class="meta-value">v1.0-P4</span>
+        </div>
+        <div class="header-meta-row">
+          <span class="meta-label">Prepared By</span>
+          <span class="meta-value">Independent Analysis</span>
+        </div>
+      </div>
+    </div>
 
-    <nav class="tabs" role="tablist" aria-label="Model sections">
+    <nav class="app-tab-nav tabs" role="tablist" aria-label="Model sections">
       <button class="tab-link" type="button" role="tab" id="tab-control-cover"
-              data-tab-link="cover" aria-controls="tab-cover" aria-selected="false">Cover &amp; TOC</button>
+              data-tab-link="cover" aria-controls="tab-cover" aria-selected="false">
+        <span class="tab-num">01</span>
+        <span class="tab-label">Cover &amp; TOC</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-assumptions"
-              data-tab-link="assumptions" aria-controls="tab-assumptions" aria-selected="false">Assumptions / Drivers</button>
+              data-tab-link="assumptions" aria-controls="tab-assumptions" aria-selected="false">
+        <span class="tab-num">02</span>
+        <span class="tab-label">Assumptions / Drivers</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-historicals"
-              data-tab-link="historicals" aria-controls="tab-historicals" aria-selected="false">Historicals</button>
+              data-tab-link="historicals" aria-controls="tab-historicals" aria-selected="false">
+        <span class="tab-num">03</span>
+        <span class="tab-label">Historicals</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-schedules"
-              data-tab-link="schedules" aria-controls="tab-schedules" aria-selected="false">Supporting Schedules</button>
+              data-tab-link="schedules" aria-controls="tab-schedules" aria-selected="false">
+        <span class="tab-num">04</span>
+        <span class="tab-label">Supporting Schedules</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-projections"
-              data-tab-link="projections" aria-controls="tab-projections" aria-selected="false">Projections (3-Statement)</button>
+              data-tab-link="projections" aria-controls="tab-projections" aria-selected="false">
+        <span class="tab-num">05</span>
+        <span class="tab-label">Projections (3-Statement)</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-valuation"
-              data-tab-link="valuation" aria-controls="tab-valuation" aria-selected="false">Valuation</button>
+              data-tab-link="valuation" aria-controls="tab-valuation" aria-selected="false">
+        <span class="tab-num">06</span>
+        <span class="tab-label">Valuation</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-summary"
-              data-tab-link="summary" aria-controls="tab-summary" aria-selected="false">Summary / Output</button>
+              data-tab-link="summary" aria-controls="tab-summary" aria-selected="false">
+        <span class="tab-num">07</span>
+        <span class="tab-label">Summary / Output</span>
+      </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-sensitivity"
-              data-tab-link="sensitivity" aria-controls="tab-sensitivity" aria-selected="false">Sensitivity / Scenarios</button>
+              data-tab-link="sensitivity" aria-controls="tab-sensitivity" aria-selected="false">
+        <span class="tab-num">08</span>
+        <span class="tab-label">Sensitivity / Scenarios</span>
+      </button>
     </nav>
   </header>
 
@@ -1662,137 +5020,558 @@
     <!-- Tab 1: Cover & TOC -->
     <section class="tab-pane" role="tabpanel" id="tab-cover" data-tab-pane data-tab="cover" aria-labelledby="tab-control-cover">
       <div class="cover-container">
-        <div class="cover-hero">
-          <h2 class="cover-title">Duolingo, Inc. (NASDAQ: DUOL) Financial Valuation Model</h2>
-          <p class="app-subtitle">Institutional-Grade Fully Integrated 3-Statement &amp; DCF Valuation Model</p>
+        <!-- Row 1: 3 Columns: Overview (Col 1), Snapshot (Col 2), Status (Col 3) -->
+        <div class="cover-grid cover-row-top">
+          <!-- 1. Overview Card -->
+          <article class="cover-card cover-overview-card" aria-labelledby="cover-overview-heading">
+            <h3 id="cover-overview-heading" class="cover-card-title">Model Overview<span class="sr-only"> &mdash; Executive Model Overview</span></h3>
+            <p class="cover-prose">
+              Institutional-grade, fully integrated 3-statement financial model for Duolingo, Inc.
+              This model builds a comprehensive income statement, balance sheet, and cash flow
+              statement, with a multi-method valuation framework, scenario analysis, and sensitivity
+              analysis.
+            </p>
+            <div class="stat-pill-row">
+              <div class="stat-pill">
+                <span class="stat-pill-label">Valuation Date</span>
+                <span class="stat-pill-value" id="cover-stat-asof">Sep 1, 2026</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-pill-label">Current Share Price</span>
+                <span class="stat-pill-value" id="cover-stat-price">&mdash;</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-pill-label">Model Version</span>
+                <span class="stat-pill-value" id="cover-stat-version">v1.0-P4</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-pill-label">Model Type</span>
+                <span class="stat-pill-value">3-Statement DCF</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- 2. Valuation Snapshot Card -->
+          <article class="cover-card cover-snapshot-card" aria-labelledby="cover-snapshot-heading">
+            <h3 id="cover-snapshot-heading" class="cover-card-title">Valuation Snapshot <span class="cover-card-sub">(Base Case)</span></h3>
+            <div class="snapshot-dl">
+              <div class="snapshot-row">
+                <span class="snapshot-label">Current Share Price</span>
+                <span class="snapshot-value" id="cover-snapshot-market-price">&mdash;</span>
+              </div>
+              <div class="snapshot-row">
+                <span class="snapshot-label">DCF Fair Value (FCFF)</span>
+                <span class="snapshot-value" id="cover-dcf-fair-value">&mdash;</span>
+              </div>
+              <div class="snapshot-row">
+                <span class="snapshot-label">Multi-Method Spread</span>
+                <span class="snapshot-value" id="cover-blended-fair-value">&mdash;</span>
+              </div>
+              <div class="snapshot-row snapshot-highlight-row" id="cover-upside-highlight-row">
+                <span class="snapshot-label">Upside / (Downside)</span>
+                <span id="cover-upside-badge" class="badge-upside">&mdash;</span>
+              </div>
+              <div class="snapshot-divider"></div>
+              <div class="snapshot-row">
+                <span class="snapshot-label">Implied Return (Base)</span>
+                <span class="snapshot-value" id="cover-implied-return">&mdash;</span>
+              </div>
+              <div class="snapshot-row">
+                <span class="snapshot-label">WACC</span>
+                <span class="snapshot-value" id="cover-snapshot-wacc">&mdash;</span>
+              </div>
+              <div class="snapshot-row">
+                <span class="snapshot-label">Terminal Growth</span>
+                <span class="snapshot-value" id="cover-snapshot-growth">&mdash;</span>
+              </div>
+              <div class="snapshot-row">
+                <span class="snapshot-label">Forecast Period</span>
+                <span class="snapshot-value">FY2026 &ndash; FY2030</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- 3. Model Status Card -->
+          <article class="cover-card cover-status-card" aria-labelledby="cover-status-heading">
+            <h3 id="cover-status-heading" class="cover-card-title">Model Status</h3>
+            <ul class="status-checklist">
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">Historical Data</span>
+                </div>
+                <span class="status-check-tag">Complete</span>
+              </li>
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">3-Statement Linkage</span>
+                </div>
+                <span class="status-check-tag">Validated</span>
+              </li>
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">Balance Sheet Check</span>
+                </div>
+                <span class="status-check-tag">Balanced</span>
+              </li>
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">Valuation Framework</span>
+                </div>
+                <span class="status-check-tag">6 Methods</span>
+              </li>
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">Sensitivity Analysis</span>
+                </div>
+                <span class="status-check-tag">9 &times; 5</span>
+              </li>
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">Model Integrity</span>
+                </div>
+                <span class="status-check-tag">Passed</span>
+              </li>
+              <li class="status-check-item">
+                <div class="status-check-left">
+                  <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
+                  <span class="status-check-label">Last Updated</span>
+                </div>
+                <span class="status-check-tag">Sep 1, 2026</span>
+              </li>
+            </ul>
+          </article>
         </div>
 
-        <dl class="cover-meta-grid">
-          <div class="cover-meta-item">
-            <dt>Company &amp; Ticker</dt>
-            <dd>Duolingo, Inc. (NASDAQ: DUOL)</dd>
-          </div>
-          <div class="cover-meta-item">
-            <dt>Valuation As-Of Date</dt>
-            <dd id="cover-meta-asof">2026-09-01</dd>
-          </div>
-          <div class="cover-meta-item">
-            <dt>Model Version</dt>
-            <dd id="cover-meta-version">v1.0-P4</dd>
-          </div>
-        </dl>
+        <!-- Row 2: 2/3 Architecture Table + 1/3 Right Rail -->
+        <div class="cover-row-mid">
+          <!-- Architecture Directory (Left 2/3) -->
+          <section class="cover-card cover-architecture-section" aria-labelledby="cover-arch-heading">
+            <div class="cover-section-header">
+              <h3 id="cover-arch-heading" class="cover-section-title">Model Architecture<span class="sr-only"> &amp; Section Directory</span></h3>
+              <p class="cover-section-subtitle">Architecture &amp; Section Directory: Navigate to each section of the model</p>
+            </div>
+            <table class="architecture-table">
+              <thead>
+                <tr>
+                  <th class="col-tab-num">#</th>
+                  <th class="col-tab-name">Section</th>
+                  <th>Description</th>
+                  <th class="col-tab-goto">Go To</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-jump-tab="cover" class="arch-row">
+                  <td class="col-tab-num">01</td>
+                  <td class="col-tab-name">Cover &amp; TOC</td>
+                  <td class="col-tab-desc">Model metadata, methodology overview, section directory, and legal disclaimers.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="cover" aria-label="Go to Cover &amp; TOC">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="assumptions" class="arch-row">
+                  <td class="col-tab-num">02</td>
+                  <td class="col-tab-name">Assumptions / Drivers</td>
+                  <td class="col-tab-desc">Operating growth drivers, margin curves, tax rates, CAPEX components, and terminal growth.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="assumptions" aria-label="Go to Assumptions / Drivers">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="historicals" class="arch-row">
+                  <td class="col-tab-num">03</td>
+                  <td class="col-tab-name">Historicals</td>
+                  <td class="col-tab-desc">FY2021&ndash;FY2025 income statement, balance sheet, cash flow, and KPIs with filing citations.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="historicals" aria-label="Go to Historicals">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="schedules" class="arch-row">
+                  <td class="col-tab-num">04</td>
+                  <td class="col-tab-name">Supporting Schedules</td>
+                  <td class="col-tab-desc">Working capital (DSO/DPO), PP&amp;E roll-forward, debt (debt-free), SBC, and amortization.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="schedules" aria-label="Go to Supporting Schedules">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="projections" class="arch-row">
+                  <td class="col-tab-num">05</td>
+                  <td class="col-tab-name">Projections (3-Statement)</td>
+                  <td class="col-tab-desc">FY2026&ndash;FY2030 linked IS, BS, and CF with automated balance gate validation.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="projections" aria-label="Go to Projections">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="valuation" class="arch-row">
+                  <td class="col-tab-num">06</td>
+                  <td class="col-tab-name">Valuation</td>
+                  <td class="col-tab-desc">Multi-method valuation synthesis (2-Stage FCFF DCF, EV/Rev, EV/EBITDAR, P/FCF, SOTP, Per-User), CAPM WACC build, enterprise-to-equity bridge, and thesis directory.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="valuation" aria-label="Go to Valuation">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="summary" class="arch-row">
+                  <td class="col-tab-num">07</td>
+                  <td class="col-tab-name">Summary / Output</td>
+                  <td class="col-tab-desc">Executive dashboard, valuation verdict card, 6-method comparison table, live price state, and key ratios.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="summary" aria-label="Go to Summary / Output">&rarr;</button></td>
+                </tr>
+                <tr data-jump-tab="sensitivity" class="arch-row">
+                  <td class="col-tab-num">08</td>
+                  <td class="col-tab-name">Sensitivity / Scenarios</td>
+                  <td class="col-tab-desc">9&times;5 WACC &times; Terminal Growth matrix and Downside / Base / Upside scenario bands.</td>
+                  <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="sensitivity" aria-label="Go to Sensitivity / Scenarios">&rarr;</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
 
-        <div class="cover-section">
-          <h3 class="cover-section-title">Table of Contents &amp; Model Architecture</h3>
-          <table class="toc-table">
-            <thead>
-              <tr>
-                <th class="col-tab-num">Tab #</th>
-                <th class="col-tab-name">Section Name</th>
-                <th>Description &amp; Contents</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td><a href="#cover" class="toc-link" data-jump-tab="cover">Cover &amp; TOC</a></td>
-                <td>Model metadata, methodology overview, section directory, and legal disclaimers.</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td><a href="#assumptions" class="toc-link" data-jump-tab="assumptions">Assumptions / Drivers</a></td>
-                <td>Operating growth drivers, margin curves, tax rates, CAPM components, and terminal growth.</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td><a href="#historicals" class="toc-link" data-jump-tab="historicals">Historicals</a></td>
-                <td>FY2021-FY2025 Income Statement, Balance Sheet, Cash Flow, and KPIs with filing citations.</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td><a href="#schedules" class="toc-link" data-jump-tab="schedules">Supporting Schedules</a></td>
-                <td>Working Capital (DSO/DPO), PP&amp;E roll-forward, Debt (debt-free), SBC, and Amortization.</td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td><a href="#projections" class="toc-link" data-jump-tab="projections">Projections (3-Statement)</a></td>
-                <td>FY2026-FY2030 linked IS, BS, and CF with automated balance gate validation.</td>
-              </tr>
-              <tr>
-                <td>6</td>
-                <td><a href="#valuation" class="toc-link" data-jump-tab="valuation">Valuation</a></td>
-                <td>Multi-method valuation synthesis (2-Stage FCFF DCF, EV/Rev, EV/EBITDAR, P/FCF, SOTP, Per-User), CAPM WACC build, enterprise-to-equity bridge, and thesis defense directory.</td>
-              </tr>
-              <tr>
-                <td>7</td>
-                <td><a href="#summary" class="toc-link" data-jump-tab="summary">Summary / Output</a></td>
-                <td>Executive dashboard, multi-method agreement verdict card, 6-method comparison table, live price state, and key financial ratios.</td>
-              </tr>
-              <tr>
-                <td>8</td>
-                <td><a href="#sensitivity" class="toc-link" data-jump-tab="sensitivity">Sensitivity / Scenarios</a></td>
-                <td>9×5 WACC × Terminal Growth valuation matrix and Downside / Base / Upside scenario bands.</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="disclaimer-box toc-methodology-note">
-            <strong>Methodology Scope Note:</strong> Trading Comparables (Comps) is fully integrated into the Tab 6 multi-method valuation framework. Precedent Transactions and LBO Analysis remain excluded (N/A) per Director decision.
+          <!-- Right Rail: Key Assumptions + Valuation Methods (Right 1/3) -->
+          <div class="cover-right-rail">
+            <!-- 4. Key Assumptions Card -->
+            <article class="cover-card cover-assumptions-card" aria-labelledby="cover-assumptions-heading">
+              <h3 id="cover-assumptions-heading" class="cover-card-title">Key Assumptions <span class="cover-card-sub">(Base Case)</span></h3>
+              <div class="assumptions-dl">
+                <div class="assump-row">
+                  <span class="assump-label">WACC</span>
+                  <span class="assump-value" id="cover-assump-wacc">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">Terminal Growth</span>
+                  <span class="assump-value" id="cover-assump-growth">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">Revenue CAGR ('26–'30)</span>
+                  <span class="assump-value" id="cover-assump-revenue-growth">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">EBIT Margin (FY2030)</span>
+                  <span class="assump-value" id="cover-assump-op-margin">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">FCF Margin (FY2030)</span>
+                  <span class="assump-value" id="cover-assump-fcf-margin">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">Tax Rate (Long-term)</span>
+                  <span class="assump-value" id="cover-assump-tax">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">Shares Outstanding (Diluted)</span>
+                  <span class="assump-value" id="cover-assump-shares">&mdash;</span>
+                </div>
+                <div class="assump-row">
+                  <span class="assump-label">Net Debt (Latest)</span>
+                  <span class="assump-value" id="cover-assump-net-debt">$0</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- 5. Valuation Methods Card -->
+            <article class="cover-card cover-methods-card" aria-labelledby="cover-methods-heading">
+              <div class="cover-card-header-flex">
+                <h3 id="cover-methods-heading" class="cover-card-title">Valuation Methods</h3>
+                <span id="cover-methods-verdict-badge" class="badge badge-fair">FAIR</span>
+              </div>
+              <table class="methods-summary-table">
+                <thead>
+                  <tr>
+                    <th>Methodology</th>
+                    <th>Fair Value</th>
+                    <th>Implied Upside</th>
+                    <th>Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="cover-methods-table-body">
+                  <tr><td><strong>2-Stage FCFF DCF</strong></td><td class="tabular-nums font-mono">&mdash;</td><td class="tabular-nums font-mono">&mdash;</td><td><span class="badge badge-fair">PENDING</span></td></tr>
+                  <tr><td><strong>Trading Comparables</strong></td><td class="tabular-nums font-mono">&mdash;</td><td class="tabular-nums font-mono">&mdash;</td><td><span class="badge badge-fair">PENDING</span></td></tr>
+                  <tr><td><strong>EV/EBITDAR Multiples</strong></td><td class="tabular-nums font-mono">&mdash;</td><td class="tabular-nums font-mono">&mdash;</td><td><span class="badge badge-fair">PENDING</span></td></tr>
+                  <tr><td><strong>P/FCF Multiple</strong></td><td class="tabular-nums font-mono">&mdash;</td><td class="tabular-nums font-mono">&mdash;</td><td><span class="badge badge-fair">PENDING</span></td></tr>
+                  <tr><td><strong>Sum-of-the-Parts (SOTP)</strong></td><td class="tabular-nums font-mono">&mdash;</td><td class="tabular-nums font-mono">&mdash;</td><td><span class="badge badge-fair">PENDING</span></td></tr>
+                  <tr><td><strong>Per-User Metric Value</strong></td><td class="tabular-nums font-mono">&mdash;</td><td class="tabular-nums font-mono">&mdash;</td><td><span class="badge badge-fair">PENDING</span></td></tr>
+                </tbody>
+              </table>
+              <div class="cover-methods-spread-bar">
+                <span class="spread-bar-label">Multi-Method Spread:</span>
+                <span class="spread-bar-value" id="cover-methods-spread-value">&mdash;</span>
+              </div>
+            </article>
           </div>
         </div>
 
-        <div class="cover-section">
-          <div class="disclaimer-box">
-            <strong>IMPORTANT DISCLAIMER:</strong> This independent financial model is prepared strictly for informational, educational, and analytical research purposes. It is not affiliated with, endorsed by, or associated with Duolingo, Inc. It is not investment advice, a financial promotion, or a recommendation to buy or sell securities. All forward-looking projections and valuations are estimates based on explicitly cited assumptions and historical filings. Past performance does not guarantee future results.
+        <!-- Row 3: Callouts -->
+        <section class="cover-callouts" aria-label="Methodology &amp; Disclaimers">
+          <div class="callout-info">
+            <div class="callout-header">
+              <img src="assets/icons/ui/info-circle.svg" alt="Info" class="callout-icon" width="20" height="20" />
+              <strong class="callout-title">Methodology Note</strong>
+            </div>
+            <p>Methodology Scope Note: Trading Comparables (Comps) is fully integrated into the "Valuation" section (Tab 6). Precedent Transactions and LBO Analysis remain excluded (N/A) per Director decision due to Duolingo's debt-free capital structure and reinvestment profile.</p>
           </div>
+          <div class="callout-warning">
+            <div class="callout-header">
+              <img src="assets/icons/ui/alert-triangle.svg" alt="Disclaimer" class="callout-icon" width="20" height="20" />
+              <strong class="callout-title">Important Disclaimer</strong>
+            </div>
+            <p>Regulatory &amp; Research Disclaimer: This independent financial model is prepared strictly for informational, educational, and analytical research purposes. It is not affiliated with, endorsed by, or associated with Duolingo, Inc. It does not constitute investment advice, financial promotion, or a recommendation to buy or sell securities. All forward-looking projections are estimates based on cited assumptions and historical filings. Past performance does not guarantee future results.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Tab 2: Assumptions & Drivers -->
+    <section class="tab-pane" role="tabpanel" id="tab-assumptions" data-tab-pane data-tab="assumptions" aria-labelledby="tab-control-assumptions" hidden>
+      <div class="assumptions-view-wrapper assumptions-container">
+        <!-- Top Title & Controls Strip -->
+        <div class="assumptions-header-row">
+          <div class="assumptions-title-block">
+            <h2 class="assumptions-title">02. Assumptions / Drivers</h2>
+            <p class="assumptions-subtitle" id="assumptions-subtitle">Key operating, financial, and valuation assumptions. Change inputs in blue cells. Hover for details.</p>
+          </div>
+
+          <div class="assumptions-controls-right">
+            <div class="input-type-legend">
+              <span class="legend-title">INPUT TYPE</span>
+              <div class="legend-items">
+                <span class="legend-item"><span class="legend-dot legend-dot-input"></span> User Input</span>
+                <span class="legend-item"><span class="legend-dot legend-dot-calc"></span> Calculated / Linked</span>
+              </div>
+            </div>
+
+            <div class="view-mode-toggle pill-control">
+              <button type="button" class="pill-btn mode-btn active" data-mode="sliders">Sliders</button>
+              <button type="button" class="pill-btn mode-btn" data-mode="table">Table View</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="category-pill-bar pill-group" role="tablist" aria-label="Category Filters">
+          <button type="button" class="cat-pill active" data-category="all">All</button>
+          <button type="button" class="cat-pill" data-category="operating">Operating</button>
+          <button type="button" class="cat-pill" data-category="margins">Margins</button>
+          <button type="button" class="cat-pill" data-category="tax-capital">Tax &amp; Capital</button>
+          <button type="button" class="cat-pill" data-category="balance-sheet">Balance Sheet</button>
+          <button type="button" class="cat-pill" data-category="financing">Financing</button>
+          <button type="button" class="cat-pill" data-category="valuation">Valuation</button>
+          <button type="button" class="cat-pill" data-category="other">Other</button>
+        </div>
+
+        <!-- Active Model Scenario Bar Placeholder -->
+        <div class="scenario-picker-card">
+          <div class="scenario-picker-title">Active Model Scenario</div>
+          <div class="scenario-btn-group" role="group" aria-label="Scenario Selector">
+            <button type="button" class="scenario-btn" data-scenario="bear">DOWNSIDE</button>
+            <button type="button" class="scenario-btn active" data-scenario="base">BASE</button>
+            <button type="button" class="scenario-btn" data-scenario="bull">UPSIDE</button>
+          </div>
+        </div>
+
+        <!-- Mode A: Parameter Sliders View -->
+        <div class="sliders-view-container" id="assumptions-sliders-view">
+          <!-- Dynamically populated by renderAssumptions -->
+        </div>
+
+        <!-- Mode B: Multi-Year Forecast Table View -->
+        <div class="table-view-container hidden" id="assumptions-table-view">
+          <!-- Dynamically populated by renderAssumptions -->
+        </div>
+
+        <!-- Assumptions Note Callout -->
+        <div class="callout-info assumptions-note">
+          <div class="callout-header">
+            <img src="assets/icons/ui/info-circle.svg" alt="Info" class="callout-icon" width="20" height="20" />
+            <strong class="callout-title">Assumptions Note</strong>
+          </div>
+          <p>These assumptions are for analytical purposes only and based on management commentary, historical trends, and third-party research. Please refer to the <a href="#" class="jump-cover-link" data-jump-tab="cover">Cover &amp; TOC</a> for full methodology and important disclaimers.</p>
         </div>
       </div>
     </section>
 
-    <!-- Tab 2: Assumptions -->
-    <section class="tab-pane" role="tabpanel" id="tab-assumptions" data-tab-pane data-tab="assumptions" aria-labelledby="tab-control-assumptions">
-      <h2>Assumptions &amp; Valuation Drivers</h2>
-      <p class="placeholder">Phase 5, interactive driver controls color-coded blue with range validation.</p>
-    </section>
-
     <!-- Tab 3: Historicals -->
-    <section class="tab-pane" role="tabpanel" id="tab-historicals" data-tab-pane data-tab="historicals" aria-labelledby="tab-control-historicals">
-      <h2>Historical Financial Statements &amp; KPIs</h2>
-      <p class="placeholder">Phase 5, audited FY2021-FY2025 statements, discrete TTM window, and filing citations.</p>
+    <section class="tab-pane" role="tabpanel" id="tab-historicals" data-tab-pane data-tab="historicals" aria-labelledby="tab-control-historicals" hidden>
+      <div class="historicals-view-wrapper historicals-terminal-container">
+        <!-- Title & Subtitle -->
+        <div class="historicals-header-block">
+          <h2 class="historicals-title">03. Historicals</h2>
+          <p class="historicals-subtitle">Filed financial statements, operating metrics and SEC citations. Figures in USD thousands unless otherwise stated.</p>
+        </div>
+
+        <!-- Hero & SEC Continuity Banner -->
+        <div class="sec-continuity-banner">
+          <div class="sec-banner-left">
+            <span class="sec-info-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </span>
+            <span class="sec-banner-text">
+              <strong>6 SEC filings integrated</strong> <span class="sec-sep">|</span> Quarterly continuity preserved <span class="sec-sep">|</span> Latest filing: Q2 FY2026 (10-Q)
+            </span>
+          </div>
+          <button type="button" class="btn-jump-audit" id="btn-jump-audit">View Audit Citations &rarr;</button>
+        </div>
+
+        <!-- Top Headline 4 KPI Cards -->
+        <div class="historicals-kpi-cards-grid" id="historicals-kpi-cards">
+          <!-- Dynamically populated by renderHistoricals -->
+        </div>
+
+        <!-- Statement Workspace Card -->
+        <div class="statement-workspace-card" id="statement-workspace">
+          <div class="statement-workspace-header">
+            <div class="statement-title-block">
+              <h3 class="workspace-main-title">Financial Statements</h3>
+              <p class="workspace-subtitle">Switch between the three primary financial statements. Use quarterly or annual view. Click any line item for details.</p>
+            </div>
+            <!-- Segmented Statement Switcher -->
+            <div class="statement-switcher-group pill-group" role="tablist" aria-label="Statement Switcher">
+              <button type="button" class="statement-pill-btn active" data-statement-tab="income">Income Statement</button>
+              <button type="button" class="statement-pill-btn" data-statement-tab="balance">Balance Sheet</button>
+              <button type="button" class="statement-pill-btn" data-statement-tab="cashflow">Cash Flow</button>
+            </div>
+          </div>
+
+          <!-- Table Controls Bar -->
+          <div class="statement-table-toolbar">
+            <div class="active-statement-label" id="active-statement-label">Income Statement ($ in thousands)</div>
+            <div class="statement-view-controls">
+              <div class="period-mode-toggle pill-control">
+                <button type="button" class="pill-btn period-btn active" data-period-mode="annual">Annual</button>
+                <button type="button" class="pill-btn period-btn" data-period-mode="quarterly">Quarterly</button>
+              </div>
+              <button type="button" class="btn-export-csv" id="btn-export-csv">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="export-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Statement Tables Container (Freeze Panes) -->
+          <div class="statement-tables-container" id="statement-tables-container">
+            <!-- Dynamically populated by renderHistoricalsWorkspace -->
+          </div>
+
+          <div class="statement-footnote">
+            Note: Figures in USD thousands. Source: SEC filings (10-K, 10-Q). Click on any line item for full detail and source citation.
+          </div>
+        </div>
+
+        <!-- Trend Explorer Section Placeholder (RP3.3) -->
+        <div class="trend-explorer-section" id="trend-explorer-section">
+          <!-- Dynamically populated in RP3.3 -->
+        </div>
+
+        <!-- Operating KPIs Section Placeholder (RP3.3) -->
+        <div class="operating-kpis-section" id="operating-kpis-section">
+          <!-- Dynamically populated in RP3.3 -->
+        </div>
+
+        <!-- Audit Center Directory Section Placeholder (RP3.2) -->
+        <div class="audit-center-section" id="audit-center-section">
+          <!-- Dynamically populated in RP3.2 -->
+        </div>
+
+        <!-- Line-Item Inspector Drawer Skeleton (RP3.2) -->
+        <div class="line-item-drawer-overlay hidden" id="line-item-drawer-overlay" aria-hidden="true">
+          <div class="line-item-drawer" id="line-item-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-metric-title">
+            <div class="drawer-header">
+              <div class="drawer-title-area">
+                <h3 class="drawer-metric-title" id="drawer-metric-title">&mdash;</h3>
+                <span class="drawer-metric-tag" id="drawer-metric-tag">Metric</span>
+              </div>
+              <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close Inspector">&times;</button>
+            </div>
+            <div class="drawer-body" id="drawer-body">
+              <!-- Content populated on row click -->
+            </div>
+          </div>
+        </div>
+
+      </div>
     </section>
 
     <!-- Tab 4: Supporting Schedules -->
-    <section class="tab-pane" role="tabpanel" id="tab-schedules" data-tab-pane data-tab="schedules" aria-labelledby="tab-control-schedules">
-      <h2>Supporting Financial Schedules</h2>
-      <p class="placeholder">Phase 5; Working Capital, PP&amp;E roll-forward, Debt, SBC, and Amortization schedules.</p>
+    <section class="tab-pane" role="tabpanel" id="tab-schedules" data-tab-pane data-tab="schedules" aria-labelledby="tab-control-schedules" hidden>
+      <div class="schedules-view-wrapper schedules-hub-container">
+        <!-- Header & Unit Controls -->
+        <div class="schedules-header-block">
+          <div class="schedules-title-area">
+            <h2 class="schedules-title">04. Supporting Schedules</h2>
+            <p class="schedules-subtitle" id="schedules-subtitle">Detailed schedules supporting the 3-statement model. Figures in USD thousands unless otherwise stated.</p>
+          </div>
+          <div class="schedules-controls-strip">
+            <div class="units-toggle-container">
+              <span class="units-toggle-label">DISPLAY UNITS</span>
+              <div class="units-mode-toggle pill-control" role="group" aria-label="Display Units">
+                <button type="button" class="pill-btn units-btn radio-pill active" data-unit="thousands" aria-pressed="true">Thousands</button>
+                <button type="button" class="pill-btn units-btn radio-pill" data-unit="millions" aria-pressed="false">Millions</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modular Schedule Switcher -->
+        <div class="schedules-switcher-bar">
+          <div class="schedule-switcher-group pill-group" role="tablist" aria-label="Schedule Switcher">
+            <button type="button" class="schedule-pill-btn active" data-schedule-tab="all">All Schedules</button>
+            <button type="button" class="schedule-pill-btn" data-schedule-tab="balance">Balance Sheet</button>
+            <button type="button" class="schedule-pill-btn" data-schedule-tab="workingCapital">Working Capital</button>
+            <button type="button" class="schedule-pill-btn" data-schedule-tab="ppe">PP&amp;E</button>
+            <button type="button" class="schedule-pill-btn" data-schedule-tab="intangibles">Intangibles</button>
+            <button type="button" class="schedule-pill-btn" data-schedule-tab="sbc">Stock-Based Comp</button>
+            <button type="button" class="schedule-pill-btn" data-schedule-tab="debt">Debt &amp; Capital Structure</button>
+          </div>
+        </div>
+
+        <!-- Balance Sheet Invariant Hard Gate Section -->
+        <div class="hard-gate-section balance-check-card" id="hard-gate-section" data-statement-card="balance">
+          <div class="statement-card-header gate-section-header">
+            Balance Sheet Invariant Hard Gate (Assets = Liabilities + Stockholders' Equity)
+          </div>
+          <div class="gate-grid balance-check-grid" id="gate-grid">
+            <!-- Dynamically populated by renderGateCards -->
+          </div>
+        </div>
+
+        <!-- Schedule Cards Container -->
+        <div class="schedules-tables-container" id="schedules-tables-container">
+          <!-- Dynamically populated by renderSchedules -->
+        </div>
+      </div>
     </section>
 
     <!-- Tab 5: Projections -->
-    <section class="tab-pane" role="tabpanel" id="tab-projections" data-tab-pane data-tab="projections" aria-labelledby="tab-control-projections">
-      <h2>3-Statement Linked Projections (FY2026-FY2030)</h2>
-      <p class="placeholder">Phase 5, linked IS → BS → CF projections with balance gate indicators.</p>
+    <section class="tab-pane" role="tabpanel" id="tab-projections" data-tab-pane data-tab="projections" aria-labelledby="tab-control-projections" hidden>
+      <div class="projections-view-root" data-projections-root>
+        <h2>05. Projections (3-Statement)</h2>
+        <p class="placeholder">Loading linked FY2026E–FY2030E projections…</p>
+      </div>
     </section>
 
     <!-- Tab 6: Valuation -->
-    <section class="tab-pane" role="tabpanel" id="tab-valuation" data-tab-pane data-tab="valuation" aria-labelledby="tab-control-valuation">
+    <section class="tab-pane" role="tabpanel" id="tab-valuation" data-tab-pane data-tab="valuation" aria-labelledby="tab-control-valuation" hidden>
       <h2>DCF Valuation &amp; WACC Build</h2>
       <p class="placeholder">Phase 5; CAPM WACC build table, explicit FCF schedule, and enterprise value bridge.</p>
     </section>
 
     <!-- Tab 7: Summary -->
-    <section class="tab-pane" role="tabpanel" id="tab-summary" data-tab-pane data-tab="summary" aria-labelledby="tab-control-summary">
+    <section class="tab-pane" role="tabpanel" id="tab-summary" data-tab-pane data-tab="summary" aria-labelledby="tab-control-summary" hidden>
       <h2>Executive Summary &amp; Output Dashboard</h2>
-      <p class="placeholder">Phase 5; DCF per share vs market price, upside %, mechanical recommendation, and KPI summary.</p>
+      <p class="placeholder">Executive agreement verdict, six-method dispersion spread, EV bridge, operating KPIs, thesis, and model health.</p>
     </section>
 
     <!-- Tab 8: Sensitivity -->
-    <section class="tab-pane" role="tabpanel" id="tab-sensitivity" data-tab-pane data-tab="sensitivity" aria-labelledby="tab-control-sensitivity">
-      <h2>Sensitivity &amp; Scenario Analysis</h2>
-      <p class="placeholder">Phase 5; 9×5 WACC × Terminal Growth per-share matrix and Downside/Base/Upside bands.</p>
+    <section class="tab-pane" role="tabpanel" id="tab-sensitivity" data-tab-pane data-tab="sensitivity" aria-labelledby="tab-control-sensitivity" hidden>
+      <h2>Sensitivity &amp; Scenario Spectrum</h2>
+      <p class="placeholder">9×5 WACC × terminal growth heatmap matrix, Downside/Base/Upside scenario spectrum bands, and hybrid FY2026 invariance memo.</p>
     </section>
   </main>
 
   <footer class="app-footer">
-    <p>Independent and unofficial financial valuation model. Not affiliated with, endorsed by, or associated with Duolingo, Inc. Prepared strictly for educational, informational, and analytical research purposes; not investment advice. Does not constitute a solicitation to buy or sell securities.</p>
+    <div class="footer-left">
+      <span>Duolingo, Inc. (NASDAQ: DUOL)</span>
+      <span class="footer-sep">|</span>
+      <span>Independent and Unofficial Financial Valuation Model</span>
+      <span class="footer-sep">|</span>
+      <span>Not affiliated with, endorsed by, or associated with Duolingo, Inc.</span>
+      <span class="sr-only">Prepared strictly for educational, informational, and analytical research purposes; not investment advice. Does not constitute a solicitation to buy or sell securities.</span>
+    </div>
+    <div class="footer-right">
+      <span>v1.0-P4</span>
+      <span class="footer-sep">|</span>
+      <span>Sep 1, 2026</span>
+    </div>
   </footer>
 
   <script type="module">

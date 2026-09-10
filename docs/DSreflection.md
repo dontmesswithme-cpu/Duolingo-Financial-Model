@@ -31,8 +31,7 @@
 - [P4.1] [Validation/Gates] PATTERN: Two-stage fail-closed gates (e.g. `ConfigError` on missing driver in assumption discipline vs `EngineError` on non-finite value) require distinct test pins for both stages. Asserting only driver removal tests the discipline gate and leaves the value check vulnerable to regression.
 - [P4.2] [DCF/NetCashBridge] PATTERN: General formula evaluation (`EV + netCash` with `netCash = cash + STI + LTI − debt`) must be evaluated on raw final forecast balance sheet components and verified with synthetic levered debt probes to prove the debt subtraction formula is active rather than hardcoding zero debt.
 - [P4.3] [Scenarios/DriverPreservation] PATTERN: When `scenarios.apply` shifts driver values, it must preserve `marking`, `asOf`, and `source` metadata on the applied drivers so downstream modules like `wacc.build` retain MKT discipline checks under all scenarios.
-
-
-
-
+- [RP1.1] [Audit/Scratch] RULE: Worker (`DS`) must NEVER modify Reviewer (`OP`) scratch files (e.g. `scratch/op_*_probe.mjs`). They are auditor instruments, not shared fixtures or worker deliverables. Touching them is treated as tampering. If a probe test seems inconsistent, address the underlying product/contract, disclose discrepancies in submission, or await OP update.
+- [RP1.1] [Testing/InvertedGates] BUG: Mock test asserted `!includes('$144.08')` to verify non-mockup, but `$144.08` is the true engine valuation, turning a quality check into an inverted gate that failed when fixtures were aligned to reality -> Permanent Rule: Never assert the absence of valid engine truth values. Assert positive presence of verified live engine pins.
+- [RP1.1] [Architecture/Agreement] BUG: `coverTab.js` calculated arithmetic mean of 6 method prices as "Consensus Fair Value", violating Phase 8 agreement-only architecture (zero weights, zero averages) -> Permanent Rule: Never compute arithmetic averages or weighted blends across valuation methods without explicit Director amendment. Present multi-method range/spread (min–max) and agreement verdict.
 

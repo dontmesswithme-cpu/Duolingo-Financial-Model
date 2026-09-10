@@ -22,6 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ASSUMPTIONS_PATH = path.join(ROOT, 'src/data/assumptions.json');
@@ -204,20 +205,36 @@ describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
     assert.equal(totalCount, 706, `Corpus count must be exactly 706, got ${totalCount}`);
   });
 
-  test('engine diff against v1.0-P6R2-base touched only authorized files for P6R2', () => {
-    let changedFiles = [];
-    try {
-      changedFiles = execSync('git diff --name-only v1.0-P6R2-base -- src/engine/', { cwd: ROOT, encoding: 'utf8' })
-        .trim()
-        .split('\n')
-        .map((s) => s.trim().replace(/\\/g, '/'))
-        .filter(Boolean);
-    } catch {
-      changedFiles = [];
-    }
-    const authorized = ['src/engine/dcf.js', 'src/engine/threeStatement.js', 'src/engine/beta.js', 'src/engine/market.js'];
-    for (const file of changedFiles) {
-      assert.ok(authorized.includes(file), `Unauthorized engine modification in ${file}`);
-    }
+  test('engine diff against v1.0-P6R2-base touched only authorized files', () => {
+    // Authorized drift from the P6R2.3 anchor-refresh baseline: the P6R3
+    // cost-of-capital files (beta.js, market.js), the P6R2 model-rigor revision
+    // (threeStatement.js), the P8 method modules (filtered out by the helper),
+    // plus the Economy Phase set (EP_AUTHORIZED_ENGINE). Director un-park order
+    // 2026-09-10, `docs/logs/ds/economy_phase.md` §5.
+    //
+    // Hardening note (EP-FIX1, F1): the previous bare `git diff` inside
+    // try/catch could not see untracked engine modules and degraded to an
+    // empty change set on exec failure. See tests/_scope_gate.js.
+    const authorized = [
+      'src/engine/beta.js',
+      'src/engine/market.js',
+      'src/engine/threeStatement.js',
+      ...EP_AUTHORIZED_ENGINE,
+    ];
+    const unauthorized = unauthorizedEngineFiles('v1.0-P6R2-base', authorized);
+    assert.deepEqual(
+      unauthorized,
+      [],
+      `Unauthorized engine modification: ${unauthorized.join(', ')}`,
+    );
+  });
+
+  test('NEGATIVE CONTROL: narrowing the allowlist makes the gate go red', () => {
+    const flagged = unauthorizedEngineFiles('v1.0-P6R2-base', []);
+    assert.ok(flagged.length > 0, 'helper must report drift when nothing is authorized');
+    assert.ok(
+      flagged.includes('src/engine/threeStatement.js') || flagged.includes('src/engine/dcf.js'),
+      'known-differing tracked file must be flagged',
+    );
   });
 });

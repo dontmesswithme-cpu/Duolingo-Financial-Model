@@ -150,8 +150,8 @@ describe('P5.3  -  Historicals Tab View: renderHistoricals()', () => {
     assert.match(html, /Cash Flow Statement/i);
     assert.match(html, /Key Performance Indicators/i);
 
-    // Citations drawer present with SEC filing links
-    assert.match(html, /<details class="source-drawer">/);
+    // Audit Center present with SEC filing links
+    assert.match(html, /<details class="filing-card"/);
     assert.match(html, /https:\/\/www\.sec\.gov/);
 
     // Tabulator configurations populated across all 4 statements

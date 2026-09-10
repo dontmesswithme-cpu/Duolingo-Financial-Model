@@ -464,3 +464,21 @@
 - P8.5 / P8.5a Defense Directory & Prose Remediation: Approved. Retitled "Thesis Defense & Driver Rationale Directory" with 7 core levers (#defense-lever-1..7), Lever 7 dedicated to Peer Set Selection (Spotify, Roblox, Netflix), 4 secondary levers retired per Director decision. All Skeptic/Enforcement-Mechanism/Coursera/Udemy terms removed; ratified reachability sentence verbatim; zero new literals.
 - Quality Gates & Tests: npm test × 3 consecutive passes (**696/696 passing**, 212 suites, 0 flakes). Frozen engine surfaces diff empty (byte-identical). 706 corpus records unchanged.
 - Release Status: **RELEASE BLOCKED** per protocol. OP PASS ≠ release. Standing by for Director FINAL PASS queue. DS in HALT state; watcher not armed.
+
+---
+
+### [2026-09-08 01:15] [DS] — OFFICIAL RELEASE: v1.0 [PROJECT ARCHIVED & TAGGED]
+
+**Event**: Director-ordered release and phase archive.
+**Status**: Project RELEASED as **v1.0** (commit `b9f34b8`, git tags `v1.0` and `v1.0-P8`).
+**Channel Archive**: Pre-release inbox history (Phases 6 through 8) archived to `docs/logs/inboxes/phase_8/`. Live inboxes reset for future phases.
+**Protocol State**:
+- docs/status_ds.json: `state: "worker_active", seq: 0, phase: "P9", subphase: "P9.1"` (archive reset).
+- docs/status_op.json: `state: "idle", seq: 0, phase: "P9", subphase: "P9.1"`.
+- Test suite at release: **696/696 passing**, 212 suites, 0 failures, 0 flakes (`npm test`).
+- Engine frozen surfaces diff empty across `src/engine/`.
+- 706 corpus records unchanged.
+
+**Next**:
+- DS is **HALTED**. Watcher is **NOT ARMED**.
+- Standing by for Director orders on follow-up items (GitHub push, deployed-URL verification, README repository URL, local_server contract, or new phase kick-off).

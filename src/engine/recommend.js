@@ -39,6 +39,7 @@ import {
   RECOMMENDATION_THRESHOLDS,
   DEFAULT_SCENARIO,
   SCENARIO_NAMES,
+  SBC_FADE_STEADY_STATE_PCT,
   UNITS,
 } from '../data/constants.js';
 import schedulesEngine from './schedules.js';
@@ -47,6 +48,7 @@ import threeStatementEngine from './threeStatement.js';
 import { apply as applyScenario } from './scenarios.js';
 import { build as buildWacc } from './wacc.js';
 import { valuate as valuateDcf } from './dcf.js';
+import { projectShares } from './shares.js';
 
 /** Derived / judgment marking. */
 const EST = 'EST';
@@ -173,6 +175,8 @@ export function evaluate(dcfPerShare, marketPrice) {
  * @param {object} input.threeStatement ThreeStatementOutput
  * @param {object} input.assumptions Base or scenario AssumptionSet
  * @param {object|number} [input.wacc] Optional base WaccBuild or WACC rate
+ * @param {object} [input.shares] Optional prebuilt SharesSchedule (else built from input.corpus)
+ * @param {object|Array} [input.corpus] Corpus rows or historical object for the EIG-B roll
  * @param {number[]} [input.waccValues] Custom WACC values
  * @param {number[]} [input.growthValues] Custom terminal growth rates
  * @param {number} [input.horizon] Forecast horizon
@@ -224,6 +228,31 @@ export function buildSensitivityGrid(input) {
 
   const baseGrowth = requireDriverValue(assumptions, 'terminal_growth_rate').value;
 
+  // ── EIG-B share roll-forward (EP.2): one schedule for the whole grid — WACC
+  // and g move cell to cell, but the SBC roll does not. A caller-supplied
+  // `input.shares` schedule is used verbatim; otherwise it is built once from
+  // the live assumptions, three-statement output, and `input.corpus`.
+  // Fail-closed: no static-share path exists for grid cells either.
+  let gridShares = null;
+  if (input.shares && typeof input.shares === 'object') {
+    if (!Number.isFinite(input.shares.sharesDcf) || input.shares.sharesDcf <= 0) {
+      throw new EngineError(
+        'invalid_shares',
+        'buildSensitivityGrid() input.shares must carry a positive finite sharesDcf.',
+        'shares',
+      );
+    }
+    gridShares = input.shares;
+  } else if (typeof input.corpus !== 'undefined') {
+    gridShares = projectShares(assumptions, threeStatement, input.corpus);
+  } else {
+    throw new EngineError(
+      'missing_input',
+      'buildSensitivityGrid() requires input.shares or input.corpus for the EIG-B roll-forward.',
+      'shares',
+    );
+  }
+
   // Default WACC values: WACC ± 200bps in 50bps steps (9 points)
   const defaultWaccOffsets = [-0.02, -0.015, -0.01, -0.005, 0, 0.005, 0.01, 0.015, 0.02];
   const customWaccValues = input.waccValues ?? input.waccRange;
@@ -273,6 +302,7 @@ export function buildSensitivityGrid(input) {
           },
         },
         horizon,
+        shares: gridShares,
       });
 
       const cellRecord = Object.freeze({
@@ -295,6 +325,7 @@ export function buildSensitivityGrid(input) {
   const baseDcf = valuateDcf(threeStatement, baseWaccRate, {
     assumptions,
     horizon,
+    shares: gridShares,
   });
 
   const gridResult = {
@@ -318,6 +349,299 @@ export function buildSensitivityGrid(input) {
 }
 
 /**
+ * Recomputes per-share value across the SBC-treatment sensitivity band and
+ * reports whether the recommendation label is stable (EP.4, R5, §8).
+ *
+ * Band treatments, all re-derived from drivers and statement lines (the
+ * rejected uncharged-netting variant is excluded by construction):
+ *  - `gross-issuance`: the headline (BOP plus gross SBC issuance at spot).
+ *  - `charged-netting`: buyback shares retired at spot AND buyback spend
+ *    charged at present value (value-neutral at fair price, within $1).
+ *  - `pv-discounted`: SBC present-valued at WACC, converted at spot.
+ *  - `sbc-fade`: SBC ratio fades linearly from the target driver to the
+ *    steady-state constant; add-back and issuance dials move together while
+ *    statements stay frozen (first-order sensitivity — the coherent rebuild
+ *    is the deferred §10.4 revision).
+ *  - `perpetual-expense`: SBC treated as pure cash expense (no add-back,
+ *    no issuance; BOP shares).
+ *
+ * Every label comes from `evaluate()` against the MKT price driver — no
+ * hand-typed band values anywhere on this path.
+ *
+ * @param {object} input Band input.
+ * @param {object} input.threeStatement ThreeStatementOutput.
+ * @param {object} input.dcf DcfResult from `dcf.valuate()`.
+ * @param {object} input.assumptions Base or scenario AssumptionSet.
+ * @param {object|Array|null} [input.corpus] Corpus rows or historical object
+ *   for the hybrid H1 SBC leg (required exactly when the model is hybrid).
+ * @returns {object} Frozen `{ labelStable, treatments, headlineLabel }`.
+ * @throws {EngineError} On missing inputs, drivers, lines, or non-finite values.
+ */
+export function buildLabelStability(input) {
+  if (!input || typeof input !== 'object') {
+    throw new EngineError(
+      'missing_input',
+      'buildLabelStability() requires an input object.',
+      'input',
+    );
+  }
+  const threeStatement = input.threeStatement;
+  const dcf = input.dcf;
+  const assumptions = input.assumptions;
+  if (!threeStatement || typeof threeStatement !== 'object') {
+    throw new EngineError(
+      'missing_input',
+      'buildLabelStability() requires a threeStatement object.',
+      'threeStatement',
+    );
+  }
+  if (!dcf || typeof dcf !== 'object') {
+    throw new EngineError(
+      'missing_input',
+      'buildLabelStability() requires a dcf result object.',
+      'dcf',
+    );
+  }
+  if (!assumptions || typeof assumptions !== 'object') {
+    throw new EngineError(
+      'missing_input',
+      'buildLabelStability() requires an assumptions object.',
+      'assumptions',
+    );
+  }
+
+  const price = requireDriverValue(assumptions, 'market_share_price').value;
+  const bopShares = requireDriverValue(assumptions, 'shares_outstanding').value;
+  const sbcTarget = requireDriverValue(assumptions, 'sbc_target_pct_of_revenue').value;
+  const scale = UNITS.thousands_usd.scale;
+
+  const periods =
+    threeStatement.periods ||
+    threeStatement.cashFlow.periods ||
+    Object.keys(threeStatement.cashFlow.byPeriod || {});
+  if (!Array.isArray(periods) || periods.length === 0) {
+    throw new EngineError(
+      'invalid_horizon',
+      'buildLabelStability() requires a non-empty forecast period list.',
+      'periods',
+    );
+  }
+  const cfByPeriod = threeStatement.cashFlow.byPeriod;
+  const isByPeriod = threeStatement.incomeStatement.byPeriod;
+  if (!cfByPeriod || !isByPeriod) {
+    throw new EngineError(
+      'missing_input',
+      'buildLabelStability() requires cashFlow.byPeriod and incomeStatement.byPeriod blocks.',
+      'threeStatement',
+    );
+  }
+
+  let corpus = null;
+  if (typeof input.corpus !== 'undefined') {
+    corpus = input.corpus;
+  }
+  const sharesSchedule = projectShares(assumptions, threeStatement, corpus);
+
+  const discountFactorOf = (period) => {
+    if (!Array.isArray(dcf.schedule)) {
+      throw new EngineError(
+        'missing_input',
+        'Band recompute needs the DCF explicit schedule array.',
+        'dcf.schedule',
+      );
+    }
+    const item = dcf.schedule.find((s) => s && s.period === period);
+    if (!item || !Number.isFinite(item.discountFactor)) {
+      throw new EngineError(
+        'missing_line',
+        `DCF schedule is missing a finite discount factor for "${period}".`,
+        period,
+      );
+    }
+    return item.discountFactor;
+  };
+  const fcffOf = (period) => {
+    if (!Array.isArray(dcf.schedule)) {
+      throw new EngineError(
+        'missing_input',
+        'Band recompute needs the DCF explicit schedule array.',
+        'dcf.schedule',
+      );
+    }
+    const item = dcf.schedule.find((s) => s && s.period === period);
+    if (!item || !Number.isFinite(item.fcf)) {
+      throw new EngineError(
+        'missing_line',
+        `DCF schedule is missing a finite FCFF for "${period}".`,
+        period,
+      );
+    }
+    return item.fcf;
+  };
+  const cfLineOf = (period, block, key) => {
+    const container = cfByPeriod[period] && cfByPeriod[period][block];
+    const line = container ? container[key] : null;
+    const value = line && typeof line === 'object' ? line.value : line;
+    if (!Number.isFinite(value)) {
+      throw new EngineError(
+        'missing_line',
+        `Cash-flow line "${block}.${key}" for "${period}" is missing or non-finite.`,
+        period,
+      );
+    }
+    return value;
+  };
+  const revenueOf = (period) => {
+    const line =
+      isByPeriod[period] && isByPeriod[period].revenue && isByPeriod[period].revenue.total;
+    if (!line || !Number.isFinite(line.value)) {
+      throw new EngineError(
+        'missing_line',
+        `Revenue line for "${period}" is missing or non-finite.`,
+        period,
+      );
+    }
+    return line.value;
+  };
+
+  const sbcSeries = periods.map((period) => sharesSchedule.byPeriod[period].sbcEmbedded);
+  const spendSeries = periods.map((period) =>
+    Math.abs(cfLineOf(period, 'financing_activities', 'repurchase_of_common_stock')),
+  );
+  const dfSeries = periods.map(discountFactorOf);
+  const fcffSeries = periods.map(fcffOf);
+  const revenueSeries = periods.map(revenueOf);
+
+  const terminalLegs = dcf.fcff && dcf.fcff.terminalNormalization;
+  if (
+    !terminalLegs ||
+    !Number.isFinite(terminalLegs.wcInflowTerminal) ||
+    !Number.isFinite(terminalLegs.wcInflowSteadyState)
+  ) {
+    throw new EngineError(
+      'missing_input',
+      'buildLabelStability() requires the DCF terminal-normalisation legs.',
+      'dcf.fcff.terminalNormalization',
+    );
+  }
+  const waccRate = requireFiniteBandNumber(dcf.wacc, 'dcf.wacc');
+  const growthRate = requireFiniteBandNumber(dcf.terminalGrowthRate, 'dcf.terminalGrowthRate');
+  const terminalDf = discountFactorOf(periods[periods.length - 1]);
+
+  const labelOf = (perShare) => evaluate(perShare, price).label;
+
+  const treatments = [];
+  const pushTreatment = (name, perShare) => {
+    if (!Number.isFinite(perShare) || perShare <= 0) {
+      throw new EngineError(
+        'invalid_per_share',
+        `Band treatment "${name}" recomputed to a non-positive non-finite value.`,
+        name,
+      );
+    }
+    treatments.push(Object.freeze({ name, perShare, label: labelOf(perShare) }));
+  };
+
+  // 1. Gross issuance at spot (headline — identical computation, tied out).
+  const grossPerShare = (dcf.equityValue * scale) / dcf.sharesOutstanding;
+  pushTreatment('gross-issuance', grossPerShare);
+
+  // 2. Charged netting: retire buyback shares at spot AND charge the spend.
+  let spendPv = 0;
+  let retiredShares = 0;
+  for (let i = 0; i < periods.length; i += 1) {
+    spendPv += spendSeries[i] * dfSeries[i];
+    retiredShares += (spendSeries[i] * scale) / price;
+  }
+  const chargedEquity = dcf.equityValue - spendPv;
+  const chargedShares = dcf.sharesOutstanding - retiredShares;
+  pushTreatment('charged-netting', (chargedEquity * scale) / chargedShares);
+
+  // 3. PV-discounted SBC converted at spot.
+  let pvSbcDollars = 0;
+  for (let i = 0; i < periods.length; i += 1) {
+    pvSbcDollars += sbcSeries[i] * scale * dfSeries[i];
+  }
+  const pvShares = bopShares + pvSbcDollars / price;
+  pushTreatment('pv-discounted', (dcf.equityValue * scale) / pvShares);
+
+  // 4. Faded SBC path (first-order sensitivity: the SBC add-back and issuance
+  // dials fade linearly from the target driver to the steady-state constant
+  // while statements stay frozen — the coherent rebuild is the deferred §10.4
+  // revision. Direction and level follow the disclosed band (below gross).
+  const fadeSpan = periods.length - 1;
+  const fadePctAt = (index) =>
+    fadeSpan > 0
+      ? sbcTarget - (sbcTarget - SBC_FADE_STEADY_STATE_PCT) * (index / fadeSpan)
+      : sbcTarget;
+  let fadedPvExplicit = 0;
+  let fadedIssuance = 0;
+  for (let i = 0; i < periods.length; i += 1) {
+    const sbcFaded = revenueSeries[i] * fadePctAt(i);
+    if (!Number.isFinite(sbcFaded) || sbcFaded < 0) {
+      throw new EngineError(
+        'invalid_sbc',
+        `Faded SBC for "${periods[i]}" is not a finite non-negative number.`,
+        periods[i],
+      );
+    }
+    fadedPvExplicit += (fcffSeries[i] - (sbcSeries[i] - sbcFaded)) * dfSeries[i];
+    fadedIssuance += (sbcFaded * scale) / price;
+  }
+  const terminalIndex = periods.length - 1;
+  const fadedTerminalBase =
+    fcffSeries[terminalIndex] -
+    (sbcSeries[terminalIndex] - revenueSeries[terminalIndex] * fadePctAt(terminalIndex)) -
+    terminalLegs.wcInflowTerminal +
+    terminalLegs.wcInflowSteadyState;
+  const fadedTv = (fadedTerminalBase * (1 + growthRate)) / (waccRate - growthRate);
+  const fadedEquity = fadedPvExplicit + fadedTv * terminalDf + dcf.netCash;
+  pushTreatment('sbc-fade', (fadedEquity * scale) / (bopShares + fadedIssuance));
+
+  // 5. Perpetual SBC expense (no add-back, no issuance; BOP shares).
+  let expensePvExplicit = 0;
+  for (let i = 0; i < periods.length; i += 1) {
+    expensePvExplicit += (fcffSeries[i] - sbcSeries[i]) * dfSeries[i];
+  }
+  const expenseTerminalBase =
+    fcffSeries[terminalIndex] -
+    sbcSeries[terminalIndex] -
+    terminalLegs.wcInflowTerminal +
+    terminalLegs.wcInflowSteadyState;
+  const expenseTv = (expenseTerminalBase * (1 + growthRate)) / (waccRate - growthRate);
+  const expenseEquity = expensePvExplicit + expenseTv * terminalDf + dcf.netCash;
+  pushTreatment('perpetual-expense', (expenseEquity * scale) / bopShares);
+
+  const headlineLabel = treatments[0].label;
+  const labelStable = treatments.every((t) => t.label === headlineLabel);
+
+  return deepFreeze({
+    labelStable,
+    treatments: Object.freeze(treatments),
+    headlineLabel,
+  });
+}
+
+/**
+ * Reads a required finite number from a DCF result field, failing closed.
+ *
+ * @param {unknown} value Candidate value.
+ * @param {string} context Greppable path for the typed error.
+ * @returns {number}
+ * @throws {EngineError} `missing_input` when absent or non-finite.
+ */
+function requireFiniteBandNumber(value, context) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new EngineError(
+      'missing_input',
+      `Band recompute needs finite "${context}".`,
+      context,
+    );
+  }
+  return value;
+}
+
+/**
  * Runs the end-to-end full valuation pipeline for a specified scenario.
  *
  * Full Pipeline:
@@ -326,7 +650,8 @@ export function buildSensitivityGrid(input) {
  *  3. Project revenue and costs: `forecast.project({ historical, assumptions: activeAssumptions })`
  *  4. Project 3 statements: `threeStatement.project(schedules, activeAssumptions, forecast)`
  *  5. Build WACC: `wacc.build({ assumptions: activeAssumptions, debtSchedule: schedules.debt })`
- *  6. Run DCF valuation: `dcf.valuate(threeStatement, wacc, { assumptions: activeAssumptions })`
+ *  6. Run DCF valuation: `dcf.valuate(threeStatement, wacc, { assumptions: activeAssumptions, corpus: historical })`
+ *     (EIG-B roll built per scenario from the scenario-applied assumptions)
  *  7. Evaluate recommendation: `recommend.evaluate(dcf.perShare, marketPrice)`
  *
  * @param {object|Array} historical Historical corpus datasets
@@ -373,11 +698,19 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
   });
   const dcfOut = valuateDcf(threeStatementOut, waccOut, {
     assumptions: activeAssumptions,
+    corpus: historical,
   });
 
   const marketPrice = requireDriverValue(activeAssumptions, 'market_share_price').value;
 
   const recOut = evaluate(dcfOut.perShare, marketPrice);
+
+  const labelStability = buildLabelStability({
+    threeStatement: threeStatementOut,
+    dcf: dcfOut,
+    assumptions: activeAssumptions,
+    corpus: historical,
+  });
 
   const fullOutput = {
     scenario: activeAssumptions.scenario || scenario || DEFAULT_SCENARIO,
@@ -394,6 +727,7 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
     marketPrice,
     upsidePct: recOut.upsidePct,
     recommendation: recOut,
+    labelStability,
     isComputed: true,
     isEstimate: true,
     marking: EST,
@@ -405,5 +739,6 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
 export default Object.freeze({
   evaluate,
   buildSensitivityGrid,
+  buildLabelStability,
   runFullValuation,
 });

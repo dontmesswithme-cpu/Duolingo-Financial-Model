@@ -30,6 +30,55 @@ const HISTORICAL_PERIODS = Object.freeze(['FY2021', 'FY2022', 'FY2023', 'FY2024'
 const FORECAST_PERIODS = Object.freeze(['FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030']);
 const ALL_PERIODS = Object.freeze([...HISTORICAL_PERIODS, ...FORECAST_PERIODS]);
 
+function readProjectionValue(period, path, threeStatement) {
+  let value = threeStatement?.[path[0]]?.byPeriod?.[period];
+  for (const key of path.slice(1)) value = value?.[key];
+  return Number.isFinite(value?.value) ? value.value : null;
+}
+
+/**
+ * Derives the four forward KPI cards from the linked 3-statement output.
+ * Missing engine values remain null so the UI fails closed with the shared
+ * dash formatter instead of inventing data.
+ *
+ * @param {object} threeStatement
+ * @returns {ReadonlyArray<object>}
+ */
+export function computeProjectionKpis(threeStatement) {
+  const revenue2026 = readProjectionValue('FY2026', ['incomeStatement', 'revenue', 'total'], threeStatement);
+  const revenue2030 = readProjectionValue('FY2030', ['incomeStatement', 'revenue', 'total'], threeStatement);
+  const ebit2030 = readProjectionValue('FY2030', ['incomeStatement', 'operating_income'], threeStatement);
+  const netIncome2030 = readProjectionValue('FY2030', ['incomeStatement', 'net_income'], threeStatement);
+  const fcf2030 = readProjectionValue('FY2030', ['cashFlow', 'free_cash_flow'], threeStatement);
+  const cagr = Number.isFinite(revenue2026) && Number.isFinite(revenue2030) && revenue2026 > 0 && revenue2030 >= 0
+    ? Math.pow(revenue2030 / revenue2026, 1 / (FORECAST_PERIODS.length - 1)) - 1
+    : null;
+
+  return Object.freeze([
+    Object.freeze({ key: 'revenue-cagr', label: 'Revenue CAGR', value: cagr, format: 'percent', benchmark: '2026E–2030E', sublabel: 'Forward revenue growth' }),
+    Object.freeze({ key: 'operating-margin', label: 'Operating Margin', value: revenue2030 > 0 && ebit2030 !== null ? ebit2030 / revenue2030 : null, format: 'percent', benchmark: '2030E', sublabel: 'Terminal-year EBIT margin' }),
+    Object.freeze({ key: 'fcf-margin', label: 'FCF Margin', value: revenue2030 > 0 && fcf2030 !== null ? fcf2030 / revenue2030 : null, format: 'percent', benchmark: '2030E', sublabel: 'Terminal-year UFCF margin' }),
+    Object.freeze({ key: 'net-income', label: 'Net Income', value: netIncome2030 === null ? null : netIncome2030 / 1e3, format: 'usd-mm', benchmark: '2030E · US$ mm', sublabel: 'Terminal-year net income' }),
+  ]);
+}
+
+function renderProjectionKpis(threeStatement) {
+  const formatValue = (kpi) => kpi.format === 'percent'
+    ? percent(kpi.value, { decimals: 1 })
+    : usd(kpi.value, { decimals: 0 });
+  return `
+    <section class="kpi-strip" aria-label="Forward projection summary">
+      ${computeProjectionKpis(threeStatement).map((kpi) => `
+        <article class="projection-kpi-card" data-kpi="${kpi.key}">
+          <div class="projection-kpi-label">${kpi.label}</div>
+          <div class="projection-kpi-value">${formatValue(kpi)}</div>
+          <div class="projection-kpi-meta"><span class="projection-kpi-benchmark">${kpi.benchmark}</span><span>${kpi.sublabel}</span></div>
+        </article>
+      `).join('')}
+    </section>
+  `;
+}
+
 /**
  * Maps historical dataset rows into a metric-keyed lookup table by period.
  *
@@ -57,9 +106,11 @@ function createHistoricalLookup(historical) {
  *
  * @param {object} [options]
  * @param {boolean} [options.isPct=false]
+ * @param {'thousands'|'millions'} [options.displayUnit='thousands']
  * @returns {Array<object>}
  */
-export function buildProjectionColumns({ isPct = false } = {}) {
+export function buildProjectionColumns({ isPct = false, displayUnit = 'thousands' } = {}) {
+  const scale = displayUnit === 'millions' ? 1 / 1e3 : 1;
   return [
     {
       title: 'Financial Statement Line Item',
@@ -86,23 +137,23 @@ export function buildProjectionColumns({ isPct = false } = {}) {
         if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
         const isRatio = row.isPct || isPct;
-        return isRatio ? percent(val) : usd(val, { decimals: 0 });
+        return isRatio ? percent(val) : usd(val, { decimals: 0, scale });
       },
     })),
     ...FORECAST_PERIODS.map((period) => ({
-      title: period,
+      title: `${period}E`,
       field: period,
       headerSort: false,
       hozAlign: 'right',
       editor: false,
       minWidth: 95,
-      titleFormatter: () => estSuffix(period, 'EST'),
+      titleFormatter: () => estSuffix(`${period}E`, 'EST'),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
         if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
         const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
         const isRatio = row.isPct || isPct;
-        return isRatio ? percent(val) : usd(val, { decimals: 0 });
+        return isRatio ? percent(val) : usd(val, { decimals: 0, scale });
       },
     })),
   ];
@@ -131,8 +182,18 @@ export function renderProjections({
   let currentThreeStatement = threeStatement;
   let currentHistorical = historical;
   let disposed = false;
+  let activeStatement = 'incomeStatement';
+  let displayUnit = 'thousands';
   const tabulatorInstances = [];
   const tabulatorConfigs = [];
+
+  function unitLabel() {
+    return displayUnit === 'millions' ? '$ in millions' : '$ in thousands';
+  }
+
+  function formatProjectionValue(value, decimals = 0) {
+    return usd(value, { decimals, scale: displayUnit === 'millions' ? 1 / 1e3 : 1 });
+  }
 
   function buildIncomeData() {
     const hist = createHistoricalLookup(currentHistorical);
@@ -236,6 +297,7 @@ export function renderProjections({
       { id: 'retained', label: 'Retained Earnings / (Accumulated Deficit)', isLink: false },
       { id: 'total_equity', label: 'Total Stockholders’ Equity', isLink: true },
       { id: 'total_liab_equity', label: 'Total Liabilities & Stockholders’ Equity', isLink: true },
+      { id: 'balance_check', label: 'Balance Check (Assets = Liabilities + Equity)', isLink: true },
     ];
 
     return rows.map((r) => {
@@ -269,6 +331,11 @@ export function renderProjections({
           else if (r.id === 'retained') val = hist['retained_earnings_accumulated_deficit']?.[p];
           else if (r.id === 'total_equity') val = hist['total_stockholders_equity']?.[p];
           else if (r.id === 'total_liab_equity') val = hist['total_liabilities_and_stockholders_equity']?.[p];
+          else if (r.id === 'balance_check') {
+            const assets = hist['total_assets']?.[p];
+            const liabilitiesAndEquity = hist['total_liabilities_and_stockholders_equity']?.[p];
+            val = Number.isFinite(assets) && Number.isFinite(liabilitiesAndEquity) ? assets - liabilitiesAndEquity : null;
+          }
         } else if (FORECAST_PERIODS.includes(p) && currentThreeStatement?.balanceSheet?.byPeriod?.[p]) {
           const bsP = currentThreeStatement.balanceSheet.byPeriod[p];
           if (r.id === 'cash') val = bsP.current_assets?.cash_and_cash_equivalents?.value;
@@ -297,6 +364,7 @@ export function renderProjections({
           else if (r.id === 'retained') val = bsP.stockholders_equity?.retained_earnings_accumulated_deficit?.value;
           else if (r.id === 'total_equity') val = bsP.stockholders_equity?.total?.value;
           else if (r.id === 'total_liab_equity') val = bsP.total_liabilities_and_stockholders_equity?.value;
+          else if (r.id === 'balance_check') val = bsP.balanceCheck?.value ?? bsP.total_assets?.value - bsP.total_liabilities_and_stockholders_equity?.value;
         }
         rowObj[p] = Number.isFinite(val) ? val : null;
       }
@@ -386,11 +454,11 @@ export function renderProjections({
 
   function renderCard(title, statementKey) {
     return `
-      <div class="projection-statement-card">
+      <div class="projection-statement-card projection-statement-panel${activeStatement === statementKey ? '' : ' is-hidden'}" data-statement-panel="${statementKey}"${activeStatement === statementKey ? '' : ' hidden'}>
         <div class="statement-card-header">
           ${title}
         </div>
-        <div class="tabulator-grid-container financial-table" data-statement="${statementKey}"></div>
+        <div class="tabulator-grid-container financial-table projection-table" data-statement="${statementKey}"></div>
       </div>
     `;
   }
@@ -421,22 +489,22 @@ export function renderProjections({
           </p>
           <div class="hybrid-metrics-grid">
             <div class="hybrid-metric-box">
-              <div class="hybrid-box-title">Total Revenue ($ in thousands)</div>
-              <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${usd(revH1, { decimals: 0 })}</strong></div>
-              <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${usd(revH2, { decimals: 2 })}</strong></div>
-              <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${usd(revTot, { decimals: 2 })}</strong></div>
+              <div class="hybrid-box-title">Total Revenue (<span data-unit-label>${unitLabel()}</span>)</div>
+              <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${formatProjectionValue(revH1)}</strong></div>
+              <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${formatProjectionValue(revH2, 2)}</strong></div>
+              <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${formatProjectionValue(revTot, 2)}</strong></div>
             </div>
             <div class="hybrid-metric-box">
-              <div class="hybrid-box-title">Operating Income ($ in thousands)</div>
-              <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${usd(ebitH1, { decimals: 0 })}</strong></div>
-              <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${usd(ebitH2, { decimals: 2 })}</strong></div>
-              <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${usd(ebitTot, { decimals: 2 })}</strong></div>
+              <div class="hybrid-box-title">Operating Income (<span data-unit-label>${unitLabel()}</span>)</div>
+              <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${formatProjectionValue(ebitH1)}</strong></div>
+              <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${formatProjectionValue(ebitH2, 2)}</strong></div>
+              <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${formatProjectionValue(ebitTot, 2)}</strong></div>
             </div>
             <div class="hybrid-metric-box">
-              <div class="hybrid-box-title">Free Cash Flow ($ in thousands)</div>
-              <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${usd(fcfH1, { decimals: 0 })}</strong></div>
-              <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${usd(fcfH2, { decimals: 2 })}</strong></div>
-              <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${usd(fcfTot, { decimals: 2 })}</strong></div>
+              <div class="hybrid-box-title">Free Cash Flow (<span data-unit-label>${unitLabel()}</span>)</div>
+              <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${formatProjectionValue(fcfH1)}</strong></div>
+              <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${formatProjectionValue(fcfH2, 2)}</strong></div>
+              <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${formatProjectionValue(fcfTot, 2)}</strong></div>
             </div>
           </div>
         </div>
@@ -455,7 +523,7 @@ export function renderProjections({
     tabulatorConfigs.length = 0;
 
     const isData = buildIncomeData();
-    const isCols = buildProjectionColumns();
+    const isCols = buildProjectionColumns({ displayUnit });
     const isConfig = {
       statement: 'incomeStatement',
       data: isData,
@@ -471,7 +539,7 @@ export function renderProjections({
     tabulatorConfigs.push(isConfig);
 
     const bsData = buildBalanceData();
-    const bsCols = buildProjectionColumns();
+    const bsCols = buildProjectionColumns({ displayUnit });
     const bsConfig = {
       statement: 'balanceSheet',
       data: bsData,
@@ -487,7 +555,7 @@ export function renderProjections({
     tabulatorConfigs.push(bsConfig);
 
     const cfData = buildCashFlowData();
-    const cfCols = buildProjectionColumns();
+    const cfCols = buildProjectionColumns({ displayUnit });
     const cfConfig = {
       statement: 'cashFlow',
       data: cfData,
@@ -502,10 +570,32 @@ export function renderProjections({
     };
     tabulatorConfigs.push(cfConfig);
 
-    const isHtml = renderCard('Projected Income Statement ($ in thousands)', 'incomeStatement');
-    const bsHtml = renderCard('Projected Balance Sheet &amp; Cash Sweep ($ in thousands)', 'balanceSheet');
-    const cfHtml = renderCard('Projected Cash Flow Statement &amp; FCF ($ in thousands)', 'cashFlow');
+    const isHtml = renderCard(`Projected Income Statement (<span data-unit-label>${unitLabel()}</span>)`, 'incomeStatement');
+    const bsHtml = renderCard(`Projected Balance Sheet &amp; Cash Sweep (<span data-unit-label>${unitLabel()}</span>)`, 'balanceSheet');
+    const cfHtml = renderCard(`Projected Cash Flow Statement &amp; FCF (<span data-unit-label>${unitLabel()}</span>)`, 'cashFlow');
     const hybridHtml = renderHybrid2026Card();
+
+    const workspaceHtml = `
+      <section class="projection-statement-workspace" aria-label="Projected financial statements">
+        <div class="projection-workspace-header">
+          <div>
+            <h3 class="statement-workspace-title">Financial Statements</h3>
+            <p class="statement-workspace-subtitle">Linked FY2021–FY2030E statements. Figures <span data-unit-label>${unitLabel()}</span>.</p>
+          </div>
+          <div class="projection-workspace-controls">
+            <div class="projection-statement-switcher" role="tablist" aria-label="Projection statement switcher">
+              <button type="button" class="projection-switch-btn is-active" data-projection-statement="incomeStatement" role="tab" aria-selected="true">Income Statement</button>
+              <button type="button" class="projection-switch-btn" data-projection-statement="balanceSheet" role="tab" aria-selected="false">Balance Sheet</button>
+              <button type="button" class="projection-switch-btn" data-projection-statement="cashFlow" role="tab" aria-selected="false">Cash Flow</button>
+            </div>
+            <div class="projection-unit-toggle pill-control" role="group" aria-label="Projection display units">
+              <button type="button" class="pill-btn projection-unit-btn${displayUnit === 'thousands' ? ' active' : ''}${displayUnit === 'thousands' ? ' is-active' : ''}" data-projection-unit="thousands" aria-pressed="${displayUnit === 'thousands'}">$ Thousands</button>
+              <button type="button" class="pill-btn projection-unit-btn${displayUnit === 'millions' ? ' active' : ''}${displayUnit === 'millions' ? ' is-active' : ''}" data-projection-unit="millions" aria-pressed="${displayUnit === 'millions'}">$ Millions</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
 
     const revFcfChart = createRevenueFcfChart({
       historical: currentHistorical,
@@ -518,19 +608,15 @@ export function renderProjections({
 
     const chartsHtml = `
       <div class="projections-charts-grid">
-        <div class="summary-card projection-chart-card">
-          <div class="statement-card-header">
-            Revenue &amp; Unlevered Free Cash Flow Progression (FY2021-FY2030)
-          </div>
-          <div class="summary-card-body chart-card-body">
+        <div class="summary-card projection-chart-card" id="chart-revenue-fcf">
+          <div class="statement-card-header">Revenue &amp; Free Cash Flow</div>
+          <div class="summary-card-body chart-card-body" data-chart="revenue-fcf">
             ${revFcfChart.svg}
           </div>
         </div>
-        <div class="summary-card projection-chart-card">
-          <div class="statement-card-header">
-            Operating Profitability &amp; Margin Expansion (% of Revenue)
-          </div>
-          <div class="summary-card-body chart-card-body">
+        <div class="summary-card projection-chart-card" id="chart-margin-expansion">
+          <div class="statement-card-header">Operating Margin Expansion</div>
+          <div class="summary-card-body chart-card-body" data-chart="margin-expansion">
             ${marginChart.svg}
           </div>
         </div>
@@ -539,8 +625,14 @@ export function renderProjections({
 
     container.innerHTML = `
       <div class="projections-view-wrapper">
-        ${hybridHtml}
+        <div class="projections-header-block">
+          <h2 class="projections-title">05. Projections (3-Statement)</h2>
+          <p class="projections-subtitle">Integrated Income Statement, Balance Sheet &amp; Cash Flow Forecast (FY2026E–FY2030E)</p>
+        </div>
+        ${renderProjectionKpis(currentThreeStatement)}
         ${chartsHtml}
+        ${hybridHtml}
+        ${workspaceHtml}
         ${isHtml}
         ${bsHtml}
         ${cfHtml}
@@ -560,6 +652,37 @@ export function renderProjections({
           // Gracefully handle in stub environments
         }
       }
+    }
+
+    if (typeof container.querySelectorAll === 'function') {
+      const statementButtons = [...container.querySelectorAll('[data-projection-statement]')];
+      const unitButtons = [...container.querySelectorAll('[data-projection-unit]')];
+      const panels = [...container.querySelectorAll('[data-statement-panel]')];
+
+      const setStatement = (key) => {
+        activeStatement = key;
+        for (const button of statementButtons) {
+          const active = button.getAttribute('data-projection-statement') === key;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', String(active));
+        }
+        for (const panel of panels) {
+          const active = panel.getAttribute('data-statement-panel') === key;
+          panel.hidden = !active;
+          panel.classList.toggle('is-hidden', !active);
+        }
+      };
+
+      const setUnit = (unit) => {
+        displayUnit = unit === 'millions' ? 'millions' : 'thousands';
+        // Re-render so both Tabulator formatters and hybrid-card values close over
+        // the new scale; a redraw alone leaves build-time column formatters stale.
+        render();
+      };
+
+      for (const button of statementButtons) button.addEventListener('click', () => setStatement(button.getAttribute('data-projection-statement')));
+      for (const button of unitButtons) button.addEventListener('click', () => setUnit(button.getAttribute('data-projection-unit')));
+      setStatement(activeStatement);
     }
   }
 

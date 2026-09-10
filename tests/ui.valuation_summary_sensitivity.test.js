@@ -49,10 +49,10 @@ async function getDatasets() {
   const fc = forecastEngine.project({ historical, assumptions });
   const ts = threeStatementEngine.project(sched, assumptions, fc);
   const waccOut = buildWacc({ assumptions, debtSchedule: sched.debt });
-  const dcfOut = valuateDcf(ts, waccOut, { assumptions });
+  const dcfOut = valuateDcf(ts, waccOut, { assumptions, corpus: historical });
   const marketPrice = assumptions.get('market_share_price').value;
   const recOut = evaluateRec(dcfOut.perShare, marketPrice);
-  const sensGrid = buildSensitivityGrid({ threeStatement: ts, assumptions, wacc: waccOut });
+  const sensGrid = buildSensitivityGrid({ threeStatement: ts, assumptions, wacc: waccOut, corpus: historical });
   const scenarios = {
     bear: runFullValuation(historical, assumptions, 'bear'),
     base: { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct },
@@ -143,13 +143,13 @@ describe('P5.5  -  Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
     assert.doesNotMatch(html, /Bloomberg/); // No Bloomberg text
     assert.doesNotMatch(html, /21\.00%/); // No 21% statutory tax text
 
-    // Bridge Waterfall assertions
+    // Bridge Waterfall assertions (EP.3 normalised terminal)
     assert.match(html, /\$1,586,880\.58/); // PV Explicit
-    assert.match(html, /\$4,205,133\.49/); // PV Terminal
-    assert.match(html, /\$5,792,014\.07/); // EV
+    assert.match(html, /\$3,745,288\.74/); // PV Terminal
+    assert.match(html, /\$5,332,169\.32/); // EV
     assert.match(html, /\$1,416,559\.00/); // Net Cash
-    assert.match(html, /\$7,208,573\.07/); // Equity Value
-    assert.match(html, /\$144\.08/); // DCF Target Price
+    assert.match(html, /\$6,748,728\.32/); // Equity Value
+    assert.match(html, /\$118\.60/); // DCF Target Price (EP.3 normalised terminal)
 
     // DCF schedule Terminal column has valid terminal FCF in Finding E termFcf row
     const termFcfRow = dcfCall.config.data.find((r) => r.id === 'termFcf');
@@ -178,11 +178,11 @@ describe('P5.5  -  Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
     assert.ok(view);
     const html = container.innerHTML;
 
-    // Recommendation card assertions
-    assert.match(html, /FAIR/);
-    assert.match(html, /\$144\.08/); // DCF Target Price
+    // Recommendation card assertions (EP.3 normalised terminal: overvalued −24.86%)
+    assert.match(html, /OVERVALUED/);
+    assert.match(html, /\$118\.60/); // DCF Target Price (EP.3 normalised terminal)
     assert.match(html, /\$157\.85/); // Market Price
-    assert.match(html, /-8\.72%/); // Implied Upside
+    assert.match(html, /-24\.86%/); // Implied Upside
 
     // Operating KPIs derived from corpus and engine
     const kpiRows = extractRows(historical.kpis);
@@ -204,7 +204,8 @@ describe('P5.5  -  Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
 
     const baseRev = extractRows(historical.income).find((r) => r.metric === 'revenue_total' && r.period === 'FY2025').value;
     const projRev = threeStatement.incomeStatement.byPeriod.FY2030.revenue.total.value;
-    const finalFcf = dcf.schedule[dcf.schedule.length - 1].fcf;
+    // RWC.1a maintenance: single authoritative FCF basis is threeStatement.cashFlow (e2e/README 47.4%), not dcf.schedule (43.1% split).
+    const finalFcf = threeStatement.cashFlow.byPeriod.FY2030.free_cash_flow.value;
     const expectedR40 = (finalFcf / projRev) + (Math.pow(projRev / baseRev, 1 / 5) - 1);
     const expectedR40Str = (expectedR40 * 100).toFixed(1) + '%';
     assert.match(html, new RegExp(expectedR40Str.replace('.', '\\.')));
@@ -217,64 +218,64 @@ describe('P5.5  -  Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
 });
 
 describe('P5.5  -  Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () => {
-  test('invokes TabulatorConstructor for 9×5 matrix with 45 cells satisfying monotonicity', async () => {
+  // RP8.1 maintenance: the matrix is a semantic `.sensitivity-matrix-table`
+  // heatmap (contract §B), not a Tabulator grid — assertions moved from the
+  // captured grid config to the rendered table; scenario/invariance pins hold.
+  test('renders 9×5 heatmap matrix with 45 cells satisfying monotonicity', async () => {
     const { sensitivityGrid, scenarios, dcf } = await getDatasets();
     const container = createHtmlContainer();
-
-    let gridConfig = null;
-    class MockTabulator {
-      constructor(element, config) {
-        gridConfig = config;
-      }
-    }
 
     const view = renderSensitivity({
       container,
       sensitivityGrid,
       scenarios,
       dcf,
-      TabulatorConstructor: MockTabulator,
     });
 
     assert.ok(view);
-    assert.ok(gridConfig);
-    assert.equal(gridConfig.statement, 'sensitivityGrid');
-    assert.equal(gridConfig.layout, 'fitDataFill');
-    assert.equal(gridConfig.selectableRange, true);
-    assert.equal(gridConfig.clipboard, true);
-
-    // 9 WACC rows × 5 Growth columns = 45 data cells
-    assert.equal(gridConfig.data.length, 9, 'Must have 9 WACC rows');
-    assert.equal(gridConfig.columns.length, 6, 'Must have 1 label column + 5 growth columns');
-
-    // Monotonicity verification
-    for (let r = 0; r < gridConfig.data.length; r++) {
-      const row = gridConfig.data[r];
-      const gKeys = ['g_0_0100', 'g_0_0150', 'g_0_0200', 'g_0_0250', 'g_0_0300'];
-      for (let c = 0; c < gKeys.length - 1; c++) {
-        const valCurrent = row[gKeys[c]];
-        const valNext = row[gKeys[c + 1]];
-        assert.ok(valNext > valCurrent, `Price must increase as growth increases: ${valNext} > ${valCurrent}`);
-      }
-    }
-
-    for (let c = 0; c < 5; c++) {
-      const gKey = ['g_0_0100', 'g_0_0150', 'g_0_0200', 'g_0_0250', 'g_0_0300'][c];
-      for (let r = 0; r < gridConfig.data.length - 1; r++) {
-        const valCurrent = gridConfig.data[r][gKey];
-        const valNext = gridConfig.data[r + 1][gKey];
-        assert.ok(valCurrent > valNext, `Price must decrease as WACC increases: ${valCurrent} > ${valNext}`);
-      }
-    }
-
     const html = container.innerHTML;
+
+    // Matrix table structure: corner header + 5 computed growth columns, 9 WACC rows
+    assert.match(html, /<table class="sensitivity-matrix-table">/);
+    assert.match(html, /<th class="matrix-corner" scope="col">WACC \(Discount Rate\)<\/th>/);
+    const thead = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'));
+    assert.equal((thead.match(/<th class="matrix-g-col"/g) || []).length, 5, 'Must have 5 growth columns');
+    const tbody = html.slice(html.indexOf('<tbody>'), html.indexOf('</tbody>'));
+    assert.equal((tbody.match(/<tr/g) || []).length, 9, 'Must have 9 WACC rows');
+    assert.equal((tbody.match(/<td class="heatmap-cell heatmap-tier-/g) || []).length, 45, 'Must have 45 heatmap cells');
+
+    // Monotonicity verification across the rendered heatmap cells
+    const cellRe = /<td class="heatmap-cell heatmap-tier-\d+( active-cell)?" data-wacc="([\d.]+)" data-growth="([\d.]+)" data-per-share="([\d.]+)">/g;
+    const cells = [...html.matchAll(cellRe)].map((m) => ({ wacc: Number(m[2]), growth: Number(m[3]), perShare: Number(m[4]) }));
+    assert.equal(cells.length, 45, 'Must parse 45 heatmap cells');
+    const waccVals = [...new Set(cells.map((c) => c.wacc))].sort((a, b) => a - b);
+    const gVals = [...new Set(cells.map((c) => c.growth))].sort((a, b) => a - b);
+    assert.equal(waccVals.length, 9, 'Must have 9 distinct WACC rows');
+    assert.equal(gVals.length, 5, 'Must have 5 distinct growth columns');
+    const at = (w, g) => cells.find((c) => c.wacc === w && c.growth === g).perShare;
+    for (const g of gVals) {
+      for (let i = 1; i < waccVals.length; i += 1) {
+        assert.ok(at(waccVals[i], g) < at(waccVals[i - 1], g), `Price must decrease as WACC increases: ${at(waccVals[i], g)} < ${at(waccVals[i - 1], g)}`);
+      }
+    }
+    for (const w of waccVals) {
+      for (let j = 1; j < gVals.length; j += 1) {
+        assert.ok(at(w, gVals[j]) > at(w, gVals[j - 1]), `Price must increase as growth increases: ${at(w, gVals[j])} > ${at(w, gVals[j - 1])}`);
+      }
+    }
+
+    // Active center cell carries .active-cell with the Base pin
+    const activeCells = [...html.matchAll(/<td class="heatmap-cell heatmap-tier-\d+ active-cell"[^>]*>([^<]+)<\/td>/g)];
+    assert.equal(activeCells.length, 1, 'Exactly one active cell');
+    assert.equal(activeCells[0][1], '$118.60');
+
     // Scenario Comparison table assertions (P6R.3 display labels: Downside, Base, Upside)
     assert.match(html, /Downside Case/);
-    assert.match(html, /\$84\.39/);
+    assert.match(html, /\$72\.38/);
     assert.match(html, /Base Case/);
-    assert.match(html, /\$144\.08/);
+    assert.match(html, /\$118\.60/);
     assert.match(html, /Upside Case/);
-    assert.match(html, /\$277\.84/);
+    assert.match(html, /\$217\.98/);
 
     // Hybrid FY2026 Invariance Footnote with OCF $239,031
     assert.match(html, /Hybrid FY2026 Invariance Invariant/);
@@ -374,7 +375,10 @@ describe('P5.5  -  Quality Gates: Zero style=, Zero UI Bare Literals, Purity & C
         let match;
         while ((match = numberRegex.exec(code)) !== null) {
           const num = Number(match[1]);
-          if (num === 1000 || num === 1280 || num === 1900 || num === 2000) continue;
+          // Filing-date years in cited prose/asOf fallbacks (Warning #2 disposition,
+          // EP.4): reviewed calendar years, not financial figures. The P8.0
+          // orphan-figure gate audits user-visible numerals separately.
+          if (num === 1000 || num === 1280 || num === 1900 || num === 2000 || num === 2025 || num === 2026) continue;
           assert.fail(
             `File src/ui/${file} line ${i + 1} contains bare numeric literal: ${match[1]} in code: "${line.trim()}"`,
           );

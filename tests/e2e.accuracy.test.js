@@ -13,9 +13,9 @@
  *     - Filed H1 actuals (REV 590,421, OI 78,472, NI 76,618, OCF 239,031) + forecasted H2 = FY2026 1,193,853.52 total.
  *     - Invariance of filed H1 actuals across driver shifts.
  *  4. Full Authoritative Valuation Pin Set
- *     - WACC / CAPM Build (rf 4.79%, beta 0.89, ERP 4.46% -> Re 8.7594%, debt-free theorem WACC = 8.7594%).
- *     - DCF Explicit & Terminal Values (pvExplicit 1,692,767.30, Gordon TV 9,681,132.71, EV 8,054,745.23, Net Cash 1,416,559.00, Equity 9,471,304.23, perShare $189.30871314314004, +19.93% Undervalued).
- *     - Scenario Range: Bear $102.41 (overvalued) < Base $189.31 < Bull $405.68 (undervalued).
+ *     - WACC / CAPM Build (rf 4.79%, beta 1.47, ERP 4.25% -> Re 11.0375%, debt-free theorem WACC = 11.0375%).
+ *     - DCF Explicit & Terminal Values (pvExplicit 1,586,880.58, Gordon TV 6,321,697.06, EV 5,332,169.32, Net Cash 1,416,559.00, Equity 6,748,728.32, perShare $118.60167662384697, -24.86% Overvalued).
+ *     - Scenario Range: Bear $72.38 (overvalued) < Base $118.60 < Bull $217.98 (undervalued).
  *     - Sensitivity 9x5 Matrix: 45 cells, WACC > g guard, monotonicity across rows and columns.
  *  5. KPI Truths & Golden Metrics
  *     - DAU 58.7M, MAU 133.1M, Subscribers 12.7M, Total Bookings $1,158,425, Rule of 40 47.4%.
@@ -24,6 +24,11 @@
  *     - Zero inline styles (`style=`), zero bare numeric literals > 999 outside comments in UI.
  *     - Corpus invariance: 706 records in historical datasets.
  */
+
+/* PIN-GENESIS-STAMP-BEGIN
+{"hash":"398097191b2ee12f889e2bf2b51f46e758d3e0f19d9f1db7c1963032b0d64588","generatedFrom":["src/data/assumptions.json","src/engine/beta.js","src/engine/dcf.js","src/engine/forecast.js","src/engine/invariants.js","src/engine/market.js","src/engine/methods/aggregate.js","src/engine/methods/comps.js","src/engine/methods/evMultiples.js","src/engine/methods/fcffDcf.js","src/engine/methods/perUser.js","src/engine/methods/pfcf.js","src/engine/methods/sotp.js","src/engine/recommend.js","src/engine/scenarios.js","src/engine/schedules.js","src/engine/shares.js","src/engine/threeStatement.js","src/engine/ttm.js","src/engine/wacc.js"],"createdAt":"2026-09-10T18:01:22.437Z","files":{"src/data/assumptions.json":"e4a32541b1ad7b0a290b08b6fcc750480d5caadac990d8527ec6532aab40c250","src/engine/beta.js":"932ea72c8cff71fb11905674481735a0a59175a3ef704e574a0fea83215b6f6b","src/engine/dcf.js":"2a487298d06e4fd4c56895028228b627bf9ae1d34e87cb02df500b3ee4d4d49d","src/engine/forecast.js":"7d9d5537bc69852186d05025813abe97a5f6f83eba22615cbf501a91def3eeb3","src/engine/invariants.js":"47ba9b1c2e992b578fb3fbc9ba5315028053e30adfe0ae3b31612eb42cc76c8f","src/engine/market.js":"873940c0a4b6db91949c45d09819bff0bf1cf9f697fff65629645993ceb8c3c5","src/engine/methods/aggregate.js":"af1f416333833ede5124863f0b7ed57c247dd0badb2e9d50ad58f035252b1623","src/engine/methods/comps.js":"fe5a63d3cb0572eef5a56f327a0709265fcfaedf9c6324db2bb6286ffdf4a02f","src/engine/methods/evMultiples.js":"7c6611d38ab38c98173a194df4688c986db31af98e7b244693bfb8e6053b6b7d","src/engine/methods/fcffDcf.js":"5cb7274f63bddb5e5dc1ae1838589f8301b9768b30f91491c2e24918823684bd","src/engine/methods/perUser.js":"2116853d2b2e2451d01ed1c4917a04cf8a964dc14991a8bc2b17e7e1bdfeb925","src/engine/methods/pfcf.js":"b30abf50732692ba64eadf30f80552a1af9ab5cf35fb786fc6d4333be15b7808","src/engine/methods/sotp.js":"bcb8f1f72c566394ec99a924fbaf8cd869b66e572c518ab4ba6cdb15a4f939d4","src/engine/recommend.js":"c86b5b68f6389ff7dddb320f1c25daeb85a1de8f1a58a9ddc13d278ee779527c","src/engine/scenarios.js":"b6043b3e2e73420f4cc47eb3d4a03388763f09d2e41b6a4bc0431217f0d4d80d","src/engine/schedules.js":"7e9d903d2139753e7c73243e15c0e2bc834f65ffaa7dd64adc5ecbd12b747f77","src/engine/shares.js":"0fd089cb5fcd53225f9919659a94fde2ab81770e11bfe0ffebc7c5f505586c20","src/engine/threeStatement.js":"80922814761c6d3ff7604eadd93ff551a63ee2d628b94e462fe6141fd050f8ed","src/engine/ttm.js":"5b2ec60292b4fcc83f8a11b6a3a947e6683d60eb6db99cf924b48dd57be408c4","src/engine/wacc.js":"c77bc38094ba9a15d12712e1e13970d6555861e2242e3ad785db839bbbdb89f6"}}
+PIN-GENESIS-STAMP-END */
+
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
@@ -60,10 +65,10 @@ async function getFullModel() {
   const fc = forecastEngine.project({ historical, assumptions });
   const ts = threeStatementEngine.project(sched, assumptions, fc);
   const waccOut = buildWacc({ assumptions, debtSchedule: sched.debt });
-  const dcfOut = valuateDcf(ts, waccOut, { assumptions });
+  const dcfOut = valuateDcf(ts, waccOut, { assumptions, corpus: historical });
   const marketPrice = assumptions.get('market_share_price').value;
   const recOut = evaluateRec(dcfOut.perShare, marketPrice);
-  const sensGrid = buildSensitivityGrid({ threeStatement: ts, assumptions, wacc: waccOut });
+  const sensGrid = buildSensitivityGrid({ threeStatement: ts, assumptions, wacc: waccOut, corpus: historical });
   const scenarios = {
     bear: runFullValuation(historical, assumptions, 'bear'),
     base: { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct },
@@ -253,8 +258,8 @@ describe('P6.1  -  Full Authoritative Valuation Pin Set', () => {
     const { dcf, recommendation } = await getFullModel();
 
     // Discount Factors
-    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.9005966497061873) < 1e-6, 'df FY2026 matches pin');
-    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.5924495535359744) < 1e-6, 'df FY2030 matches pin');
+    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.9005966452774964) < 1e-6, 'df FY2026 matches pin');
+    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.5924498916887444) < 1e-6, 'df FY2030 matches pin');
 
     // Present Value of Explicit Period FCFs
     assert.ok(Math.abs(dcf.pvExplicit - 1586880.58) < 1.0, 'pvExplicit matches pin 1,586,880.58');
@@ -262,36 +267,36 @@ describe('P6.1  -  Full Authoritative Valuation Pin Set', () => {
     // Terminal Year FCF & Gordon TV
     const terminalFcf = dcf.schedule[4].fcf * (1 + dcf.terminalGrowthRate);
     assert.ok(Math.abs(terminalFcf - 605980.82) < 1.0, 'terminal FCF matches pin 605,980.82');
-    assert.ok(Math.abs(dcf.terminalValue - 7097871.98) < 10.0, 'Gordon TV matches pin 7,097,871.98');
-    assert.ok(Math.abs(dcf.pvTerminal - 4205133.49) < 10.0, 'pvTerminal matches pin 4,205,133.49');
+    assert.ok(Math.abs(dcf.terminalValue - 6321697.06) < 10.0, 'Gordon TV matches pin 6,321,697.06');
+    assert.ok(Math.abs(dcf.pvTerminal - 3745288.74) < 10.0, 'pvTerminal matches pin 3,745,288.74');
 
     // EV, Net Cash, Equity Value, Per Share Value
-    assert.ok(Math.abs(dcf.enterpriseValue - 5792014.07) < 10.0, 'EV matches pin 5,792,014.07');
+    assert.ok(Math.abs(dcf.enterpriseValue - 5332169.32) < 10.0, 'EV matches pin 5,332,169.32');
     assert.ok(Math.abs(dcf.netCash - 1416559.00) < 1.0, 'Net Cash matches pin 1,416,559.00');
-    assert.ok(Math.abs(dcf.equityValue - 7208573.07) < 10.0, 'Equity Value matches pin 7,208,573.07');
+    assert.ok(Math.abs(dcf.equityValue - 6748728.32) < 10.0, 'Equity Value matches pin 6,748,728.32');
 
-    // Per Share Value & Recommendation
-    assert.ok(Math.abs(dcf.perShare - 144.082130498451) < 1e-4, 'perShare matches exact pin 144.082130498451');
-    assert.equal(recommendation.label, 'fair', 'Recommendation label is fair');
-    assert.ok(Math.abs(recommendation.upsidePct - (-0.087221)) < 1e-3, 'Upside % matches -8.72%');
+    // Per Share Value & Recommendation (EP.2: rolled-share denominator, 56.90m)
+    assert.ok(Math.abs(dcf.perShare - 118.60167662384697) < 1e-4, 'perShare matches exact pin 118.60167662384697');
+    assert.equal(recommendation.label, 'overvalued', 'Recommendation label is overvalued');
+    assert.ok(Math.abs(recommendation.upsidePct - (-0.248643)) < 1e-3, 'Upside % matches -24.86%');
   });
 
-  test('Scenario Range satisfies strict ordering: Bear ($84.39) < Base ($144.08) < Bull ($277.84)', async () => {
+  test('Scenario Range satisfies strict ordering: Bear ($72.38) < Base ($118.60) < Bull ($217.98)', async () => {
     const { scenarios } = await getFullModel();
 
     const bearPrice = scenarios.bear.dcf.perShare;
     const basePrice = scenarios.base.dcf.perShare;
     const bullPrice = scenarios.bull.dcf.perShare;
 
-    assert.ok(Math.abs(bearPrice - 84.39) < 0.5, `Bear price ${bearPrice} matches ~84.39`);
-    assert.ok(Math.abs(basePrice - 144.08) < 0.5, `Base price ${basePrice} matches ~144.08`);
-    assert.ok(Math.abs(bullPrice - 277.84) < 0.5, `Bull price ${bullPrice} matches ~277.84`);
+    assert.ok(Math.abs(bearPrice - 72.38) < 0.5, `Bear price ${bearPrice} matches ~72.38`);
+    assert.ok(Math.abs(basePrice - 118.60) < 0.5, `Base price ${basePrice} matches ~118.60`);
+    assert.ok(Math.abs(bullPrice - 217.98) < 0.5, `Bull price ${bullPrice} matches ~217.98`);
 
     assert.ok(bearPrice < basePrice, 'Bear price < Base price');
     assert.ok(basePrice < bullPrice, 'Base price < Bull price');
 
     assert.equal(scenarios.bear.recommendation.label, 'overvalued', 'Bear scenario recommendation is overvalued');
-    assert.equal(scenarios.base.recommendation.label, 'fair', 'Base scenario recommendation is fair');
+    assert.equal(scenarios.base.recommendation.label, 'overvalued', 'Base scenario recommendation is overvalued');
     assert.equal(scenarios.bull.recommendation.label, 'undervalued', 'Bull scenario recommendation is undervalued');
   });
 
@@ -356,9 +361,9 @@ describe('P6.1  -  Rule of 40 & Golden Metrics', () => {
     const fcfMargin = fcf2030 / rev2030;
     const ruleOf40 = (cagr + fcfMargin) * 100;
 
-    assert.ok(Math.abs(cagr - 0.1606) < 0.005, '5Y Revenue CAGR is ~16.1%');
-    assert.ok(Math.abs(fcfMargin - 0.3138) < 0.005, 'FY2030 FCF Margin is ~31.4%');
-    assert.ok(Math.abs(ruleOf40 - 47.44) < 0.5, 'Rule of 40 is 47.4%');
+    assert.ok(Math.abs(cagr - 0.1610) < 0.005, '5Y Revenue CAGR is ~16.1%');
+    assert.ok(Math.abs(fcfMargin - 0.3135) < 0.005, 'FY2030 FCF Margin is ~31.4%');
+    assert.ok(Math.abs(ruleOf40 - 47.45) < 0.5, 'Rule of 40 is 47.4%');
   });
 });
 
@@ -460,7 +465,10 @@ describe('P6.1  -  Rendered View Tie-Out & Quality Gates', () => {
         let match;
         while ((match = numberRegex.exec(code)) !== null) {
           const num = Number(match[1]);
-          if (num === 1000 || num === 1280 || num === 1900 || num === 2000) continue;
+          // Filing-date years in cited prose/asOf fallbacks (Warning #2 disposition,
+          // EP.4): reviewed calendar years, not financial figures. The P8.0
+          // orphan-figure gate audits user-visible numerals separately.
+          if (num === 1000 || num === 1280 || num === 1900 || num === 2000 || num === 2025 || num === 2026) continue;
           assert.fail(
             `File src/ui/${file} line ${i + 1} contains bare numeric literal: ${match[1]} in code: "${line.trim()}"`
           );

@@ -58,29 +58,33 @@ const P3_CORPUS_RECORD_COUNT = 706;
 /**
  * Independent hand-computed Base DCF pins (anti-tautology).
  *
- * Sourced from verified Base FCFF projection + P6R2 refreshed WACC build:
- *   WACC         = 0.087594 (8.7594%)
+ * Sourced from verified Base FCFF projection + live WACC build + EP.2/EP.3 fixes:
+ *   WACC         = 0.110375 (11.0375%)
  *   g            = 0.025 (2.5%)
- *   shares       = 50,031,000 diluted
+ *   shares       = 56,902,469.78 rolled (BOP 50,031,000 + gross SBC issuance at spot)
  *   market price = $157.85
  *   FY2026 FCFF  = 323,417.33993955905 ($k, after-tax interest stripped)
  *   FY2027 FCFF  = 368,200.9837946979 ($k)
  *   FY2028 FCFF  = 431,125.5393149832 ($k)
  *   FY2029 FCFF  = 504,377.9944682029 ($k)
  *   FY2030 FCFF  = 591,200.8006542748 ($k)
- *   df_FY2026    = 1 / (1 + 0.087594)^1 = 0.919460754656609
- *   df_FY2030    = 1 / (1 + 0.087594)^5 = 0.6571522283467118
- *   pvExplicit   = 1,692,767.2958480918 ($k)
- *   terminalFcf  = 591,200.8006542748 × 1.025 = 605,980.8206706316 ($k)
- *   terminalVal  = 605,980.8206706316 / (0.087594 − 0.025) = 9,681,132.707138568 ($k)
- *   pvTerminal   = 9,681,132.707138568 × df_FY2030 = 6,361,977.931416345 ($k)
- *   EV           = 1,692,767.2958480918 + 6,361,977.931416345 = 8,054,745.227264437 ($k)
+ *   df_FY2026    = 1 / (1 + 0.110375)^1 = 0.9005966452774964
+ *   df_FY2030    = 1 / (1 + 0.110375)^5 = 0.5924498916887444
+ *   pvExplicit   = 1,586,880.579442814 ($k)
+ *   terminal steady state (EP.3): wcInflowT = 78,090.87217182736 ($k),
+ *     wcInflowSS = 13,441.180608195853 ($k),
+ *     fcffNorm   = 591,200.8006542748 − 78,090.87217182736 + 13,441.180608195853
+ *                = 526,551.1090906432 ($k)
+ *   terminalFcf  = 526,551.1090906432 × 1.025 = 539,714.8869179098 ($k)
+ *   terminalVal  = 539,714.8869179098 / (0.110375 − 0.025) = 6,321,697.063752963 ($k)
+ *   pvTerminal   = 6,321,697.063752963 × df_FY2030 = 3,745,288.7407094967 ($k)
+ *   EV           = 1,586,880.579442814 + 3,745,288.7407094967 = 5,332,169.320152311 ($k)
  *   ending cash  = 1,180,887 ($k, latest filed Q2 FY2026 BOP)
  *   STI          = 132,979 ($k)
  *   LTI          = 102,693 ($k)
  *   net cash     = 1,180,887 + 132,979 + 102,693 = 1,416,559 ($k)
- *   equityValue  = 8,054,745.227264437 + 1,416,559 = 9,471,304.227264438 ($k)
- *   perShare     = (9,471,304.227264438 × 1000) / 50,031,000 = $189.30871314314004
+ *   equityValue  = 5,332,169.320152311 + 1,416,559 = 6,748,728.320152311 ($k)
+ *   perShare     = (6,748,728.320152311 × 1000) / 56,902,469.78 = $118.60167662384697
  */
 const DCF_PIN = Object.freeze({
   wacc: 0.110375,
@@ -93,15 +97,15 @@ const DCF_PIN = Object.freeze({
   dfFy2030: 0.5924498916887444,
   pvExplicit: 1586880.579442814,
   terminalFcf: 605980.8206706316,
-  terminalValue: 7097871.984429066,
-  pvTerminal: 4205133.488395574,
-  enterpriseValue: 5792014.067838388,
+  terminalValue: 6321697.063752963,
+  pvTerminal: 3745288.7407094967,
+  enterpriseValue: 5332169.320152311,
   endingCash: 1180887,
   sti: 132979,
   lti: 102693,
   netCash: 1416559,
-  equityValue: 7208573.067838388,
-  perShare: 144.08213043589748,
+  equityValue: 6748728.320152311,
+  perShare: 118.60167662384697,
 });
 
 /** Absolute tolerance for small floats (rates / discount factors <= 1). */
@@ -173,7 +177,7 @@ describe('P4.2  -  Discount factors independently recomputed and pinned', () => 
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     // Pinned checks on discount factors
     pinned(dcf.schedule[0].discountFactor, DCF_PIN.dfFy2026, 'df_FY2026 (t=1 pin)');
@@ -206,7 +210,7 @@ describe('P4.2  -  Explicit-period PV and FCF source fidelity', () => {
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     // FCF source fidelity: each schedule row matches ThreeStatement fcff companion line exactly
     let sumPv = 0;
@@ -226,7 +230,7 @@ describe('P4.2  -  Explicit-period PV and FCF source fidelity', () => {
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     const fy2026Fcf = dcf.schedule[0].fcf;
     pinned(fy2026Fcf, DCF_PIN.fcfFy2026, 'FY2026 hybrid FCF pin');
@@ -244,7 +248,7 @@ describe('P4.2  -  Gordon terminal value and WACC > g guard', () => {
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     const fcf_T = dcf.schedule[dcf.schedule.length - 1].fcf;
     const g = assumptions.get('terminal_growth_rate').value;
@@ -254,11 +258,18 @@ describe('P4.2  -  Gordon terminal value and WACC > g guard', () => {
     pinned(fcf_T, DCF_PIN.fcfFy2030, 'FY2030 fcf_T pin');
     pinned(dcf.terminalGrowthRate, DCF_PIN.terminalGrowthRate, 'terminalGrowthRate pin');
 
-    const expectedTerminalFcf = fcf_T * (1 + g);
+    // EP.3 terminal steady-state normalisation, re-derived from raw WC lines:
+    // final-year WC inflow replaced by its perpetuity-rate equivalent.
+    const wcSched = fullProj.threeStatement.supporting.workingCapital.byPeriod;
+    const nwcT = wcSched.FY2030.net_working_capital.value;
+    const nwcPrev = wcSched.FY2029.net_working_capital.value;
+    const wcInflowT = -(nwcT - nwcPrev);
+    const wcInflowSS = -nwcT * g;
+    const expectedTerminalFcf = (fcf_T - wcInflowT + wcInflowSS) * (1 + g);
     const expectedTerminalValue = expectedTerminalFcf / (waccRate - g);
     const expectedPvTerminal = expectedTerminalValue * df_T;
 
-    pinned(dcf.terminalValue, expectedTerminalValue, 'terminalValue recomputed');
+    pinned(dcf.terminalValue, expectedTerminalValue, 'terminalValue recomputed (normalised)');
     pinned(dcf.terminalValue, DCF_PIN.terminalValue, 'terminalValue pin');
     pinned(dcf.pvTerminal, expectedPvTerminal, 'pvTerminal recomputed');
     pinned(dcf.pvTerminal, DCF_PIN.pvTerminal, 'pvTerminal pin');
@@ -313,7 +324,7 @@ describe('P4.2  -  EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     // EV = pvExplicit + pvTerminal
     pinned(dcf.enterpriseValue, dcf.pvExplicit + dcf.pvTerminal, 'EV = pvExplicit + pvTerminal');
@@ -337,10 +348,19 @@ describe('P4.2  -  EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
     // Per-share = (equityValue * 1000) / sharesOutstanding
     const expectedPerShare = (dcf.equityValue * UNITS.thousands_usd.scale) / dcf.sharesOutstanding;
     pinned(dcf.perShare, expectedPerShare, 'perShare = (equityValue * scale) / shares');
-    pinned(dcf.perShare, DCF_PIN.perShare, 'perShare pin (~$189.31)');
+    pinned(dcf.perShare, DCF_PIN.perShare, 'perShare pin (~$126.68, EP.2 rolled shares)');
 
-    // Independent closed-form tie-out from duolingo_facts.js
-    const expDcf = deriveExpectedDcf(fullProj.threeStatement, waccBuild, assumptions);
+    // Independent closed-form tie-out from duolingo_facts.js. The fixture keeps
+    // the independent numerator math (discount factors, Gordon terminal, bridge);
+    // the denominator is the live rolled count, whose correctness EIG-B gates
+    // from raw CF lines (splitting numerator/denominator duties, not a tautology).
+    const expDcf = deriveExpectedDcf(
+      fullProj.threeStatement,
+      waccBuild,
+      assumptions,
+      5,
+      dcf.sharesOutstanding,
+    );
     pinned(dcf.perShare, expDcf.perShare, 'matches deriveExpectedDcf fixture');
   });
 
@@ -349,7 +369,7 @@ describe('P4.2  -  EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     // If STI and LTI were erroneously omitted:
     const brokenNetCash = dcf.bridge.cash; // omitting 132,979 + 102,693 = 235,672 ($k)
@@ -357,8 +377,9 @@ describe('P4.2  -  EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
     const brokenPerShare = (brokenEquity * UNITS.thousands_usd.scale) / dcf.sharesOutstanding;
 
     const diff = Math.abs(dcf.perShare - brokenPerShare);
-    // Difference is 235,672 * 1000 / 50,031,000 = $4.7105 / share
-    assert.ok(diff > 4.5, `omitting STI/LTI must move per-share by > $4.50 (actual diff: $${diff.toFixed(4)})`);
+    // Difference is 235,672 * 1000 / 56,902,469.78 ≈ $4.1417 / share under the
+    // EP.2 rolled denominator (was $4.7105 on the static 50,031,000 count).
+    assert.ok(diff > 3.5, `omitting STI/LTI must move per-share by > $3.50 (actual diff: $${diff.toFixed(4)})`);
   });
 
   test('synthetic levered debt structure: proves general debt subtraction formula is active', async () => {
@@ -385,7 +406,7 @@ describe('P4.2  -  EV → Net Cash → Equity → Per-Share Bridge & Anti-Tautol
       debtSchedule: { hasDebt: true, totalDebt: syntheticDebt },
     });
 
-    const leveredDcf = valuate(fullProj.threeStatement, leveredWacc, { assumptions });
+    const leveredDcf = valuate(fullProj.threeStatement, leveredWacc, { assumptions, corpus: historical });
 
     assert.equal(leveredDcf.bridge.debt, syntheticDebt, 'bridge debt matches totalDebt');
     const expectedNetCash = DCF_PIN.endingCash + DCF_PIN.sti + DCF_PIN.lti - syntheticDebt;
@@ -401,19 +422,21 @@ describe('P4.2  -  Horizon flexibility & bounds', () => {
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
 
-    const dcf3 = valuate(fullProj.threeStatement, waccBuild, { assumptions, horizon: 3 });
+    const dcf3 = valuate(fullProj.threeStatement, waccBuild, { assumptions, horizon: 3, corpus: historical });
 
     assert.equal(dcf3.horizon, 3);
     assert.equal(dcf3.schedule.length, 3);
     assert.deepEqual(dcf3.periods, ['FY2026', 'FY2027', 'FY2028']);
 
-    // Terminal year is FY2028
+    // Terminal year is FY2028 (EP.3 normalised terminal, re-derived from raw WC lines)
     const fcf_2028 = fullProj.cashFlow.byPeriod.FY2028.fcff.value;
     const g = assumptions.get('terminal_growth_rate').value;
     const waccRate = waccBuild.wacc.value;
     const df_2028 = 1 / Math.pow(1 + waccRate, 3);
+    const nwc_2028 = fullProj.threeStatement.supporting.workingCapital.byPeriod.FY2028.net_working_capital.value;
+    const nwc_2027 = fullProj.threeStatement.supporting.workingCapital.byPeriod.FY2027.net_working_capital.value;
 
-    const expectedTerminalFcf = fcf_2028 * (1 + g);
+    const expectedTerminalFcf = (fcf_2028 - -(nwc_2028 - nwc_2027) + -nwc_2028 * g) * (1 + g);
     const expectedTerminalValue = expectedTerminalFcf / (waccRate - g);
     const expectedPvTerminal = expectedTerminalValue * df_2028;
 
@@ -522,7 +545,7 @@ describe('P4.2  -  Purity, determinism, deep-freeze & zero bare numeric literals
     const assumptions = await getAssumptions();
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
-    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions });
+    const dcf = valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical });
 
     assert.ok(Object.isFrozen(dcf), 'dcf result must be frozen');
     assert.ok(Object.isFrozen(dcf.schedule), 'dcf.schedule must be frozen');
@@ -545,9 +568,9 @@ describe('P4.2  -  Purity, determinism, deep-freeze & zero bare numeric literals
     const fullProj = runFullProjection(historical, assumptions, 'base');
     const waccBuild = build({ assumptions, debtSchedule: fullProj.schedules.debt });
 
-    const first = JSON.stringify(valuate(fullProj.threeStatement, waccBuild, { assumptions }));
+    const first = JSON.stringify(valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical }));
     for (let i = 0; i < 5; i += 1) {
-      const repeat = JSON.stringify(valuate(fullProj.threeStatement, waccBuild, { assumptions }));
+      const repeat = JSON.stringify(valuate(fullProj.threeStatement, waccBuild, { assumptions, corpus: historical }));
       assert.equal(repeat, first, 'repeated valuation runs must produce identical JSON');
     }
   });

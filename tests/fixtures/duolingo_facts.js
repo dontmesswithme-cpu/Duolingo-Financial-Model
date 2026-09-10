@@ -2152,9 +2152,13 @@ export function deriveDiscountFactor(t, wacc = WACC_FIXTURE.wacc) {
  * @param {number|object} wacc WACC rate or WaccBuild
  * @param {object} assumptions AssumptionSet or driver map
  * @param {number} [horizon=5]
+ * @param {number|null} [sharesOverride=null] Rolled share count for the per-share
+ *   division (EP.2: the engine divides by the EIG-B roll-forward, not the static
+ *   driver; the denominator itself is gated by EIG-B, this fixture keeps the
+ *   independent numerator math). Omit for the legacy static-driver division.
  * @returns {object}
  */
-export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5) {
+export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5, sharesOverride = null) {
   const waccRate =
     typeof wacc === 'number'
       ? wacc
@@ -2206,7 +2210,27 @@ export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5
 
   const finalItem = schedule[schedule.length - 1];
   const fcf_T = finalItem.fcf;
-  const terminalFcf = fcf_T * (1 + g);
+  // EP.3 terminal steady-state normalisation, re-derived from raw WC-schedule
+  // lines (same identity as the engine, independently recomputed here).
+  const terminalPeriodKey = periods[periods.length - 1];
+  const wcLines =
+    threeStatement.supporting && threeStatement.supporting.workingCapital
+      ? threeStatement.supporting.workingCapital.byPeriod
+      : null;
+  if (!wcLines || !wcLines[terminalPeriodKey]) {
+    throw new Error('deriveExpectedDcf needs the working-capital schedule for normalisation.');
+  }
+  const nwcT = wcLines[terminalPeriodKey].net_working_capital.value;
+  const terminalIndex = periods.indexOf(terminalPeriodKey);
+  const priorKey = terminalIndex > 0 ? periods[terminalIndex - 1] : null;
+  const nwcPrior = priorKey
+    ? wcLines[priorKey].net_working_capital.value
+    : (threeStatement.bopBalanceSheet || {}).net_working_capital;
+  if (!Number.isFinite(nwcT) || !Number.isFinite(nwcPrior)) {
+    throw new Error('deriveExpectedDcf needs finite NWC schedule lines.');
+  }
+  const normBase = fcf_T - -(nwcT - nwcPrior) + -nwcT * g;
+  const terminalFcf = normBase * (1 + g);
   const terminalValue = terminalFcf / (waccRate - g);
   const df_T = finalItem.discountFactor;
   const pvTerminal = terminalValue * df_T;
@@ -2225,7 +2249,11 @@ export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5
   const debt = 0;
   const netCash = cash + sti + lti - debt;
   const equityValue = enterpriseValue + netCash;
-  const perShare = (equityValue * 1000) / shares;
+  const sharesForDivision =
+    typeof sharesOverride === 'number' && Number.isFinite(sharesOverride) && sharesOverride > 0
+      ? sharesOverride
+      : shares;
+  const perShare = (equityValue * 1000) / sharesForDivision;
 
   return Object.freeze({
     wacc: waccRate,
@@ -2241,7 +2269,8 @@ export function deriveExpectedDcf(threeStatement, wacc, assumptions, horizon = 5
     netCash,
     equityValue,
     perShare,
-    sharesOutstanding: shares,
+    sharesOutstanding: sharesForDivision,
+    sharesOutstandingStatic: shares,
     marketSharePrice: price,
     bridge: Object.freeze({
       cash,

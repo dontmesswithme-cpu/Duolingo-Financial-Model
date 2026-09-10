@@ -400,7 +400,10 @@ describe('P6.2  -  Quality Gates: Corpus Invariance & UI Cleanliness', () => {
         let match;
         while ((match = numberRegex.exec(code)) !== null) {
           const num = Number(match[1]);
-          if (num === 1000 || num === 1280 || num === 1900 || num === 2000) continue;
+          // Filing-date years in cited prose/asOf fallbacks (Warning #2 disposition,
+          // EP.4): reviewed calendar years, not financial figures. The P8.0
+          // orphan-figure gate audits user-visible numerals separately.
+          if (num === 1000 || num === 1280 || num === 1900 || num === 2000 || num === 2025 || num === 2026) continue;
           assert.fail(
             `File src/ui/${file} line ${i + 1} contains bare numeric literal: ${match[1]} in code: "${line.trim()}"`
           );

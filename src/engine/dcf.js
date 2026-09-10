@@ -7,19 +7,28 @@
  * The valuation pipeline implements the standard Gordon Growth DCF framework:
  *  1. Discount factors: df_t = 1 / (1 + WACC)^t for forecast years t = 1..horizon
  *  2. Explicit-period PV: pvFcf_t = fcf_t × df_t; pvExplicit = Σ pvFcf_t
- *  3. Gordon terminal value: terminalFcf = fcf_T × (1 + g);
+ *  3. Terminal steady-state normalisation (EP.3, EIG-A) + Gordon terminal value:
+ *     wcInflowT = −ΔNWC_T (final-year working-capital inflow from the WC
+ *     schedule); wcInflowSS = −NWC_T × g (steady-state replacement at the
+ *     perpetuity rate); fcffTNormalised = fcff_T − wcInflowT + wcInflowSS;
+ *     terminalFcf = fcffTNormalised × (1 + g);
  *     terminalValue = terminalFcf / (WACC − g); pvTerminal = terminalValue × df_T
- *     (Hard fail-closed guard: WACC > g required)
+ *     (Hard fail-closed guard: WACC > g required; the FCFE floor and legacy
+ *     paths normalise their shared terminal-year cash flow identically)
  *  4. Enterprise value: EV = pvExplicit + pvTerminal
  *  5. Net cash bridge: netCash = endingCash(T) + shortTermInvestments(T) + longTermInvestments(T) − debt(T)
  *     from the final forecast balance sheet
  *  6. Equity value: Equity = EV + netCash = EV − debt + cashAndInvestments
  *  7. Per-share value: perShare = (equityValue × scale) / sharesOutstanding
- *     where sharesOutstanding is the MKT driver with as-of date
+ *     where sharesOutstanding is the EIG-B share roll-forward terminal count
+ *     (BOP MKT driver plus gross SBC issuance at spot, EP.2 — the static
+ *     driver divisor is retired; see src/engine/shares.js)
  *
  * Invariants enforced:
  *  - FCF series consumed directly from ThreeStatementOutput.cashFlow.byPeriod[].free_cash_flow
  *  - Hybrid FY2026 FCF consumed as built (H1 cited actuals + H2 engine estimate)
+ *  - Terminal steady-state law (EP.3, EIG-A): the final-year WC inflow is
+ *    replaced by its perpetuity-rate equivalent before Gordon capitalisation
  *  - Net cash bridge reads raw final balance sheet lines (ending cash + held-constant STI + LTI)
  *  - Gordon guard: WACC > g throws typed EngineError('terminal_growth_exceeds_wacc')
  *  - Debt-free collapse as theorem: debt = 0 exercised in the formula
@@ -31,6 +40,7 @@
  */
 
 import { EngineError } from '../data/errors.js';
+import { projectShares } from './shares.js';
 import {
   UNITS,
   FORECAST_HORIZON_MIN,
@@ -145,11 +155,46 @@ function normalizeHorizon(requestedHorizon) {
 }
 
 /**
+ * Resolves the EIG-B share roll-forward schedule for the per-share division.
+ *
+ * A caller-supplied schedule (`dcfInput.shares`) is used verbatim after shape
+ * validation; otherwise the schedule is built from the live assumptions and
+ * three-statement output (plus `dcfInput.corpus` for the hybrid H1 leg).
+ * There is no static-share path: every per-share figure divides by the rolled
+ * terminal count.
+ *
+ * @param {object} dcfInput Input configuration `{ assumptions, horizon?, shares?, corpus? }`.
+ * @param {object} assumptions AssumptionSet (base or scenario-applied).
+ * @param {object} threeStatement ThreeStatementOutput from `threeStatement.project()`.
+ * @returns {object} Frozen SharesSchedule.
+ * @throws {EngineError} On malformed schedule or unbuildable roll (fail-closed).
+ */
+function resolveSharesSchedule(dcfInput, assumptions, threeStatement) {
+  const hasInput = dcfInput && typeof dcfInput === 'object';
+  const supplied = hasInput ? dcfInput.shares : null;
+  if (supplied && typeof supplied === 'object') {
+    if (!Number.isFinite(supplied.sharesDcf) || supplied.sharesDcf <= 0) {
+      throw new EngineError(
+        'invalid_shares',
+        'dcfInput.shares must carry a positive finite sharesDcf terminal count.',
+        'shares',
+      );
+    }
+    return supplied;
+  }
+  let corpus = null;
+  if (hasInput && typeof dcfInput.corpus !== 'undefined') {
+    corpus = dcfInput.corpus;
+  }
+  return projectShares(assumptions, threeStatement, corpus);
+}
+
+/**
  * Evaluates the discounted cash flow (DCF) valuation model.
  *
  * @param {object} threeStatement ThreeStatementOutput from `threeStatement.project()`
  * @param {object|number} wacc WaccBuild from `wacc.build()` or numeric WACC rate
- * @param {object} dcfInput Input configuration `{ assumptions, horizon? }`
+ * @param {object} dcfInput Input configuration `{ assumptions, horizon?, shares?, corpus? }`
  * @returns {object} Frozen DcfResult
  * @throws {EngineError} On missing inputs, non-finite values, or WACC <= g
  */
@@ -204,15 +249,18 @@ export function valuate(threeStatement, wacc, dcfInput) {
   const sharesDriver = requireDriverValue(assumptions, 'shares_outstanding');
 
   const terminalGrowthRate = gDriver.value;
-  const sharesOutstanding = sharesDriver.value;
+  const bopSharesOutstanding = sharesDriver.value;
 
-  if (!Number.isFinite(sharesOutstanding) || sharesOutstanding <= 0) {
+  if (!Number.isFinite(bopSharesOutstanding) || bopSharesOutstanding <= 0) {
     throw new EngineError(
       'missing_driver',
-      `shares_outstanding must be a positive finite number (received ${sharesOutstanding}).`,
+      `shares_outstanding must be a positive finite number (received ${bopSharesOutstanding}).`,
       'shares_outstanding',
     );
   }
+
+  // ── EIG-B share roll-forward (EP.2): resolved late, just before the
+  // per-share division (see section 6), so legacy fail-closed precedence holds.
 
   // ── Gordon Growth Guard: WACC > g ───────────────────────────────────────
   if (waccRate <= terminalGrowthRate) {
@@ -327,18 +375,84 @@ export function valuate(threeStatement, wacc, dcfInput) {
     );
   }
 
-  // ── 2. Gordon Terminal Values ──────────────────────────────────────────
+  // ── 2. Terminal Steady-State Normalisation (EP.3, EIG-A) ───────────────
+  // The final forecast year embeds a working-capital inflow priced at the
+  // forecast growth rate; the Gordon perpetuity must capitalise the
+  // steady-state equivalent instead. NWC reads come from the working-capital
+  // schedule (raw schedule lines); a first-period terminal anchors on the
+  // cited BOP balance. The same normalisation applies to the FCFE floor and
+  // the legacy path, which share the terminal-year cash flow.
+  const terminalPeriodKey = periods[periods.length - 1];
+  const wcSupporting =
+    threeStatement.supporting && typeof threeStatement.supporting === 'object'
+      ? threeStatement.supporting.workingCapital
+      : null;
+  if (!wcSupporting || typeof wcSupporting.byPeriod !== 'object') {
+    throw new EngineError(
+      'missing_input',
+      'dcf.valuate() requires the working-capital schedule at supporting.workingCapital for terminal normalisation.',
+      'supporting.workingCapital',
+    );
+  }
+  const nwcTerminalLine = wcSupporting.byPeriod[terminalPeriodKey];
+  if (
+    !nwcTerminalLine ||
+    typeof nwcTerminalLine.net_working_capital !== 'object' ||
+    !Number.isFinite(nwcTerminalLine.net_working_capital.value)
+  ) {
+    throw new EngineError(
+      'missing_line',
+      `Working-capital schedule line for terminal period "${terminalPeriodKey}" is missing or non-finite.`,
+      terminalPeriodKey,
+    );
+  }
+  const nwcTerminal = nwcTerminalLine.net_working_capital.value;
+  const terminalIndex = periods.indexOf(terminalPeriodKey);
+  let nwcPrior;
+  if (terminalIndex > 0) {
+    const priorLine = wcSupporting.byPeriod[periods[terminalIndex - 1]];
+    if (
+      !priorLine ||
+      typeof priorLine.net_working_capital !== 'object' ||
+      !Number.isFinite(priorLine.net_working_capital.value)
+    ) {
+      throw new EngineError(
+        'missing_line',
+        `Working-capital schedule line for period "${periods[terminalIndex - 1]}" is missing or non-finite.`,
+        periods[terminalIndex - 1],
+      );
+    }
+    nwcPrior = priorLine.net_working_capital.value;
+  } else {
+    const bopForNwc =
+      threeStatement.bopBalanceSheet ||
+      (threeStatement.supporting && threeStatement.supporting.bopBalanceSheet);
+    if (!bopForNwc || !Number.isFinite(bopForNwc.net_working_capital)) {
+      throw new EngineError(
+        'missing_input',
+        'A first-period terminal anchors NWC on the cited BOP balance, which is missing.',
+        'bopBalanceSheet.net_working_capital',
+      );
+    }
+    nwcPrior = bopForNwc.net_working_capital;
+  }
+  const deltaNwcTerminal = nwcTerminal - nwcPrior;
+  const wcInflowT = -deltaNwcTerminal;
+  const wcInflowSS = -nwcTerminal * terminalGrowthRate;
+
   const finalFcffItem = fcffSchedule[fcffSchedule.length - 1];
   const fcff_T = finalFcffItem.fcf;
   const df_T = finalFcffItem.discountFactor;
 
-  const terminalFcff = fcff_T * (1 + terminalGrowthRate);
+  const fcffTNormalised = fcff_T - wcInflowT + wcInflowSS;
+  const terminalFcff = fcffTNormalised * (1 + terminalGrowthRate);
   const terminalValueFcff = terminalFcff / (waccRate - terminalGrowthRate);
   const pvTerminalFcff = terminalValueFcff * df_T;
 
   const finalFcfeItem = fcfeSchedule[fcfeSchedule.length - 1];
   const fcfe_T = finalFcfeItem.fcf;
-  const terminalFcfe = fcfe_T * (1 + terminalGrowthRate);
+  const fcfeTNormalised = fcfe_T - wcInflowT + wcInflowSS;
+  const terminalFcfe = fcfeTNormalised * (1 + terminalGrowthRate);
   const terminalValueFcfe = terminalFcfe / (waccRate - terminalGrowthRate);
   const pvTerminalFcfe = terminalValueFcfe * df_T;
 
@@ -467,6 +581,21 @@ export function valuate(threeStatement, wacc, dcfInput) {
   const netCashLegacy = cashVal + stiVal + ltiVal - debtVal;
 
   // ── 6. Equity Values & Per Share ───────────────────────────────────────
+  // EIG-B share roll-forward (EP.2): the per-share divisor is the rolled
+  // terminal count (BOP plus gross SBC issuance at spot), never the static
+  // BOP driver alone. Fail-closed: no static-share fallback path exists.
+  // Resolved late (after all input/guard validation) so legacy fail-closed
+  // error precedence is preserved.
+  const sharesSchedule = resolveSharesSchedule(dcfInput, assumptions, threeStatement);
+  const sharesOutstanding = sharesSchedule.sharesDcf;
+
+  if (!Number.isFinite(sharesOutstanding) || sharesOutstanding <= 0) {
+    throw new EngineError(
+      'invalid_shares',
+      `Rolled share count must be a positive finite number (received ${sharesOutstanding}).`,
+      'shares',
+    );
+  }
   const moneyScale = UNITS.thousands_usd.scale;
 
   // FCFF Headline (adds today's net cash)
@@ -512,9 +641,23 @@ export function valuate(threeStatement, wacc, dcfInput) {
     debt: debtVal,
   });
 
+  const terminalNormalization = Object.freeze({
+    terminalPeriod: terminalPeriodKey,
+    nwcTerminal,
+    nwcPrior,
+    deltaNwcTerminal,
+    wcInflowTerminal: wcInflowT,
+    wcInflowSteadyState: wcInflowSS,
+    fcffTerminal: fcff_T,
+    fcffTerminalNormalised: fcffTNormalised,
+    fcfeTerminal: fcfe_T,
+    fcfeTerminalNormalised: fcfeTNormalised,
+  });
+
   const fcffBlock = Object.freeze({
     schedule: Object.freeze(fcffSchedule),
     pvExplicit: pvExplicitFcff,
+    terminalNormalization,
     terminalValue: terminalValueFcff,
     pvTerminal: pvTerminalFcff,
     enterpriseValue: evFcff,
@@ -526,6 +669,7 @@ export function valuate(threeStatement, wacc, dcfInput) {
   const fcfeBlock = Object.freeze({
     schedule: Object.freeze(fcfeSchedule),
     pvExplicit: pvExplicitFcfe,
+    terminalNormalization,
     terminalValue: terminalValueFcfe,
     pvTerminal: pvTerminalFcfe,
     equityValue: equityValueFcfe,
@@ -568,10 +712,29 @@ export function valuate(threeStatement, wacc, dcfInput) {
       kind: 'assumptionDriver',
       name: sharesDriver.name,
       label: sharesDriver.label,
-      value: sharesOutstanding,
+      value: bopSharesOutstanding,
       marking: sharesDriver.marking ?? MKT,
       asOf: sharesDriver.asOf ?? null,
       provider: sharesDriver.source?.provider ?? null,
+    }),
+    Object.freeze({
+      kind: 'shareRollForward',
+      bopShares: sharesSchedule.bopShares,
+      price: sharesSchedule.price,
+      totalIssuance: sharesSchedule.totalIssuance,
+      sharesDcf: sharesSchedule.sharesDcf,
+      terminalPeriod: sharesSchedule.terminalPeriod,
+    }),
+    Object.freeze({
+      kind: 'terminalNormalization',
+      terminalPeriod: terminalPeriodKey,
+      nwcTerminal,
+      nwcPrior,
+      deltaNwcTerminal,
+      wcInflowTerminal: wcInflowT,
+      wcInflowSteadyState: wcInflowSS,
+      fcffTerminalNormalised: fcffTNormalised,
+      fcfeTerminalNormalised: fcfeTNormalised,
     }),
     Object.freeze({
       kind: 'cashFlow',
@@ -621,6 +784,8 @@ export function valuate(threeStatement, wacc, dcfInput) {
     equityValue: equityValueFcff,
     perShare: perShareFcff,
     sharesOutstanding,
+    bopSharesOutstanding,
+    shares: sharesSchedule,
     bridge: bridgeToday,
 
     // ── Dual-Path & Finding F Blocks ─────────────────────────────────────

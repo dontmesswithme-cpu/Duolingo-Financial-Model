@@ -25,6 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { percent } from '../src/ui/format.js';
+import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ASSUMPTIONS_PATH = path.join(ROOT, 'src/data/assumptions.json');
@@ -144,18 +145,50 @@ describe('P6R3.1  -  Quality Gates: Scope & Invariance', () => {
     }
   });
 
-  test('engine diff against v1.0-P6R3-base is strictly EMPTY', () => {
-    let changedFiles = [];
+  test('engine diff against v1.0-P6R3-base touched only authorized engine files', () => {
+    // Authorized drift from the P6R3 cost-of-capital baseline is the Economy
+    // Phase set (EP_AUTHORIZED_ENGINE). EP authorization: Director un-park
+    // order 2026-09-10, `docs/logs/ds/economy_phase.md` §5.
+    //
+    // Hardening note (EP-FIX1, F1): this gate previously ran a bare `git diff`
+    // inside try/catch — blind to untracked files (so `invariants.js` and
+    // `shares.js` passed it for the whole Economy Phase) and degrading to an
+    // empty change set on any exec failure. The shared helper unions the
+    // tracked diff with `git ls-files --others` and fails closed on an
+    // unresolvable baseline; assertions run outside any `try`.
+    // See tests/_scope_gate.js.
+    const unauthorized = unauthorizedEngineFiles('v1.0-P6R3-base', EP_AUTHORIZED_ENGINE);
+    assert.deepEqual(
+      unauthorized,
+      [],
+      `Unauthorized engine modification: ${unauthorized.join(', ')}`,
+    );
+  });
+
+  test('NEGATIVE CONTROL: narrowing the allowlist makes the gate go red', () => {
+    const flagged = unauthorizedEngineFiles('v1.0-P6R3-base', []);
+    assert.ok(flagged.length > 0, 'helper must report drift when nothing is authorized');
+    assert.ok(
+      flagged.includes('src/engine/dcf.js'),
+      'known-differing tracked file must be flagged',
+    );
+  });
+
+  test('NEGATIVE CONTROL: synthetic untracked engine file is flagged, then cleaned up', () => {
+    const probeName = '__scope_gate_probe__.js';
+    const probePath = path.join(ROOT, 'src', 'engine', probeName);
+    fs.writeFileSync(probePath, '// scope-gate tamper probe (deleted in finally)\n', 'utf8');
     try {
-      changedFiles = execSync('git diff --name-only v1.0-P6R3-base -- src/engine/', { cwd: ROOT, encoding: 'utf8' })
-        .trim()
-        .split('\n')
-        .map((s) => s.trim().replace(/\\/g, '/'))
-        .filter(Boolean);
-    } catch {
-      changedFiles = [];
+      const flagged = unauthorizedEngineFiles('v1.0-P6R3-base', EP_AUTHORIZED_ENGINE);
+      assert.deepEqual(
+        flagged,
+        [`src/engine/${probeName}`],
+        'the untracked probe must be the sole offender',
+      );
+    } finally {
+      fs.rmSync(probePath, { force: true });
     }
-    assert.deepEqual(changedFiles, [], 'src/engine/ must remain byte-identical to v1.0-P6R3-base');
+    assert.ok(!fs.existsSync(probePath), 'probe file is cleaned up');
   });
 
   test('historical corpus 706-record count invariant is strictly preserved', () => {

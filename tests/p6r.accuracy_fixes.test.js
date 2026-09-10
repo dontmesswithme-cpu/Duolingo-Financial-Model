@@ -18,6 +18,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 
+import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
+
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
 import { createApp } from '../src/app.js';
 import { renderAssumptions } from '../src/ui/assumptionsTab.js';
@@ -26,7 +28,6 @@ import { renderSchedules, buildScheduleColumns } from '../src/ui/schedulesTab.js
 import { renderHistoricals, deriveColumnPrimaryCitations, buildTabulatorColumns as buildHistoricalsColumns } from '../src/ui/historicalsTab.js';
 import { buildProjectionColumns } from '../src/ui/projectionsTab.js';
 import { buildDcfColumns } from '../src/ui/valuationTab.js';
-import { buildSensitivityColumns } from '../src/ui/sensitivityTab.js';
 import { extractRows } from '../src/data/schema.js';
 import { formatDriverDisplay, parseDriverInput } from '../src/ui/format.js';
 import { build as buildSchedules } from '../src/engine/schedules.js';
@@ -88,7 +89,7 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
 
     const s = app.state();
     assert.equal(s.scenario, 'base');
-    assert.ok(Math.abs(s.dcf.perShare - 144.082130498451) < 1e-6, 'Base active perShare must match pin');
+    assert.ok(Math.abs(s.dcf.perShare - 118.60167662384697) < 1e-6, 'Base active perShare must match pin');
     assert.ok(Math.abs(s.wacc.wacc.value - 0.110375) < 1e-6, 'Base active WACC must match pin');
 
     const sc = s.scenarios;
@@ -96,17 +97,17 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
 
     // Bear pin: $84.39, WACC 12.985%, g 2.0%
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
-    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4, `Bear target price must be ~$84.39, got ${bearPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4, `Bear target price must be ~$72.38, got ${bearPerShare}`);
     assert.ok(Math.abs((sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value) - 0.129850) < 1e-4);
 
     // Base pin: $144.08, WACC 11.0375%, g 2.5%
     const basePerShare = sc.base?.perShare ?? sc.base?.dcf?.perShare;
-    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-4, `Base target price must be ~$144.08, got ${basePerShare}`);
+    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-4, `Base target price must be ~$118.60, got ${basePerShare}`);
     assert.ok(Math.abs((sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value) - 0.110375) < 1e-4);
 
     // Bull pin: $277.84, WACC 9.24%, g 3.0%
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
-    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4, `Bull target price must be ~$277.84, got ${bullPerShare}`);
+    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4, `Bull target price must be ~$217.98, got ${bullPerShare}`);
     assert.ok(Math.abs((sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value) - 0.092400) < 1e-4);
 
     // Strict ordering
@@ -136,7 +137,7 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
     app.setScenario('bear');
     const s = app.state();
     assert.equal(s.scenario, 'bear');
-    assert.ok(Math.abs(s.dcf.perShare - 84.3890501794256) < 1e-4, 'Active DCF perShare must be Bear');
+    assert.ok(Math.abs(s.dcf.perShare - 72.38359613050305) < 1e-4, 'Active DCF perShare must be Bear');
     assert.ok(Math.abs(s.wacc.wacc.value - 0.129850) < 1e-4, 'Active WACC must be Bear WACC');
 
     const sc = s.scenarios;
@@ -145,9 +146,9 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
 
     // Critical anti-double-delta assertions: Base must NOT mutate to Bear, Bull must NOT mutate to Base
-    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4, 'Bear row in comparison must be 84.39');
-    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-4, `Base row in comparison must remain 144.08, got ${basePerShare}`);
-    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4, `Bull row in comparison must remain 277.84, got ${bullPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4, 'Bear row in comparison must be 72.38');
+    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-4, `Base row in comparison must remain 118.60, got ${basePerShare}`);
+    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4, `Bull row in comparison must remain 217.98, got ${bullPerShare}`);
 
     const baseWacc = sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value;
     const bullWacc = sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value;
@@ -182,7 +183,7 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
     app.setScenario('bull');
     const s = app.state();
     assert.equal(s.scenario, 'bull');
-    assert.ok(Math.abs(s.dcf.perShare - 277.8370238128362) < 1e-4, 'Active DCF perShare must be Bull');
+    assert.ok(Math.abs(s.dcf.perShare - 217.98387088789931) < 1e-4, 'Active DCF perShare must be Bull');
     assert.ok(Math.abs(s.wacc.wacc.value - 0.092400) < 1e-4, 'Active WACC must be Bull WACC');
 
     const sc = s.scenarios;
@@ -191,9 +192,9 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
 
     // Critical anti-double-delta assertions: Bear must NOT shift to Base, Bull must NOT double-delta to 1373
-    assert.ok(Math.abs(bearPerShare - 84.3890501794256) < 1e-4, `Bear row in comparison must remain 84.39, got ${bearPerShare}`);
-    assert.ok(Math.abs(basePerShare - 144.082130498451) < 1e-4, `Base row in comparison must remain 144.08, got ${basePerShare}`);
-    assert.ok(Math.abs(bullPerShare - 277.8370238128362) < 1e-4, `Bull row in comparison must remain 277.84, got ${bullPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4, `Bear row in comparison must remain 72.38, got ${bearPerShare}`);
+    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-4, `Base row in comparison must remain 118.60, got ${basePerShare}`);
+    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4, `Bull row in comparison must remain 217.98, got ${bullPerShare}`);
 
     const bearWacc = sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value;
     const baseWacc = sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value;
@@ -243,8 +244,13 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
 });
 
 describe('P6R.1  -  Sensitivity 9×5 Grid Tracks Active Scenario WACC', () => {
+  // RP8.1 maintenance: the matrix is a semantic `.sensitivity-matrix-table`
+  // heatmap (contract §B), not a Tabulator grid — assertions moved from the
+  // captured column formatter to the rendered table row header.
   test('sensitivity matrix row highlight badge relabels BASE -> ACTIVE', () => {
     const container = createHtmlContainer();
+    // Synthetic vector (249.36-era mock coords, not a live pin): exercises the
+    // ACTIVE row binding without asserting engine truth.
     const sensitivityGrid = {
       base: { wacc: 0.086638, growth: 0.025, perShare: 249.36 },
       waccValues: [0.066638, 0.076638, 0.086638, 0.096638, 0.106638],
@@ -254,27 +260,16 @@ describe('P6R.1  -  Sensitivity 9×5 Grid Tracks Active Scenario WACC', () => {
       },
     };
 
-    let capturedConfig = null;
-    class MockTabulator {
-      constructor(el, cfg) {
-        capturedConfig = cfg;
-      }
-    }
-
-    renderSensitivity({
+    const view = renderSensitivity({
       container,
       sensitivityGrid,
-      TabulatorConstructor: MockTabulator,
     });
 
-    assert.ok(capturedConfig);
-    const labelCol = capturedConfig.columns[0];
-    assert.equal(typeof labelCol.formatter, 'function');
+    assert.ok(view);
+    const html = container.innerHTML;
 
     // Row corresponding to active center WACC emits ACTIVE badge
-    const activeRow = { isBaseWacc: true, isActiveWacc: true, waccLabel: '8.66%' };
-    const html = labelCol.formatter(activeRow);
-    assert.match(html, /ACTIVE/, 'Highlight badge must say ACTIVE');
+    assert.match(html, /8\.66% <span class="badge badge-est">ACTIVE<\/span>/, 'Highlight badge must say ACTIVE');
     assert.doesNotMatch(html, />BASE</, 'Highlight badge must not say BASE');
 
     // Container description states matrix center tracks active scenario WACC
@@ -353,22 +348,38 @@ describe('P6R.1  -  Debt Schedule Lease Rows, Footnotes & Balance Gate', () => {
 });
 
 describe('P6R.1  -  Quality Gates: Frozen Engine, Zero UI Literals & Zero style=', () => {
-  test('git diff v1.0-P6R-base -- src/engine/ touched only authorized files for P6R2', () => {
-    try {
-      const changedFiles = execSync('git diff --name-only v1.0-P6R-base -- src/engine/', { cwd: ROOT, encoding: 'utf8' })
-        .trim()
-        .split('\n')
-        .map((s) => s.trim().replace(/\\/g, '/'))
-        .filter(Boolean);
-      const authorized = ['src/engine/beta.js', 'src/engine/dcf.js', 'src/engine/threeStatement.js'];
-      for (const file of changedFiles) {
-        assert.ok(authorized.includes(file), `Unauthorized engine modification in ${file}`);
-      }
-    } catch {
-      // If tag not resolvable in CI, verify git diff against HEAD for engine files
-      const diff = execSync('git diff HEAD -- src/engine/', { cwd: ROOT, encoding: 'utf8' }).trim();
-      assert.ok(typeof diff === 'string');
-    }
+  test('git diff v1.0-P6R-base -- src/engine/ touched only authorized files', () => {
+    // Authorized drift from the P6R baseline: the P6R2 model-rigor revision
+    // (threeStatement.js), the P6R2.3/P6R3 cost-of-capital files (market.js,
+    // beta.js), the P8 method modules (excluded by the helper, gated by their
+    // own suites), and the Economy Phase set. EP authorization: Director
+    // un-park order 2026-09-10, `docs/logs/ds/economy_phase.md` §5.
+    //
+    // Structural repair (EP-FIX1, F2): the assertion used to sit INSIDE the
+    // `try` block, so its AssertionError was caught by the `catch` and replaced
+    // by a trivially-true check — this test could never go red. The assertion
+    // now runs outside any `try`. See tests/_scope_gate.js.
+    const authorized = [
+      'src/engine/beta.js',
+      'src/engine/market.js',
+      'src/engine/threeStatement.js',
+      ...EP_AUTHORIZED_ENGINE,
+    ];
+    const unauthorized = unauthorizedEngineFiles('v1.0-P6R-base', authorized);
+    assert.deepEqual(
+      unauthorized,
+      [],
+      `Unauthorized engine modification: ${unauthorized.join(', ')}`,
+    );
+  });
+
+  test('NEGATIVE CONTROL: narrowing the allowlist makes the gate go red', () => {
+    const flagged = unauthorizedEngineFiles('v1.0-P6R-base', []);
+    assert.ok(flagged.length > 0, 'helper must report drift when nothing is authorized');
+    assert.ok(
+      flagged.includes('src/engine/threeStatement.js') || flagged.includes('src/engine/dcf.js'),
+      'known-differing tracked file must be flagged',
+    );
   });
 
   test('zero bare numeric literals > 999 outside comments in src/ui/*.js', () => {
@@ -414,7 +425,10 @@ describe('P6R.1  -  Quality Gates: Frozen Engine, Zero UI Literals & Zero style=
         let match;
         while ((match = numberRegex.exec(code)) !== null) {
           const num = Number(match[1]);
-          if (num === 1000 || num === 1280 || num === 1900 || num === 2000) continue;
+          // Filing-date years in cited prose/asOf fallbacks (Warning #2 disposition,
+          // EP.4): reviewed calendar years, not financial figures. The P8.0
+          // orphan-figure gate audits user-visible numerals separately.
+          if (num === 1000 || num === 1280 || num === 1900 || num === 2000 || num === 2025 || num === 2026) continue;
           assert.fail(
             `File src/ui/${file} line ${i + 1} contains bare numeric literal: ${match[1]} in code: "${lines[i].trim()}"`,
           );
@@ -777,9 +791,9 @@ describe('P6R.4  -  Historicals Citation Hybrid & Cross-Tab Calibration', () => 
     });
 
     const html = container.innerHTML;
-    assert.match(html, /<details class="source-drawer">/);
-    assert.match(html, /Audit &amp; Filing Citations Directory/);
-    assert.match(html, /6 cited filings/);
+    assert.match(html, /<div class="audit-center"/);
+    assert.match(html, /SEC Audit Center &amp; Primary Source Filings/);
+    assert.match(html, /6 SEC filings integrated/);
     assert.match(html, /duol-20231231\.htm/);
     assert.match(html, /duol-20251231\.htm/);
     assert.match(html, /duol-20250930\.htm/);
@@ -813,11 +827,8 @@ describe('P6R.4  -  Historicals Citation Hybrid & Cross-Tab Calibration', () => 
     assert.equal(dcfCols[0].frozen, true, 'Valuation label column frozen');
     assert.equal(dcfCols[1].minWidth, 95, 'Valuation period column minWidth');
 
-    // Sensitivity
-    const sensCols = buildSensitivityColumns([0.02, 0.025]);
-    assert.equal(sensCols[0].minWidth, 200, 'Sensitivity WACC column minWidth');
-    assert.equal(sensCols[0].frozen, true, 'Sensitivity WACC column frozen');
-    assert.equal(sensCols[1].minWidth, 95, 'Sensitivity growth column minWidth');
+    // Sensitivity (RP8.1 maintenance: semantic `.sensitivity-matrix-table`
+    // heatmap per contract §B — no Tabulator column calibration applies)
   });
 
   test('shared layout wrapper in index.html includes historicals, schedules, projections', () => {

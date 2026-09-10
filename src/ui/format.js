@@ -163,7 +163,8 @@ export function isRatioUnit(units) {
  * @returns {string}
  */
 export function humanizeUnits(units) {
-  if (!units || isRatioUnit(units)) return '';
+  if (!units) return '';
+  if (isRatioUnit(units)) return '%';
   if (units === 'days') return 'days';
   if (units === 'thousands_usd') return '$k';
   if (units === 'usd_per_subscriber_year') return '$/sub';
@@ -185,6 +186,12 @@ export function formatDriverDisplay(value, units) {
     return ' - ';
   }
   if (isRatioUnit(units)) {
+    const pctVal = value * 100;
+    const rounded2 = Number(pctVal.toFixed(2));
+    if (Math.abs(pctVal - rounded2) > 1e-4) {
+      const rounded4 = Number(pctVal.toFixed(4));
+      return `${rounded4}%`;
+    }
     return percent(value, { decimals: 2 });
   }
   return String(value);
@@ -251,6 +258,76 @@ export const SCENARIO_DISPLAY_NAMES = Object.freeze({
   bull: 'Upside',
 });
 
+/**
+ * Wraps a numeric or text value with a tabular-nums span for strict decimal alignment.
+ *
+ * @param {string|number|null|undefined} value
+ * @param {string} [className='tabular-nums']
+ * @returns {string}
+ */
+export function tabularNums(value, className = 'tabular-nums') {
+  if (value === null || value === undefined) return '';
+  return `<span class="${className}">${value}</span>`;
+}
+
+export function formatTabularNumber(value, { decimals = 0, dash = ' - ', parenthesesNegative = true } = {}) {
+  if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
+    return dash;
+  }
+  if (value === 0) {
+    return '0';
+  }
+  const isNeg = value < 0;
+  const absVal = Math.abs(value);
+  const formatted = decimals > 0
+    ? absVal.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    : Math.round(absVal).toLocaleString('en-US');
+
+  if (isNeg) {
+    return parenthesesNegative ? `(${formatted})` : `-${formatted}`;
+  }
+  return formatted;
+}
+
+/**
+ * Enhanced accounting number formatter (Task RP4.2).
+ * Formats negative numbers in parentheses e.g. (1,033),
+ * zero as em-dash ('—') or custom zero string,
+ * non-finite as ' - '.
+ *
+ * @param {number|null|undefined} value
+ * @param {object} [options]
+ * @param {number} [options.decimals=0]
+ * @param {boolean} [options.showCurrency=false]
+ * @param {string} [options.zeroDisplay='—']
+ * @param {string} [options.dash=' - ']
+ * @returns {string}
+ */
+export function formatAccounting(value, {
+  decimals = 0,
+  showCurrency = false,
+  zeroDisplay = '—',
+  dash = ' - ',
+} = {}) {
+  if (value === null || value === undefined || typeof value !== 'number' || !Number.isFinite(value)) {
+    return dash;
+  }
+  if (Math.abs(value) < 1e-6) {
+    return zeroDisplay;
+  }
+  const isNeg = value < 0;
+  const absVal = Math.abs(value);
+  const formatted = decimals > 0
+    ? absVal.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    : Math.round(absVal).toLocaleString('en-US');
+
+  const curr = showCurrency ? '$' : '';
+  if (isNeg) {
+    return `(${curr}${formatted})`;
+  }
+  return `${curr}${formatted}`;
+}
+
 export default Object.freeze({
   usd,
   percent,
@@ -262,6 +339,9 @@ export default Object.freeze({
   formatDriverDisplay,
   parseDriverInput,
   formatDisplayText,
+  tabularNums,
+  formatTabularNumber,
+  formatAccounting,
   SCENARIO_DISPLAY_NAMES,
 });
 

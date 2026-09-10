@@ -31,12 +31,14 @@ import { valuate as valuateDcf } from './engine/dcf.js';
 import {
   evaluate as evaluateRec,
   buildSensitivityGrid,
+  buildLabelStability,
   runFullValuation,
 } from './engine/recommend.js';
 import { apply as applyScenario, list as listScenarios } from './engine/scenarios.js';
 import { compute as computeTtm } from './engine/ttm.js';
 import { LEDGER_URLS } from './data/ledger.js';
 import { createTabs, TAB_KEYS } from './ui/tabs.js';
+import { renderCover } from './ui/coverTab.js';
 import { renderAssumptions } from './ui/assumptionsTab.js';
 import { renderHistoricals } from './ui/historicalsTab.js';
 import { renderSchedules } from './ui/schedulesTab.js';
@@ -391,6 +393,7 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
   const recommend = engine?.recommend ?? {
     evaluate: evaluateRec,
     buildSensitivityGrid,
+    buildLabelStability,
     runFullValuation,
   };
   const scenarios = engine?.scenarios ?? { apply: applyScenario, list: listScenarios };
@@ -408,6 +411,7 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
   const snapshotPrice = snapshotDriver && Number.isFinite(snapshotDriver.value) ? snapshotDriver.value : 0;
   const snapshotAsOf = snapshotDriver?.asOf || '';
   let marketPriceState = createMarketPriceState(snapshotPrice, snapshotAsOf);
+  let coverView = null;
   let assumptionsView = null;
   let historicalsView = null;
   let schedulesView = null;
@@ -415,6 +419,49 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
   let valuationView = null;
   let summaryView = null;
   let sensitivityView = null;
+  let computeSensitivityGrid = () => null;
+  let computeScenarios = () => null;
+
+  // Live model state.
+  let currentMethods = null;
+  let currentVerdict = null;
+
+  const model = {
+    assumptions: null,
+    scenario: DEFAULT_SCENARIO,
+    schedules: null,
+    forecast: null,
+    threeStatement: null,
+    wacc: null,
+    dcf: null,
+    recommendation: null,
+    dirty: false,
+  };
+
+  Object.defineProperties(model, {
+    methods: {
+      get() { return currentMethods; },
+      set(val) { currentMethods = val; },
+      enumerable: false,
+      configurable: true,
+    },
+    verdict: {
+      get() { return currentVerdict; },
+      set(val) { currentVerdict = val; },
+      enumerable: false,
+      configurable: true,
+    },
+    sensitivityGrid: {
+      get() { return computeSensitivityGrid(); },
+      enumerable: false,
+      configurable: true,
+    },
+    scenarios: {
+      get() { return computeScenarios(); },
+      enumerable: false,
+      configurable: true,
+    },
+  });
 
   // Tab shell router
   const tabRouter = createTabs({
@@ -482,6 +529,26 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
           }
         }
       }
+
+      if (model.assumptions) {
+        if (key === 'cover' && coverView) {
+          coverView.update(model.dcf, model.wacc, model.recommendation, model.assumptions, model.threeStatement, model.methods, model.verdict, marketPriceState, model.schedules);
+        } else if (key === 'assumptions' && assumptionsView) {
+          assumptionsView.update(model.assumptions);
+        } else if (key === 'historicals' && historicalsView) {
+          historicalsView.update(historical, computeTtm(historical));
+        } else if (key === 'schedules' && schedulesView) {
+          schedulesView.update(model.schedules, model.threeStatement);
+        } else if (key === 'projections' && projectionsView) {
+          projectionsView.update(model.threeStatement, historical);
+        } else if (key === 'valuation' && valuationView) {
+          valuationView.update(model.wacc, model.dcf, model.assumptions, null, marketPriceState, model.methods, model.verdict);
+        } else if (key === 'summary' && summaryView) {
+          summaryView.update(model.dcf, model.recommendation, null, historical, model.assumptions, model.threeStatement, marketPriceState, model.verdict, model.methods, model.sensitivityGrid, model.labelStability);
+        } else if (key === 'sensitivity' && sensitivityView) {
+          sensitivityView.update(computeSensitivityGrid(), computeScenarios(), model.dcf, marketPriceState, model.scenario);
+        }
+      }
     },
   });
 
@@ -533,48 +600,25 @@ export function createApp({ data, engine, root, now, historical = null, assumpti
     }
   }
 
-  // Live model state.
-  let currentMethods = null;
-  let currentVerdict = null;
+  // Target tab containers if present in root
+  const coverPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="cover"]') : null) ||
+                    (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-cover') : null);
+  const assumptionsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="assumptions"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-assumptions') : null);
+  const historicalsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="historicals"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-historicals') : null);
+  const schedulesPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="schedules"]') : null) ||
+                        (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-schedules') : null);
+  const projectionsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="projections"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-projections') : null);
+  const valuationPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="valuation"]') : null) ||
+                        (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-valuation') : null);
+  const summaryPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="summary"]') : null) ||
+                      (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-summary') : null);
+  const sensitivityPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="sensitivity"]') : null) ||
+                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-sensitivity') : null);
 
-  const model = {
-    assumptions: null,
-    scenario: DEFAULT_SCENARIO,
-    schedules: null,
-    forecast: null,
-    threeStatement: null,
-    wacc: null,
-    dcf: null,
-    recommendation: null,
-    dirty: false,
-  };
 
-  Object.defineProperties(model, {
-    methods: {
-      get() { return currentMethods; },
-      set(val) { currentMethods = val; },
-      enumerable: false,
-      configurable: true,
-    },
-    verdict: {
-      get() { return currentVerdict; },
-      set(val) { currentVerdict = val; },
-      enumerable: false,
-      configurable: true,
-    },
-    sensitivityGrid: {
-      value: null,
-      writable: true,
-      enumerable: false,
-      configurable: true,
-    },
-    scenarios: {
-      value: null,
-      writable: true,
-      enumerable: false,
-      configurable: true,
-    },
-  });
 
 /**
  * Applies driver overrides to an AssumptionSet while preserving immutability.
@@ -659,49 +703,91 @@ function applyDriverOverrides(assumptions, overrides) {
     });
     const dcfOut = dcf.valuate(threeStatementOut, waccOut, {
       assumptions: workingAssumptions,
+      corpus: historical,
     });
 
     const effectiveMarketPrice = driverOverrides.has('market_share_price')
       ? driverOverrides.get('market_share_price')
       : marketPriceState.price;
     const recOut = recommend.evaluate(dcfOut.perShare, effectiveMarketPrice);
-    let sensitivityGridOut = null;
-    if (typeof recommend.buildSensitivityGrid === 'function') {
-      const activeWacc = typeof waccOut === 'number' ? waccOut : (waccOut.wacc?.value ?? waccOut.wacc ?? waccOut.value);
-      const activeG = requireDriver(workingAssumptions, 'terminal_growth_rate').value;
-      const axes = computeSensitivityAxes(activeWacc, activeG);
 
-      const gridInput = {
+    // EP.4 verdict-sensitivity band (engine-derived; follows the active drivers).
+    let labelStabilityOut = null;
+    if (typeof recommend.buildLabelStability === 'function') {
+      labelStabilityOut = recommend.buildLabelStability({
         threeStatement: threeStatementOut,
+        dcf: dcfOut,
         assumptions: workingAssumptions,
-        wacc: waccOut,
-        growthValues: axes.growthValues,
-      };
-      if (axes.axisNarrowed) {
-        gridInput.waccValues = axes.waccValues;
-      }
-
-      const rawGrid = recommend.buildSensitivityGrid(gridInput);
-      sensitivityGridOut = Object.freeze({
-        ...rawGrid,
-        axisNarrowed: axes.axisNarrowed,
+        corpus: historical,
       });
     }
 
-    // Step 4: Scenario comparison table (computes each case as neutral state + that scenario's deltas)
-    const scenariosOut = typeof recommend.runFullValuation === 'function' && historical && neutralAssumptions
-      ? {
+    let cachedSensitivityGrid = null;
+    let cachedScenarios = null;
+
+    computeSensitivityGrid = () => {
+      if (cachedSensitivityGrid) return cachedSensitivityGrid;
+      if (typeof recommend.buildSensitivityGrid === 'function') {
+        const activeWacc = typeof waccOut === 'number' ? waccOut : (waccOut.wacc?.value ?? waccOut.wacc ?? waccOut.value);
+        const activeG = requireDriver(workingAssumptions, 'terminal_growth_rate').value;
+        const axes = computeSensitivityAxes(activeWacc, activeG);
+
+        const gridInput = {
+          threeStatement: threeStatementOut,
+          assumptions: workingAssumptions,
+          wacc: waccOut,
+          growthValues: axes.growthValues,
+          corpus: historical,
+        };
+        if (axes.axisNarrowed) {
+          gridInput.waccValues = axes.waccValues;
+        }
+
+        const rawGrid = recommend.buildSensitivityGrid(gridInput);
+        cachedSensitivityGrid = Object.freeze({
+          ...rawGrid,
+          axisNarrowed: axes.axisNarrowed,
+        });
+      }
+      return cachedSensitivityGrid;
+    };
+
+    computeScenarios = () => {
+      if (cachedScenarios) return cachedScenarios;
+      if (typeof recommend.runFullValuation === 'function' && historical && neutralAssumptions) {
+        const baseCase = { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut };
+        const rawScenarios = {
           [SCENARIO_NAMES[0]]: activeScenario === SCENARIO_NAMES[0]
-            ? { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut }
+            ? baseCase
             : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[0]),
           [SCENARIO_NAMES[1]]: activeScenario === SCENARIO_NAMES[1]
-            ? { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut }
+            ? baseCase
             : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[1]),
           [SCENARIO_NAMES[2]]: activeScenario === SCENARIO_NAMES[2]
-            ? { scenario: activeScenario, wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions: workingAssumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct, threeStatement: threeStatementOut, schedules: schedulesOut, forecast: forecastOut }
+            ? baseCase
             : recommend.runFullValuation(historical, neutralAssumptions, SCENARIO_NAMES[2]),
+        };
+        for (const k of SCENARIO_NAMES) {
+          const sc = rawScenarios[k];
+          if (sc && sc.dcf && sc.threeStatement && !sc.methods) {
+            const scMulti = computeMultiMethodValuation({
+              dcfOut: sc.dcf,
+              threeStatementOut: sc.threeStatement,
+              historical,
+              peers: peersDataset,
+              marketPrice: benchmarkPrice,
+            });
+            rawScenarios[k] = Object.freeze({
+              ...sc,
+              methods: scMulti.methods,
+              verdict: scMulti.verdict,
+            });
+          }
         }
-      : null;
+        cachedScenarios = rawScenarios;
+      }
+      return cachedScenarios;
+    };
 
     // Step 5: Multi-method valuation synthesis & agreement verdict
     const benchmarkPrice = Number.isFinite(marketPriceState?.price)
@@ -716,26 +802,6 @@ function applyDriverOverrides(assumptions, overrides) {
       marketPrice: benchmarkPrice,
     });
 
-    if (scenariosOut) {
-      for (const k of SCENARIO_NAMES) {
-        const sc = scenariosOut[k];
-        if (sc && sc.dcf && sc.threeStatement) {
-          const scMulti = computeMultiMethodValuation({
-            dcfOut: sc.dcf,
-            threeStatementOut: sc.threeStatement,
-            historical,
-            peers: peersDataset,
-            marketPrice: benchmarkPrice,
-          });
-          scenariosOut[k] = Object.freeze({
-            ...sc,
-            methods: scMulti.methods,
-            verdict: scMulti.verdict,
-          });
-        }
-      }
-    }
-
     model.assumptions = workingAssumptions;
     model.scenario = activeScenario;
     model.schedules = schedulesOut;
@@ -744,14 +810,18 @@ function applyDriverOverrides(assumptions, overrides) {
     model.wacc = waccOut;
     model.dcf = dcfOut;
     model.recommendation = recOut;
-    model.sensitivityGrid = sensitivityGridOut;
-    model.scenarios = scenariosOut;
+    model.labelStability = labelStabilityOut;
     model.methods = multiMethodOut.methods;
     model.verdict = multiMethodOut.verdict;
     model.dirty = isDirty;
 
+    const isPaneVisible = (pane) => !pane || typeof pane.hasAttribute !== 'function' || !pane.hasAttribute('hidden');
+
+    if (coverView) {
+      coverView.update(dcfOut, waccOut, recOut, workingAssumptions, threeStatementOut, multiMethodOut.methods, multiMethodOut.verdict, marketPriceState, schedulesOut);
+    }
     if (assumptionsView) {
-      assumptionsView.update(workingAssumptions);
+      assumptionsView.update(workingAssumptions, { historical, threeStatement: threeStatementOut, schedules: schedulesOut });
     }
     if (historicalsView) {
       historicalsView.update(historical, computeTtm(historical));
@@ -766,10 +836,10 @@ function applyDriverOverrides(assumptions, overrides) {
       valuationView.update(waccOut, dcfOut, workingAssumptions, null, marketPriceState, multiMethodOut.methods, multiMethodOut.verdict);
     }
     if (summaryView) {
-      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut, marketPriceState, multiMethodOut.verdict, multiMethodOut.methods);
+      summaryView.update(dcfOut, recOut, null, historical, workingAssumptions, threeStatementOut, marketPriceState, multiMethodOut.verdict, multiMethodOut.methods, computeSensitivityGrid(), labelStabilityOut);
     }
-    if (sensitivityView && sensitivityGridOut) {
-      sensitivityView.update(sensitivityGridOut, scenariosOut, dcfOut, marketPriceState);
+    if (sensitivityView && isPaneVisible(sensitivityPane)) {
+      sensitivityView.update(computeSensitivityGrid(), computeScenarios(), dcfOut, marketPriceState, activeScenario);
     }
   }
 
@@ -777,22 +847,6 @@ function applyDriverOverrides(assumptions, overrides) {
   if (historical && baseAssumptions) {
     recalculate();
   }
-
-  // Target tab containers if present in root
-  const assumptionsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="assumptions"]') : null) ||
-                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-assumptions') : null);
-  const historicalsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="historicals"]') : null) ||
-                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-historicals') : null);
-  const schedulesPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="schedules"]') : null) ||
-                        (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-schedules') : null);
-  const projectionsPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="projections"]') : null) ||
-                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-projections') : null);
-  const valuationPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="valuation"]') : null) ||
-                        (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-valuation') : null);
-  const summaryPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="summary"]') : null) ||
-                      (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-summary') : null);
-  const sensitivityPane = (root && typeof root.querySelector === 'function' ? root.querySelector('[data-tab-pane][data-tab="sensitivity"]') : null) ||
-                          (root && typeof root.querySelector === 'function' ? root.querySelector('#tab-sensitivity') : null);
 
   const app = {
     /**
@@ -914,6 +968,10 @@ function applyDriverOverrides(assumptions, overrides) {
     dispose() {
       if (disposed) return;
       disposed = true;
+      if (coverView) {
+        coverView.dispose();
+        coverView = null;
+      }
       if (assumptionsView) {
         assumptionsView.dispose();
         assumptionsView = null;
@@ -959,10 +1017,28 @@ function applyDriverOverrides(assumptions, overrides) {
   };
 
   // Mount views if containers are present in root
+  if (coverPane) {
+    coverView = renderCover({
+      container: coverPane,
+      dcf: model.dcf,
+      wacc: model.wacc,
+      recommendation: model.recommendation,
+      assumptions: model.assumptions || baseAssumptions,
+      threeStatement: model.threeStatement,
+      methods: model.methods,
+      verdict: model.verdict,
+      marketPriceState,
+      schedules: model.schedules,
+    });
+  }
+
   if (assumptionsPane && baseAssumptions) {
     assumptionsView = renderAssumptions({
       container: assumptionsPane,
       assumptions: model.assumptions || baseAssumptions,
+      historical,
+      threeStatement: model.threeStatement,
+      schedules: model.schedules,
       onDriverChange: (name, val) => app.setDriver(name, val),
       onScenarioChange: (sc) => app.setScenario(sc),
     });
@@ -1017,6 +1093,8 @@ function applyDriverOverrides(assumptions, overrides) {
       onRefreshPrice: () => app.fetchPrice(),
       methods: model.methods,
       verdict: model.verdict,
+      sensitivityGrid: model.sensitivityGrid,
+      labelStability: model.labelStability,
     });
   }
 
@@ -1027,6 +1105,8 @@ function applyDriverOverrides(assumptions, overrides) {
       scenarios: model.scenarios,
       dcf: model.dcf,
       marketPriceState,
+      activeScenario: model.scenario,
+      onScenarioChange: (sc) => app.setScenario(sc),
     });
   }
 

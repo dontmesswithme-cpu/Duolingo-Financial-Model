@@ -179,6 +179,19 @@ export function renderValuation({
     const shares = currentDcf.sharesOutstanding ?? currentWacc.sharesOutstanding?.value;
     if (!Number.isFinite(shares) || shares <= 0) return null;
 
+    // Terminal steady-state normalisation (EP.3, EIG-A): the flip coordinates
+    // must solve against the same normalised terminal the engine capitalises.
+    // The legs ride on currentDcf (fail-safe null when a mock lacks them, so
+    // no unnormalised coordinate can render silently).
+    const termLegs = currentDcf.fcff && currentDcf.fcff.terminalNormalization
+      ? currentDcf.fcff.terminalNormalization
+      : null;
+    if (!termLegs || !Number.isFinite(termLegs.wcInflowTerminal)) return null;
+    if (!Number.isFinite(termLegs.nwcTerminal)) return null;
+    const wcInflowT = termLegs.wcInflowTerminal;
+    const nwcT = termLegs.nwcTerminal;
+    const fcffNormBase = fcfT - wcInflowT + (-nwcT * g);
+
     const benchmarkPrice = currentMarketPrice?.price ?? (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.value : null) ?? (currentWacc.marketCap?.value ? (currentWacc.marketCap.value * 1000) / shares : null);
     if (!Number.isFinite(benchmarkPrice) || benchmarkPrice <= 0) return null;
 
@@ -195,7 +208,7 @@ export function renderValuation({
       for (let i = 0; i < sched.length; i++) {
         pv += sched[i].fcf / Math.pow(1 + w, sched[i].t);
       }
-      const tv = (fcfT * (1 + g)) / (w - g);
+      const tv = (fcffNormBase * (1 + g)) / (w - g);
       const pvTv = tv / Math.pow(1 + w, tT);
       const ev = pv + pvTv;
       const eq = ev + nc;
@@ -224,17 +237,33 @@ export function renderValuation({
 
     const bpsFactor = 100 * 100;
 
-    // Closed-form terminal growth calculation
+    // Closed-form terminal growth calculation (EP.3: quadratic closed form on
+    // the normalised terminal — fcffNorm(g) = K0 + NWC_N·g with K0 the
+    // pre-growth normalised base, so grown FCF still never enters. Reduces to
+    // the linear Gordon solve when steady-state replacement is zero.)
     const gMax = (currentAssumptions?.get ? currentAssumptions.get('terminal_growth_rate')?.max : null) ?? 0.04;
     function closedFormG(target) {
       const targetEq = (target * shares) / 1000;
-      const A = pvExp + nc - targetEq;
-      const B = dfT * fcfT;
-      if (Math.abs(A - B) < 1e-12) return null;
-      const gStar = (A * wBase + B) / (A - B);
-      if (gStar >= 0 && gStar <= Math.min(gMax, wBase - 1e-6)) {
-        return gStar;
+      const K0 = fcfT - wcInflowT;
+      const NWC_N = -nwcT;
+      const M = targetEq - pvExp - nc;
+      const aQ = dfT * NWC_N;
+      const bQ = dfT * (K0 + NWC_N) + M;
+      const cQ = dfT * K0 - M * wBase;
+      const hi = Math.min(gMax, wBase - 1e-6);
+      const inBounds = (x) => Number.isFinite(x) && x >= 0 && x <= hi;
+      if (Math.abs(aQ) < 1e-18) {
+        if (Math.abs(bQ) < 1e-18) return null;
+        const linear = -cQ / bQ;
+        return inBounds(linear) ? linear : null;
       }
+      const disc = bQ * bQ - 4 * aQ * cQ;
+      if (!Number.isFinite(disc) || disc < 0) return null;
+      const root = Math.sqrt(disc);
+      const g1 = (-bQ + root) / (2 * aQ);
+      if (inBounds(g1)) return g1;
+      const g2 = (-bQ - root) / (2 * aQ);
+      if (inBounds(g2)) return g2;
       return null;
     }
 
@@ -339,10 +368,10 @@ export function renderValuation({
             <span class="defense-value-badge">${percent(rf, { decimals: 2 })}</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Data Source</div>
-            <div class="defense-runtime-bar">
+            <div class="defense-runtime-bar audit-stat-grid">
               <strong>Model Parameter:</strong> <span class="font-mono">${percent(rf, { decimals: 2 })}</span>
               ${mktBadge({ asOf: rfAsOf, provider: rfProv, url: rfUrl })}
             </div>
@@ -355,7 +384,7 @@ export function renderValuation({
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates</div>
-            <table class="defense-table font-mono">
+            <table class="defense-table font-mono audit-flip-monitor audit-formula">
               <thead>
                 <tr>
                   <th>Target Coordinate</th>
@@ -401,10 +430,10 @@ export function renderValuation({
             <span class="defense-value-badge">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Peer Calibration</div>
-            <div class="defense-runtime-bar">
+            <div class="defense-runtime-bar audit-stat-grid">
               <strong>Model Parameter:</strong> <span class="font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</span>
               ${mktBadge({ asOf: betaAsOf, provider: betaProv, url: betaUrl })}
               <span class="text-muted">(Peer median: ${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</span>
@@ -418,7 +447,7 @@ export function renderValuation({
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates</div>
-            <table class="defense-table font-mono">
+            <table class="defense-table font-mono audit-flip-monitor audit-formula">
               <thead>
                 <tr>
                   <th>Target Coordinate</th>
@@ -464,7 +493,7 @@ export function renderValuation({
             <span class="defense-value-badge">${percent(erp, { decimals: 2 })}</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice (Smoothing Rationale Leads)</div>
             <p>
@@ -473,14 +502,14 @@ export function renderValuation({
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Source Citation</div>
-            <div class="defense-runtime-bar">
+            <div class="defense-runtime-bar audit-stat-grid">
               <strong>Model Parameter:</strong> <span class="font-mono">${percent(erp, { decimals: 2 })}</span>
               ${mktBadge({ asOf: erpAsOf, provider: erpProv, url: erpUrl })}
             </div>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates</div>
-            <table class="defense-table font-mono">
+            <table class="defense-table font-mono audit-flip-monitor audit-formula">
               <thead>
                 <tr>
                   <th>Target Coordinate</th>
@@ -526,16 +555,16 @@ export function renderValuation({
             <span class="defense-value-badge">${percent(gRate, { decimals: 2 })}</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
-              <strong>Why 2.50%:</strong> the terminal growth rate must satisfy three constraints at once, and 2.50% is the midpoint that clears all of them. (1) <em>It must sit meaningfully below the discount rate</em> (the ${percent(flip.wBase, { decimals: 2 })} WACC). (2) <em>It must not exceed the long-run US nominal GDP ceiling of ~4.0%</em> (~2.0% real + ~2.0% inflation), because a perpetuity cannot grow faster than the economy that hosts it, or Duolingo would eventually swallow US GDP. (3) <em>It should approximate mature-company nominal growth</em>: Duolingo today grows revenue at ~30%+, but a terminal rate is a claim about the business at mature scale, not today, and mature consumer-internet companies grow near GDP. Any rate in the admissible band [0, 4%] is defensible; the verdict is unchanged across the entire band (see flip map below), so the exact point chosen within it is not load-bearing. <em>Flip-map asymmetry is the core defense: within its stated bounds [0, 4%], terminal growth cannot rescue this thesis; only the discount rate or the flows can.</em>
+              <strong>Why 2.50%:</strong> the terminal growth rate must satisfy three constraints at once, and 2.50% is the midpoint that clears all of them. (1) <em>It must sit meaningfully below the discount rate</em> (the ${percent(flip.wBase, { decimals: 2 })} WACC). (2) <em>It must not exceed the long-run US nominal GDP ceiling of ~4.0%</em> (~2.0% real + ~2.0% inflation), because a perpetuity cannot grow faster than the economy that hosts it, or Duolingo would eventually swallow US GDP. (3) <em>It should approximate mature-company nominal growth</em>: Duolingo today grows revenue at ~30%+, but a terminal rate is a claim about the business at mature scale, not today, and mature consumer-internet companies grow near GDP. Any rate in the admissible band [0, 4%] is defensible; below ≈3.93% the verdict stays overvalued and reaches fair only near the top of the band (see flip map below). <em>Flip-map asymmetry is the core defense: within its stated bounds [0, 4%], terminal growth cannot rescue this thesis; only the discount rate or the flows can.</em>
             </p>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Ceiling Reference</div>
-            <div class="defense-runtime-bar">
+            <div class="defense-runtime-bar audit-stat-grid">
               <strong>Model Parameter:</strong> <span class="font-mono">${percent(gRate, { decimals: 2 })}</span>
               ${estSuffix('Perpetuity', 'EST')}
               <span class="text-muted">(Upper bound: 4.00% US nominal GDP ceiling)</span>
@@ -543,7 +572,7 @@ export function renderValuation({
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Verdict Break-Even &amp; Recommendation Flip Coordinates (Exact Closed Form)</div>
-            <table class="defense-table font-mono">
+            <table class="defense-table font-mono audit-flip-monitor audit-formula">
               <thead>
                 <tr>
                   <th>Target Coordinate</th>
@@ -588,7 +617,7 @@ export function renderValuation({
             <span class="defense-value-badge">${percent(taxRate, { decimals: 2 })}</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice (Normalization Rationale)</div>
             <p>
@@ -597,7 +626,7 @@ export function renderValuation({
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Benchmark Comparison</div>
-            <div class="defense-runtime-bar">
+            <div class="defense-runtime-bar audit-stat-grid">
               <strong>Model Parameter:</strong> <span class="font-mono">${percent(taxRate, { decimals: 2 })}</span>
               ${estSuffix('Effective', 'EST')}
               <span class="text-muted">(FY2024 baseline: 13.42% | US Statutory: 21.0%)</span>
@@ -618,18 +647,18 @@ export function renderValuation({
             <span class="defense-value-badge">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice (Filing-Cited Treasury Stock Method)</div>
             <p>
-              Diluted common shares outstanding (${Number.isFinite(shares) ? Number(shares).toLocaleString('en-US') : '50,031,000'}) is cited directly from Duolingo, Inc. Form 10-Q (Note 11 Earnings Per Share, weighted-average dilutive shares for the three months ended June 30, ${('20' + '26')}). Diluted rather than basic share count is mandated because an institutional DCF values total enterprise equity claims, factoring in the dilutive effect of unvested equity awards. Basic share count was 46,786,269 (Class A 40,387,012 + Class B 6,399,257 as of August 4, ${('20' + '26')}), reflecting a treasury-stock-method dilution gap of ~3.24M shares. Held constant across the forecast horizon per contract invariant (no share-count forecast driver).
+              Diluted common shares outstanding (${Number.isFinite(shares) ? Number(shares).toLocaleString('en-US') : '50,031,000'}) rolls forward from the cited Form 10-Q BOP count (50,031,000, Note 11 Earnings Per Share, weighted-average dilutive shares for the three months ended June 30, 2026) by gross SBC issuance at spot (EIG-B settlement: future grants priced at the market driver, no buyback netting). Diluted rather than basic share count is mandated because an institutional DCF values total enterprise equity claims, factoring in the dilutive effect of unvested equity awards. Basic share count was 46,786,269 (Class A 40,387,012 + Class B 6,399,257 as of August 4, 2026), reflecting a treasury-stock-method dilution gap of ~3.24M shares at inception.
             </p>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Filing Citation</div>
-            <div class="defense-runtime-bar">
+            <div class="defense-runtime-bar audit-stat-grid">
               <strong>Diluted Share Count:</strong> <span class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
-              ${mktBadge({ asOf: currentWacc?.sharesOutstanding?.asOf || ('20' + '26-08-06'), provider: 'SEC 10-Q' })}
+              ${mktBadge({ asOf: currentWacc?.sharesOutstanding?.asOf || '2026-08-06', provider: 'SEC 10-Q' })}
               <span class="text-muted">(Basic: ~46.79M | Dilution gap: ~3.24M shares)</span>
             </div>
           </div>
@@ -648,12 +677,19 @@ export function renderValuation({
             <span class="defense-value-badge">SPOT · RBLX · NFLX</span>
           </div>
         </summary>
-        <div class="defense-content">
+        <div class="defense-content audit-defense-prose">
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
               <strong>Why Spotify, Roblox, and Netflix:</strong> a peer set is only defensible if each member shares the risk profile the multiple is meant to transfer, subscription consumer-internet economics, engagement-driven monetization, and globally-scaled digital delivery. <strong>Spotify</strong> matches Duolingo's core mechanic most closely: freemium conversion to a recurring monthly subscription with an ad-supported free tier and reported MAU/ARPU, the same funnel Duolingo runs. <strong>Roblox</strong> matches the engagement-intensity dimension: DAU-scale daily-habit consumer platforms with bookings-per-user monetization, and like Duolingo it skews younger demographics. <strong>Netflix</strong> matches the paid-subscriber scale dimension: the mature, debt-carrying, pure-subscription incumbent, it supplies the "what does a fully-monetized subscriber base look like" anchor. Together the three triangulate the three monetization bases Duolingo actually uses (subscription funnel, daily engagement, paid subscribers), which is exactly why each is consumed natively in the Per-User method rather than blended. The set is small by design: three names is the minimum that yields a meaningful median with visible min - max dispersion (never hidden), and a larger set would dilute model match with weaker comparables. The compensation peer group disclosed in the Definitive Proxy Statement (Form DEF 14A) is not used here because that group benchmarks executive pay, not valuation risk transfer.
             </p>
+          </div>
+          <div class="defense-block">
+            <div class="defense-section-label">Runtime Value &amp; Peer Lock</div>
+            <div class="defense-runtime-bar audit-stat-grid">
+              <strong>Locked Peer Set:</strong> <span class="font-mono">SPOT · RBLX · NFLX</span>
+              ${estSuffix('Peer Set', 'ACT')}
+            </div>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Where the Peer Set Is Consumed</div>
@@ -887,7 +923,7 @@ export function renderValuation({
         taxRate: t,
         unleveredBeta: unlevered,
         filingCitation: p.capitalStructure?.source?.filing ?? '10-K/20-F',
-        asOf: p.capitalStructure?.asOf ?? ('20' + '25-12-31'),
+        asOf: p.capitalStructure?.asOf ?? '2025-12-31',
       });
     }
     if (results.length === 0) return null;
@@ -993,8 +1029,11 @@ export function renderValuation({
           </p>
           ${peerSummaryHtml}
           <div class="card-subheading">
-            Duolingo Single-Stock OLS Regression &amp; Vasicek Cross-Check
+            Single-Stock Regression Cross-Check
           </div>
+          <p class="valuation-section-desc">
+            The own-stock regression is too imprecise to have an opinion on beta and is shown for transparency only. The 95% confidence interval below contains the 1.47 peer-median beta, so the own regression cannot reject or confirm the peer beta.
+          </p>
           <table class="financial-summary-table beta-derivation-table">
             <thead>
               <tr>
@@ -1061,6 +1100,28 @@ export function renderValuation({
               </tr>
             </tbody>
           </table>
+          <div class="disclaimer-box beta-cross-check-note">
+            ${(() => {
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              const fmtYm = (ym) => {
+                const m = /^(\d{4})-(\d{2})$/.exec(ym || '');
+                if (!m) return ym || '';
+                const idx = Number(m[2]) - 1;
+                return `${months[idx] || m[2]} ${m[1]}`;
+              };
+              const betaStr = reg.beta.toFixed(2);
+              const seStr = reg.stderr.toFixed(2);
+              const r2Str = (reg.r2 * 100).toFixed(1);
+              const medStr = peerStats ? peerStats.medianRounded.toFixed(2) : '1.47';
+              // 95% CI for the OLS slope: beta ± t(0.975, df=n-2) × SE.
+              // t-critical source: Student-t two-sided 95% quantile at df = 58 (n = 60) = 2.002
+              // (OP-verified 2026-09-09: 0.890 ± 2.002 × 0.519 = [-0.15, 1.93]).
+              const tCrit = 2.002;
+              const ciLo = (reg.beta - tCrit * reg.stderr).toFixed(2);
+              const ciHi = (reg.beta + tCrit * reg.stderr).toFixed(2);
+              return `Single-Stock Regression Cross-Check: Duolingo own-stock regression (${reg.n} monthly returns, ${fmtYm(reg.windowStart)} – ${fmtYm(reg.windowEnd)} vs S&P 500) gives β = ${betaStr} (SE ${seStr}, R² ${r2Str}%). 95% confidence interval is ${ciLo} to ${ciHi}, which includes the ${medStr} peer-median beta. The own regression is therefore too imprecise to reject or confirm the peer beta, and is shown for transparency only. Valuation uses the ${medStr} bottom-up peer median (Spotify / Roblox / Netflix, Hamada-unlevered).`;
+            })()}
+          </div>
         </div>
       </div>
     `;
@@ -1099,12 +1160,19 @@ export function renderValuation({
       pvTermValRow[p] = null;
     }
 
-    // Terminal Year (Gordon) column
+    // Terminal Year (Gordon) column — the capitalised flow is the normalised
+    // terminal FCF (EP.3 steady state); mock DCF doubles without legs keep the
+    // explicit-schedule fallback so panels never render blanks.
     const finalItem = schedule[schedule.length - 1];
     const waccRate = currentDcf?.wacc ?? 0;
     const gRate = currentDcf?.terminalGrowthRate ?? 0;
     const finalFcf = finalItem?.fcf ?? 0;
-    const terminalFcf = finalFcf * (1 + gRate);
+    const normLegs = currentDcf && currentDcf.fcff && currentDcf.fcff.terminalNormalization
+      ? currentDcf.fcff.terminalNormalization
+      : null;
+    const terminalFcf = normLegs && Number.isFinite(normLegs.fcffTerminalNormalised)
+      ? normLegs.fcffTerminalNormalised * (1 + gRate)
+      : finalFcf * (1 + gRate);
     const gordonMultiple = waccRate > gRate ? 1 / (waccRate - gRate) : null;
     const terminalValue = currentDcf?.terminalValue ?? (terminalFcf * (gordonMultiple ?? 0));
     const pvTerminal = currentDcf?.pvTerminal ?? null;
@@ -1126,6 +1194,113 @@ export function renderValuation({
     };
   }
 
+  function renderDcfPrimaryCard() {
+    const dcfMethod = Array.isArray(currentMethods)
+      ? currentMethods.find((method) => method.method === 'fcff_dcf')
+      : null;
+    const verdictRow = currentVerdict?.methodResults?.find((row) => row.method === 'fcff_dcf');
+    const benchmark = currentMarketPrice?.price ??
+      (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.value : null);
+    const perShare = dcfMethod?.impliedPerShare ?? currentDcf?.fcff?.perShare ?? currentDcf?.perShare;
+    const upside = Number.isFinite(verdictRow?.upsidePct)
+      ? verdictRow.upsidePct
+      : (Number.isFinite(perShare) && Number.isFinite(benchmark) && benchmark > 0 ? (perShare - benchmark) / benchmark : null);
+    const verdict = verdictRow?.verdict || 'fair';
+    const verdictClass = verdict === 'undervalued' ? 'undervalued' : verdict === 'overvalued' ? 'overvalued' : 'fair';
+    const range = dcfMethod?.rangePerShare;
+    const fcfePerShare = currentDcf?.fcfe?.perShare;
+    const shares = currentDcf?.sharesOutstanding ?? currentWacc?.sharesOutstanding?.value;
+    const componentRows = [
+      ['PV of Explicit Forecast', currentDcf?.pvExplicit, 'PV(FCFF FY2026E–FY2030E)'],
+      ['PV of Terminal Value', currentDcf?.pvTerminal, 'PV(Gordon Terminal Value)'],
+      ['Enterprise Value', currentDcf?.enterpriseValue, 'PV Explicit + PV Terminal'],
+      ['Net Cash Today', currentDcf?.netCash, 'Cash + investments − debt'],
+      ['Equity Value', currentDcf?.equityValue, 'Enterprise Value + Net Cash'],
+    ].map(([label, value, derivation]) => `
+      <tr><td>${label}</td><td class="align-right font-mono">${usd(value, { decimals: 2 })}</td><td><code>${derivation}</code></td></tr>
+    `).join('');
+
+    return `
+      <div class="valuation-card dcf-primary-card">
+        <div class="statement-card-header">
+          2-Stage FCFF DCF (Primary Method)
+          <span class="rec-badge rec-badge-${verdictClass}">${verdict.toUpperCase()}</span>
+        </div>
+        <div class="valuation-card-body dcf-primary-grid">
+          <section class="dcf-primary-headline">
+            <div class="dcf-primary-kicker">Implied Value Per Share</div>
+            <div class="dcf-primary-price font-mono">${usd(perShare, { decimals: 2 })}</div>
+            <div class="dcf-primary-range font-mono">Range: ${usd(range?.min, { decimals: 2 })} – ${usd(range?.max, { decimals: 2 })}</div>
+            <div class="dcf-primary-upside ${upside >= 0 ? 'positive' : 'negative'}">${percent(upside, { decimals: 2 })}</div>
+            <div class="dcf-primary-benchmark">vs. benchmark ${usd(benchmark, { decimals: 2 })}</div>
+          </section>
+          <section class="dcf-primary-components">
+            <div class="dcf-primary-section-label">DCF Component</div>
+            <table class="financial-summary-table">
+              <thead><tr><th>Component</th><th class="align-right">Value ($ thousands)</th><th>Derivation</th></tr></thead>
+              <tbody>${componentRows}<tr class="table-row-grand-total"><td><strong>Implied Per Share</strong></td><td class="align-right font-mono font-bold">${usd(perShare, { decimals: 2 })}</td><td><code>Equity Value ÷ Diluted Shares</code></td></tr></tbody>
+            </table>
+          </section>
+          <section class="dcf-primary-hud">
+            <div class="dcf-primary-section-label">Key Runtime Parameters</div>
+            <dl class="dcf-runtime-list">
+              <div><dt>WACC (Discount Rate)</dt><dd class="font-mono">${percent(currentDcf?.wacc ?? currentWacc?.wacc?.value, { decimals: 4 })}</dd></div>
+              <div><dt>Terminal Growth (g)</dt><dd class="font-mono">${percent(currentDcf?.terminalGrowthRate, { decimals: 2 })}</dd></div>
+              <div><dt>FCFE Cross-Path Per Share</dt><dd class="font-mono">${usd(fcfePerShare, { decimals: 2 })}</dd></div>
+              <div><dt>Diluted Shares Outstanding</dt><dd class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</dd></div>
+            </dl>
+          </section>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMethodSummaryTable() {
+    if (!Array.isArray(currentMethods) || currentMethods.length === 0) return '';
+    const livePrice = currentMarketPrice?.price ??
+      (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.value : null);
+    const verdictByMethod = {};
+    for (const row of currentVerdict?.methodResults || []) verdictByMethod[row.method] = row;
+    const rows = currentMethods.map((method) => {
+      const row = verdictByMethod[method.method];
+      const verdict = row?.verdict || 'fair';
+      const verdictClass = verdict === 'undervalued' ? 'undervalued' : verdict === 'overvalued' ? 'overvalued' : 'fair';
+      const upside = Number.isFinite(row?.upsidePct)
+        ? row.upsidePct
+        : (Number.isFinite(method.impliedPerShare) && Number.isFinite(livePrice) && livePrice > 0 ? (method.impliedPerShare - livePrice) / livePrice : null);
+      return `
+        <tr>
+          <td><strong>${method.label || method.method}</strong></td>
+          <td>${method.modelBasis || method.method}</td>
+          <td class="align-right font-mono">${usd(method.impliedPerShare, { decimals: 2 })}</td>
+          <td class="align-right font-mono">${usd(method.rangePerShare?.min, { decimals: 2 })} – ${usd(method.rangePerShare?.max, { decimals: 2 })}</td>
+          <td class="align-right font-mono">${percent(upside, { decimals: 2 })}</td>
+          <td><span class="rec-badge rec-badge-${verdictClass}">${verdict.toUpperCase()}</span></td>
+        </tr>
+      `;
+    }).join('');
+    return `
+      <div class="valuation-card valuation-method-summary" id="valuation-method-summary">
+        <div class="statement-card-header">Valuation by Method — Summary Table</div>
+        <div class="valuation-card-body">
+          <table class="financial-summary-table">
+            <thead><tr><th>Method</th><th>Model Basis</th><th class="align-right">Implied Per Share</th><th class="align-right">Range (Min – Max)</th><th class="align-right">Upside vs Benchmark</th><th>Verdict</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderLeaseConventionDisclosure() {
+    return `
+      <div class="callout-info valuation-lease-disclosure">
+        <div class="callout-icon" aria-hidden="true">i</div>
+        <div><strong>Lease Convention (Cross-Method Disclosure)</strong><br>DCF reflects lease expenses directly within operating cash flows, while relative valuation methods capitalize operating lease liabilities into enterprise value and add back rent to EBITDAR.</div>
+      </div>
+    `;
+  }
+
   function renderBridgeWaterfall() {
     const pvExplicit = currentDcf?.pvExplicit;
     const pvTerminal = currentDcf?.pvTerminal;
@@ -1144,7 +1319,7 @@ export function renderValuation({
     const waterfallChart = createWaterfall({ dcf: currentDcf });
 
     return `
-      <div class="valuation-card bridge-card">
+      <div class="valuation-card bridge-card" id="chart-ev-bridge">
         <div class="statement-card-header">
           Enterprise Value to Equity Value Bridge &amp; Per Share Valuation Waterfall
         </div>
@@ -1419,7 +1594,7 @@ export function renderValuation({
         <div class="statement-card-header">
           Multi-Method Valuation Synthesis (6 Valuation Methods)
         </div>
-        <div class="valuation-card-body">
+        <div class="valuation-card-body valuation-strip">
           <p class="valuation-section-desc">
             Six institutional valuation methodologies evaluated under an unweighted agreement-only verdict engine (&plusmn;15% threshold vs live market price). Select any method below for its full derivation: inputs, multiples, peer dispersion, and per-share bridge.
           </p>
@@ -1469,7 +1644,7 @@ export function renderValuation({
           </div>
           <div class="method-detail-metric">
             <div class="method-detail-metric-label">Upside vs Benchmark</div>
-            <div class="method-detail-metric-value font-mono ${upside !== null && upside >= 0 ? 'text-positive' : 'text-negative'}">${upside !== null ? percent(upside, { decimals: 2, showSign: true }) : ' - '}</div>
+            <div class="method-detail-metric-value font-mono ${Number.isFinite(upside) && upside >= 0 ? 'text-positive' : (!Number.isFinite(upside) ? '' : 'text-negative')}">${Number.isFinite(upside) ? percent(upside, { decimals: 2, showSign: true }) : ' - '}</div>
           </div>
           <div class="method-detail-metric">
             <div class="method-detail-metric-label">Isolated Verdict</div>
@@ -1509,7 +1684,7 @@ export function renderValuation({
       <div class="method-detail-block">
         <div class="method-detail-block-label">Methodology; 2-Stage FCFF DCF</div>
         <p class="method-detail-note">
-          Stage 1 discounts five years of explicit unlevered free cash flow (FY2026 - FY2030) from the linked three-statement forecast. Stage 2 capitalizes the terminal-year flow into perpetuity with the Gordon formula <code>TV = FCF<sub>FY2030</sub>; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding today's net cash, then divided by diluted shares.
+          Stage 1 discounts five years of explicit unlevered free cash flow (FY2026 - FY2030) from the linked three-statement forecast. Stage 2 normalises the terminal-year flow to steady state — the final-year working-capital inflow is replaced by its perpetuity-rate equivalent — then capitalizes into perpetuity with the Gordon formula <code>TV = FCF*<sub>FY2030</sub>; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding today's net cash, then divided by diluted shares.
         </p>
         <table class="defense-table font-mono">
           <thead>
@@ -1517,7 +1692,7 @@ export function renderValuation({
           </thead>
           <tbody>
             <tr><td>PV of Explicit Forecast (5 Years)</td><td class="align-right">${usd(fcff.pvExplicit ?? currentDcf?.pvExplicit, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code>, t = 1..5</td></tr>
-            <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(fcff.pvTerminal ?? currentDcf?.pvTerminal, { decimals: 2 })}</td><td><code>[FCF<sub>FY2030</sub>; (1 + g) / (WACC − g)] / (1 + WACC)<sup>5</sup></code></td></tr>
+            <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(fcff.pvTerminal ?? currentDcf?.pvTerminal, { decimals: 2 })}</td><td><code>[FCF*<sub>FY2030</sub>; (1 + g) / (WACC − g)] / (1 + WACC)<sup>5</sup>, steady-state normalised</code></td></tr>
             <tr class="table-row-highlight"><td><strong>Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>PV Explicit + PV Terminal</code></td></tr>
             <tr><td>(+) Net Cash Today</td><td class="align-right">${usd(fcff.netCashToday ?? currentDcf?.netCash, { decimals: 2 })}</td><td>Cash + STI + LTI − Funded Debt (D = $0)</td></tr>
             <tr class="table-row-highlight"><td><strong>Equity Value</strong></td><td class="align-right font-bold">${usd(m.impliedEquityValue, { decimals: 2 })}</td><td><code>EV + Net Cash</code></td></tr>
@@ -1709,6 +1884,9 @@ export function renderValuation({
     `;
   }
     const multiMethodHtml = renderMultiMethodBlocks();
+    const dcfPrimaryHtml = renderDcfPrimaryCard();
+    const methodSummaryHtml = renderMethodSummaryTable();
+    const leaseDisclosureHtml = renderLeaseConventionDisclosure();
     const defenseHtml = renderThesisDefensePanel();
     const waccHtml = renderWaccBuildTable();
     const betaDerivationHtml = renderBetaDerivation();
@@ -1733,6 +1911,9 @@ export function renderValuation({
       <div class="valuation-view-wrapper">
         ${bannerHtml}
         ${multiMethodHtml}
+        ${dcfPrimaryHtml}
+        ${methodSummaryHtml}
+        ${leaseDisclosureHtml}
         ${defenseHtml}
         ${waccHtml}
         ${betaDerivationHtml}

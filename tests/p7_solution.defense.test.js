@@ -43,7 +43,7 @@ async function getDatasets() {
   const fc = forecastEngine.project({ historical, assumptions });
   const ts = threeStatementEngine.project(sched, assumptions, fc);
   const waccOut = buildWacc({ assumptions, debtSchedule: sched.debt });
-  const dcfOut = valuateDcf(ts, waccOut, { assumptions });
+  const dcfOut = valuateDcf(ts, waccOut, { assumptions, corpus: historical });
   const marketPrice = assumptions.get('market_share_price').value;
   const recOut = evaluateRec(dcfOut.perShare, marketPrice);
   return { historical, assumptions, sched, fc, ts, waccOut, dcfOut, recOut, marketPrice };
@@ -199,9 +199,9 @@ describe('P8.0 - Thesis Defense: Derivation Guard & Flip-Map Geometry', () => {
     const tvPct = ((dcfOut.pvTerminal / dcfOut.enterpriseValue) * 100).toFixed(1) + '%';
     assert.ok(html.includes(tvPct), `Bridge table must carry TV share: ${tvPct}`);
 
-    // Lever 6: Diluted Shares (renumbered from 7)
+    // Lever 6: Diluted Shares (renumbered from 7) — EP.2 rolled count (BOP 50.031M + gross issuance)
     const sharesM = (dcfOut.sharesOutstanding / 1e6).toFixed(3) + 'M';
-    assert.equal(sharesM, '50.031M', 'Diluted shares derivation must be 50.031M');
+    assert.equal(sharesM, '56.902M', 'Diluted shares derivation must be 56.902M (rolled)');
     assert.ok(html.includes(sharesM), `Lever 6 must render shares: ${sharesM}`);
     assert.ok(html.includes('50,031,000'), 'Lever 6 must cite full diluted share count');
     assert.ok(html.includes('46,786,269'), 'Lever 6 must cite basic shares count');
@@ -221,12 +221,12 @@ describe('P8.0 - Thesis Defense: Derivation Guard & Flip-Map Geometry', () => {
     const html = container.innerHTML;
 
     assert.match(html, /Parity \(perShare == \$157\.85\)/, 'Must render Parity coordinate');
-    assert.match(html, /10\.19%|-85\.\d+ bps/, 'Must render WACC parity coordinate');
+    assert.match(html, /2\.35%|-244\.\d+ bps/, 'Must render rf parity coordinate (EP.3 normalised terminal)');
     assert.match(html, /Overvalued Flip/, 'Must render Overvalued flip');
     assert.match(html, /Undervalued Flip/, 'Must render Undervalued flip');
 
-    assert.match(html, /3\.62%/, 'Terminal g parity must be 3.62%');
-    assert.match(html, /1\.46%/, 'Terminal g overvalued flip must be 1.46%');
+    assert.doesNotMatch(html, />3\.62%</, 'Terminal g parity 3.62% is gone (EP.2: parity unreachable)');
+    assert.match(html, /&lt; 3\.93%/, 'Terminal g overvalued flip must be < 3.93% (EP.3)');
     assert.match(html, /Unreachable within driver bounds \[0, 4%\]/, 'Terminal g undervalued flip must declare unreachable');
     assert.match(html, /within its stated bounds.*terminal growth cannot rescue this thesis; only the discount rate or the flows can/, 'Ratified reachability defense sentence must be present');
 
@@ -265,7 +265,7 @@ describe('P8.0 - Prose Data-Content Gate in All 4 Interactive States', () => {
     // 4. Slider-edited state: beta override
     const editedAssumptions = overrideAssumption(assumptions, { beta: 1.20 });
     const editedWacc = buildWacc({ assumptions: editedAssumptions, debtSchedule: sched.debt });
-    const editedDcf = valuateDcf(ts, editedWacc, { assumptions: editedAssumptions });
+    const editedDcf = valuateDcf(ts, editedWacc, { assumptions: editedAssumptions, corpus: historical });
     view.update(editedWacc, editedDcf, editedAssumptions);
     html = container.innerHTML;
     assert.match(html, /1\.20/, 'Slider-edited state updates beta parameter in defense panel');

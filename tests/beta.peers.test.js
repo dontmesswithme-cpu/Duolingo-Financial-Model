@@ -197,7 +197,9 @@ describe('P6R3.2  -  UI Presentation: Peer Derivation & Range Readout', () => {
     assert.ok(html.includes('1.47'), 'Must display peer median 1.47');
     assert.ok(html.includes('1.49'), 'Must display peer mean 1.49');
     assert.ok(html.includes('0.13'), 'Must display peer span 0.13');
-    assert.ok(html.includes('Duolingo Single-Stock OLS Regression &amp; Vasicek Cross-Check') || html.includes('Vasicek Cross-Check'), 'Must render Vasicek cross-check header');
+    // RWC.1d maintenance: block renamed to Single-Stock Regression Cross-Check, Vasicek-shrunk claim removed (raw 0.89 shown with no shrinkage).
+    assert.ok(html.includes('Single-Stock Regression Cross-Check'), 'Must render Single-Stock Regression Cross-Check header');
+    assert.ok(!html.includes('Vasicek'), 'Must not claim Vasicek shrinkage was performed');
     assert.ok(html.includes('0.8905'), 'Must render DUOL computed OLS slope');
     assert.ok(html.includes('0.89'), 'Must render DUOL OLS rounded slope / cross-check');
 

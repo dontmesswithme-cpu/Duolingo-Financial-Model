@@ -57,6 +57,21 @@ export function createTabs({ root, tabs = TAB_KEYS, onTabChange } = {}) {
     }
   }
 
+  function markPane(pane, isActive) {
+    if (!pane || typeof pane.setAttribute !== 'function') return;
+    if (isActive) {
+      pane.setAttribute(ACTIVE_ATTRIBUTE, 'true');
+      if (typeof pane.removeAttribute === 'function') {
+        pane.removeAttribute('hidden');
+      }
+    } else {
+      if (typeof pane.removeAttribute === 'function') {
+        pane.removeAttribute(ACTIVE_ATTRIBUTE);
+      }
+      pane.setAttribute('hidden', '');
+    }
+  }
+
   function activate(key) {
     if (!tabs.includes(key)) return;
     activeTabKey = key;
@@ -67,7 +82,7 @@ export function createTabs({ root, tabs = TAB_KEYS, onTabChange } = {}) {
     }
     for (const pane of panes) {
       const match = getElementKey(pane) === key;
-      markActive(pane, match, false);
+      markPane(pane, match);
     }
 
     if (typeof onTabChange === 'function') {
@@ -85,6 +100,37 @@ export function createTabs({ root, tabs = TAB_KEYS, onTabChange } = {}) {
       link.addEventListener('click', clickHandler);
     }
     listeners.push({ target: link, type: 'click', handler: clickHandler });
+  }
+
+  // Handle click on jump links anywhere under root (e.g. data-jump-tab="assumptions")
+  const jumpHandler = (event) => {
+    if (!event || !event.target) return;
+    const target = event.target;
+    let jumpEl = typeof target.closest === 'function' ? target.closest('[data-jump-tab]') : null;
+    if (!jumpEl) {
+      let cur = target;
+      while (cur) {
+        if (cur.getAttribute && cur.getAttribute('data-jump-tab')) {
+          jumpEl = cur;
+          break;
+        }
+        cur = cur.parentElement || cur.parentNode || null;
+      }
+    }
+    if (jumpEl && typeof jumpEl.getAttribute === 'function') {
+      const targetKey = jumpEl.getAttribute('data-jump-tab');
+      if (targetKey && tabs.includes(targetKey)) {
+        if (typeof event.preventDefault === 'function') {
+          event.preventDefault();
+        }
+        activate(targetKey);
+      }
+    }
+  };
+
+  if (typeof root.addEventListener === 'function') {
+    root.addEventListener('click', jumpHandler);
+    listeners.push({ target: root, type: 'click', handler: jumpHandler });
   }
 
   // Keyboard navigation on tablist / links: ArrowLeft, ArrowRight, Home, End

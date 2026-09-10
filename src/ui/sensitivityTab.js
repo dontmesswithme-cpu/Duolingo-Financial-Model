@@ -1,14 +1,18 @@
 /**
- * Sensitivity & Scenario Analysis View (Phase 5.5).
+ * Sensitivity & Scenario Analysis View (Phase 5.5; RP8.1 heatmap matrix).
  *
- * Renders the valuation sensitivity matrix and scenario comparison bands:
- *  1. 9×5 WACC × Terminal Growth Sensitivity Matrix (Tabulator grid across 45 valuation points)
+ * Renders the valuation sensitivity workstation:
+ *  1. 9x5 WACC x Terminal Growth heatmap matrix (`.sensitivity-matrix-table`):
+ *     computed axes centered on the active scenario, discrete percentile
+ *     bucket classes (`.heatmap-cell`, `.heatmap-tier-1` through
+ *     `.heatmap-tier-9`), and a solid-blue `.active-cell` on the active
+ *     (center) valuation. Zero inline styling attributes.
  *  2. Scenario Comparison Table (Bear / Base / Bull full-path valuation tie-outs)
  *  3. Hybrid FY2026 Invariance Footnote (H1 filed actuals invariant across all scenarios)
  *
  * Strict Compliance:
- *  - 45 cells strictly satisfy WACC > g guard and monotonicity (perShare ↓ as WACC ↑, perShare ↑ as g ↑)
- *  - Live Tabulator mount with selectableRange: true, selectableRangeColumns: true, clipboard: true
+ *  - 45 cells strictly satisfy WACC > g guard and monotonicity (perShare falls as WACC rises, rises as g rises)
+ *  - Semantic heatmap table: axes and values derive from the computed engine grid; tier classes carry the shading
  *  - Zero bare numeric literals > 999 in src/ui/*.js
  *  - Zero inline styling attributes
  *
@@ -18,52 +22,118 @@
 import { EngineError } from '../data/errors.js';
 import { SCENARIO_NAMES } from '../data/constants.js';
 import { usd, percent, estSuffix, SCENARIO_DISPLAY_NAMES } from './format.js';
-import { TabulatorFull as DefaultTabulator } from './tabulator.js';
+
+/** Number of discrete heatmap tiers on the sensitivity matrix color ramp. */
+const HEATMAP_TIERS = 9;
+
+/** Center-match tolerance binding the active cell to the computed axes. */
+const CENTER_TOLERANCE = 0.0001;
 
 /**
- * Builds Tabulator column definitions for the 9×5 sensitivity matrix.
+ * Builds the heatmap matrix model from a SensitivityGrid engine output.
  *
- * @param {Array<number>} growthValues Array of terminal growth rates (e.g. [0.01, 0.015, 0.02, 0.025, 0.03])
- * @returns {Array<object>}
+ * Axes are consumed verbatim from the COMPUTED grid (centered on the active
+ * scenario WACC and terminal growth by `computeSensitivityAxes`, shrink-guard
+ * narrowed when Gordon headroom squeezes) - never fixed literals. The active
+ * row and cell are bound by closest match against `grid.base` coordinates.
+ * Finite cells are ranked into discrete percentile tiers 1..9 (lowest values
+ * tier 1, highest tier 9) driving the `.heatmap-tier-N` classes.
+ *
+ * @param {object|null|undefined} grid SensitivityGrid output from recommend.buildSensitivityGrid
+ * @returns {{ growthValues: Array<number>, rows: Array<object>, activeWacc: number|null, activeGrowth: number|null, axisNarrowed: boolean }}
  */
-export function buildSensitivityColumns(growthValues = []) {
-  return [
-    {
-      title: 'WACC Discount Rate',
-      field: 'waccLabel',
-      frozen: true,
-      headerSort: false,
-      editor: false,
-      minWidth: 200,
-      formatter: (cell) => {
-        const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : cell;
-        const activeTag = (row.isActiveWacc || row.isBaseWacc) ? ' <span class="badge badge-est">ACTIVE</span>' : '';
-        return `<div class="sensitivity-wacc-label">${row.waccLabel || ''}${activeTag}</div>`;
-      },
-    },
-    ...growthValues.map((gVal) => {
-      const fieldKey = `g_${gVal.toFixed(4).replace('.', '_')}`;
-      const titleText = `g = ${percent(gVal, { decimals: 1 })}`;
+export function buildSensitivityMatrix(grid) {
+  const empty = {
+    growthValues: [],
+    rows: [],
+    activeWacc: null,
+    activeGrowth: null,
+    axisNarrowed: !!(grid && grid.axisNarrowed),
+  };
+  if (!grid || !Array.isArray(grid.waccValues) || !Array.isArray(grid.growthValues)) {
+    return empty;
+  }
+
+  const waccVals = grid.waccValues;
+  const gVals = grid.growthValues;
+  const baseWacc = grid.base?.wacc ?? null;
+  const baseG = grid.base?.growth ?? null;
+  const matrix = grid.matrix || {};
+
+  const rows = waccVals.map((wVal) => {
+    const isActiveRow = Number.isFinite(baseWacc) && Math.abs(wVal - baseWacc) < CENTER_TOLERANCE;
+    const cells = gVals.map((gVal) => {
+      const cell = matrix[wVal]?.[gVal];
+      const perShare = cell?.perShare ?? null;
+      const isActive = isActiveRow
+        && Number.isFinite(baseG)
+        && Math.abs(gVal - baseG) < CENTER_TOLERANCE;
       return {
-        title: titleText,
-        field: fieldKey,
-        headerSort: false,
-        hozAlign: 'right',
-        editor: false,
-        minWidth: 95,
-        titleFormatter: () => estSuffix(titleText, 'EST'),
-        formatter: (cell) => {
-          const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
-          if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
-          const row = typeof cell.getRow === 'function' ? cell.getRow().getData() : {};
-          const targetG = row.activeGrowth ?? row.baseGrowth ?? 0.02;
-          const isHighlightCell = (row.isActiveWacc || row.isBaseWacc) && Math.abs(gVal - targetG) < 0.0001;
-          const highlightClass = isHighlightCell ? 'cell-highlight-base' : '';
-          return `<div class="sensitivity-cell-value ${highlightClass}">${usd(val, { decimals: 2 })}</div>`;
-        },
+        growth: gVal,
+        perShare,
+        tier: null,
+        isActive,
       };
-    }),
-  ];
+    });
+    return {
+      wacc: wVal,
+      label: percent(wVal, { decimals: 2 }),
+      isActiveRow,
+      cells,
+    };
+  });
+
+  // Rank-based percentile buckets over the finite cells present.
+  const finite = [];
+  for (const row of rows) {
+    for (const cell of row.cells) {
+      if (Number.isFinite(cell.perShare)) finite.push(cell);
+    }
+  }
+  const ranked = [...finite].sort((a, b) => a.perShare - b.perShare);
+  const count = ranked.length;
+  ranked.forEach((cell, rank) => {
+    cell.tier = count <= 1
+      ? 1
+      : Math.min(HEATMAP_TIERS, Math.floor((rank / (count - 1)) * HEATMAP_TIERS) + 1);
+  });
+
+  return {
+    growthValues: gVals,
+    rows,
+    activeWacc: Number.isFinite(baseWacc) ? baseWacc : null,
+    activeGrowth: Number.isFinite(baseG) ? baseG : null,
+    axisNarrowed: !!grid.axisNarrowed,
+  };
+}
+
+/**
+ * Renders the heatmap matrix table HTML from a matrix model.
+ *
+ * @param {{ growthValues: Array<number>, rows: Array<object> }} model Matrix model from buildSensitivityMatrix
+ * @returns {string} HTML markup for the `.sensitivity-matrix-table`
+ */
+export function renderSensitivityMatrix(model) {
+  const growthHeaders = (model.growthValues || []).map((gVal) => {
+    const titleText = `g = ${percent(gVal, { decimals: 1 })}`;
+    return `<th class="matrix-g-col" scope="col">${estSuffix(titleText, 'EST')}</th>`;
+  }).join('');
+
+  const bodyRows = (model.rows || []).map((row) => {
+    const badge = row.isActiveRow ? ' <span class="badge badge-est">ACTIVE</span>' : '';
+    const trClass = row.isActiveRow ? ' class="matrix-active-row"' : '';
+    const cells = row.cells.map((cell) => {
+      if (!Number.isFinite(cell.perShare)) {
+        return '<td class="heatmap-cell heatmap-empty"> - </td>';
+      }
+      const tierClass = cell.tier === null ? '' : ` heatmap-tier-${cell.tier}`;
+      const activeClass = cell.isActive ? ' active-cell' : '';
+      return `<td class="heatmap-cell${tierClass}${activeClass}" data-wacc="${row.wacc}" data-growth="${cell.growth}" data-per-share="${cell.perShare}">${usd(cell.perShare, { decimals: 2 })}</td>`;
+    }).join('');
+    return `<tr${trClass}><th class="matrix-wacc-label" scope="row">${row.label}${badge}</th>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="matrix-table-scroll"><table class="sensitivity-matrix-table"><thead><tr><th class="matrix-corner" scope="col">WACC (Discount Rate)</th>${growthHeaders}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
 }
 
 /**
@@ -75,8 +145,9 @@ export function buildSensitivityColumns(growthValues = []) {
  * @param {object} [options.scenarios] Scenario summary comparisons
  * @param {object} [options.dcf] Base DcfOutput
  * @param {object} [options.marketPriceState] Live market price state (auto-updates benchmark)
- * @param {typeof DefaultTabulator} [options.TabulatorConstructor]
- * @returns {{ update: (sensitivityGrid: object, scenarios?: object, dcf?: object, marketPriceState?: object) => void, dispose: () => void, tabulatorInstances: object[], tabulatorConfigs: object[] }}
+ * @param {string} [options.activeScenario] Active scenario key (binds the dropdown selection)
+ * @param {(scenario: string) => void} [options.onScenarioChange] Scenario-switch callback (wired to app.setScenario)
+ * @returns {{ update: (sensitivityGrid: object, scenarios?: object, dcf?: object, marketPriceState?: object, activeScenario?: string) => void, dispose: () => void, tabulatorInstances: object[], tabulatorConfigs: object[] }}
  */
 export function renderSensitivity({
   container,
@@ -84,7 +155,8 @@ export function renderSensitivity({
   scenarios = null,
   dcf = null,
   marketPriceState = null,
-  TabulatorConstructor = DefaultTabulator,
+  activeScenario = null,
+  onScenarioChange = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderSensitivity requires a container element.', 'container');
@@ -94,48 +166,43 @@ export function renderSensitivity({
   let currentScenarios = scenarios;
   let currentDcf = dcf;
   let currentMarketPrice = marketPriceState;
+  let currentActiveScenario = activeScenario;
+  const handleScenarioChange = onScenarioChange;
   let disposed = false;
   const tabulatorInstances = [];
   const tabulatorConfigs = [];
 
-  function buildMatrixTableData() {
-    if (!currentGrid || !Array.isArray(currentGrid.waccValues) || !Array.isArray(currentGrid.growthValues)) {
-      return { growthValues: [], rows: [] };
-    }
-
-    const waccVals = currentGrid.waccValues;
-    const gVals = currentGrid.growthValues;
-    const baseWacc = currentGrid.base?.wacc;
-    const baseG = currentGrid.base?.growth;
-    const matrix = currentGrid.matrix || {};
-
-    const rows = waccVals.map((wVal) => {
-      const isCenterWacc = baseWacc !== undefined && Math.abs(wVal - baseWacc) < 0.0001;
-      const rowObj = {
-        wacc: wVal,
-        waccLabel: percent(wVal, { decimals: 2 }),
-        isActiveWacc: isCenterWacc,
-        isBaseWacc: isCenterWacc,
-        activeGrowth: baseG,
-        baseGrowth: baseG,
-      };
-
-      for (const gVal of gVals) {
-        const fieldKey = `g_${gVal.toFixed(4).replace('.', '_')}`;
-        const cell = matrix[wVal]?.[gVal];
-        rowObj[fieldKey] = cell?.perShare ?? null;
-      }
-
-      return rowObj;
-    });
-
-    return {
-      growthValues: gVals,
-      rows,
-    };
+  function scenarioTerminalMargin(sc) {
+    // RWC.1b: per-scenario FY2030 terminal FCF margin from that scenario's own
+    // threeStatement engine (free_cash_flow / revenue.total). Fail-closed null.
+    const fcf = sc?.threeStatement?.cashFlow?.byPeriod?.FY2030?.free_cash_flow?.value
+      ?? sc?.cashFlow?.byPeriod?.FY2030?.free_cash_flow?.value
+      ?? null;
+    const rev = sc?.threeStatement?.incomeStatement?.byPeriod?.FY2030?.revenue?.total?.value
+      ?? sc?.incomeStatement?.byPeriod?.FY2030?.revenue?.total?.value
+      ?? null;
+    if (!Number.isFinite(fcf) || !Number.isFinite(rev) || rev <= 0) return null;
+    return fcf / rev;
   }
 
-  function renderScenarioComparisonCard() {
+  function scenarioMarginClause(sc) {
+    const m = scenarioTerminalMargin(sc);
+    return m !== null ? `${percent(m, { decimals: 1 })} terminal FCF margin` : 'terminal FCF margin -';
+  }
+
+  function renderScenarioSelect() {
+    const current = (typeof currentActiveScenario === 'string' && SCENARIO_NAMES.includes(currentActiveScenario))
+      ? currentActiveScenario
+      : 'base';
+    const options = SCENARIO_NAMES.map((key) => {
+      const label = `${SCENARIO_DISPLAY_NAMES[key] || key} Case`;
+      const selected = key === current ? ' selected' : '';
+      return `<option value="${key}"${selected}>${label}</option>`;
+    }).join('');
+    return `<label class="scenario-select-label">Active Scenario: <select class="scenario-select" data-scenario-select>${options}</select></label>`;
+  }
+
+  function renderScenarioSpectrumCard() {
     // Benchmark share price: derived dynamically from neutral snapshot driver. All scenario comparison upsides evaluate versus this benchmark.
     const bearKey = SCENARIO_NAMES[0];
     const baseKey = SCENARIO_NAMES[1];
@@ -149,22 +216,27 @@ export function renderSensitivity({
     const bearG = bear?.assumptions?.getValue ? bear?.assumptions?.getValue('terminal_growth_rate') : bear?.assumptions?.get?.('terminal_growth_rate')?.value;
     const bearPrice = bear?.perShare ?? bear?.dcf?.perShare ?? null;
     const bearUpside = bear?.upsidePct ?? bear?.recommendation?.upsidePct ?? null;
-    const bearRecLabel = bear?.recommendation?.label || 'fair';
-    const bearVerdict = bear?.verdict?.verdict || bear?.verdict || bearRecLabel;
+    // C3 disposition: recommendation/verdict labels render fail-closed dashes
+    // when absent - no invented 'fair'/'undervalued' stand-ins.
+    const bearRec = bear?.recommendation?.label ?? null;
+    const bearVerdictRaw = bear?.verdict?.verdict ?? bear?.verdict ?? null;
+    const bearVerdict = typeof bearVerdictRaw === 'string' ? bearVerdictRaw : null;
 
     const baseWacc = base?.wacc?.wacc?.value ?? base?.wacc?.value ?? currentGrid?.base?.wacc ?? null;
     const baseG = (base?.assumptions?.getValue ? base?.assumptions?.getValue('terminal_growth_rate') : base?.assumptions?.get?.('terminal_growth_rate')?.value) ?? currentGrid?.base?.growth ?? null;
     const basePrice = base?.perShare ?? base?.dcf?.perShare ?? currentDcf?.perShare ?? null;
     const baseUpside = base?.upsidePct ?? base?.recommendation?.upsidePct ?? currentScenarios?.base?.upsidePct ?? null;
-    const baseRecLabel = base?.recommendation?.label || 'undervalued';
-    const baseVerdict = base?.verdict?.verdict || base?.verdict || baseRecLabel;
+    const baseRec = base?.recommendation?.label ?? null;
+    const baseVerdictRaw = base?.verdict?.verdict ?? base?.verdict ?? null;
+    const baseVerdict = typeof baseVerdictRaw === 'string' ? baseVerdictRaw : null;
 
     const bullWacc = bull?.wacc?.wacc?.value ?? bull?.wacc?.value ?? null;
     const bullG = bull?.assumptions?.getValue ? bull?.assumptions?.getValue('terminal_growth_rate') : bull?.assumptions?.get?.('terminal_growth_rate')?.value;
     const bullPrice = bull?.perShare ?? bull?.dcf?.perShare ?? null;
     const bullUpside = bull?.upsidePct ?? bull?.recommendation?.upsidePct ?? null;
-    const bullRecLabel = bull?.recommendation?.label || 'undervalued';
-    const bullVerdict = bull?.verdict?.verdict || bull?.verdict || bullRecLabel;
+    const bullRec = bull?.recommendation?.label ?? null;
+    const bullVerdictRaw = bull?.verdict?.verdict ?? bull?.verdict ?? null;
+    const bullVerdict = typeof bullVerdictRaw === 'string' ? bullVerdictRaw : null;
 
     const scenarioRows = [
       {
@@ -176,45 +248,44 @@ export function renderSensitivity({
         growth: bearG,
         targetPrice: bearPrice,
         upside: bearUpside,
-        rec: bearRecLabel.toUpperCase(),
-        recClass: bearRecLabel,
-        verdict: bearVerdict.toUpperCase(),
-        verdictClass: bearVerdict.toLowerCase(),
+        rec: bearRec,
+        verdict: bearVerdict,
       },
       {
         id: baseKey,
         name: `${SCENARIO_DISPLAY_NAMES[baseKey] || 'Base'} Case`,
         badgeClass: `badge-${baseKey}`,
-        desc: 'Current baseline consensus; steady Super Duolingo Max tier scaling; 33.9% terminal FCF margin.',
+        desc: `Current baseline consensus; steady Super Duolingo Max tier scaling; ${scenarioMarginClause(base)}.`,
         wacc: baseWacc,
         growth: baseG,
         targetPrice: basePrice,
         upside: baseUpside,
-        rec: baseRecLabel.toUpperCase(),
-        recClass: baseRecLabel,
-        verdict: baseVerdict.toUpperCase(),
-        verdictClass: baseVerdict.toLowerCase(),
+        rec: baseRec,
+        verdict: baseVerdict,
       },
       {
         id: bullKey,
         name: `${SCENARIO_DISPLAY_NAMES[bullKey] || 'Upside'} Case`,
         badgeClass: `badge-${bullKey}`,
-        desc: 'Accelerated GenAI Max tier monetization; DET expansion in institutional admissions; 38.0% FCF margin.',
+        desc: `Accelerated GenAI Max tier monetization; DET expansion in institutional admissions; ${scenarioMarginClause(bull)}.`,
         wacc: bullWacc,
         growth: bullG,
         targetPrice: bullPrice,
         upside: bullUpside,
-        rec: bullRecLabel.toUpperCase(),
-        recClass: bullRecLabel,
-        verdict: bullVerdict.toUpperCase(),
-        verdictClass: bullVerdict.toLowerCase(),
+        rec: bullRec,
+        verdict: bullVerdict,
       },
     ];
 
     const baseMktDriver = base?.assumptions?.get ? base?.assumptions?.get('market_share_price') : null;
     const livePrice = Number.isFinite(currentMarketPrice?.price) ? currentMarketPrice.price : null;
-    const benchmarkPrice = livePrice ?? baseMktDriver?.value ?? 157.85;
+    // C3 disposition: no invented benchmark fallback - fail-closed dash when
+    // neither the live price nor the snapshot driver resolves.
+    const benchmarkPrice = livePrice ?? baseMktDriver?.value ?? null;
     const benchmarkAsOf = (livePrice !== null ? (currentMarketPrice?.asOf || '') : (baseMktDriver?.asOf || ''));
+    const benchmarkCaption = Number.isFinite(benchmarkPrice)
+      ? `Benchmark share price: $${benchmarkPrice.toFixed(2)}${benchmarkAsOf ? ` (${benchmarkAsOf})` : ''} snapshot driver.`
+      : 'Benchmark share price: - snapshot driver.';
 
     return `
       <div class="sensitivity-card scenario-card">
@@ -224,9 +295,10 @@ export function renderSensitivity({
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
             Full-path end-to-end valuation runs parameterized across three macroeconomic and operating scenarios (preserving <code>Downside &lt; Base &lt; Upside</code> intrinsic value ordering).
-            <span class="scenario-benchmark-caption">Benchmark share price: $${benchmarkPrice.toFixed(2)}${benchmarkAsOf ? ` (${benchmarkAsOf})` : ''} snapshot driver. All scenario comparison upsides evaluate versus this neutral benchmark. Multi-Method Verdict reflects unweighted agreement across all six valuation methods.</span>
+            <span class="scenario-benchmark-caption">${benchmarkCaption} All scenario comparison upsides evaluate versus this neutral benchmark. Multi-Method Verdict reflects unweighted agreement across all six valuation methods.</span>
           </p>
-          <table class="financial-summary-table scenario-table">
+          <div class="spectrum-table-scroll">
+          <table class="financial-summary-table scenario-spectrum-table">
             <thead>
               <tr>
                 <th>Scenario Case</th>
@@ -234,7 +306,7 @@ export function renderSensitivity({
                 <th class="align-right">WACC</th>
                 <th class="align-right">Terminal Growth (g)</th>
                 <th class="align-right">DCF Target Price</th>
-                <th class="align-right">Implied Upside</th>
+                <th class="align-right">Upside / (Downside) %</th>
                 <th>Multi-Method Verdict</th>
                 <th>Mechanical Recommendation</th>
               </tr>
@@ -247,18 +319,44 @@ export function renderSensitivity({
                   <td class="align-right font-mono">${percent(s.wacc, { decimals: 2 })}</td>
                   <td class="align-right font-mono">${percent(s.growth, { decimals: 1 })}</td>
                   <td class="align-right font-mono font-bold font-large">${usd(s.targetPrice, { decimals: 2 })}</td>
-                  <td class="align-right font-mono font-bold ${s.upside >= 0 ? 'text-positive' : 'text-negative'}">
+                  <td class="align-right font-mono font-bold ${!Number.isFinite(s.upside) ? '' : (s.upside >= 0 ? 'text-positive' : 'text-negative')}">
                     ${percent(s.upside, { decimals: 2, showSign: true })}
                   </td>
-                  <td><span class="rec-badge rec-badge-${s.verdictClass}">${s.verdict}</span></td>
-                  <td><span class="rec-badge rec-badge-${s.recClass}">${s.rec}</span></td>
+                  <td>${s.verdict ? `<span class="rec-badge rec-badge-${s.verdict}">${s.verdict.toUpperCase()}</span>` : ' - '}</td>
+                  <td>${s.rec ? `<span class="rec-badge rec-badge-${s.rec}">${s.rec.toUpperCase()}</span>` : ' - '}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
-          <div class="disclaimer-box scenario-invariant-note">
+          </div>
+          <div class="callout-warning sensitivity-invariance-callout">
             <strong>Hybrid FY2026 Invariance Invariant:</strong> In accordance with audit standards, <strong>H1 FY2026 Actuals</strong> (Total Revenue: $590,421 / Operating Income: $78,472 / Operating Cash Flow: $239,031) are transcribed directly from SEC Form 10-Q filings and remain <strong>byte-identical and invariant across all Downside, Base, and Upside scenarios</strong>, while H2 estimates respond dynamically to driver inputs.
           </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMatrixCard() {
+    const model = buildSensitivityMatrix(currentGrid);
+
+    const narrowingFootnoteHtml = model.axisNarrowed
+      ? `<div class="disclaimer-box sensitivity-narrowing-note">axis range narrowed to respect WACC &gt; g at current driver settings.</div>`
+      : '';
+
+    return `
+      <div class="sensitivity-card matrix-card">
+        <div class="statement-card-header">
+          WACC × Terminal Growth Sensitivity Matrix (Implied Per-Share DCF Value in USD)
+          ${renderScenarioSelect()}
+        </div>
+        <div class="sensitivity-card-body">
+          <p class="valuation-section-desc">
+            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Evaluates valuation sensitivity across the active systematic risk beta range (Bear β = 1.62, Base β = 1.47, Bull β = 1.32; peer unlevered asset beta range: 1.44 to 1.57). Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
+          </p>
+          ${renderSensitivityMatrix(model)}
+          <p class="matrix-axis-note">Darker green shades denote higher implied intrinsic value; the blue cell marks the active-scenario center valuation.</p>
+          ${narrowingFootnoteHtml}
         </div>
       </div>
     `;
@@ -273,42 +371,8 @@ export function renderSensitivity({
     tabulatorInstances.length = 0;
     tabulatorConfigs.length = 0;
 
-    const matrixData = buildMatrixTableData();
-    const cols = buildSensitivityColumns(matrixData.growthValues);
-
-    const gridConfig = {
-      statement: 'sensitivityGrid',
-      data: matrixData.rows,
-      columns: cols,
-      layout: 'fitDataFill',
-      selectableRange: true,
-      selectableRangeColumns: true,
-      clipboard: true,
-      clipboardCopyConfig: { formatCells: false },
-      headerSort: false,
-      keybindings: true,
-    };
-    tabulatorConfigs.push(gridConfig);
-
-    const narrowingFootnoteHtml = currentGrid?.axisNarrowed
-      ? `<div class="disclaimer-box sensitivity-narrowing-note">axis range narrowed to respect WACC &gt; g at current driver settings.</div>`
-      : '';
-
-    const matrixHtml = `
-      <div class="sensitivity-card matrix-card">
-        <div class="statement-card-header">
-          WACC Discount Rate × Terminal Growth Rate Sensitivity Matrix (Per-Share DCF Value in USD)
-        </div>
-        <div class="sensitivity-card-body">
-          <p class="valuation-section-desc">
-            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Evaluates valuation sensitivity across the active systematic risk beta range (Bear β = 1.62, Base β = 1.47, Bull β = 1.32; peer unlevered asset beta range: 1.44 to 1.57). Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
-          </p>
-          <div class="tabulator-grid-container financial-table" data-statement="sensitivityGrid"></div>
-          ${narrowingFootnoteHtml}
-        </div>
-      </div>
-    `;
-    const scenarioHtml = renderScenarioComparisonCard();
+    const matrixHtml = renderMatrixCard();
+    const scenarioHtml = renderScenarioSpectrumCard();
 
     container.innerHTML = `
       <div class="sensitivity-view-wrapper">
@@ -316,35 +380,39 @@ export function renderSensitivity({
         ${scenarioHtml}
       </div>
     `;
+  }
 
-    if (typeof TabulatorConstructor === 'function') {
-      for (const config of tabulatorConfigs) {
-        try {
-          const gridEl = container.querySelector ? container.querySelector(`[data-statement="${config.statement}"]`) : null;
-          if (gridEl) {
-            const inst = new TabulatorConstructor(gridEl, config);
-            tabulatorInstances.push(inst);
-          }
-        } catch {
-          // Gracefully handle in stub environments
-        }
-      }
+  function handleContainerChange(e) {
+    const select = e.target?.closest ? e.target.closest('[data-scenario-select]') : null;
+    if (!select) return;
+    if (typeof handleScenarioChange !== 'function') return;
+    const value = select.value;
+    if (typeof value === 'string' && SCENARIO_NAMES.includes(value)) {
+      handleScenarioChange(value);
     }
+  }
+
+  if (typeof container.addEventListener === 'function') {
+    container.addEventListener('change', handleContainerChange);
   }
 
   render();
 
   return {
-    update(newGrid, newScenarios = null, newDcf = null, newMarketPrice = undefined) {
+    update(newGrid, newScenarios = null, newDcf = null, newMarketPrice = undefined, newActiveScenario = undefined) {
       currentGrid = newGrid;
       currentScenarios = newScenarios || currentScenarios;
       currentDcf = newDcf || currentDcf;
       if (newMarketPrice !== undefined) currentMarketPrice = newMarketPrice;
+      if (newActiveScenario !== undefined) currentActiveScenario = newActiveScenario;
       render();
     },
     dispose() {
       if (disposed) return;
       disposed = true;
+      if (typeof container.removeEventListener === 'function') {
+        container.removeEventListener('change', handleContainerChange);
+      }
       for (const inst of tabulatorInstances) {
         if (inst && typeof inst.destroy === 'function') {
           try { inst.destroy(); } catch { /* ignore */ }
@@ -356,6 +424,7 @@ export function renderSensitivity({
       currentScenarios = null;
       currentDcf = null;
       currentMarketPrice = null;
+      currentActiveScenario = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

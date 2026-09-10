@@ -1,8 +1,1 @@
-{
-  "protocol": "1.0",
-  "seq": 0,
-  "state": "idle",
-  "phase": "P9",
-  "subphase": "P9.1",
-  "updated_at": "2026-09-07T19:42:41.284Z"
-}
+{"protocol": "1.0", "seq": 9, "state": "idle", "phase": "EP", "subphase": "EP-FIX1", "updated_at": "2026-09-10T20:37:00.000Z"}

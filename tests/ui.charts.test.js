@@ -65,6 +65,7 @@ async function getDatasets() {
     });
     dcfData = dcf.valuate(threeStatementData, waccData, {
       assumptions: assumptionsData,
+      corpus: historicalData,
     });
   }
   return {
@@ -193,24 +194,24 @@ describe('P5.6  -  Enterprise Value Bridge Waterfall: createWaterfall', () => {
     assert.match(svg, /PV of Explicit FCFs/);
     assert.match(svg, /\$1,586,881/);
 
-    // Step 2: Terminal PV ($4,205,133)
+    // Step 2: Terminal PV ($3,745,289 — EP.3 normalised terminal)
     assert.match(svg, /PV of Terminal Value/);
-    assert.match(svg, /\$4,205,133/);
+    assert.match(svg, /\$3,745,289/);
 
-    // Step 3: Enterprise Value ($5,792,014)
+    // Step 3: Enterprise Value ($5,332,169)
     assert.match(svg, /Implied Enterprise Value/);
-    assert.match(svg, /\$5,792,014/);
+    assert.match(svg, /\$5,332,169/);
 
     // Step 4: Net Cash ($1,416,559)
     assert.match(svg, /\(\+\) Net Cash Bridge/);
     assert.match(svg, /\$1,416,559/);
 
-    // Step 5: Equity Value ($7,208,573)
+    // Step 5: Equity Value ($6,748,728)
     assert.match(svg, /Implied Equity Value/);
-    assert.match(svg, /\$7,208,573/);
+    assert.match(svg, /\$6,748,728/);
 
-    // Target price pill ($144.08)
-    assert.match(svg, /\$144\.08 \/ share/);
+  // Target price pill ($118.60, EP.3 normalised terminal)
+  assert.match(svg, /\$118\.60 \/ share/);
 
     chart.dispose();
   });
@@ -297,7 +298,7 @@ describe('P5.6  -  Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$144\.08/);
+    assert.match(container.innerHTML, /\$118\.60/);
 
     view.dispose();
   });
@@ -320,7 +321,7 @@ describe('P5.6  -  Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$144\.08/);
+    assert.match(container.innerHTML, /\$118\.60/);
 
     view.dispose();
   });

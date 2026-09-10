@@ -4,30 +4,24 @@
 
 ---
 
-## 1. Phase 8 (REOPENED) — 🚢 RELEASED as `v1.0` (Director order 2026-09-08) · consecutive_fails: 0 · Watcher NOT armed (terminal)
-- **Reopened-scope ledger**: P8.4 ✅ + P8.5 ✅ (incl. P8.5a) — submit 12:08 + addendum 12:50 (seq38) → FAIL cycle 1 (R1 red suite + R2 missing test file + R3 scope/dropdown/rows + R4 claims) → resubmit seq39 → PASS cycle 2 (2026-09-08). Amended contract governs: tile-only switcher, 7-lever directory, §5 Ruling #4 (Director 2026-09-08).
-- **Cycle-2 proof**: suite 696/696 ×3 OP-independent (212 suites, 0 flakes; delta 690+6 reconciles); new detail suite 6/6 (switching, bindings, persistence, tripwire); contract–tree match gate-by-gate; claims true; D1–D4 closed (D3 local_server → Director disposition); OLS triple re-derived to 6dp (median 1.471329 → 1.47); browser re-sweep ALL PASS 0 errors.
-- **Final product state**: 6 methods live with tile-switched full derivations; agreement-only FAIR verdict (2 UND / 1 OVR / 3 fair) vs $157.85; 7-lever Defense Directory (rf/beta/ERP/g/tax/shares/peer-set); SOTP 2-seg + per-user 3-base + lease disclosures intact; corpus 706; engine+methods frozen.
-- **Director FINAL PASS queue (standing, from P6R)**: (a) interface review; (b) cost-of-capital sign-off (monthly ERP 4.25%, peer-median beta 1.47, WACC 11.04%, FAIR −8.72%); (c) GitHub push + deployed-URL offline smoke (incl. `/api/price` live behavior); (d) canonical repo URL for README; (e) disclaimer wording; (f) local_server contract disposition (D3) → explicit FINAL PASS → archive + tag `v1.0` (Director-only release authority; OP PASS ≠ release). Uncommitted working tree (P6R3+P7+P8) held by the release block — committed at archive time per standard flow.
-- **Watcher**: NOT armed — gate terminal state; next signal is a human prompt (Director FINAL PASS items or new orders). Re-arm on the next OP review turn.
-- **OP audit artifacts (scratch/, gitignored)**: op_p84_hand_derive.mjs (ALL PASS) · op_p84_p85_browser_probe.mjs (ALL PASS ×2 trees) · opsuite.log (687/3 cycle-1) · opsuite2a/b/c.log (696/696 ×3 cycle-2).
-- **Rollback checkpoints (stash list)**: cycle-1 `PRE-OP-REVIEW P8.4-P8.5a 2026-09-07` + cycle-2 `PRE-OP-REVIEW P8.4-P8.5a cycle2 2026-09-08` — both retained.
+## 0. EP-FIX1 — 🟡 ACTIVE (kicked 2026-09-10, Director order "Proceed. Fix and Log it.") · consecutive_fails: 0 · Watcher armed baseline status_op seq 8
+- **Scope**: gate-layer hardening for findings A1–A8 — F1 untracked-aware freeze gates · F2 assert-outside-try ×2 + real fallbacks · F3 real market.fetch diff · F4 CI fetch-depth/tags · F5 status.md Next refresh · F6 commit-subject amend + tag move (OP-executed post-verification).
+- **Findings record**: A1–A8 accepted in full (A4/A5/A6/A8 shapes OP-verified; A1–A3/A7 evidenced). OP owns: blind-allowlist adoption (EP.2), shelled commit subject, stale Next.
+- **Signal**: `inbox_ds.md` KICKOFF EP-FIX1 + `status_ds.json` → worker_active seq 14 (payload-first). Awaiting DS `SUBMISSION: EP-FIX1`.
+- **Next**: audit submission (negative controls must go red; full suite green incl. freeze gates vs old baselines AND at HEAD; deploy.yml shape; Next refresh; no pin/driver/statement moves), then OP amends commit subject + moves v1.0-EP, re-verifies, closes out.
 
-## 1a. Phase 8 audit trail (2026-09-04 23:51 → 2026-09-05 04:27; reopened 2026-09-06 → approved 2026-09-08)
-- Kick-off 23:51 (Director "OP start phase 8"). P8.0: submit 00:08 (seq30) → FAIL 01:42 (R1 shares 1000× display + R2 tautology + D1/D2 gate name-inflation + D3 claim) → resubmit 01:52 (seq31) → PASS 02:09 (seq37). P8.1: submit 02:32 (seq32) → FAIL 03:01 (SPOT fyForward EUR-in-USD-lane 19,540→22,320.02 @1.14227; EBITDA note €97M invented; DUOL lease LT-only ruling keep+disclose) → resubmit (seq33) → PASS 03:08 (seq39). P8.2: submit 03:15 (seq34) → FAIL 03:23 (invented $5.76 ARPU default — no corpus lane yields it; $21.98 hardcoded default; fold footnote missing IAP+other composition) → resubmit 03:32 (seq35) → PASS 03:35 (seq41). P8.3: submit 03:58 (seq36) → FAIL 04:16 (app.js:705 methods/verdict SWAP — Summary verdict card renders ZERO method rows post-recompute, real-DOM-verified; initial render + stub suite masked it) → resubmit 04:25 (seq37) → PASS 04:27 → GATE PASS (seq44 completed).
-- Reopened 2026-09-06 (Director): P8.4+P8.5 submit 12:08 (seq38) + P8.5a addendum 12:50 → OP FAIL cycle 1 2026-09-07 (R1 red suite 687/3 + R2 missing test file + R3 scope/dropdown/7-vs-11 + R4 false claims; consecutive 1) → resubmit seq39 (2026-09-08: re-pins, new detail suite, amended contract tile-only/7-row/Ruling-4, true claims, D1–D4) → OP PASS cycle 2 2026-09-08 (consecutive 0). No archive/tag/v1.0 — release block carries.
-- **Standing rulings from Phase 8 (permanent)**: peers live-source verification (ruling #10 — every figure re-pulled); 3-name median + min–max span everywhere; lease-capitalized basis w/ DUOL LT-only + disclosure (~$0.14/share); FY+1 basis; agreement-only ±15% imported; zero weights; per-user caller-supplied context (zero DUOL financial defaults in engine); SOTP two-segment map with full-composition fold footnote; no AI-tutor surface; EST/MKT sole-badge; engine methods = new additive modules only; tile-switched derivations + 7-lever directory (Ruling #4).
+## 1. Economy Phase — 🟢 GATE PASSED (2026-09-10 18:15 UTC) · history retained
+- **Ledger**: EP.1 ✅ · EP.2 ✅ (Warning #2) · EP.3 ✅ · EP.4 ✅ cycle 2 (F1 → one resubmission). 1 FAIL total. Suite 934/934 ×271 (888+46 EIG).
+- **Outcome**: headline **$118.60167662384697 overvalued −24.86%** (Bear $72.38 / Bull $217.98); EIG A–E green; F4 remediated (stamp IN SYNC); labelStable true ($78.18–$122.84 all-overvalued); Warning #2 carry complete.
+- **Post-gate**: close-out done (inboxes archived hash-verified, headers canonical); rollback point v1.0-EP committed + tagged (7ef0c40); tree restored to tag after rogue-work stash ("unprompted scope-gate repair 2026-09-11" — offered as reference shape, out-of-band editing prohibited).
+- **Partner liveness**: DS HALT at last check (DSmemory EP COMPLETE/HALT); EP-FIX1 kickoff lands cold — Director must prompt DS's session if no live worker picks it up.
 
-## 1b. Phase 7 — 🟢 DONE (GATE PASSED 2026-09-04 23:43 — Director-approved)
-- Converged deliberation (R1–R3) + solution doc fidelity-PASSED (2 cycles, [C1] pre-growth base 591,200.80) + Director approval 23:43 = GATE PASS. Solution = permanent design authority as amended by Ruling #4 (tile-only, 7-lever). No archive/tag/v1.0 (release block). Grid overlay deferred to P8 (never invoked).
+## 2. Prior programs (compacted): RP0–RP9 🟢 (GATE PASSED 2026-09-10 08:11, 888/888 ×259) · P8 🚢 v1.0 · P0–P7 ✅.
 
-## 3. Authoritative Pin Tables (P6R3 + Phase 8 final — READ-ONLY)
-- **P6R3 baseline**: Base $144.082130 FAIR (−8.72%) / Bear $84.389050 / Bull $277.837024 vs $157.85; WACC 0.110375 (rf 0.0479 + 1.47×0.0425); EV 5,792,014.07; netCashToday 1,416,559; shares 50,031,000; beta median 1.4713 (SPOT 1.565748/RBLX 1.438748/NFLX 1.471329); ERP 4.25% (3M-avg); corpus 706 + price series + peers_beta + peers.json (P8).
-- **Phase 8 methods (final, OP-verified)**: DCF $144.08 [134.11–144.08] · EV/Rev $141.59 [124.47–190.43] (median 4.8191x) · EV/EBITDAR $116.20 [98.93–133.47] (median 25.2312x, RBLX excluded) · P/FCF $240.43 [142.28–245.19] (median 30.26x) · SOTP $141.59 [124.47–190.43] (EBITDAR sensitivity $116.20) · Per-User $443.68 [348.12–483.70] (median of MAU/DAU/paid-sub bases). Verdict: FAIR no-consensus; dissent [EBITDAR OVR, P/FCF UND, Per-User UND]; spread 116.20–443.68.
-- **Flip-map pins (P8.0)**: WACC parity 10.1846%/−85.29bps · OVR 11.7803%/+74.28bps · UND 9.0600%/−197.75bps; g parity 3.6214%/+112.1bps · OVR 1.4573%/−104.3bps · UND unreachable; C1 pre-growth base 591,200.80 (grown 605,980.82 NEVER enters B; trap −17.27bps); PV(TV)/EV 72.6%.
-
-## 4. Standing Rules (permanent carry)
-1. Evidence honesty: every factual claim cited or derived; methodology text matches sources; no invented figures (corpus-derivable only).
-2. Buildability under standing gates (literal/data-content/derived-not-transcribed with tripwires/real-browser/zero-fallbacks — engine layers: no DUOL financial defaults; no buried `??` on market/EST without disclosed masking).
-3. Logs append-only; memory overwritten per turn; payload-first + `[END_OF_MESSAGE]` + flip-signal-second; assert delimiter on wake; reconcile seq on wake; quarantine scratch probes before npm test.
-4. Real-browser probe for every UI sub-phase (P5.3); live-source verification for every data sub-phase (ruling #10); negative-test every new gate (must bite); update-path integration tests (render→update→assert, P8.3 R2 pattern).
+## 3. Standing Rules (permanent carry)
+1. Evidence honesty: every factual claim cited or derived; submission examples verbatim tool outputs (Warnings #1, #2 standing).
+2. Buildability under standing gates (literal/data-content/derived-not-transcribed with tripwires/real-browser/zero-fallbacks).
+3. Logs append-only; memory overwritten per turn; payload-first + `[END_OF_MESSAGE]` + flip-signal-second; assert delimiter on wake; reconcile seq on wake.
+4. Capture-then-view for UI sub-phases; never fake a capability.
+5. Gate-scope discipline: every test's grep/scan must cover what its name promises; freeze gates must see untracked files; asserts never inside `try` with swallowing catches (EP-FIX1 learnings).
+6. Every verdict turn ends with re-arm (or explicit no-re-arm on terminal states). DS never edits OP scratch probes.

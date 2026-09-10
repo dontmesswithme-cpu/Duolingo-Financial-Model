@@ -243,7 +243,7 @@ describe('P8.3  -  End-to-End Live Engine Valuation & Multi-Method Tie-Out', () 
     const fc = forecastEngine.project({ historical: dataset, assumptions });
     const ts = threeStatementEngine.project(sched, assumptions, fc);
     const w = buildWacc({ assumptions, debtSchedule: sched.debt });
-    const d = valuateDcf(ts, w, { assumptions });
+    const d = valuateDcf(ts, w, { assumptions, corpus: dataset });
     const ttm = computeTtm(dataset);
 
     const p0 = ts.periods[0];
@@ -282,13 +282,13 @@ describe('P8.3  -  End-to-End Live Engine Valuation & Multi-Method Tie-Out', () 
     const resSotp = valuateSotp(peers, { forwardRevenue, detRevenue, forwardEbitdar, netCashCapitalized, sharesOutstanding });
     const resPerUser = valuatePerUser(peers, { kpis: { mau, dau, paidSubscribers: paidSubs }, netCashCapitalized, sharesOutstanding, arpuContext });
 
-    // Tie-out each method to OP expected values
-    assert.ok(Math.abs(resDcf.impliedPerShare - 144.08) < 0.05, `DCF expected ~144.08, got ${resDcf.impliedPerShare}`);
-    assert.ok(Math.abs(resComps.impliedPerShare - 141.59) < 0.05, `Comps expected ~141.59, got ${resComps.impliedPerShare}`);
-    assert.ok(Math.abs(resEv.impliedPerShare - 116.20) < 0.05, `EV/EBITDAR expected ~116.20, got ${resEv.impliedPerShare}`);
-    assert.ok(Math.abs(resPfcf.impliedPerShare - 240.43) < 0.05, `P/FCF expected ~240.43, got ${resPfcf.impliedPerShare}`);
-    assert.ok(Math.abs(resSotp.impliedPerShare - 141.59) < 0.05, `SOTP expected ~141.59, got ${resSotp.impliedPerShare}`);
-    assert.ok(Math.abs(resPerUser.impliedPerShare - 443.68) < 0.05, `Per-User expected ~443.68, got ${resPerUser.impliedPerShare}`);
+    // Tie-out each method to OP expected values (EP.3 normalised terminal; peers use rolled shares)
+    assert.ok(Math.abs(resDcf.impliedPerShare - 118.60) < 0.05, `DCF expected ~118.60, got ${resDcf.impliedPerShare}`);
+    assert.ok(Math.abs(resComps.impliedPerShare - 124.49) < 0.05, `Comps expected ~124.49, got ${resComps.impliedPerShare}`);
+    assert.ok(Math.abs(resEv.impliedPerShare - 102.17) < 0.05, `EV/EBITDAR expected ~102.17, got ${resEv.impliedPerShare}`);
+    assert.ok(Math.abs(resPfcf.impliedPerShare - 211.40) < 0.05, `P/FCF expected ~211.40, got ${resPfcf.impliedPerShare}`);
+    assert.ok(Math.abs(resSotp.impliedPerShare - 124.49) < 0.05, `SOTP expected ~124.49, got ${resSotp.impliedPerShare}`);
+    assert.ok(Math.abs(resPerUser.impliedPerShare - 390.10) < 0.05, `Per-User expected ~390.10, got ${resPerUser.impliedPerShare}`);
 
     // Run Agreement Verdict against benchmark price $157.85
     const livePrice = 157.85;
@@ -298,9 +298,9 @@ describe('P8.3  -  End-to-End Live Engine Valuation & Multi-Method Tie-Out', () 
     assert.equal(verdictOut.verdict, 'fair');
     assert.equal(verdictOut.agreement.unanimous, false);
     assert.equal(verdictOut.agreement.counts.undervalued, 2);
-    assert.equal(verdictOut.agreement.counts.overvalued, 1);
-    assert.equal(verdictOut.agreement.counts.fair, 3);
-    assert.equal(verdictOut.dissent.length, 3);
+    assert.equal(verdictOut.agreement.counts.overvalued, 4);
+    assert.equal(verdictOut.agreement.counts.fair, 0);
+    assert.equal(verdictOut.dissent.length, 6);
   });
 });
 
@@ -350,7 +350,7 @@ describe('P8.3  -  Summary View Update Wiring & Live App Recalculation Integrati
     const fc = forecastEngine.project({ historical: dataset, assumptions });
     const ts = threeStatementEngine.project(sched, assumptions, fc);
     const w = buildWacc({ assumptions, debtSchedule: sched.debt });
-    const d = valuateDcf(ts, w, { assumptions });
+    const d = valuateDcf(ts, w, { assumptions, corpus: dataset });
     const rec = evaluateRec(d.perShare, 157.85);
 
     const container = new StubElement();
@@ -392,11 +392,11 @@ describe('P8.3  -  Summary View Update Wiring & Live App Recalculation Integrati
 
     const rowMatches = html.match(/<tr class="method-row-/g);
     assert.equal(rowMatches?.length, 6, `Expected exactly 6 method rows after update(), got ${rowMatches?.length}`);
-    assert.ok(html.includes('$144.08'), 'Must include DCF per share $144.08');
-    assert.ok(html.includes('$141.59'), 'Must include Comps per share $141.59');
-    assert.ok(html.includes('$116.20'), 'Must include EV/EBITDAR per share $116.20');
-    assert.ok(html.includes('$240.43'), 'Must include P/FCF per share $240.43');
-    assert.ok(html.includes('$443.68'), 'Must include Per-User per share $443.68');
+    assert.ok(html.includes('$118.60'), 'Must include DCF per share $118.60 (EP.3 normalised terminal)');
+    assert.ok(html.includes('$124.49'), 'Must include Comps per share $124.49');
+    assert.ok(html.includes('$102.17'), 'Must include EV/EBITDAR per share $102.17');
+    assert.ok(html.includes('$211.40'), 'Must include P/FCF per share $211.40');
+    assert.ok(html.includes('$390.10'), 'Must include Per-User per share $390.10');
     assert.ok(html.includes('2 methods undervalued'), 'Must include dissent summary');
 
     // Prove that swapped order fails (regression gate)

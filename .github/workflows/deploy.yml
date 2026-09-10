@@ -24,6 +24,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          # Full history + tags: the frozen-engine scope gates diff the working
+          # tree against the baseline tags (v1.0, v1.0-P8, v1.0-P6R3-base, ...)
+          # and fail closed when a baseline is missing. The default shallow
+          # checkout carries no tags, which used to be masked by a catch-all
+          # that degraded to an empty change set — a silent pass.
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

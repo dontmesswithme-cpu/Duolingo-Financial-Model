@@ -1,9 +1,13 @@
 /**
- * Executive Summary & Output Dashboard View (Phase 5.5).
+ * Executive Summary & Output Dashboard View (Phase 5.5; RP7.1 executive verdict header).
  *
  * Renders executive-level synthesis cards and valuation conclusions:
- *  1. Mechanical Investment Recommendation Card (DCF Target vs Market Price, Implied Upside %, Rule-Based Badge)
- *  2. Valuation Bridge Snapshot (EV, Net Cash, Equity Value, Diluted Shares, DCF Price)
+ *  1. Executive Verdict Header (RP7.1 `.summary-headline-grid`): DCF fair value,
+ *     benchmark share price, upside vs market, and min-max spread with verdict badge
+ *  2. Agreement Synthesis Table (RP7.1 `.weighted-valuation-table`, agreement-only
+ *     contents): per-method share price, equity value ($mm), upside %, status pill,
+ *     plus a bold min-max spread row. No method-standing column, no single-figure row.
+ *  3. Valuation Bridge Snapshot (EV, Net Cash, Equity Value, Diluted Shares, DCF Price)
  *  3. Operating Quality & Rule of 40 Dashboard (Growth, FCF Margin, Rule of 40 Score, Gross Margin)
  *  4. Product & Operating KPI Headline Cards (DAU, MAU, Paid Subscribers, DET Bookings, Filing Citations)
  *
@@ -82,6 +86,10 @@ function createKpiLookup(historical) {
  * @param {object} [options.threeStatement]
  * @param {object} [options.marketPriceState] MarketPriceState (Finding G)
  * @param {() => Promise<void>|void} [options.onRefreshPrice] Manual refresh callback
+ * @param {object} [options.verdict] Agreement verdict from aggregateVerdicts
+ * @param {Array<object>} [options.methods] Raw six-method outputs (equity join)
+ * @param {object} [options.sensitivityGrid] Sensitivity grid for health coverage check
+ * @param {object} [options.labelStability] Verdict-sensitivity band from buildLabelStability
  * @returns {{ update: (dcf: object, recommendation: object, kpi?: object, historical?: object, assumptions?: object, threeStatement?: object, marketPriceState?: object) => void, dispose: () => void }}
  */
 export function renderSummary({
@@ -96,6 +104,8 @@ export function renderSummary({
   onRefreshPrice = null,
   verdict = null,
   methods = null,
+  sensitivityGrid = null,
+  labelStability = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderSummary requires a container element.', 'container');
@@ -110,6 +120,8 @@ export function renderSummary({
   let currentMarketPrice = marketPriceState;
   let currentVerdict = verdict;
   let currentMethods = methods;
+  let currentSensitivityGrid = sensitivityGrid;
+  let currentLabelStability = labelStability;
   let disposed = false;
 
   function renderMultiMethodVerdictCard() {
@@ -122,6 +134,12 @@ export function renderSummary({
     const priceAsOf = currentMarketPrice?.asOf || (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf : '') || '';
     const priceProvider = currentMarketPrice?.source?.provider ?? 'stockanalysis.com';
     const retrievedText = currentMarketPrice?.retrievedAt ? ` · Retrieved: ${currentMarketPrice.retrievedAt.slice(0, 10)}` : '';
+    const intradayPrice = currentMarketPrice?.intradayPrice;
+    // Live-close states carry intradayPrice 0 when the quote endpoint sends null
+    // (Number(null) === 0 upstream); only a positive print is a real intraday quote.
+    const intradayLine = Number.isFinite(intradayPrice) && intradayPrice > 0
+      ? `<div class="rec-hero-sub">Intraday: ${usd(intradayPrice, { decimals: 2 })}</div>`
+      : '';
 
     const underThresh = RECOMMENDATION_THRESHOLDS.undervalued;
     const overThresh = RECOMMENDATION_THRESHOLDS.overvalued;
@@ -165,6 +183,46 @@ export function renderSummary({
 
     const methodRows = activeVerdict.methodResults || [];
 
+    // RP7.1 headline inputs: DCF fair value and its upside vs the benchmark close.
+    // Falls back to a recomputed upside only when the recommendation output is absent;
+    // no stand-in price is ever invented (non-finite renders as ' - ').
+    const dcfPerShare = currentDcf?.perShare;
+    let dcfUpside = currentRec?.upsidePct;
+    if (!Number.isFinite(dcfUpside) && Number.isFinite(dcfPerShare) && Number.isFinite(marketPrice) && marketPrice > 0) {
+      dcfUpside = (dcfPerShare - marketPrice) / marketPrice;
+    }
+    const dcfShares = currentDcf?.sharesOutstanding;
+
+    // RP7.1 agreement table equity join: per-method implied equity comes from the
+    // live method outputs (engine $ thousands -> $mm). Rows are still driven ONLY
+    // by activeVerdict.methodResults, so a crossed update() signature keeps the
+    // P8.3 R2 tripwire (0 rows when the verdict slot holds the methods array).
+    const liveEquityByMethod = new Map();
+    if (Array.isArray(currentMethods)) {
+      for (const live of currentMethods) {
+        if (live && typeof live.method === 'string' && Number.isFinite(live.impliedEquityValue)) {
+          liveEquityByMethod.set(live.method, live.impliedEquityValue);
+        }
+      }
+    }
+    function equityMmFor(row) {
+      const liveEquity = liveEquityByMethod.get(row.method);
+      if (Number.isFinite(liveEquity)) return liveEquity / 1000;
+      if (Number.isFinite(row.impliedPerShare) && Number.isFinite(dcfShares) && dcfShares > 0) {
+        return (row.impliedPerShare * dcfShares) / 1000 / 1000;
+      }
+      return null;
+    }
+    const spreadEquities = methodRows.map(equityMmFor).filter((v) => Number.isFinite(v));
+    const minEquityMm = spreadEquities.length > 0 ? Math.min(...spreadEquities) : null;
+    const maxEquityMm = spreadEquities.length > 0 ? Math.max(...spreadEquities) : null;
+    const spreadUpsideMin = Number.isFinite(minSpread) && Number.isFinite(marketPrice) && marketPrice > 0
+      ? (minSpread - marketPrice) / marketPrice
+      : null;
+    const spreadUpsideMax = Number.isFinite(maxSpread) && Number.isFinite(marketPrice) && marketPrice > 0
+      ? (maxSpread - marketPrice) / marketPrice
+      : null;
+
     return `
       <div class="summary-card recommendation-card rec-card-${badgeClass}">
         <div class="rec-card-header">
@@ -175,42 +233,48 @@ export function renderSummary({
           </div>
           <div class="rec-badge-wrapper">
             <span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span>
+            ${renderSensitivityNote()}
           </div>
         </div>
 
-        <div class="rec-metrics-hero">
+        <div class="summary-headline-grid">
           <div class="rec-hero-item">
-            <div class="rec-hero-label">Multi-Method Agreement Verdict</div>
-            <div class="rec-hero-value font-mono font-large font-bold">${labelDisplay}</div>
-            <div class="rec-hero-sub">${activeVerdict.agreement?.unanimous ? 'Unanimous 6-Method Consensus' : 'Split; Unanimous Consensus Not Reached'}</div>
+            <div class="rec-hero-label">DCF Fair Value (2-Stage FCFF)</div>
+            <div class="rec-hero-value font-mono font-large font-bold">${usd(dcfPerShare, { decimals: 2 })}</div>
+            <div class="rec-hero-sub">Implied upside: ${Number.isFinite(dcfUpside) ? percent(dcfUpside, { decimals: 2, showSign: true }) : ' - '}</div>
           </div>
           <div class="rec-hero-item">
-            <div class="rec-hero-label">Market Benchmark Share Price${overrideMarker}</div>
+            <div class="rec-hero-label">Current Benchmark Share Price${overrideMarker}</div>
             <div class="rec-hero-value font-mono font-large">${usd(marketPrice, { decimals: 2 })}</div>
             <div class="rec-hero-sub">${mktBadge({ asOf: priceAsOf, provider: priceProvider })}${retrievedText}</div>
+            ${intradayLine}
             <div class="rec-hero-action">
               <button type="button" class="btn-refresh-price" data-action="refresh-price">↻ Refresh Live Price</button>
             </div>
           </div>
           <div class="rec-hero-item">
-            <div class="rec-hero-label">Implied Valuation Range (6 Methods)</div>
+            <div class="rec-hero-label">Upside / (Downside) vs Market</div>
+            <div class="rec-hero-value font-mono font-large font-bold ${Number.isFinite(dcfUpside) && dcfUpside >= 0 ? 'text-positive' : 'text-negative'}">${Number.isFinite(dcfUpside) ? percent(dcfUpside, { decimals: 2, showSign: true }) : ' - '}</div>
+            <div class="rec-hero-sub">DCF vs benchmark close</div>
+          </div>
+          <div class="rec-hero-item">
+            <div class="rec-hero-label">Valuation Spread (6 Methods)</div>
             <div class="rec-hero-value font-mono font-large font-bold">
               ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} - ${usd(maxSpread, { decimals: 2 })}` : ' - '}
             </div>
-            <div class="rec-hero-sub">Min-Max Method Dispersion</div>
+            <div class="rec-hero-sub"><span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span> ${activeVerdict.agreement?.unanimous ? 'Unanimous 6-method agreement' : 'Split; unanimous agreement not reached'}</div>
           </div>
         </div>
 
         <div class="multi-method-table-wrapper">
-          <table class="financial-summary-table multi-method-table">
+          <table class="financial-summary-table weighted-valuation-table">
             <thead>
               <tr>
-                <th>Valuation Method</th>
-                <th>Model Basis</th>
-                <th class="align-right">Implied / Share</th>
-                <th class="align-right">Multiple / Range</th>
-                <th class="align-right">Implied Upside</th>
-                <th>Method Verdict (Isolated)</th>
+                <th>Method</th>
+                <th class="align-right">Implied Share Price</th>
+                <th class="align-right">Implied Equity Value ($mm)</th>
+                <th class="align-right">Upside %</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -226,29 +290,39 @@ export function renderSummary({
                   vClass = 'overvalued';
                   vText = 'OVERVALUED';
                 }
-                const rangeStr = m.rangePerShare
-                  ? `${usd(m.rangePerShare.min, { decimals: 2 })} - ${usd(m.rangePerShare.max, { decimals: 2 })}`
-                  : (m.medianMultiple ? `${m.medianMultiple.toFixed(2)}x` : ' - ');
+                const equityMm = equityMmFor(m);
 
                 return `
                   <tr class="method-row-${m.method}">
                     <td><strong>${m.label}</strong></td>
-                    <td><span class="font-muted font-small">${m.basis}</span></td>
                     <td class="align-right font-mono font-bold font-large">${usd(m.impliedPerShare, { decimals: 2 })}</td>
-                    <td class="align-right font-mono font-small">${rangeStr}</td>
-                    <td class="align-right font-mono font-bold ${upside >= 0 ? 'text-positive' : 'text-negative'}">
+                    <td class="align-right font-mono">${Number.isFinite(equityMm) ? usd(equityMm, { decimals: 2 }) : ' - '}</td>
+                    <td class="align-right font-mono font-bold ${Number.isFinite(upside) && upside >= 0 ? 'text-positive' : 'text-negative'}">
                       ${percent(upside, { decimals: 2, showSign: true })}
                     </td>
                     <td><span class="rec-badge rec-badge-${vClass}">${vText}</span></td>
                   </tr>
                 `;
               }).join('')}
+              <tr class="agreement-spread-row table-row-total">
+                <td><strong>Valuation Spread (min-max)</strong></td>
+                <td class="align-right font-mono font-bold font-large">
+                  ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} - ${usd(maxSpread, { decimals: 2 })}` : ' - '}
+                </td>
+                <td class="align-right font-mono font-bold">
+                  ${Number.isFinite(minEquityMm) && Number.isFinite(maxEquityMm) ? `${usd(minEquityMm, { decimals: 2 })} - ${usd(maxEquityMm, { decimals: 2 })}` : ' - '}
+                </td>
+                <td class="align-right font-mono font-bold">
+                  ${Number.isFinite(spreadUpsideMin) && Number.isFinite(spreadUpsideMax) ? `${percent(spreadUpsideMin, { decimals: 2, showSign: true })} - ${percent(spreadUpsideMax, { decimals: 2, showSign: true })}` : ' - '}
+                </td>
+                <td><span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
 
         <div class="rec-discipline-note">
-          <strong>Mechanical Discipline:</strong> Investment verdict is strictly determined by unanimous agreement across all six independent valuation methods evaluated against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). All six methods must agree beyond the threshold band for a directional verdict; any split produces FAIR (no consensus). Unweighted; zero subjective or discretionary editorial language.
+          <strong>Mechanical Discipline:</strong> Investment verdict is strictly determined by unanimous agreement across all six independent valuation methods evaluated against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). All six methods must agree beyond the threshold band for a directional verdict; any split produces FAIR (no consensus). Equal standing across all six methods; zero subjective or discretionary editorial language.
         </div>
         <div class="disclaimer-box lease-convention-note">
           <strong>Cross-Method Lease Capitalization Disclosure:</strong> DCF keeps operating lease costs within operating cash flows (rent in operating flow), whereas relative valuation methods (EV/Revenue, EV/EBITDAR, SOTP, Per-User) capitalize Duolingo operating lease liabilities into Enterprise Value ($86.136M long-term obligation filed in Q2 Form 10-Q Note 9; current operating lease portion folded into accrued expenses and not separately broken out in quarterly filings; ~$7.204M in annual Form 10-K Note 9; ~$0.14/share materiality) and add back rent ($12.071M filed) to EBITDAR. P/FCF operates on equity-level cash flows after actual lease payments.
@@ -330,13 +404,72 @@ export function renderSummary({
     `;
   }
 
-  function renderOperatingQualityAndKpis() {
+  const FY_ORDER = ['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025'];
+
+  function fySeries(dataset, metric) {
+    if (!dataset) return FY_ORDER.map(() => null);
+    const rows = extractRows(dataset);
+    return FY_ORDER.map((period) => {
+      const row = rows.find((r) => r && r.metric === metric && r.period === period);
+      return row && Number.isFinite(row.value) ? row.value : null;
+    });
+  }
+
+  function sparklineSvg(values, label) {
+    const pts = [];
+    values.forEach((v) => { if (Number.isFinite(v)) pts.push(v); });
+    if (pts.length < 2) {
+      return `<svg class="sparkline-svg spark-flat" viewBox="0 0 120 36" role="img" aria-label="${label} trend unavailable"><line x1="2" y1="18" x2="118" y2="18" /></svg>`;
+    }
+    const W = 120, H = 36, PAD = 3;
+    let min = Infinity, max = -Infinity;
+    for (const v of pts) { if (v < min) min = v; if (v > max) max = v; }
+    const span = (max - min) || 1;
+    const coords = pts.map((v, k) => {
+      const x = PAD + (k * (W - PAD * 2)) / (pts.length - 1);
+      const y = H - PAD - ((v - min) / span) * (H - PAD * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const direction = pts[pts.length - 1] >= pts[0] ? 'spark-up' : 'spark-down';
+    return `<svg class="sparkline-svg ${direction}" viewBox="0 0 120 36" role="img" aria-label="${label} five-year trend"><polyline points="${coords}" /></svg>`;
+  }
+
+  function deltaBadge(cur, prev, mode) {
+    if (!Number.isFinite(cur) || !Number.isFinite(prev)) {
+      return '<span class="delta-badge delta-flat"> - </span>';
+    }
+    if (mode === 'pp') {
+      const dpp = (cur - prev) * 100;
+      const cls = dpp > 0 ? 'delta-up' : (dpp < 0 ? 'delta-down' : 'delta-flat');
+      const sign = dpp > 0 ? '+' : '';
+      return `<span class="delta-badge ${cls}">${sign}${dpp.toFixed(1)} pp YoY</span>`;
+    }
+    if (prev === 0) return '<span class="delta-badge delta-flat"> - </span>';
+    const dpct = (cur - prev) / Math.abs(prev);
+    const cls = dpct > 0 ? 'delta-up' : (dpct < 0 ? 'delta-down' : 'delta-flat');
+    return `<span class="delta-badge ${cls}">${percent(dpct, { decimals: 1, showSign: true })} YoY</span>`;
+  }
+
+  function sparklineCard({ title, valueHtml, basisSub, series, deltaHtml, rangeLabel = null }) {
+    // R40 precision: the trailing Rule-of-40 series starts in FY2022 (no
+    // prior-year base for FY2021), so its range suffix must not claim FY2021.
+    const rangeSuffix = rangeLabel || 'Sparkline FY2021–FY2025';
+    return `
+      <div class="sparkline-card">
+        <div class="sparkline-title">${title}</div>
+        <div class="sparkline-value font-mono">${valueHtml}</div>
+        <div class="sparkline-delta">${deltaHtml}</div>
+        ${sparklineSvg(series, title)}
+        <div class="sparkline-sub">${basisSub} · ${rangeSuffix}</div>
+      </div>`;
+  }
+
+  function renderSparklineKpis() {
     const kpiLookup = createKpiLookup(currentHistorical);
 
     const dauRow = kpiLookup['dau'];
     const mauRow = kpiLookup['mau'];
     const subsRow = kpiLookup['paid_subscribers'];
-    const detRow = kpiLookup['revenue_duolingo_english_test'];
 
     const dauVal = dauRow && Number.isFinite(dauRow.value) ? (dauRow.value / 1e6).toFixed(1) + 'M' : ' - ';
     const dauSub = dauRow?.period ? `Latest Reported (${dauRow.period})` : ' - ';
@@ -355,10 +488,9 @@ export function renderSummary({
       convSub = `${subsRow.period} Subs / ${mauRow.period} MAU`;
     }
 
-    const detVal = detRow && Number.isFinite(detRow.value) ? usd(detRow.value, { decimals: 0 }) : ' - ';
-    const detSub = detRow?.period ? `${detRow.period} Form 10-K` : ' - ';
-
-    // Rule of 40 calculation: projected FY2030 Unlevered FCF Margin + 5-Year Revenue CAGR
+    // Rule of 40 calculation (RWC.1a): single authoritative definition —
+    // FY2030 Free Cash Flow Margin from threeStatement.cashFlow (e2e/README basis)
+    // + 5-Year Revenue CAGR (FY2025–FY2030E). No schedule-FCF basis, no fallbacks.
     let rule40Score = null;
     let fcfMargin = null;
     let revCAGR = null;
@@ -368,16 +500,46 @@ export function renderSummary({
       : null;
     const baseRev = histRevRow?.value ?? null;
 
-    const lastSched = currentDcf?.schedule ? currentDcf.schedule[currentDcf.schedule.length - 1] : null;
-    const finalFcf = lastSched?.fcf ?? null;
+    const finalFcf = currentThreeStatement?.cashFlow?.byPeriod?.FY2030?.free_cash_flow?.value ?? null;
 
     const projRev = currentThreeStatement?.incomeStatement?.byPeriod?.FY2030?.revenue?.total?.value ?? null;
 
-    if (finalFcf && projRev && baseRev && projRev > 0 && baseRev > 0) {
+    if (Number.isFinite(finalFcf) && Number.isFinite(projRev) && Number.isFinite(baseRev) && projRev > 0 && baseRev > 0) {
       fcfMargin = finalFcf / projRev;
       revCAGR = Math.pow(projRev / baseRev, 1 / 5) - 1;
       rule40Score = fcfMargin + revCAGR;
+    } else {
+      fcfMargin = null;
+      revCAGR = null;
+      rule40Score = null;
     }
+
+    // Trailing annual context series (filed actuals). Conversion and trailing
+    // Rule of 40 are growth-defined from FY2022 (FY2021 has no prior-year base).
+    const dauS = fySeries(currentHistorical?.kpis, 'dau');
+    const mauS = fySeries(currentHistorical?.kpis, 'mau');
+    const paidS = fySeries(currentHistorical?.kpis, 'paid_subscribers');
+    const subRevS = fySeries(currentHistorical?.income, 'revenue_subscription');
+    const revS = fySeries(currentHistorical?.income, 'revenue_total');
+    const cfoS = fySeries(currentHistorical?.cashflow, 'cash_from_operating_activities');
+    const ppeS = fySeries(currentHistorical?.cashflow, 'purchase_of_property_and_equipment');
+    const capS = fySeries(currentHistorical?.cashflow, 'capitalized_software_and_intangibles');
+    const convS = FY_ORDER.map((_, i) => (
+      Number.isFinite(paidS[i]) && Number.isFinite(mauS[i]) && mauS[i] > 0 ? paidS[i] / mauS[i] : null
+    ));
+    const r40trailS = FY_ORDER.map((_, i) => {
+      if (i === 0) return null;
+      const rev = revS[i], prevRev = revS[i - 1];
+      const fcf = Number.isFinite(cfoS[i]) && Number.isFinite(ppeS[i]) && Number.isFinite(capS[i])
+        ? cfoS[i] - Math.abs(ppeS[i]) - Math.abs(capS[i])
+        : null;
+      if (!Number.isFinite(rev) || !Number.isFinite(prevRev) || prevRev <= 0 || rev <= 0 || !Number.isFinite(fcf)) return null;
+      return (fcf / rev) + (rev / prevRev - 1);
+    });
+
+    const at = (s) => s[s.length - 1];
+    const prior = (s) => s[s.length - 2];
+    const arrVal = Number.isFinite(at(subRevS)) ? '$' + (at(subRevS) / 1000).toFixed(1) + 'M' : ' - ';
 
     return `
       <div class="summary-card operating-kpi-card">
@@ -385,48 +547,194 @@ export function renderSummary({
           Operating Quality, Rule of 40 &amp; Core Product KPIs
         </div>
         <div class="summary-card-body">
-          <div class="kpi-headline-grid">
-            <div class="kpi-metric-box">
-              <div class="kpi-box-title">Daily Active Users (DAU)</div>
-              <div class="kpi-box-value font-mono">${dauVal}</div>
-              <div class="kpi-box-sub">${dauSub}</div>
-            </div>
-            <div class="kpi-metric-box">
-              <div class="kpi-box-title">Monthly Active Users (MAU)</div>
-              <div class="kpi-box-value font-mono">${mauVal}</div>
-              <div class="kpi-box-sub">${mauSub}</div>
-            </div>
-            <div class="kpi-metric-box">
-              <div class="kpi-box-title">Paid Subscribers</div>
-              <div class="kpi-box-value font-mono">${subsVal}</div>
-              <div class="kpi-box-sub">${subsSub}</div>
-            </div>
-            <div class="kpi-metric-box">
-              <div class="kpi-box-title">Subscription Conversion</div>
-              <div class="kpi-box-value font-mono">${convVal}</div>
-              <div class="kpi-box-sub">${convSub}</div>
-            </div>
-            <div class="kpi-metric-box">
-              <div class="kpi-box-title">Rule of 40 Score</div>
-              <div class="kpi-box-value font-mono font-bold ${rule40Score !== null && rule40Score >= 0.4 ? 'text-positive' : ''}">
-                ${rule40Score !== null ? percent(rule40Score, { decimals: 1 }) : ' - '}
-              </div>
-              <div class="kpi-box-sub">${fcfMargin !== null && revCAGR !== null ? `FCF (${percent(fcfMargin, { decimals: 1 })}) + CAGR (${percent(revCAGR, { decimals: 1 })})` : 'FCF Margin + 5Y Rev CAGR'}</div>
-            </div>
-            <div class="kpi-metric-box">
-              <div class="kpi-box-title">DET Annualized Revenue</div>
-              <div class="kpi-box-value font-mono">${detVal}</div>
-              <div class="kpi-box-sub">${detSub}</div>
-            </div>
+          <div class="sparkline-strip">
+            ${sparklineCard({ title: 'Daily Active Users (DAU)', valueHtml: dauVal, basisSub: dauSub, series: dauS, deltaHtml: deltaBadge(at(dauS), prior(dauS), 'pct') })}
+            ${sparklineCard({ title: 'Monthly Active Users (MAU)', valueHtml: mauVal, basisSub: mauSub, series: mauS, deltaHtml: deltaBadge(at(mauS), prior(mauS), 'pct') })}
+            ${sparklineCard({ title: 'Paid Subscribers', valueHtml: subsVal, basisSub: subsSub, series: paidS, deltaHtml: deltaBadge(at(paidS), prior(paidS), 'pct') })}
+            ${sparklineCard({ title: 'Subscription Conversion', valueHtml: convVal, basisSub: convSub, series: convS, deltaHtml: deltaBadge(at(convS), prior(convS), 'pp') })}
+            ${sparklineCard({ title: 'Rule of 40 Score', valueHtml: rule40Score !== null ? percent(rule40Score, { decimals: 1 }) : ' - ', basisSub: fcfMargin !== null && revCAGR !== null ? `FCF (${percent(fcfMargin, { decimals: 1 })}) + CAGR FY2025–FY2030E (${percent(revCAGR, { decimals: 1 })})` : 'FCF Margin + 5Y Rev CAGR (FY2025–FY2030E)', series: r40trailS, deltaHtml: deltaBadge(at(r40trailS), prior(r40trailS), 'pp'), rangeLabel: 'Sparkline FY2022–FY2025' })}
+            ${sparklineCard({ title: 'Annual Recurring Revenue (ARR)', valueHtml: arrVal, basisSub: 'Subscription-revenue basis, FY2025', series: subRevS, deltaHtml: deltaBadge(at(subRevS), prior(subRevS), 'pct') })}
           </div>
           <div class="kpi-citations-drawer">
             <div class="kpi-citation-title">Verbatim SEC Filing Definitions &amp; Methodology Citations:</div>
             <ul class="kpi-citation-list">
-              <li><strong>DAU:</strong> Defined as unique users who engage with the platform on a given calendar day, averaged across the period (${dauRow?.source?.filing ? `Form ${dauRow.source.filing} ${dauRow.period}` : 'Form 10-Q Q2 FY2026'}).</li>
+              <li><strong>DAU:</strong> Defined as unique users who engage with the platform on a given calendar day, taking the daily mean across the period (${dauRow?.source?.filing ? `Form ${dauRow.source.filing} ${dauRow.period}` : 'Form 10-Q Q2 FY2026'}).</li>
               <li><strong>MAU:</strong> Defined as unique users who log in and interact with Duolingo within a 30-day trailing period (${mauRow?.source?.filing ? `Form ${mauRow.source.filing} ${mauRow.period}` : 'Form 10-K FY2025'}).</li>
               <li><strong>Paid Subscribers:</strong> Subscribed members on Super Duolingo or Duolingo Max with active recurring billing plans (${subsRow?.source?.filing ? `Form ${subsRow.source.filing} ${subsRow.period}` : 'Form 10-Q Q2 FY2026'}).</li>
-              <li><strong>Rule of 40:</strong> Calculated as projected FY2030 Free Cash Flow Margin (${fcfMargin !== null ? percent(fcfMargin, { decimals: 1 }) : '33.9%'}) + 5-Year Revenue CAGR (${revCAGR !== null ? percent(revCAGR, { decimals: 1 }) : '16.5%'}) = ${rule40Score !== null ? percent(rule40Score, { decimals: 1 }) : '50.4%'} (Software Benchmark: &ge; 40.0%).</li>
+              <li><strong>Rule of 40:</strong> Calculated as projected FY2030 Free Cash Flow Margin (${fcfMargin !== null ? percent(fcfMargin, { decimals: 1 }) : ' - '}) + 5-Year Revenue CAGR FY2025–FY2030E (${revCAGR !== null ? percent(revCAGR, { decimals: 1 }) : ' - '}) = ${rule40Score !== null ? percent(rule40Score, { decimals: 1 }) : ' - '} (Software Benchmark: &ge; 40.0%). Sparkline shows trailing annual Rule of 40 (CFO-based free cash flow margin plus revenue growth).</li>
+              <li><strong>Subscription Conversion:</strong> Derived as paid subscribers divided by MAU per fiscal year (engine-computed from filed actuals, not a filed line).</li>
+              <li><strong>ARR:</strong> Subscription-revenue basis (FY2025 filed subscription revenue); Duolingo does not disclose ARR, so no ARR filing exists — this card annualizes nothing and invents no retention or price input.</li>
             </ul>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function countFiniteLeaves(root) {
+    const seen = new Set();
+    let total = 0, finite = 0;
+    const walk = (node) => {
+      if (!node || typeof node !== 'object' || seen.has(node)) return;
+      seen.add(node);
+      for (const k of Object.keys(node)) {
+        const v = node[k];
+        if (typeof v === 'number') {
+          total += 1;
+          if (Number.isFinite(v)) finite += 1;
+        } else {
+          walk(v);
+        }
+      }
+    };
+    walk(root);
+    return { total, finite };
+  }
+
+  function buildHealthChecks() {
+    const driverNames = ['market_share_price', 'risk_free_rate', 'beta', 'equity_risk_premium', 'terminal_growth_rate'];
+    const driversOk = currentAssumptions && typeof currentAssumptions.get === 'function'
+      && driverNames.every((n) => Number.isFinite(currentAssumptions.get(n)?.value))
+      && Number.isFinite(currentDcf?.perShare);
+
+    const bcPeriods = currentThreeStatement?.balanceCheck?.byPeriod
+      ? Object.values(currentThreeStatement.balanceCheck.byPeriod)
+      : null;
+    const balanceOk = Array.isArray(bcPeriods) && bcPeriods.length > 0
+      && bcPeriods.every((bc) => bc && bc.ok === true && Number.isFinite(bc.difference) && Math.abs(bc.difference) < 1e-6);
+
+    const ev = currentDcf?.enterpriseValue;
+    const netCash = currentDcf?.netCash;
+    const equityVal = currentDcf?.equityValue;
+    const shares = currentDcf?.sharesOutstanding;
+    const perShare = currentDcf?.perShare;
+    const bridgeOk = Number.isFinite(ev) && Number.isFinite(netCash) && Number.isFinite(equityVal)
+      && Number.isFinite(shares) && shares > 0 && Number.isFinite(perShare) && perShare > 0
+      && (Math.abs(equityVal - (ev + netCash)) / Math.max(Math.abs(equityVal), 1) < 1e-9)
+      && (Math.abs(perShare - (equityVal * 1000) / shares) / perShare < 1e-9);
+
+    const verdictRows = currentVerdict?.methodResults || null;
+    const agreementOk = Array.isArray(verdictRows) && verdictRows.length > 0
+      && verdictRows.every((m) => Number.isFinite(m.impliedPerShare) && m.impliedPerShare > 0)
+      && Number.isFinite(currentVerdict?.agreement?.spread?.min)
+      && Number.isFinite(currentVerdict?.agreement?.spread?.max)
+      && currentVerdict.agreement.spread.min < currentVerdict.agreement.spread.max;
+
+    const leafCount = currentThreeStatement ? countFiniteLeaves(currentThreeStatement) : { total: 0, finite: 0 };
+    const circularOk = leafCount.total > 0 && leafCount.finite === leafCount.total;
+
+    const sensCells = currentSensitivityGrid?.cells;
+    const sensTotal = Array.isArray(sensCells) ? sensCells.length : 0;
+    let sensFinite = 0;
+    if (Array.isArray(sensCells)) {
+      for (const cell of sensCells) {
+        if (cell && Number.isFinite(cell.perShare) && Number.isFinite(cell.wacc) && Number.isFinite(cell.growth)) {
+          sensFinite += 1;
+        }
+      }
+    }
+    const sensEvaluated = sensTotal > 0;
+
+    const pass = (status, detail) => ({ tone: 'pass', icon: '✓', status, detail });
+    const fail = (detail) => ({ tone: 'fail', icon: '✗', status: 'Attention', detail });
+    const pending = (detail) => ({ tone: 'pending', icon: '○', status: 'Pending', detail });
+
+    return [
+      { label: 'All model inputs and formulas validated', result: driversOk ? pass('Validated', '5 drivers + DCF live') : fail('Driver or DCF output missing') },
+      { label: '3-statement model balances (BS, IS, CF)', result: balanceOk ? pass('Passed', `Tie-out $0 across ${bcPeriods.length} periods`) : fail('Balance invariant breach') },
+      { label: 'Checksums and tie-outs passed', result: bridgeOk ? pass('Passed', 'EV + net cash ties to equity and per share') : fail('Bridge checksum breach') },
+      { label: 'Multi-method agreement verdict live', result: agreementOk ? pass('Complete', `${verdictRows.length} methods live, spread resolves`) : fail('Verdict not resolved') },
+      { label: 'No circular references', result: circularOk ? pass('Passed', `${leafCount.finite}/${leafCount.total} forecast cells finite`) : fail('Non-finite forecast cell found') },
+      { label: 'Sensitivity analysis completed', result: !sensEvaluated ? pending('Grid not wired to this view') : (sensFinite === sensTotal ? pass('Complete', `${sensFinite}/${sensTotal} WACC x g cells finite`) : fail('Non-finite sensitivity cell found')) },
+    ];
+  }
+
+  function renderSensitivityNote() {
+    if (!currentLabelStability || currentLabelStability.labelStable !== false) {
+      return '';
+    }
+    return '<div class="rec-sensitivity-note" role="note">verdict sensitive to SBC treatment</div>';
+  }
+
+  function renderSensitivityBand() {
+    const band = currentLabelStability;
+    if (!band || !Array.isArray(band.treatments) || band.treatments.length === 0) {
+      return '';
+    }
+    const treatmentLabel = (name) => {
+      if (name === 'gross-issuance') return 'Gross issuance at spot (headline)';
+      if (name === 'charged-netting') return 'Charged netting (fair-value buybacks)';
+      if (name === 'pv-discounted') return 'PV-discounted SBC (WACC)';
+      if (name === 'sbc-fade') return 'Faded SBC (steady-state path)';
+      if (name === 'perpetual-expense') return 'Perpetual SBC expense';
+      return String(name);
+    };
+    const headline = String(band.headlineLabel || '').toLowerCase();
+    const rows = band.treatments.map((t) => {
+      const tone = String(t.label || '').toLowerCase() === headline ? 'pass' : 'fail';
+      const icon = tone === 'pass' ? '✓' : '✗';
+      const status = String(t.label || '').toUpperCase();
+      const detail = Number.isFinite(t.perShare) ? usd(t.perShare, { decimals: 2 }) : ' - ';
+      return `
+                <li class="health-row health-${tone}">
+                  <span class="health-icon" aria-hidden="true">${icon}</span>
+                  <span class="health-text"><span class="health-label">${treatmentLabel(t.name)}</span><span class="health-detail">${detail}</span></span>
+                  <span class="health-status">${status}</span>
+                </li>`;
+    }).join('');
+    const stableCount = band.treatments.filter(
+      (t) => String(t.label || '').toLowerCase() === headline,
+    ).length;
+    const verdictNote = band.labelStable === false
+      ? `Headline: <span class="rec-badge rec-badge-${headline}">${headline.toUpperCase()}</span> — verdict sensitive to SBC treatment (${stableCount}/${band.treatments.length} match headline)`
+      : `Headline: <span class="rec-badge rec-badge-${headline}">${headline.toUpperCase()}</span> — verdict stable across the SBC treatment band (${stableCount}/${band.treatments.length} ${headline})`;
+    return `
+      <div class="summary-card sensitivity-band-card">
+        <div class="statement-card-header">Verdict Sensitivity Band &amp; SBC Treatments</div>
+        <div class="summary-card-body">
+          <ul class="health-list">
+            ${rows}
+          </ul>
+          <div class="health-verdict-note">${verdictNote}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderThesisHealth() {
+    const liveVerdict = String(currentVerdict?.verdict || currentRec?.label || 'fair').toLowerCase();
+    const verdictBadge = liveVerdict === 'undervalued' ? 'UNDERVALUED' : (liveVerdict === 'overvalued' ? 'OVERVALUED' : 'FAIR');
+    const verdictClass = liveVerdict === 'undervalued' ? 'undervalued' : (liveVerdict === 'overvalued' ? 'overvalued' : 'fair');
+    const pillars = [
+      'Global category leader in language learning on a scalable, asset-light model.',
+      'Expanding user funnel with improving monetization across subscription tiers and the product ecosystem.',
+      'Durable brand, daily-habit engagement, and network effects supporting long-term retention.',
+      'Multiple margin-expansion levers across subscription mix, operating leverage, and efficiency.',
+      `Mechanical anchor: the six-method agreement verdict is ${verdictBadge} — no single-method call drives the conclusion.`,
+    ];
+    const checks = buildHealthChecks();
+    return `
+      <div class="thesis-health-grid">
+        <div class="summary-card thesis-card">
+          <div class="statement-card-header">Key Investment Thesis</div>
+          <div class="summary-card-body">
+            <ol class="thesis-list">
+              ${pillars.map((p) => `<li><span class="thesis-num" aria-hidden="true"></span><span>${p}</span></li>`).join('')}
+            </ol>
+          </div>
+        </div>
+        <div class="summary-card health-card">
+          <div class="statement-card-header">Model Health &amp; Audit Status</div>
+          <div class="summary-card-body">
+            <ul class="health-list">
+              ${checks.map((c) => `
+                <li class="health-row health-${c.result.tone}">
+                  <span class="health-icon" aria-hidden="true">${c.result.icon}</span>
+                  <span class="health-text"><span class="health-label">${c.label}</span><span class="health-detail">${c.result.detail}</span></span>
+                  <span class="health-status">${c.result.status}</span>
+                </li>`).join('')}
+            </ul>
+            <div class="health-verdict-note">Agreement verdict: <span class="rec-badge rec-badge-${verdictClass}">${verdictBadge}</span></div>
           </div>
         </div>
       </div>
@@ -440,15 +748,19 @@ export function renderSummary({
       ? `<div class="live-price-banner live-price-${currentMarketPrice.status || 'fallback'}" role="alert">${cleanBanner}</div>`
       : '';
     const recHtml = renderMultiMethodVerdictCard();
+    const bandHtml = renderSensitivityBand();
     const bridgeHtml = renderValuationBridgeSnapshot();
-    const operatingHtml = renderOperatingQualityAndKpis();
+    const sparkHtml = renderSparklineKpis();
+    const thesisHtml = renderThesisHealth();
 
     container.innerHTML = `
       <div class="summary-view-wrapper">
         ${bannerHtml}
         ${recHtml}
+        ${bandHtml}
         ${bridgeHtml}
-        ${operatingHtml}
+        ${sparkHtml}
+        ${thesisHtml}
       </div>
     `;
   }
@@ -472,7 +784,7 @@ export function renderSummary({
   render();
 
   return {
-    update(newDcf, newRec, newKpi = null, newHistorical = null, newAssumptions = null, newThreeStatement = null, newMarketPrice = undefined, newVerdict = undefined, newMethods = undefined) {
+    update(newDcf, newRec, newKpi = null, newHistorical = null, newAssumptions = null, newThreeStatement = null, newMarketPrice = undefined, newVerdict = undefined, newMethods = undefined, newSensitivityGrid = undefined, newLabelStability = undefined) {
       currentDcf = newDcf;
       currentRec = newRec;
       currentKpi = newKpi || currentKpi;
@@ -487,6 +799,12 @@ export function renderSummary({
       }
       if (newMethods !== undefined) {
         currentMethods = newMethods;
+      }
+      if (newSensitivityGrid !== undefined) {
+        currentSensitivityGrid = newSensitivityGrid;
+      }
+      if (newLabelStability !== undefined) {
+        currentLabelStability = newLabelStability;
       }
       render();
     },

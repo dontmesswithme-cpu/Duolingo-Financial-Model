@@ -57,7 +57,7 @@ async function getDatasets() {
   const fc = forecastEngine.project({ historical, assumptions });
   const ts = threeStatementEngine.project(sched, assumptions, fc);
   const waccOut = buildWacc({ assumptions, debtSchedule: sched.debt });
-  const dcfOut = valuateDcf(ts, waccOut, { assumptions });
+  const dcfOut = valuateDcf(ts, waccOut, { assumptions, corpus: historical });
   const marketPrice = assumptions.get('market_share_price').value;
   const recOut = evaluateRec(dcfOut.perShare, marketPrice);
 

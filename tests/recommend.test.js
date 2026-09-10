@@ -169,6 +169,7 @@ describe('P4.3  -  Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
       threeStatement: fullProj.threeStatement,
       assumptions,
       wacc: waccOut,
+      corpus: historical,
     });
 
     assert.equal(grid.waccValues.length, 9, '9 WACC points');
@@ -246,6 +247,7 @@ describe('P4.3  -  Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
           assumptions,
           waccValues: [0.03, 0.04],
           growthValues: [0.03, 0.035],
+          corpus: historical,
         }),
       (err) => err instanceof EngineError && err.code === 'terminal_growth_exceeds_wacc',
     );
@@ -263,6 +265,7 @@ describe('P4.3  -  Sensitivity Grid (WACC × Terminal Growth Matrix)', () => {
       waccBase: waccOut,
       waccRange: [0.07, 0.08, 0.09],
       terminalGrowthRange: [0.015, 0.02, 0.025],
+      corpus: historical,
     });
 
     assert.equal(gridWithAliases.waccValues.length, 3);
@@ -291,19 +294,19 @@ describe('P4.3  -  Full Valuation Pipeline & Scenario Ranges', () => {
       `Base perShare ($${baseVal.perShare.toFixed(2)}) must be < Bull ($${bullVal.perShare.toFixed(2)})`,
     );
 
-    // Assert Base per-share matches pinned value
-    pinned(baseVal.perShare, 144.08213043589748, 'Base per-share pin');
-    assert.equal(baseVal.recommendation.label, 'fair');
+    // Assert Base per-share matches pinned value (EP.3 normalised terminal)
+    pinned(baseVal.perShare, 118.60167662384697, 'Base per-share pin');
+    assert.equal(baseVal.recommendation.label, 'overvalued');
 
     // Benchmark price invariance: marketPrice remains 157.85 across all scenarios
     assert.equal(bearVal.marketPrice, 157.85);
     assert.equal(baseVal.marketPrice, 157.85);
     assert.equal(bullVal.marketPrice, 157.85);
 
-    // Scenario recommendations
-    assert.equal(bearVal.recommendation.label, 'overvalued', 'Bear upside is ~ -46.54% (<= -15% overvalued band)');
-    assert.equal(baseVal.recommendation.label, 'fair', 'Base upside is ~ -8.72% (within +/-15% fair band)');
-    assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +76.01% (>= +15% undervalued band)');
+    // Scenario recommendations (EP.3 normalised terminal: base −24.86%, bear −54.14%, bull +38.10%)
+    assert.equal(bearVal.recommendation.label, 'overvalued', 'Bear upside is ~ -54.14% (<= -15% overvalued band)');
+    assert.equal(baseVal.recommendation.label, 'overvalued', 'Base upside is ~ -24.86% (<= -15% overvalued band)');
+    assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +38.10% (>= +15% undervalued band)');
   });
 
   test('hybrid FY2026 valuation honesty under scenarios: cited H1 actuals invariant', async () => {
