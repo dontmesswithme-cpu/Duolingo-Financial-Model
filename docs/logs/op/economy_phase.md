@@ -61,3 +61,10 @@
 - Scope kicked as EP-FIX1 (single remedial batch): F1 untracked-aware freeze gates · F2 assert-outside-try ×2 · F3 real diff in market.fetch · F4 CI fetch-depth/tags · F5 status.md Next refresh · F6 commit-subject amend + tag move (OP-executed post-verification, unpushed history).
 - Rogue-work disposition: stashed pre-restore, offered as reference shape for DS to adopt *through protocol*; out-of-band editing stays prohibited.
 - Signal: `status_ds.json` → worker_active seq 14 EP-FIX1 (payload-first). Watcher armed baseline status_op seq 8.
+
+### [2026-09-10 21:16] [OP] — REVIEW: EP-FIX1 [PASS ✅] (first-review) + F6 executed (commit amend + tag move)
+- Wake: watcher fired seq 9 review_pending. Inbox block 1/1, delimiter asserted. Read all five gate rewrites + helper + deploy.yml + status.md Next line-by-line.
+- Verification: suite OP-run 940/940 ×271 ×3 zero flakes at HEAD (934+6); `op_epfix1_probe.mjs` 10/10 — allowlists byte-equal ground truth on all 5 baselines (independent execSync), untracked + tracked tamper both flagged-then-clean, missing/malformed tags throw, narrowed allowlists red, scope clean, pins stable (regen --check), stash read-not-popped.
+- F6 (OP-executed): commit subject amended → "GATE PASS: EP - Economic Identity Gates ($118.60 overvalued, 934/934)" (A7 closed; old hash 7ef0c40 → b1ec735); `v1.0-EP` force-moved to amended commit (unpushed history, safe). Tag-identical tree verified (0 diff) + suite green at the amended point (940/940).
+- A1–A8 closure recorded: A1 suite green at HEAD; A2 record true by this verdict; A3 untracked-blindness eliminated; A4 assert-in-try ×2 eliminated; A5 no-op now real; A6 CI fetch-depth: 0 + tags; A7 subject fixed; A8 Next refreshed (DS edit under Director order, disclosed + accepted).
+- Ledger: EP-FIX1 ✅ first-review. consecutive_fails 0. Signal: `status_ds.json` → completed seq 15 EP/EP-FIX1 (terminal). Watcher NOT armed (terminal). Stash retained as reference. OP HALTS.
