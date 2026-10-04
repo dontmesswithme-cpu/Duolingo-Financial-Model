@@ -258,12 +258,12 @@ export function renderSummary({
         <div class="summary-headline-grid">
           <div class="rec-hero-item">
             <div class="rec-hero-label">DCF Fair Value (${stageDisclosure.stageTag} FCFF)</div>
-            <div class="rec-hero-value font-mono font-large font-bold">${usd(dcfPerShare, { decimals: 2 })}</div>
+            <div class="rec-hero-value font-mono font-bold">${usd(dcfPerShare, { decimals: 2 })}</div>
             <div class="rec-hero-sub">Implied upside: ${Number.isFinite(dcfUpside) ? percent(dcfUpside, { decimals: 2, showSign: true }) : ' - '}</div>
           </div>
           <div class="rec-hero-item">
             <div class="rec-hero-label">Current Benchmark Share Price${overrideMarker}</div>
-            <div class="rec-hero-value font-mono font-large">${usd(marketPrice, { decimals: 2 })}</div>
+            <div class="rec-hero-value font-mono">${usd(marketPrice, { decimals: 2 })}</div>
             <div class="rec-hero-sub">${mktBadge({ asOf: priceAsOf, provider: priceProvider })}${retrievedText}</div>
             <div class="rec-hero-action">
               <button type="button" class="btn-refresh-price" data-action="refresh-price">↻ Refresh Last Close</button>
@@ -271,12 +271,12 @@ export function renderSummary({
           </div>
           <div class="rec-hero-item">
             <div class="rec-hero-label">Upside / (Downside) vs Market</div>
-            <div class="rec-hero-value font-mono font-large font-bold ${Number.isFinite(dcfUpside) && dcfUpside >= 0 ? 'text-positive' : 'text-negative'}">${Number.isFinite(dcfUpside) ? percent(dcfUpside, { decimals: 2, showSign: true }) : ' - '}</div>
+            <div class="rec-hero-value font-mono font-bold ${Number.isFinite(dcfUpside) && dcfUpside >= 0 ? 'text-positive' : 'text-negative'}">${Number.isFinite(dcfUpside) ? percent(dcfUpside, { decimals: 2, showSign: true }) : ' - '}</div>
             <div class="rec-hero-sub">DCF vs benchmark close</div>
           </div>
           <div class="rec-hero-item">
             <div class="rec-hero-label">Valuation Spread (Voting Evidence Only)</div>
-            <div class="rec-hero-value font-mono font-large font-bold">
+            <div class="rec-hero-value font-mono font-bold">
               ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} – ${usd(maxSpread, { decimals: 2 })}` : ' - '}
             </div>
             <div class="rec-hero-sub"><span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span> ${activeVerdict.agreement?.unanimous ? 'Unanimous clustered agreement' : 'Split; unanimous agreement not reached'}</div>
@@ -312,7 +312,7 @@ export function renderSummary({
                 return `
                   <tr class="method-row-${m.method}">
                     <td><strong>${m.label}</strong></td>
-                    <td class="align-right font-mono font-bold font-large">${usd(m.impliedPerShare, { decimals: 2 })}</td>
+                    <td class="align-right font-mono font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td>
                     <td class="align-right font-mono">${Number.isFinite(equityMm) ? usd(equityMm, { decimals: 2 }) : ' - '}</td>
                     <td class="align-right font-mono font-bold ${Number.isFinite(upside) && upside >= 0 ? 'text-positive' : 'text-negative'}">
                       ${percent(upside, { decimals: 2, showSign: true })}
@@ -323,7 +323,7 @@ export function renderSummary({
               }).join('')}
               <tr class="agreement-spread-row table-row-total">
                 <td><span class="soft-em">Valuation Spread (min-max)</span></td>
-                <td class="align-right font-mono font-bold font-large">
+                <td class="align-right font-mono font-bold">
                   ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} – ${usd(maxSpread, { decimals: 2 })}` : ' - '}
                 </td>
                 <td class="align-right font-mono font-bold">
@@ -439,13 +439,13 @@ export function renderSummary({
               </tr>
               <tr class="table-row-total">
                 <td><strong>Implied Equity Value</strong></td>
-                <td class="align-right font-mono font-bold font-large">${usd(equityVal, { decimals: 2 })}</td>
+                <td class="align-right font-mono font-bold">${usd(equityVal, { decimals: 2 })}</td>
                 <td class="align-right font-mono"> - </td>
                 <td><code>Enterprise Value + Net Cash</code></td>
               </tr>
               <tr class="table-row-grand-total">
                 <td><strong>Implied Equity Value Per Share</strong></td>
-                <td class="align-right font-mono font-bold font-huge">${usd(perShare, { decimals: 2 })}</td>
+                <td class="align-right font-mono font-bold">${usd(perShare, { decimals: 2 })}</td>
                 <td class="align-right font-mono"> - </td>
                 <td>${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M diluted shares' : ' - '}</td>
               </tr>

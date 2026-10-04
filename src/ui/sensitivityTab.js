@@ -358,7 +358,7 @@ export function renderSensitivity({
                   <td class="scenario-desc">${s.desc}</td>
                   <td class="align-right font-mono">${percent(s.wacc, { decimals: 2 })}</td>
                   <td class="align-right font-mono">${percent(s.growth, { decimals: 1 })}</td>
-                  <td class="align-right font-mono font-bold font-large">${usd(s.targetPrice, { decimals: 2 })}</td>
+                  <td class="align-right font-mono font-bold">${usd(s.targetPrice, { decimals: 2 })}</td>
                   <td class="align-right font-mono font-bold ${!Number.isFinite(s.upside) ? '' : (s.upside >= 0 ? 'text-positive' : 'text-negative')}">
                     ${percent(s.upside, { decimals: 2, showSign: true })}
                   </td>

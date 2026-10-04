@@ -1536,7 +1536,7 @@ export function renderValuation({
                   </tr>
                   <tr class="table-row-total">
                     <td><strong>(=) Implied Equity Value</strong></td>
-                    <td class="align-right font-mono font-bold font-large">${usd(equityValue, { decimals: 2 })}</td>
+                    <td class="align-right font-mono font-bold">${usd(equityValue, { decimals: 2 })}</td>
                     <td><code>Enterprise Value + Net Cash</code></td>
                   </tr>
                   <tr>
@@ -1546,7 +1546,7 @@ export function renderValuation({
                   </tr>
                   <tr class="table-row-grand-total">
                     <td><strong>(=) Implied DCF Equity Value Per Share (FCFF Headline)</strong></td>
-                    <td class="align-right font-mono font-bold font-huge">${usd(perShare, { decimals: 2 })}</td>
+                    <td class="align-right font-mono font-bold">${usd(perShare, { decimals: 2 })}</td>
                     <td>${estSuffix('Target Intrinsic Value', 'EST')}</td>
                   </tr>
                 </tbody>
@@ -1620,7 +1620,7 @@ export function renderValuation({
             <div class="dual-path-card-col headline-col">
               <div class="dual-path-badge badge-headline">HEADLINE MODEL ANSWER</div>
               <div class="dual-path-path-title">Firm Basis: Free Cash Flow to Firm (FCFF)</div>
-              <div class="dual-path-price-value font-mono font-huge font-bold">${usd(fcffPerShare, { decimals: 2 })}</div>
+              <div class="dual-path-price-value font-mono font-bold">${usd(fcffPerShare, { decimals: 2 })}</div>
               <div class="dual-path-price-sub">Implied Target Price / Share</div>
               <ul class="dual-path-metrics-list font-mono">
                 <li><span>Enterprise Value (PV Explicit + PV TV):</span> <strong>${usd(fcffEnterpriseValue, { decimals: 0 })}</strong></li>
@@ -1636,7 +1636,7 @@ export function renderValuation({
             <div class="dual-path-card-col diagnostic-col">
               <div class="dual-path-badge badge-diagnostic">FCFE DIAGNOSTIC</div>
               <div class="dual-path-path-title">Equity Basis: Free Cash Flow to Equity (FCFE)</div>
-              <div class="dual-path-price-value font-mono font-huge font-bold">${usd(fcfePerShare, { decimals: 2 })}</div>
+              <div class="dual-path-price-value font-mono font-bold">${usd(fcfePerShare, { decimals: 2 })}</div>
               <div class="dual-path-price-sub">Implied Target Price / Share</div>
               <ul class="dual-path-metrics-list font-mono">
                 <li><span>PV of Explicit FCFE + PV of TV:</span> <strong>${usd(fcfe?.equityValue, { decimals: 0 })}</strong></li>
@@ -2045,7 +2045,7 @@ export function renderValuation({
               <span class="method-title">${m.label}</span>
               <span class="method-badge">${methodFamily[key] || 'Method'}</span>
             </div>
-            <div class="method-per-share font-mono font-bold font-large">${usd(m.impliedPerShare, { decimals: 2 })}</div>
+            <div class="method-per-share font-mono font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</div>
             <div class="method-range text-muted font-mono">${m.rangePerShare ? `Range: ${usd(m.rangePerShare.min, { decimals: 2 })} – ${usd(m.rangePerShare.max, { decimals: 2 })}` : (m.baseCount ? `${m.baseCount} Native Bases` : (m.segmentCount ? `${m.segmentCount} Segments` : ' - '))}</div>
             ${v ? `<span class="rec-badge rec-badge-${vClass}">${v.toUpperCase()}</span>` : ''}
           </button>
@@ -2101,7 +2101,7 @@ export function renderValuation({
         <div class="method-detail-head-metrics">
           <div class="method-detail-metric">
             <div class="method-detail-metric-label">Implied Per Share</div>
-            <div class="method-detail-metric-value font-mono font-large font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</div>
+            <div class="method-detail-metric-value font-mono font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</div>
           </div>
           <div class="method-detail-metric">
             <div class="method-detail-metric-label">Range (Min; Max)</div>
