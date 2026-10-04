@@ -428,6 +428,7 @@ export function renderSensitivity({
 
     container.innerHTML = `
       <div class="sensitivity-view-wrapper">
+        <h2>08. Sensitivity / Scenarios</h2>
         ${matrixHtml}
         ${scenarioHtml}
       </div>

@@ -2407,6 +2407,7 @@ export function renderValuation({
     container.innerHTML = `
       <div class="valuation-view-wrapper">
         ${bannerHtml}
+        <h2>06. Valuation</h2>
         ${multiMethodHtml}
         ${dcfPrimaryHtml}
         ${methodSummaryHtml}

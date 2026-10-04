@@ -276,6 +276,7 @@ export function renderCover({
 
     container.innerHTML = `
       <div class="cover-container">
+        <h2>01. Cover &amp; TOC</h2>
         <!-- Row 1: 3 Columns: Overview (Col 1), Snapshot (Col 2), Status (Col 3) -->
         <div class="cover-grid cover-row-top">
           <!-- 1. Overview Card -->

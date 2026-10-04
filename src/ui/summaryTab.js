@@ -813,6 +813,7 @@ export function renderSummary({
     container.innerHTML = `
       <div class="summary-view-wrapper">
         ${bannerHtml}
+        <h2>07. Summary / Output</h2>
         ${recHtml}
         ${bandHtml}
         ${bridgeHtml}
