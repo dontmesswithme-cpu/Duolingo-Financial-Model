@@ -20,14 +20,10 @@ const run = (args) => execFileSync(process.execPath, [path.join(ROOT, 'tools/bui
 });
 
 describe('P10.6 — Pages artifact is a minimal allowlist', () => {
-  test('the workflow no longer uploads the repository root', () => {
-    const yml = read('.github/workflows/deploy.yml');
-    // Match the real YAML key, not a `#` comment that merely mentions the old value.
-    const rootUpload = yml.split(/\r?\n/).find((l) => /^\s*path:\s*'\.'\s*$/.test(l));
-    assert.equal(rootUpload, undefined, "upload must not use path: '.'");
-    assert.match(yml, /^\s*path:\s*'_pages'\s*$/m, 'upload targets the built artifact');
-    assert.match(yml, /build_pages_artifact\.mjs/, 'the artifact build step is wired');
-    assert.match(yml, /--check/, 'the allowlist assertion runs in CI and fails closed');
+  test('no GitHub Pages workflow exists (Vercel is the deploy target)', () => {
+    // Director order: deploy.yml removed; pushes show only the Vercel check.
+    // This test pins the decision so the workflow cannot silently return.
+    assert.equal(fs.existsSync(path.join(ROOT, '.github/workflows/deploy.yml')), false, 'deploy.yml must stay deleted');
   });
 
   test('building produces only allowlisted entries', () => {

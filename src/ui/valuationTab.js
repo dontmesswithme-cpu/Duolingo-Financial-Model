@@ -343,7 +343,10 @@ export function renderValuation({
 
     const beta = currentWacc?.beta?.value;
     const betaAsOf = currentWacc?.beta?.asOf || '';
-    const betaProv = currentWacc?.beta?.source?.provider || 'stockanalysis.com';
+    // Methodology-first provenance: 1.49 is the model's own bottom-up mean
+    // over peer 60-mo OLS regressions (record note carries the full build);
+    // stockanalysis.com / SEC EDGAR supply the price + filing inputs.
+    const betaProv = `Bottom-up peer mean (SPOT/RBLX/NFLX 60-mo OLS) — ${currentWacc?.beta?.source?.provider || 'stockanalysis.com'}`;
     const betaUrl = currentWacc?.beta?.source?.url || '';
 
     const erp = currentWacc?.erp?.value;
@@ -716,7 +719,7 @@ export function renderValuation({
               <tbody>
                 <tr>
                   <td>Cost of Capital (Beta)</td>
-                  <td>Hamada-unlevered regression betas → 3-name median asset beta</td>
+                  <td>Hamada-unlevered regression betas → 3-name mean asset beta</td>
                   <td>Replaces statistically weak single-stock OLS on ~60 monthly observations</td>
                 </tr>
                 <tr>
@@ -807,7 +810,9 @@ export function renderValuation({
 
     const beta = currentWacc?.beta?.value;
     const betaAsOf = currentWacc?.beta?.asOf || '';
-    const betaProv = currentWacc?.beta?.source?.provider || '';
+    // Methodology-first provenance (mirrors the defense-panel beta row):
+    // 1.49 is the model's own bottom-up mean over peer 60-mo OLS regressions.
+    const betaProv = `Bottom-up peer mean (SPOT/RBLX/NFLX 60-mo OLS) - ${currentWacc?.beta?.source?.provider || ''}`;
     const betaUrl = currentWacc?.beta?.source?.url || '';
 
     const erp = currentWacc?.erp?.value;
@@ -1420,7 +1425,7 @@ export function renderValuation({
   function renderLeaseConventionDisclosure() {
     return `
       <div class="callout-info valuation-lease-disclosure">
-        <div class="callout-icon" aria-hidden="true">i</div>
+        <img src="assets/icons/ui/info-circle.svg" alt="" aria-hidden="true" class="callout-icon" width="20" height="20" />
         <div><span class="soft-em">Lease Convention (Cross-Method Disclosure)</span><br>DCF reflects lease expenses directly within operating cash flows, while relative valuation methods capitalize operating lease liabilities into enterprise value and add back rent to EBITDAR.</div>
       </div>
     `;
