@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duolingo, Inc. — Model Cover — MOCKUP</title>
+<style>
+  :root{
+    /* ink + paper */
+    --ink:#12161B; --ink-2:#3B424B; --ink-3:#5A616B; --ink-4:#666D75;
+    --paper:#F3F2EE; --panel:#FAF9F6; --rule:#D5D3CC; --rule-2:#BCBAB3;
+    /* institutional accent: navy (no consumer green anywhere) */
+    --accent:#1E3A5F; --accent-lit:#A8C0DE; --accent-wash:#E8EDF4;
+    /* inverted decision surface */
+    --dark:#111519; --dark-rule:#333A44; --dark-ink:#F2F1EE; --dark-ink-2:#C4CAD4;
+    --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono:"Cascadia Mono","Segoe UI Mono",Consolas,ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:13px;line-height:1.5;
+    font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 clamp(16px,4vw,28px)}
+  .mono{font-family:var(--mono)}
+
+  /* in-page jump targets clear the sticky verdict rail */
+  [id]{scroll-margin-top:76px}
+  .sec:target .sec-head{border-bottom-color:var(--accent);background:var(--accent-wash);
+    padding-left:9px;padding-right:9px}
+  .sec:target .sec-num,.sec:target .sec-title{color:var(--accent)}
+  .c12:target{outline:2px solid var(--accent);outline-offset:8px}
+  .c12:target .sub-head{border-bottom-color:var(--accent);background:var(--accent-wash);
+    padding-left:9px;padding-right:9px}
+  header.band:target .mast{background:#1B2129}
+
+  /* ============ 01 · masthead + 02 · rating  (inverted surface) ============ */
+  .band{background:var(--dark);color:var(--dark-ink);border-bottom:3px solid var(--accent)}
+  .mockbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;
+    padding:8px 0;border-bottom:1px solid var(--dark-rule)}
+  .mocktag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--accent-lit);
+    border:1px solid var(--accent-lit);padding:2px 6px;line-height:1.3}
+  .mockmeta{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--dark-ink-2)}
+
+  .sn{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;
+    color:var(--accent-lit);margin-right:8px}
+
+  .mast{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
+    padding:16px 0 13px;border-bottom:1px solid var(--dark-rule)}
+  .brand{display:flex;gap:12px;align-items:center;min-width:0}
+  .owl{width:38px;height:34px;display:block;flex:0 0 auto}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dark-ink-2)}
+  .co{font-size:clamp(20px,3.4vw,27px);font-weight:700;letter-spacing:-.012em;line-height:1.04;margin:4px 0 3px}
+  .tick{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dark-ink-2)}
+  .px{margin:2px 0 0;display:grid;grid-template-columns:auto auto;gap:3px 16px;
+    font-family:var(--mono);font-size:12px;align-items:baseline}
+  .px dt{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--dark-ink-2)}
+  .px dd{margin:0;text-align:right;color:var(--dark-ink);font-weight:600}
+  .px dd.hi{color:var(--accent-lit)}
+
+  .rec{display:flex;justify-content:space-between;align-items:flex-end;gap:22px;
+    padding:15px 0 14px;border-bottom:1px solid var(--dark-rule)}
+  .rec-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .rec-lab{margin:0;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--dark-ink-2)}
+  .verdict{font-size:clamp(30px,7.4vw,50px);font-weight:700;letter-spacing:-.016em;line-height:.9;
+    color:var(--accent-lit)}
+  .rec-side{text-align:right;min-width:0}
+  .rec-v{font-family:var(--mono);font-size:clamp(15px,2.5vw,21px);font-weight:600;letter-spacing:-.01em;color:var(--dark-ink)}
+  .rec-n{color:var(--accent-lit)}
+  .rec-s{font-size:11.5px;color:var(--dark-ink-2);margin-top:3px}
+
+  .strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-right:1px solid var(--dark-rule)}
+  .cell{padding:9px 12px 11px;border-left:1px solid var(--dark-rule);min-width:0}
+  .cell:first-child{padding-left:0}
+  .cl{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink-2);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cv{display:block;font-family:var(--mono);font-size:clamp(14px,2vw,18px);font-weight:600;letter-spacing:-.01em;
+    margin-top:2px;color:var(--dark-ink)}
+  .cv.up{color:var(--accent-lit)}
+
+  /* ============ sticky verdict rail (web-native: always in view) ============ */
+  .verdictbar{position:sticky;top:0;z-index:20;background:var(--dark);color:var(--dark-ink);
+    border-bottom:2px solid var(--accent)}
+  .verdictbar .wrap{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 14px;padding:9px 0 10px}
+  .vb-rec{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--accent-lit)}
+  .vb-val{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.02em}
+  .vb-note{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dark-ink-2)}
+
+  /* ============ page body — one 12-column spine ============ */
+  main{padding:4px 0 0}
+  .sec{margin:34px 0 0}
+  .sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;
+    border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:12px}
+  .sec-num{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--accent);flex:0 0 auto}
+  .sec-title{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;flex:0 1 auto;min-width:0}
+  .sec-meta{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-3);text-align:right}
+  .hint-scroll{display:none;color:var(--accent);letter-spacing:.06em}
+
+  .sub-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:3px 12px;
+    border-bottom:1px solid var(--rule-2);padding-bottom:4px;margin-bottom:9px}
+  .sub-title{margin:0;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+  .sub-meta{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-3);text-align:right}
+
+  .g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+  .c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}
+  .c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+  .g > *{min-width:0}
+
+  /* thesis */
+  .th-item{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;padding:10px 0;
+    border-top:1px solid var(--rule)}
+  .th-item:first-child{border-top:0;padding-top:0}
+  .th-n{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--accent);padding-top:3px}
+  .th-item p{margin:0;font-size:13.5px;line-height:1.52;color:var(--ink-2);max-width:62ch}
+  .th-item p b{color:var(--ink);font-weight:600}
+
+  /* panels */
+  .panel{border:1px solid var(--rule);background:var(--panel)}
+  .panel-hd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 10px;
+    padding:7px 10px;border-bottom:1px solid var(--rule)}
+  .ph-t{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+  .ico{width:14px;height:14px;display:block;flex:0 0 auto;filter:grayscale(1);opacity:.72}
+  .ico-xs{width:12px;height:12px;display:inline-block;vertical-align:-1px;flex:0 0 auto;
+    filter:grayscale(1);opacity:.72}
+  .rail-list{padding:2px 10px 4px;display:grid;grid-template-columns:minmax(0,1fr)}
+  .ri{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;
+    border-bottom:1px solid var(--rule);min-width:0}
+  .ri:last-child{border-bottom:0}
+  .ri-l{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+  .ri-v{font-family:var(--mono);font-size:12.5px;font-weight:600;white-space:nowrap}
+  .ri-v.a{color:var(--accent)}
+  .grade{padding:8px 10px 11px;border-top:1px solid var(--rule)}
+  .grade-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:4px 0}
+  .gr-l{font-size:11px;letter-spacing:.04em;color:var(--ink-2)}
+  .gr-v{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink)}
+
+  /* tables — text left, figures right, decimals aligned */
+  .tbl-scroll{overflow-x:auto;max-width:100%;min-width:0;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+  th:first-child,td:first-child{padding-left:0}
+  th:last-child,td:last-child{padding-right:0}
+  th.num,td.num{text-align:right;font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+  thead th{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    border-bottom:1px solid var(--ink-2);padding-top:0;padding-bottom:6px}
+  tbody tr:last-child td{border-bottom:0}
+  .mcell{display:inline-flex;align-items:center;gap:6px}
+  .up{color:var(--accent)}
+  .flat{color:var(--ink-3)}
+  .spark{width:74px;height:18px;display:block;margin-left:auto;overflow:visible}
+  tr.total td{font-weight:700;border-top:1px solid var(--ink-2);border-bottom:0}
+  tr.total td:first-child{letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+  tr.total td:last-child{font-weight:400}
+  caption{caption-side:bottom;text-align:left;padding:7px 0 0;font-size:11.5px;color:var(--ink-3);line-height:1.45;max-width:76ch}
+
+  /* charts */
+  .chart-scroll{overflow-x:auto;max-width:100%;min-width:0;-webkit-overflow-scrolling:touch}
+  .chart-scroll svg{display:block;width:100%;height:auto;max-width:520px;margin:0 auto}
+  .chart text{font-family:var(--mono)}
+  .legend{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:11px;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--ink-3)}
+  .legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .sw{width:14px;height:8px;display:block;flex:0 0 auto}
+  .sw.mk{background:none;border-top:1px dashed var(--ink-3);height:0}
+  .sw.tg{background:var(--accent);height:2px}
+  .sw.bar{background:#E7E5DF;border:1px solid var(--rule-2)}
+  .sw.be{background:#E7E5DF;border:1px solid var(--rule-2)}
+  .sw.ba{background:var(--accent)}
+  .sw.bu{background:var(--ink)}
+  .chart-body{padding:12px 10px 8px}
+
+  /* key guesses */
+  .guesses{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule)}
+  .guess{padding:9px 12px 10px;border-left:1px solid var(--rule);min-width:0}
+  .guess:first-child{border-left:0;padding-left:0}
+  .guess:last-child{padding-right:0}
+  .gl{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gv{display:block;font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:-.01em;margin:2px 0 1px}
+  .gs{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-4);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* risks */
+  .risk{padding:12px 0;border-top:1px solid var(--rule)}
+  .risk:first-of-type{border-top:0;padding-top:0}
+  .risk-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+    grid-template-areas:"head ctl" "note ctl";gap:4px 26px;align-items:start}
+  .risk-head{grid-area:head;display:flex;align-items:center;gap:8px;min-width:0}
+  .risk-name{font-size:12.5px;font-weight:600;letter-spacing:.02em}
+  .risk-note{grid-area:note;margin:2px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink-2);max-width:60ch}
+  .risk-ctl{grid-area:ctl;min-width:0;padding-top:2px}
+  .risk-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+  .risk-lab{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+  .risk-read{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--accent)}
+  input[type="range"]{-webkit-appearance:none;appearance:none;display:block;width:100%;height:18px;
+    margin:0;background:none;border-radius:0;cursor:pointer}
+  input[type="range"]:focus{outline:none}
+  input[type="range"]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  input[type="range"]::-webkit-slider-runnable-track{height:3px;background:var(--rule-2);border-radius:0}
+  input[type="range"]:hover::-webkit-slider-runnable-track{background:var(--ink-4)}
+  input[type="range"]:focus-visible::-webkit-slider-runnable-track{background:var(--ink-4)}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:4px;height:18px;
+    margin-top:-7.5px;background:var(--accent);border:0;border-radius:0}
+  input[type="range"]:hover::-webkit-slider-thumb{background:var(--ink)}
+  input[type="range"]:focus-visible::-webkit-slider-thumb{background:var(--ink)}
+  input[type="range"]:active::-webkit-slider-thumb{background:var(--ink)}
+  input[type="range"]::-moz-range-track{height:3px;background:var(--rule-2);border:0;border-radius:0}
+  input[type="range"]::-moz-range-progress{height:3px;background:var(--rule-2);border-radius:0}
+  input[type="range"]::-moz-range-thumb{width:4px;height:18px;background:var(--accent);border:0;border-radius:0}
+  input[type="range"]:hover::-moz-range-thumb{background:var(--ink)}
+  input[type="range"]:focus-visible::-moz-range-thumb{background:var(--ink)}
+  input[type="range"]:active::-moz-range-thumb{background:var(--ink)}
+  .risk-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;
+    letter-spacing:.08em;color:var(--ink-4);margin-top:1px}
+
+  /* mind-change */
+  .mind{border:1px solid var(--rule);border-left:3px solid var(--accent);background:var(--panel);padding:11px 13px 13px}
+  .mind h3{margin:0 0 7px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    display:flex;align-items:center;gap:7px;color:var(--ink)}
+  .mind ul{margin:0;padding:0;list-style:none}
+  .mind li{position:relative;padding:5px 0 5px 14px;font-size:11.5px;line-height:1.5;color:var(--ink-2);
+    border-top:1px solid var(--rule);max-width:64ch}
+  .mind li:first-child{border-top:0}
+  .mind li:before{content:"";position:absolute;left:0;top:11px;width:5px;height:5px;background:var(--accent)}
+  .mind li b{color:var(--ink);font-weight:600}
+
+  /* directory (in-page contents) */
+  .dir-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;padding:9px 0;
+    border-top:1px solid var(--rule);text-decoration:none;color:inherit}
+  .dir-row:first-of-type{border-top:0}
+  .dir-row.sub{padding-left:20px;background:linear-gradient(90deg,var(--accent-wash) 0 3px,transparent 3px)}
+  .dir-num{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);flex:0 0 auto;min-width:22px}
+  .dir-name{font-size:12.5px;font-weight:600;flex:0 0 auto}
+  .dir-desc{font-size:11.5px;color:var(--ink-3);flex:1 1 140px;min-width:0}
+  .dir-tag{font-family:var(--mono);font-size:11px;letter-spacing:.09em;color:var(--ink-4);
+    flex:0 0 auto;margin-left:auto}
+  .dir-arrow{width:12px;height:12px;flex:0 0 auto;align-self:center;color:var(--ink-4)}
+  .dir-row:hover{background-color:var(--accent-wash)}
+  .dir-row:hover .dir-name{color:var(--accent)}
+  .dir-row:hover .dir-arrow{color:var(--accent)}
+  .dir-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;background-color:var(--accent-wash)}
+  .dir-row:active{background-color:var(--accent-wash)}
+  .dir-row:active .dir-name{color:var(--ink)}
+
+  /* external (cross-document) link */
+  .ext-link{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+    color:var(--accent);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+  .ext-link:hover{color:var(--ink);text-decoration-thickness:2px}
+  .ext-link:hover .ico-xs{opacity:1}
+  .ext-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .ext-link:active{color:var(--ink)}
+  .disc-link{margin:0;padding:0 11px 13px}
+
+  /* details: change log + sources */
+  .log{border:1px solid var(--rule);background:var(--panel);margin-top:14px}
+  .log > summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;
+    padding:10px 11px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+  .log > summary::-webkit-details-marker{display:none}
+  .log > summary::before{content:"+";font-family:var(--mono);font-size:13px;line-height:1;
+    color:var(--accent);width:12px;display:inline-block;text-align:center}
+  .log[open] > summary::before{content:"–"}
+  .log > summary:hover{background:var(--accent-wash)}
+  .log > summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .log[open] > summary{border-bottom:1px solid var(--rule)}
+  .log ul{margin:0;padding:4px 11px 10px;list-style:none}
+  .log li{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;padding:6px 0;
+    border-top:1px solid var(--rule);font-size:12px;line-height:1.5;color:var(--ink-2)}
+  .log li:first-child{border-top:0}
+  .log-d{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--ink-3)}
+  .log-src{margin:0;padding:0 11px 12px;font-size:11.5px;line-height:1.5;color:var(--ink-3);max-width:78ch}
+
+  /* disclaimer + footer */
+  .disc-p{margin:0;padding:10px 11px 10px;font-size:12px;line-height:1.55;color:var(--ink-2);max-width:78ch}
+  .disc-p b{color:var(--ink);font-weight:600}
+  .foot{margin-top:30px;background:var(--dark);color:var(--dark-ink-2);border-top:3px solid var(--accent)}
+  .foot-in{display:flex;gap:14px;align-items:flex-start;padding:16px 0 14px}
+  .owl-sm{width:22px;height:20px;display:block;flex:0 0 auto;margin-top:2px}
+  .foot-note{margin:0;max-width:70ch;font-size:11.5px;line-height:1.55}
+  .foot-meta{display:flex;flex-wrap:wrap;gap:5px 18px;justify-content:space-between;
+    padding:9px 0 13px;border-top:1px solid var(--dark-rule);font-family:var(--mono);font-size:11px;
+    letter-spacing:.09em}
+  .foot-meta .accent{color:var(--accent-lit)}
+
+  /* ---- responsive ---- */
+  @media (max-width:760px){
+    .c4,.c5,.c6,.c7,.c8{grid-column:span 12}
+    .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .cell:nth-child(3n+1){border-left:0;padding-left:0}
+    .risk-grid{grid-template-columns:minmax(0,1fr);
+      grid-template-areas:"head" "note" "ctl";gap:6px}
+    .risk-ctl{margin-top:4px}
+    .rail-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}
+    .grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}
+  }
+  @media (max-width:640px){
+    .mast{flex-direction:column;gap:12px}
+    .px{grid-template-columns:auto auto;justify-content:start;gap:2px 14px}
+    .px dd{text-align:left}
+    .rec{flex-direction:column;align-items:flex-start;gap:9px}
+    .rec-side{text-align:left}
+    .guesses{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .guess:nth-child(4n+1){border-left:0;padding-left:0}
+    .dir-desc{flex:1 1 100%;order:3}
+    .vb-note{margin-left:0;flex:1 1 100%}
+  }
+  @media (max-width:600px){
+    .tbl-scroll table{min-width:560px}
+    .hint-scroll{display:inline}
+  }
+  @media (max-width:460px){
+    .guesses{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .guess:nth-child(2n+1){border-left:0;padding-left:0}
+    .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cell:nth-child(2n+1){border-left:0;padding-left:0}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header class="band" id="top">
+  <div class="wrap">
+    <div class="mockbar">
+      <span class="mocktag">MOCKUP — dummy data</span>
+      <span class="mockmeta">DESIGN MOCKUP · INTERNAL DRAFT · NOT FOR DISTRIBUTION</span>
+    </div>
+
+    <!-- 01 · masthead -->
+    <div class="mast">
+      <div class="brand">
+        <img class="owl" src="../../assets/branding/duolingo-owl.svg" alt="">
+        <div class="brandtxt">
+          <div class="eyebrow"><span class="sn">01</span>Equity research · model cover</div>
+          <h1 class="co">DUOLINGO, INC.</h1>
+          <div class="tick">NASDAQ: DUOL · CONSUMER INTERNET · USD</div>
+        </div>
+      </div>
+      <dl class="px">
+        <dt>Target price</dt><dd class="hi">$###.##</dd>
+        <dt>Market price</dt><dd>$###.##</dd>
+        <dt>Pricing date</dt><dd>##/##/####</dd>
+      </dl>
+    </div>
+
+    <!-- 02 · rating -->
+    <div class="rec" id="rating">
+      <div class="rec-main">
+        <h2 class="rec-lab"><span class="sn">02</span>Rating</h2>
+        <span class="verdict">OVERWEIGHT</span>
+      </div>
+      <div class="rec-side">
+        <div class="rec-v">UNDERVALUED <span class="rec-n">+##.#%</span></div>
+        <div class="rec-s">Blended mid-point vs. market price</div>
+      </div>
+    </div>
+
+    <div class="strip">
+      <div class="cell"><span class="cl">Upside to target</span><span class="cv up">+##.#%</span></div>
+      <div class="cell"><span class="cl">Risk / reward</span><span class="cv">##.#x</span></div>
+      <div class="cell"><span class="cl">Position size</span><span class="cv">##.#%</span></div>
+      <div class="cell"><span class="cl">Conviction</span><span class="cv">##/##</span></div>
+      <div class="cell"><span class="cl">FCF yield</span><span class="cv">##.#%</span></div>
+      <div class="cell"><span class="cl">Data grade</span><span class="cv">##%</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- sticky verdict: stays in view for the whole scroll -->
+<div class="verdictbar">
+  <div class="wrap">
+    <span class="vb-rec">OVERWEIGHT</span>
+    <span class="vb-val">UNDERVALUED <span class="rec-n">+##.#%</span></span>
+    <span class="vb-note">TARGET $###.## · MARKET $###.## · ##/##/####</span>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+
+    <!-- 03 · thesis -->
+    <section class="sec" id="thesis">
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <h2 class="sec-title">Investment thesis</h2>
+        <span class="sec-meta">THREE SENTENCES · ##/##/####</span>
+      </div>
+      <div class="g">
+        <div class="c8">
+          <div class="th-item">
+            <span class="th-n">I</span>
+            <p>The market is underwriting the paid base as a maturing <b>##% growth annuity</b>; our model carries a <b>##.#% three-year revenue CAGR</b> on the same user base, and that difference alone accounts for most of the gap to target.</p>
+          </div>
+          <div class="th-item">
+            <span class="th-n">II</span>
+            <p>Acquisition cost is the swing variable: a <b>##.#x turn in blended CAC</b> moves fair value by <b>$##.## per share</b>, which makes the downside measurable rather than narrative.</p>
+          </div>
+          <div class="th-item">
+            <span class="th-n">III</span>
+            <p>Downside is bounded by <b>$###.## of net cash</b> and a <b>##.#% FCF margin</b>; the base case still clears <b>##.#% upside</b> if revenue growth decelerates to ##%.</p>
+          </div>
+        </div>
+        <aside class="c4">
+          <div class="panel">
+            <div class="panel-hd">
+              <span class="ph-t">Position &amp; conviction</span>
+              <img class="ico" src="../../assets/icons/ui/check-circle.svg" alt="">
+            </div>
+            <div class="rail-list">
+              <div class="ri"><span class="ri-l">Conviction</span><span class="ri-v">##/##</span></div>
+              <div class="ri"><span class="ri-l">Position size</span><span class="ri-v a">##.#%</span></div>
+              <div class="ri"><span class="ri-l">Max position</span><span class="ri-v">##.#%</span></div>
+              <div class="ri"><span class="ri-l">Review trigger</span><span class="ri-v">##/##/####</span></div>
+              <div class="ri"><span class="ri-l">Stop / re-underwrite</span><span class="ri-v">$##.##</span></div>
+            </div>
+            <div class="grade">
+              <div class="grade-row"><span class="gr-l">Data quality</span><span class="gr-v">##/##</span></div>
+              <div class="grade-row"><span class="gr-l">Model coverage</span><span class="gr-v">##/##</span></div>
+              <div class="grade-row"><span class="gr-l">Source recency</span><span class="gr-v">##/##</span></div>
+              <div class="grade-row"><span class="gr-l">Estimate dispersion</span><span class="gr-v">##/##</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 04 · business snapshot -->
+    <section class="sec" id="snapshot">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2 class="sec-title">Business snapshot</h2>
+        <span class="sec-meta">LTM vs. prior year <span class="hint-scroll">· scroll →</span></span>
+      </div>
+      <div class="g">
+        <div class="c12">
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Metric</th><th scope="col" class="num">LTM</th><th scope="col" class="num">Prior yr</th><th scope="col" class="num">Δ yoy</th><th scope="col" class="num">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="mcell"><img class="ico-xs" src="../../assets/icons/ui/check-circle.svg" alt="">Daily active users (M)</span></td>
+                  <td class="num">##.#M</td><td class="num">##.#M</td><td class="num up">+##.#%</td>
+                  <td class="num"><svg class="spark" viewBox="0 0 100 24" aria-hidden="true"><polyline points="0,19 14,17 28,18 42,14 56,15 70,11 84,12 100,7" fill="none" stroke="#1E3A5F" stroke-width="1.6"/><rect x="97" y="4" width="3" height="3" fill="#1E3A5F"/></svg></td>
+                </tr>
+                <tr>
+                  <td><span class="mcell"><img class="ico-xs" src="../../assets/icons/ui/check-circle.svg" alt="">Monthly active users (M)</span></td>
+                  <td class="num">##.#M</td><td class="num">##.#M</td><td class="num up">+##.#%</td>
+                  <td class="num"><svg class="spark" viewBox="0 0 100 24" aria-hidden="true"><polyline points="0,17 14,16 28,15 42,16 56,13 70,12 84,10 100,9" fill="none" stroke="#1E3A5F" stroke-width="1.6"/><rect x="97" y="6" width="3" height="3" fill="#1E3A5F"/></svg></td>
+                </tr>
+                <tr>
+                  <td><span class="mcell"><img class="ico-xs" src="../../assets/icons/ui/info-circle.svg" alt="">Paid subscribers (M)</span></td>
+                  <td class="num">##.#M</td><td class="num">##.#M</td><td class="num up">+##.#%</td>
+                  <td class="num"><svg class="spark" viewBox="0 0 100 24" aria-hidden="true"><polyline points="0,20 14,18 28,16 42,17 56,13 70,12 84,9 100,6" fill="none" stroke="#1E3A5F" stroke-width="1.6"/><rect x="97" y="3" width="3" height="3" fill="#1E3A5F"/></svg></td>
+                </tr>
+                <tr>
+                  <td><span class="mcell"><img class="ico-xs" src="../../assets/icons/ui/check-circle.svg" alt="">Revenue, LTM ($M)</span></td>
+                  <td class="num">$###.##</td><td class="num">$###.##</td><td class="num up">+##.#%</td>
+                  <td class="num"><svg class="spark" viewBox="0 0 100 24" aria-hidden="true"><polyline points="0,21 14,19 28,20 42,16 56,14 70,13 84,10 100,5" fill="none" stroke="#1E3A5F" stroke-width="1.6"/><rect x="97" y="2" width="3" height="3" fill="#1E3A5F"/></svg></td>
+                </tr>
+                <tr>
+                  <td><span class="mcell"><img class="ico-xs" src="../../assets/icons/ui/alert-triangle.svg" alt="">Revenue per paid sub ($)</span></td>
+                  <td class="num">$##.##</td><td class="num">$##.##</td><td class="num flat">−##.#%</td>
+                  <td class="num"><svg class="spark" viewBox="0 0 100 24" aria-hidden="true"><polyline points="0,12 14,13 28,11 42,14 56,13 70,15 84,14 100,16" fill="none" stroke="#5A616B" stroke-width="1.6"/><rect x="97" y="13" width="3" height="3" fill="#5A616B"/></svg></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 · valuation -->
+    <section class="sec" id="valuation">
+      <div class="sec-head">
+        <span class="sec-num">05</span>
+        <h2 class="sec-title">Valuation — six methods</h2>
+        <span class="sec-meta">BLENDED · ##/##/####</span>
+      </div>
+      <div class="g">
+        <div class="c12">
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Method</th><th scope="col" class="num">Implied value</th><th scope="col" class="num">Weight</th><th scope="col" class="num">Weighted</th><th scope="col">Basis</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>FCFF DCF</td><td class="num">$###.##</td><td class="num">##.#%</td><td class="num">$###.##</td><td>WACC ##.#%, g ##.#%</td></tr>
+                <tr><td>Trading comps</td><td class="num">$###.##</td><td class="num">##.#%</td><td class="num">$###.##</td><td>peer med. ##.#x</td></tr>
+                <tr><td>EV/EBITDAR</td><td class="num">$###.##</td><td class="num">##.#%</td><td class="num">$###.##</td><td>applied ##.#x</td></tr>
+                <tr><td>P/FCF</td><td class="num">$###.##</td><td class="num">##.#%</td><td class="num">$###.##</td><td>target ##.#x</td></tr>
+                <tr><td>SOTP</td><td class="num">$###.##</td><td class="num">##.#%</td><td class="num">$###.##</td><td>parts, ##.#x</td></tr>
+                <tr><td>Per-user (DAU)</td><td class="num">$###.##</td><td class="num">##.#%</td><td class="num">$###.##</td><td>$##.## / DAU</td></tr>
+                <tr class="total"><td>Blended</td><td class="num">$###.##</td><td class="num">##%</td><td class="num">—</td><td>vs. market $###.##</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="c12">
+          <div class="sub-head">
+            <h3 class="sub-title">Method spread vs. market</h3>
+            <span class="sub-meta">IMPLIED VALUE PER SHARE ($)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-hd">
+              <span class="ph-t">Valuation range</span>
+              <span class="legend">
+                <span><i class="sw bar"></i>Range</span>
+                <span><i class="sw tg"></i>Point est.</span>
+                <span><i class="sw mk"></i>Market</span>
+              </span>
+            </div>
+            <div class="chart-body">
+              <div class="chart-scroll">
+                <svg class="chart" viewBox="0 0 320 264" role="img" aria-label="Valuation range by method, dummy data. Rows: FCFF DCF, Trading comps, EV/EBITDAR, P/FCF, SOTP, Per-user, Blended. A dashed market line and a solid target line are both visible.">
+                  <!-- range bars, one per method (labels sit above their bar) -->
+                  <rect x="21" y="44" width="172" height="9" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="32" y="74" width="182" height="9" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="46" y="104" width="173" height="9" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="16" y="134" width="164" height="9" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="40" y="164" width="197" height="9" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="27" y="194" width="176" height="9" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="55" y="224" width="172" height="11" fill="#12161B"/>
+
+                  <!-- point estimates -->
+                  <rect x="152" y="41" width="3" height="15" fill="#1E3A5F"/>
+                  <rect x="166" y="71" width="3" height="15" fill="#1E3A5F"/>
+                  <rect x="175" y="101" width="3" height="15" fill="#1E3A5F"/>
+                  <rect x="133" y="131" width="3" height="15" fill="#1E3A5F"/>
+                  <rect x="195" y="161" width="3" height="15" fill="#1E3A5F"/>
+                  <rect x="157" y="191" width="3" height="15" fill="#1E3A5F"/>
+                  <rect x="184" y="221" width="3" height="17" fill="#1E3A5F"/>
+
+                  <!-- row labels, above each bar -->
+                  <text x="6" y="39" font-size="12" fill="#3B424B">FCFF DCF</text>
+                  <text x="6" y="69" font-size="12" fill="#3B424B">Trading comps</text>
+                  <text x="6" y="99" font-size="12" fill="#3B424B">EV/EBITDAR</text>
+                  <text x="6" y="129" font-size="12" fill="#3B424B">P/FCF</text>
+                  <text x="6" y="159" font-size="12" fill="#3B424B">SOTP</text>
+                  <text x="6" y="189" font-size="12" fill="#3B424B">Per-user (DAU)</text>
+                  <text x="6" y="219" font-size="12" font-weight="700" fill="#12161B">BLENDED</text>
+
+                  <!-- axis -->
+                  <line x1="6" y1="241" x2="314" y2="241" stroke="#12161B" stroke-width="1"/>
+                  <line x1="6" y1="241" x2="6" y2="246" stroke="#12161B" stroke-width="1"/>
+                  <line x1="83" y1="241" x2="83" y2="246" stroke="#12161B" stroke-width="1"/>
+                  <line x1="160" y1="241" x2="160" y2="246" stroke="#12161B" stroke-width="1"/>
+                  <line x1="237" y1="241" x2="237" y2="246" stroke="#12161B" stroke-width="1"/>
+                  <line x1="314" y1="241" x2="314" y2="246" stroke="#12161B" stroke-width="1"/>
+                  <text x="6" y="258" font-size="11.5" fill="#5A616B">$###.##</text>
+                  <text x="83" y="258" text-anchor="middle" font-size="11.5" fill="#5A616B">$###.##</text>
+                  <text x="160" y="258" text-anchor="middle" font-size="11.5" fill="#5A616B">$###.##</text>
+                  <text x="237" y="258" text-anchor="middle" font-size="11.5" fill="#5A616B">$###.##</text>
+                  <text x="314" y="258" text-anchor="end" font-size="11.5" fill="#5A616B">$###.##</text>
+
+                  <!-- reference lines, drawn last so both stay visible across every bar -->
+                  <line x1="115" y1="16" x2="115" y2="241" stroke="#5A616B" stroke-width="1" stroke-dasharray="4 3"/>
+                  <line x1="232" y1="16" x2="232" y2="241" stroke="#1E3A5F" stroke-width="1.6"/>
+                  <text x="111" y="12" text-anchor="end" font-size="11.5" fill="#5A616B">MKT $###.##</text>
+                  <text x="236" y="12" font-size="11.5" fill="#1E3A5F">TGT $###.##</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 · key guesses -->
+    <section class="sec" id="assumptions">
+      <div class="sec-head">
+        <span class="sec-num">06</span>
+        <h2 class="sec-title">Key guesses</h2>
+        <span class="sec-meta">SHARED ACROSS ALL SCENARIOS</span>
+      </div>
+      <div class="g">
+        <div class="c12">
+          <div class="guesses">
+            <div class="guess"><span class="gl">WACC</span><span class="gv">##.#%</span><span class="gs">MODEL</span></div>
+            <div class="guess"><span class="gl">Terminal g</span><span class="gv">##.#%</span><span class="gs">MODEL</span></div>
+            <div class="guess"><span class="gl">Rev CAGR</span><span class="gv">##.#%</span><span class="gs">MODEL</span></div>
+            <div class="guess"><span class="gl">EBIT margin</span><span class="gv">##.#%</span><span class="gs">GUIDE</span></div>
+            <div class="guess"><span class="gl">Tax rate</span><span class="gv">##.#%</span><span class="gs">MODEL</span></div>
+            <div class="guess"><span class="gl">Diluted shares</span><span class="gv">##.#M</span><span class="gs">FILED</span></div>
+            <div class="guess"><span class="gl">Net debt</span><span class="gv">$###.##</span><span class="gs">FILED</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 · risks & scenarios -->
+    <section class="sec" id="risks">
+      <div class="sec-head">
+        <span class="sec-num">07</span>
+        <h2 class="sec-title">Risks &amp; scenarios</h2>
+        <span class="sec-meta">DRAG EACH SLIDER TO RE-WEIGHT · ##/##/####</span>
+      </div>
+      <div class="g">
+        <div class="c12">
+          <div class="risk">
+            <div class="risk-grid">
+              <div class="risk-head">
+                <img class="ico" src="../../assets/icons/ui/alert-triangle.svg" alt="">
+                <span class="risk-name">Subscriber growth stalls</span>
+              </div>
+              <p class="risk-note">A ##.#x turn in blended CAC, or a ##.#% churn step-up, compresses fair value by $##.## per share before any revenue revision.</p>
+              <div class="risk-ctl">
+                <div class="risk-top"><span class="risk-lab">Weight in bear case</span><span class="risk-read">##/##</span></div>
+                <input type="range" min="0" max="100" value="50" aria-label="Subscriber growth risk weight">
+                <div class="risk-scale"><span>LOW</span><span>HIGH</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="risk">
+            <div class="risk-grid">
+              <div class="risk-head">
+                <img class="ico" src="../../assets/icons/ui/alert-triangle.svg" alt="">
+                <span class="risk-name">Free alternatives absorb demand</span>
+              </div>
+              <p class="risk-note">If free substitutes take ##.#% of new installs, our ##.#% CAGR case loses $##.## per share and the payback period extends past ##/##/####.</p>
+              <div class="risk-ctl">
+                <div class="risk-top"><span class="risk-lab">Weight in bear case</span><span class="risk-read">##/##</span></div>
+                <input type="range" min="0" max="100" value="50" aria-label="Substitution risk weight">
+                <div class="risk-scale"><span>LOW</span><span>HIGH</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="risk">
+            <div class="risk-grid">
+              <div class="risk-head">
+                <img class="ico" src="../../assets/icons/ui/alert-triangle.svg" alt="">
+                <span class="risk-name">Platform &amp; store economics</span>
+              </div>
+              <p class="risk-note">A store-fee or data-rule change moves gross margin by ##.#% and fair value by $##.##, with no offsetting pricing lever inside the model.</p>
+              <div class="risk-ctl">
+                <div class="risk-top"><span class="risk-lab">Weight in bear case</span><span class="risk-read">##/##</span></div>
+                <input type="range" min="0" max="100" value="50" aria-label="Platform economics risk weight">
+                <div class="risk-scale"><span>LOW</span><span>HIGH</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mind" style="margin-top:14px">
+            <h3><img class="ico" src="../../assets/icons/ui/info-circle.svg" alt="">What would change our mind</h3>
+            <ul>
+              <li>Two consecutive quarters of net paid adds below <b>##.#M</b> moves the name to neutral.</li>
+              <li>A blended CAC print above <b>$##.##</b> without a matching lift in lifetime value breaks the <b>##.#x</b> payback case.</li>
+              <li>Any change to store economics above <b>##.#%</b> of gross bookings forces a full re-underwrite of the ##.#% margin line.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="c12" id="scenarios">
+          <div class="sub-head">
+            <h3 class="sub-title">Scenario matrix</h3>
+            <span class="sub-meta">BEAR / BASE / BULL <span class="hint-scroll">· scroll →</span></span>
+          </div>
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Scenario</th><th scope="col" class="num">Probability</th><th scope="col" class="num">Rev CAGR</th><th scope="col" class="num">Implied value</th><th scope="col" class="num">Vs. market</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>BEAR</td><td class="num">##%</td><td class="num">##.#%</td><td class="num">$###.##</td><td class="num flat">−##.#%</td></tr>
+                <tr><td>BASE</td><td class="num">##%</td><td class="num">##.#%</td><td class="num">$###.##</td><td class="num up">+##.#%</td></tr>
+                <tr><td>BULL</td><td class="num">##%</td><td class="num">##.#%</td><td class="num">$###.##</td><td class="num up">+##.#%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="risk-note" style="margin-top:8px">Bear assumes a ##.#% churn step-up and flat ARPU; base holds blended CAC at $##.##; bull assumes a ##.#% conversion lift with no incremental acquisition spend. All values are placeholders.</p>
+        </div>
+
+        <div class="c12" id="scenario-chart">
+          <div class="sub-head">
+            <h3 class="sub-title">Scenario chart</h3>
+            <span class="sub-meta">IMPLIED VALUE PER SHARE ($)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-hd">
+              <span class="ph-t">Bear / base / bull</span>
+              <span class="legend">
+                <span><i class="sw be"></i>Bear</span>
+                <span><i class="sw ba"></i>Base</span>
+                <span><i class="sw bu"></i>Bull</span>
+                <span><i class="sw mk"></i>Market</span>
+              </span>
+            </div>
+            <div class="chart-body">
+              <div class="chart-scroll">
+                <svg class="chart" viewBox="0 0 320 250" role="img" aria-label="Bear, base and bull implied value chart, dummy data. A dashed market line sits level with the bear case.">
+                  <line x1="6" y1="16" x2="314" y2="16" stroke="#D5D3CC" stroke-width="1"/>
+                  <line x1="6" y1="92" x2="314" y2="92" stroke="#D5D3CC" stroke-width="1"/>
+                  <line x1="6" y1="16" x2="6" y2="196" stroke="#12161B" stroke-width="1"/>
+                  <line x1="6" y1="196" x2="314" y2="196" stroke="#12161B" stroke-width="1"/>
+
+                  <rect x="48" y="153" width="64" height="43" fill="#E7E5DF" stroke="#BCBAB3" stroke-width="1"/>
+                  <rect x="128" y="92" width="64" height="104" fill="#1E3A5F"/>
+                  <rect x="208" y="35" width="64" height="161" fill="#12161B"/>
+
+                  <text x="80" y="179" text-anchor="middle" font-size="12" fill="#12161B">$###.##</text>
+                  <text x="160" y="118" text-anchor="middle" font-size="12" fill="#E8EDF4">$###.##</text>
+                  <text x="240" y="61" text-anchor="middle" font-size="12" fill="#ECEBE7">$###.##</text>
+
+                  <line x1="6" y1="153" x2="314" y2="153" stroke="#5A616B" stroke-width="1" stroke-dasharray="4 3"/>
+                  <text x="6" y="148" font-size="11.5" fill="#5A616B">MARKET $###.##</text>
+
+                  <text x="80" y="216" text-anchor="middle" font-size="12" letter-spacing="1.4" fill="#12161B">BEAR</text>
+                  <text x="160" y="216" text-anchor="middle" font-size="12" letter-spacing="1.4" fill="#12161B">BASE</text>
+                  <text x="240" y="216" text-anchor="middle" font-size="12" letter-spacing="1.4" fill="#12161B">BULL</text>
+                  <text x="80" y="232" text-anchor="middle" font-size="11" fill="#5A616B">##% prob.</text>
+                  <text x="160" y="232" text-anchor="middle" font-size="11" fill="#5A616B">##% prob.</text>
+                  <text x="240" y="232" text-anchor="middle" font-size="11" fill="#5A616B">##% prob.</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 · contents + disclaimer -->
+    <section class="sec" id="contents">
+      <div class="sec-head">
+        <span class="sec-num">08</span>
+        <h2 class="sec-title">Contents &amp; disclaimer</h2>
+        <span class="sec-meta">EIGHT SECTIONS · ##/##/####</span>
+      </div>
+      <div class="g">
+        <div class="c12">
+          <nav class="dir" aria-label="Report contents">
+            <a class="dir-row" href="#top">
+              <span class="dir-num">01</span>
+              <span class="dir-name">Masthead</span>
+              <span class="dir-desc">Company, target price, market price, pricing date</span>
+              <span class="dir-tag">HEADER</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#rating">
+              <span class="dir-num">02</span>
+              <span class="dir-name">Rating</span>
+              <span class="dir-desc">Overweight and the blended undervaluation</span>
+              <span class="dir-tag">VERDICT</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#thesis">
+              <span class="dir-num">03</span>
+              <span class="dir-name">Investment thesis</span>
+              <span class="dir-desc">Three sentences and the position panel</span>
+              <span class="dir-tag">NOTE</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#snapshot">
+              <span class="dir-num">04</span>
+              <span class="dir-name">Business snapshot</span>
+              <span class="dir-desc">DAU, MAU, paid subscribers, revenue</span>
+              <span class="dir-tag">TABLE</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#valuation">
+              <span class="dir-num">05</span>
+              <span class="dir-name">Valuation</span>
+              <span class="dir-desc">Six methods and the method-spread range</span>
+              <span class="dir-tag">TABLE · CHART</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#assumptions">
+              <span class="dir-num">06</span>
+              <span class="dir-name">Key guesses</span>
+              <span class="dir-desc">WACC, growth, margins, tax, shares, debt</span>
+              <span class="dir-tag">NOTE</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#risks">
+              <span class="dir-num">07</span>
+              <span class="dir-name">Risks &amp; scenarios</span>
+              <span class="dir-desc">Three weighted risks and the bear/base/bull set</span>
+              <span class="dir-tag">SLIDERS</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row sub" href="#scenarios">
+              <span class="dir-num">07a</span>
+              <span class="dir-name">Scenario matrix</span>
+              <span class="dir-desc">Bear, base and bull with probabilities</span>
+              <span class="dir-tag">MATRIX</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row sub" href="#scenario-chart">
+              <span class="dir-num">07b</span>
+              <span class="dir-name">Scenario chart</span>
+              <span class="dir-desc">Implied value per share, three cases</span>
+              <span class="dir-tag">CHART</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+            <a class="dir-row" href="#contents">
+              <span class="dir-num">08</span>
+              <span class="dir-name">Contents &amp; disclaimer</span>
+              <span class="dir-desc">This index and the standing disclaimer</span>
+              <span class="dir-tag">THIS PAGE</span>
+              <svg class="dir-arrow" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </a>
+          </nav>
+        </div>
+
+        <div class="c12">
+          <div class="panel">
+            <div class="panel-hd">
+              <span class="ph-t">Disclaimer</span>
+              <img class="ico" src="../../assets/icons/ui/info-circle.svg" alt="">
+            </div>
+            <p class="disc-p">Design mockup for internal review. Every figure, date and name on this page is a placeholder and none of it is derived from a real model. This is <b>not investment advice</b>, not an offer, and not a solicitation to buy or sell any security. Do not rely on the contents. Prepared by the equity research design desk; last updated ##/##/####.</p>
+            <p class="disc-link"><a class="ext-link" href="../../docs/spec.md"><img class="ico-xs" src="../../assets/icons/ui/external-link.svg" alt="">Model specification — separate document</a></p>
+          </div>
+
+          <details class="log">
+            <summary>Change log &amp; sources</summary>
+            <ul>
+              <li><span class="log-d">##/##/####</span><span>Rating set to OVERWEIGHT; blended mid-point moved to +##.#% versus market.</span></li>
+              <li><span class="log-d">##/##/####</span><span>Six-method blend re-weighted; WACC held at ##.#% and terminal g at ##.#%.</span></li>
+              <li><span class="log-d">##/##/####</span><span>Snapshot refreshed to LTM; paid subscriber base shown at ##.#M.</span></li>
+            </ul>
+            <p class="log-src">Sources: placeholder filings, placeholder transcripts and placeholder third-party data sets. Every entry above is dummy text used to show layout only; no figure on this page is real.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-in">
+      <img class="owl-sm" src="../../assets/branding/duolingo-owl.svg" alt="">
+      <p class="foot-note">Every figure, date and name on this page is a placeholder; nothing here is derived from a real model and this is <b>not investment advice</b>. Internal design mockup only.</p>
+    </div>
+    <div class="foot-meta">
+      <span class="accent">MOCKUP — dummy data</span>
+      <span>Duolingo, Inc. · NASDAQ: DUOL</span>
+      <span>##/##/####</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

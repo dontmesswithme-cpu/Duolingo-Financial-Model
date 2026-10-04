@@ -1125,16 +1125,16 @@ describe('RP3.2 — Interactive Drawer DOM Lifecycle & Accessibility', () => {
       /\.trend-title-block[\s\S]*?\.operating-kpis-title-block[\s\S]*?\.statement-title-block[\s\S]*?\.audit-center-title-block[\s\S]*?\.cover-section-header[\s\S]*?\.cover-card-title[\s\S]*?\.scenario-picker-title[\s\S]*?\.driver-group-header[\s\S]*?\.statement-card-header\s*\{[^}]*border-left:\s*3px\s+solid\s+var\(--color-accent-blue\);[^}]*padding-left:\s*10px;/
     );
 
-    // Shared rule for titles (15px, 700, var(--color-text-primary), 2px bottom margin)
+    // Shared rule for titles (15px / var(--text-lg), 700, var(--color-text-primary), 2px bottom margin)
     assert.match(
       html,
-      /\.trend-main-title[\s\S]*?\.operating-kpis-main-title[\s\S]*?\.workspace-main-title[\s\S]*?\.statement-title-block\s+h3[\s\S]*?\.audit-center-title[\s\S]*?\.cover-section-title[\s\S]*?\.cover-card-title[\s\S]*?\{[^}]*font-size:\s*15px;[^}]*font-weight:\s*700;[^}]*color:\s*var\(--color-text-primary\);[^}]*margin:\s*0\s+0\s+2px\s+0;/
+      /\.trend-main-title[\s\S]*?\.operating-kpis-main-title[\s\S]*?\.workspace-main-title[\s\S]*?\.statement-title-block\s+h3[\s\S]*?\.audit-center-title[\s\S]*?\.cover-section-title[\s\S]*?\.cover-card-title[\s\S]*?\{[^}]*font-size:\s*(?:15px|var\(--text-lg\));[^}]*font-weight:\s*700;[^}]*color:\s*var\(--color-text-primary\);[^}]*margin:\s*0\s+0\s+2px\s+0;/
     );
 
-    // Shared rule for subtitles (12px, var(--color-text-muted), 0 margin)
+    // Shared rule for subtitles (12px / var(--text-sm), var(--color-text-muted), 0 margin)
     assert.match(
       html,
-      /\.trend-subtitle[\s\S]*?\.operating-kpis-subtitle[\s\S]*?\.workspace-subtitle[\s\S]*?\.statement-title-block\s+p[\s\S]*?\.audit-center-subtitle[\s\S]*?\.cover-section-subtitle\s*\{[^}]*font-size:\s*12px;[^}]*color:\s*var\(--color-text-muted\);[^}]*margin:\s*0;/
+      /\.trend-subtitle[\s\S]*?\.operating-kpis-subtitle[\s\S]*?\.workspace-subtitle[\s\S]*?\.statement-title-block\s+p[\s\S]*?\.audit-center-subtitle[\s\S]*?\.cover-section-subtitle\s*\{[^}]*font-size:\s*(?:12px|var\(--text-sm\));[^}]*color:\s*var\(--color-text-muted\);[^}]*margin:\s*0;/
     );
   });
 

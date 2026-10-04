@@ -1,0 +1,126 @@
+{
+  "artifact": "duolingoFullyDilutedSchedule",
+  "version": "1.0",
+  "owner": "P10.4",
+  "purpose": "Current point-in-time fully diluted share schedule. This is the single denominator for every present-day relative valuation output (EV/Revenue, EV/EBITDAR, P/FCF, SOTP decomposition, Per-User).",
+  "explicitlyNot": [
+    "the weighted-average diluted count reported in EPS (diagnostic only, per P10.4 contract)",
+    "the DCF terminal-year share roll produced by src/engine/shares.js projectShares (P10.4 contract: 'They must not receive the DCF terminal share roll')"
+  ],
+  "measurementDate": "2026-06-30",
+  "asOfBasis": "period_end",
+  "filing": {
+    "form": "10-Q",
+    "registrant": "Duolingo, Inc.",
+    "cik": "0001562088",
+    "accession": "0001628280-26-053603",
+    "filedOn": "2026-08-06",
+    "periodOfReport": "2026-06-30",
+    "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+    "indexUrl": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/0001628280-26-053603-index.htm",
+    "retrievedAt": "2026-09-26"
+  },
+  "components": {
+    "basicPeriodEnd": {
+      "label": "Basic period-end shares outstanding (Class A + Class B)",
+      "value": 46724000,
+      "units": "count",
+      "measurementDate": "2026-06-30",
+      "detail": [
+        {
+          "class": "Class A",
+          "value": 40325000,
+          "note": "shares issued 40,337k less 12k treasury stock"
+        },
+        {
+          "class": "Class B",
+          "value": 6399000,
+          "note": "shares issued = shares outstanding"
+        }
+      ],
+      "citation": {
+        "accession": "0001628280-26-053603",
+        "statement": "Unaudited Condensed Consolidated Balance Sheets (Parenthetical)",
+        "renderedTable": "R3",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/R3.htm"
+      }
+    },
+    "incrementalOptions": {
+      "label": "Incremental options (treasury stock method)",
+      "value": 520458,
+      "units": "count",
+      "method": "treasury_stock_method",
+      "optionsOutstanding": 636000,
+      "optionsExercisable": 636000,
+      "weightedAverageExercisePriceUsd": 21.09,
+      "treasuryStockMethodPriceUsd": 116.09,
+      "treasuryStockMethodPriceDerivation": "WAEP 21.09 + (aggregate intrinsic value 60,408k / 636,000 options = 95.00) = 116.09. The price is derived from the filing's own aggregate intrinsic value so the whole schedule is single-source and single-date, rather than mixing a 2026-06-30 share count with a later market price.",
+      "citation": {
+        "accession": "0001628280-26-053603",
+        "statement": "Stockholders' Equity - Schedule of Stock Option Activity (Details)",
+        "renderedTable": "R42",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/R42.htm"
+      },
+      "crossValidation": "The filing's own Q2 2026 dilutive effect of options is 519,000 (weighted-average basis). The point-in-time treasury-stock-method increment computed here is 520,458, i.e. within 0.3% of the issuer's own figure, which corroborates the method and the price input.",
+      "measurementDate": "2026-06-30"
+    },
+    "rsusAndOtherAwards": {
+      "label": "RSUs and other outstanding equity awards (issuer-disclosed dilutive effect)",
+      "value": 2817000,
+      "units": "count",
+      "note": "Issuer-disclosed dilutive effect of RSUs outstanding for the three months ended 2026-06-30. This is the incremental figure after the treasury-stock-method treatment of unrecognised compensation cost, not the gross RSU roll-forward, and is therefore the correct addition to a diluted count.",
+      "citation": {
+        "accession": "0001628280-26-053603",
+        "statement": "Earnings Per Share - Schedule of Earnings Per Share, Basic and Diluted (Details)",
+        "renderedTable": "R47",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/R47.htm"
+      },
+      "measurementDate": "2026-06-30"
+    },
+    "founderAwards": {
+      "label": "Founder awards where performance conditions have been met",
+      "value": 0,
+      "units": "count",
+      "note": "Zero included because no founder award met its performance condition as of 2026-06-30. The comparable line was 720,000 for the three months ended 2025-06-30, so this is a real decline in met founder awards, not a missing disclosure. Had founder awards met, the schedule would rise by that amount.",
+      "priorPeriodValue": 720000,
+      "priorPeriodLabel": "three months ended 2025-06-30",
+      "citation": {
+        "accession": "0001628280-26-053603",
+        "statement": "Earnings Per Share - Schedule of Earnings Per Share, Basic and Diluted (Details)",
+        "renderedTable": "R47",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/R47.htm"
+      },
+      "measurementDate": "2026-06-30"
+    }
+  },
+  "fullyDilutedTotal": 50061458,
+  "reconciliation": {
+    "basicPeriodEnd": 46724000,
+    "plusIncrementalOptions": 520458,
+    "plusRsusAndOtherAwards": 2817000,
+    "plusFounderAwards": 0,
+    "equalsFullyDilutedTotal": 50061458,
+    "issuerWeightedAverageDilutedQ2Fy2026": 50031000,
+    "difference": 30458,
+    "differencePct": 0.0006,
+    "note": "The issuer's weighted-average diluted count is 30,458 shares (0.06%) below the point-in-time schedule. That closeness is a sanity check, not an identity: a weighted average cannot serve as a present-day denominator because it blends periods and, here, carries founder awards that had not vested, whereas the point-in-time schedule reflects actual outstanding instruments at the measurement date."
+  },
+  "diagnostics": {
+    "weightedAverageDiluted": {
+      "value": 50031000,
+      "period": "three months ended 2026-06-30",
+      "role": "diagnostic_only",
+      "prohibition": "P10.4 contract: 'Weighted-average diluted shares remain diagnostic and cannot appear as a valuation denominator.'"
+    },
+    "weightedAverageBasic": {
+      "value": 46695000,
+      "period": "three months ended 2026-06-30",
+      "role": "diagnostic_only"
+    }
+  },
+  "methodNotes": [
+    "The treasury-stock-method price is disclosed explicitly and is derived from the same filing as the option count, so no cross-date mixing occurs.",
+    "At a higher market price the option increment would grow and the total would rise; the schedule is therefore a point-in-time construction, not a permanent constant.",
+    "Founder awards are reported at zero with the prior-period value disclosed, so a future vesting event is a visible change rather than a silent one."
+  ]
+}

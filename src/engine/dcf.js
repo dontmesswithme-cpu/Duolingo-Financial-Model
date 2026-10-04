@@ -1,34 +1,39 @@
 /**
- * DCF Valuation Engine (P4.2).
+ * DCF Valuation Engine (P4.2, EP.3, FP.2).
  *
  * Implements the spec §3.2 frozen interface:
  *   `dcf.valuate(threeStatement: ThreeStatementOutput, wacc: WaccBuild, dcfInput: DcfInput): DcfResult`
  *
- * The valuation pipeline implements the standard Gordon Growth DCF framework:
+ * The valuation pipeline implements the Three-Stage Gordon Growth DCF framework (Phase 9 FP):
  *  1. Discount factors: df_t = 1 / (1 + WACC)^t for forecast years t = 1..horizon
- *  2. Explicit-period PV: pvFcf_t = fcf_t × df_t; pvExplicit = Σ pvFcf_t
+ *  2. Three-Stage PV decomposition:
+ *     - Stage 1 Explicit (FY2026–FY2030): pvFcf_t = fcf_t × df_t over periods 0..4
+ *     - Stage 2 Fade Glide (FY2031–FY2035): pvFcf_t = fcf_t × df_t over periods 5..9
+ *     - pvExplicit = Σ pvFcf_t across all explicit and fade forecast periods
+ *     - pvByStage = { explicit, fade, terminal } exposing exact stage breakdown
  *  3. Terminal steady-state normalisation (EP.3, EIG-A) + Gordon terminal value:
  *     wcInflowT = −ΔNWC_T (final-year working-capital inflow from the WC
  *     schedule); wcInflowSS = −NWC_T × g (steady-state replacement at the
  *     perpetuity rate); fcffTNormalised = fcff_T − wcInflowT + wcInflowSS;
  *     terminalFcf = fcffTNormalised × (1 + g);
  *     terminalValue = terminalFcf / (WACC − g); pvTerminal = terminalValue × df_T
- *     (Hard fail-closed guard: WACC > g required; the FCFE floor and legacy
- *     paths normalise their shared terminal-year cash flow identically)
- *  4. Enterprise value: EV = pvExplicit + pvTerminal
+ *     (Hard fail-closed guard: WACC > g required; terminalYear = 'FY2035' under 10-year horizon;
+ *     the FCFE diagnostic and legacy paths normalise their shared terminal-year cash flow identically)
+ *  4. Enterprise value: EV = pvExplicit + pvTerminal = pvByStage.explicit + pvByStage.fade + pvTerminal
  *  5. Net cash bridge: netCash = endingCash(T) + shortTermInvestments(T) + longTermInvestments(T) − debt(T)
  *     from the final forecast balance sheet
  *  6. Equity value: Equity = EV + netCash = EV − debt + cashAndInvestments
  *  7. Per-share value: perShare = (equityValue × scale) / sharesOutstanding
  *     where sharesOutstanding is the EIG-B share roll-forward terminal count
- *     (BOP MKT driver plus gross SBC issuance at spot, EP.2 — the static
- *     driver divisor is retired; see src/engine/shares.js)
+ *     (BOP MKT driver plus gross SBC issuance at spot across the full forecast horizon,
+ *     EP.2 & FP.2 — see src/engine/shares.js)
  *
  * Invariants enforced:
  *  - FCF series consumed directly from ThreeStatementOutput.cashFlow.byPeriod[].free_cash_flow
  *  - Hybrid FY2026 FCF consumed as built (H1 cited actuals + H2 engine estimate)
- *  - Terminal steady-state law (EP.3, EIG-A): the final-year WC inflow is
- *    replaced by its perpetuity-rate equivalent before Gordon capitalisation
+ *  - Fade Stage Law (FP.4): explicit-stage growth converges toward terminal anchor through
+ *    declared driver glide; terminal normalisation re-anchored on normalised FY2035 FCFF
+ *  - Terminal steady-state law (EP.3, EIG-A): final-year WC inflow replaced by perpetuity equivalent
  *  - Net cash bridge reads raw final balance sheet lines (ending cash + held-constant STI + LTI)
  *  - Gordon guard: WACC > g throws typed EngineError('terminal_growth_exceeds_wacc')
  *  - Debt-free collapse as theorem: debt = 0 exercised in the formula
@@ -40,12 +45,24 @@
  */
 
 import { EngineError } from '../data/errors.js';
-import { projectShares } from './shares.js';
+import { projectShares, fullyDilutedSchedule } from './shares.js';
+
 import {
   UNITS,
   FORECAST_HORIZON_MIN,
   FORECAST_HORIZON_MAX,
   FORECAST_HORIZON_DEFAULT,
+  CANONICAL_HORIZON,
+  EFFECTIVE_VALUATION_DATE,
+  REPORTING_CUTOFF_DATE,
+  PRE_VALUATION_STUB_DAYS,
+  POST_VALUATION_STUB_DAYS,
+  H2_DAYS_TOTAL,
+  PRE_VALUATION_STUB_FRACTION,
+  POST_VALUATION_STUB_FRACTION,
+  PERIOD_END_DATES,
+  MILLISECONDS_PER_DAY,
+  calculateDiscountExponent,
 } from '../data/constants.js';
 
 /** Derived / judgment marking. */
@@ -133,9 +150,9 @@ function resolveWaccRate(wacc) {
  * @returns {number}
  * @throws {EngineError} `invalid_horizon` if out of bounds or non-integer.
  */
-function normalizeHorizon(requestedHorizon) {
+function normalizeHorizon(requestedHorizon, defaultHorizon = FORECAST_HORIZON_DEFAULT) {
   if (requestedHorizon === undefined || requestedHorizon === null) {
-    return FORECAST_HORIZON_DEFAULT;
+    return defaultHorizon;
   }
 
   if (
@@ -155,6 +172,126 @@ function normalizeHorizon(requestedHorizon) {
 }
 
 /**
+ * Reads one required ISO calendar date from a dated-seam object, failing closed.
+ *
+ * @param {object} container Dated-seam container.
+ * @param {string} key Field name.
+ * @param {string} path Dotted engine path used in the error `field`.
+ * @returns {string} ISO `YYYY-MM-DD` date.
+ * @throws {EngineError} `missing_seam_partition` when absent or malformed.
+ */
+function requireSeamString(container, key, path) {
+  const value = container && typeof container === 'object' ? container[key] : undefined;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new EngineError(
+      'missing_seam_partition',
+      `Required dated-seam date "${path}" is missing or not an ISO YYYY-MM-DD value.`,
+      path,
+    );
+  }
+  return value;
+}
+
+/**
+ * Computes the overlap, in days, between two half-open calendar date ranges.
+ *
+ * @param {string} aStart First interval start.
+ * @param {string} aEnd First interval end.
+ * @param {string} bStart Second interval start.
+ * @param {string} bEnd Second interval end.
+ * @returns {number} Overlapping days (zero when the windows are disjoint).
+ */
+function intervalOverlapDays(aStart, aEnd, bStart, bEnd) {
+  const start = Math.max(
+    new Date(`${aStart}T00:00:00Z`).getTime(),
+    new Date(`${bStart}T00:00:00Z`).getTime(),
+  );
+  const end = Math.min(
+    new Date(`${aEnd}T00:00:00Z`).getTime(),
+    new Date(`${bEnd}T00:00:00Z`).getTime(),
+  );
+  return end > start ? Math.round((end - start) / MILLISECONDS_PER_DAY) : 0;
+}
+
+/**
+ * Reads one required finite number from a dated-seam object, failing closed.
+ *
+ * @param {object} container Dated-seam container.
+ * @param {string} key Field name.
+ * @param {string} path Dotted engine path used in the error `field`.
+ * @returns {number} Finite value.
+ * @throws {EngineError} `missing_seam_partition` when absent or non-finite.
+ */
+function requireSeamNumber(container, key, path) {
+  const value = container && typeof container === 'object' ? container[key] : undefined;
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new EngineError(
+      'missing_seam_partition',
+      `Required dated-seam value "${path}" is missing or non-finite; the DCF fails closed rather than defaulting the valuation bridge to zero.`,
+      path,
+    );
+  }
+  return value;
+}
+
+/**
+ * Reads one required leg of a hybrid cash-flow line, failing closed.
+ *
+ * @param {object} periodRow Cash-flow row for the hybrid period.
+ * @param {string} lineKey Cash-flow line name (`fcff`, `net_change_in_cash`, ...).
+ * @param {string} partition `h1`, `preValuation`, `postValuation`, or `fullYear`.
+ * @param {string} path Dotted engine path used in the error `field`.
+ * @returns {number} Finite value.
+ * @throws {EngineError} `missing_seam_partition` when absent or non-finite.
+ */
+function requireSeamPartitionValue(periodRow, lineKey, partition, path) {
+  const line = periodRow && typeof periodRow === 'object' ? periodRow[lineKey] : null;
+  if (!line || typeof line !== 'object') {
+    throw new EngineError(
+      'missing_seam_partition',
+      `Required dated-seam row "${path}" is missing from the three-statement output.`,
+      path,
+    );
+  }
+  const leg =
+    partition === 'fullYear'
+      ? line
+      : (partition === 'h1' || partition === 'h2' ? line[partition] : line.h2 && line.h2[partition]);
+  if (!leg || typeof leg !== 'object') {
+    throw new EngineError(
+      'missing_seam_partition',
+      `Required dated-seam partition "${path}" is missing; an engine-critical missing row may never silently become zero.`,
+      path,
+    );
+  }
+  return requireSeamNumber(leg, 'value', `${path}.value`);
+}
+
+/**
+ * Resolves a declared period-end date, failing closed on any undeclared period.
+ *
+ * P10.2 requires that discount exponents derive from declared dates and forbids
+ * an implicit stand-in for a declared valuation period. A synthesized
+ * `${year}-12-31` fallback would let an undeclared period silently acquire a
+ * plausible date, so an undeclared period is an error, not a default.
+ *
+ * @param {string} period Period key (e.g. `FY2030`).
+ * @returns {string} Declared ISO `YYYY-MM-DD` period-end date.
+ * @throws {EngineError} `undeclared_period` when the period has no declared date.
+ */
+function requirePeriodEndDate(period) {
+  const declared = PERIOD_END_DATES[period];
+  if (typeof declared !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(declared)) {
+    throw new EngineError(
+      'undeclared_period',
+      `Period "${period}" has no declared period-end date in PERIOD_END_DATES. Discount exponents must derive from declared dates; a synthesized date is not permitted.`,
+      period,
+    );
+  }
+  return declared;
+}
+
+/**
  * Resolves the EIG-B share roll-forward schedule for the per-share division.
  *
  * A caller-supplied schedule (`dcfInput.shares`) is used verbatim after shape
@@ -169,7 +306,7 @@ function normalizeHorizon(requestedHorizon) {
  * @returns {object} Frozen SharesSchedule.
  * @throws {EngineError} On malformed schedule or unbuildable roll (fail-closed).
  */
-function resolveSharesSchedule(dcfInput, assumptions, threeStatement) {
+function resolveSharesSchedule(dcfInput, assumptions, threeStatement, periods, options) {
   const hasInput = dcfInput && typeof dcfInput === 'object';
   const supplied = hasInput ? dcfInput.shares : null;
   if (supplied && typeof supplied === 'object') {
@@ -180,13 +317,45 @@ function resolveSharesSchedule(dcfInput, assumptions, threeStatement) {
         'shares',
       );
     }
+    if (Array.isArray(supplied.periods) && Array.isArray(periods)) {
+      if (
+        supplied.periods.length !== periods.length ||
+        supplied.periods.some((p, idx) => p !== periods[idx])
+      ) {
+        throw new EngineError(
+          'mismatched_share_periods',
+          `Supplied share schedule periods [${supplied.periods.join(', ')}] must match DCF periods [${periods.join(', ')}] exactly.`,
+          'shares',
+        );
+      }
+    }
+    if (
+      supplied.terminalPeriod &&
+      Array.isArray(periods) &&
+      periods.length > 0 &&
+      supplied.terminalPeriod !== periods[periods.length - 1]
+    ) {
+      throw new EngineError(
+        'mismatched_share_periods',
+        `Supplied share schedule terminal period "${supplied.terminalPeriod}" must match DCF terminal period "${periods[periods.length - 1]}" exactly.`,
+        'shares',
+      );
+    }
     return supplied;
   }
   let corpus = null;
   if (hasInput && typeof dcfInput.corpus !== 'undefined') {
     corpus = dcfInput.corpus;
   }
-  return projectShares(assumptions, threeStatement, corpus);
+  // P10.5: issuance rolls from the point-in-time fully diluted schedule, never
+  // the Q2 weighted-average count. The perpetual post-terminal rate and the
+  // cost of equity are passed so the terminal policy is explicit and the
+  // positivity rules are enforced rather than assumed.
+  return projectShares(assumptions, threeStatement, corpus, {
+    fullyDilutedSchedule: fullyDilutedSchedule(),
+    dilutionRatePerpetual: options && options.dilutionRatePerpetual,
+    costOfEquity: options && options.costOfEquity,
+  });
 }
 
 /**
@@ -198,7 +367,7 @@ function resolveSharesSchedule(dcfInput, assumptions, threeStatement) {
  * @returns {object} Frozen DcfResult
  * @throws {EngineError} On missing inputs, non-finite values, or WACC <= g
  */
-export function valuate(threeStatement, wacc, dcfInput) {
+export function valuate(threeStatement, wacc, dcfInput, options = {}) {
   // ── Input assertions ───────────────────────────────────────────────────
   if (!threeStatement || typeof threeStatement !== 'object') {
     throw new EngineError(
@@ -241,7 +410,20 @@ export function valuate(threeStatement, wacc, dcfInput) {
     );
   }
 
-  const horizon = normalizeHorizon(dcfInput.horizon);
+  // ── Forecast periods ───────────────────────────────────────────────────
+  const availablePeriods =
+    threeStatement.periods ||
+    (threeStatement.cashFlow && threeStatement.cashFlow.periods) ||
+    (threeStatement.cashFlow && typeof threeStatement.cashFlow.byPeriod === 'object'
+      ? Object.keys(threeStatement.cashFlow.byPeriod)
+      : []);
+
+  const defaultHorizon =
+    availablePeriods && availablePeriods.length >= FORECAST_HORIZON_MIN
+      ? Math.min(availablePeriods.length, FORECAST_HORIZON_MAX)
+      : FORECAST_HORIZON_DEFAULT;
+
+  const horizon = normalizeHorizon(dcfInput.horizon, defaultHorizon);
   const waccRate = resolveWaccRate(wacc);
 
   // ── Drivers ────────────────────────────────────────────────────────────
@@ -271,12 +453,6 @@ export function valuate(threeStatement, wacc, dcfInput) {
     );
   }
 
-  // ── Forecast periods ───────────────────────────────────────────────────
-  const availablePeriods =
-    threeStatement.periods ||
-    threeStatement.cashFlow.periods ||
-    Object.keys(threeStatement.cashFlow.byPeriod || {});
-
   if (!availablePeriods || availablePeriods.length < horizon) {
     throw new EngineError(
       'invalid_horizon',
@@ -287,7 +463,19 @@ export function valuate(threeStatement, wacc, dcfInput) {
 
   const periods = availablePeriods.slice(0, horizon);
 
-  // ── 1. Explicit-period PV schedules (FCFF headline & FCFE floor) ───────
+  if (
+    dcfInput.terminalYear !== undefined &&
+    dcfInput.terminalYear !== null &&
+    dcfInput.terminalYear !== periods[periods.length - 1]
+  ) {
+    throw new EngineError(
+      'mismatched_terminal_year',
+      `Gordon terminal value terminal year mismatch: expected "${periods[periods.length - 1]}", received "${dcfInput.terminalYear}".`,
+      'terminalYear',
+    );
+  }
+
+// == 1. Explicit-period PV schedules (FCFF headline & FCFE diagnostic) ===
   const fcffSchedule = [];
   const fcfeSchedule = [];
   let pvExplicitFcff = 0;
@@ -316,6 +504,29 @@ export function valuate(threeStatement, wacc, dcfInput) {
       );
     }
 
+
+    // P10.5: the after-tax interest leg is computed for every period, not only
+    // where FCFF must be derived from FCFE, so the contract identity
+    //   FCFE - FCFF = after-tax interest income
+    // is auditable against the statement-supplied FCFF as well.
+    // Fail-closed, not defaulted: a missing interest leg must be a typed error
+    // rather than a silent zero, because a silent zero makes the FCFE/FCFF
+    // identity appear to hold when in fact the leg was never computed.
+    const interestIncomeRow =
+      threeStatement.incomeStatement?.byPeriod?.[period]?.interest_income;
+    if (
+      !interestIncomeRow ||
+      typeof interestIncomeRow !== 'object' ||
+      typeof interestIncomeRow.value !== 'number' ||
+      !Number.isFinite(interestIncomeRow.value)
+    ) {
+      throw new EngineError(
+        'missing_interest_income',
+        `Interest income is missing or non-finite for period "${period}"; the FCFE/FCFF identity cannot be computed from an absent leg.`,
+        period,
+      );
+    }
+    const afterTaxInterest = interestIncomeRow.value * (1 - effTaxRate);
     const fcffLine = cfPeriod?.fcff;
     let fcffVal =
       fcffLine && typeof fcffLine === 'object' && typeof fcffLine.value === 'number'
@@ -327,7 +538,6 @@ export function valuate(threeStatement, wacc, dcfInput) {
     if (fcffVal === null) {
       const interestVal =
         threeStatement.incomeStatement?.byPeriod?.[period]?.interest_income?.value ?? 0;
-      const afterTaxInterest = interestVal * (1 - effTaxRate);
       fcffVal = fcfeVal - afterTaxInterest;
     }
 
@@ -368,6 +578,12 @@ export function valuate(threeStatement, wacc, dcfInput) {
         period,
         t,
         fcf: fcfeVal,
+        // P10.5: the contract identity, recorded per period so the residual can
+        // be audited to zero rather than inferred: FCFE - FCFF = after-tax
+        // interest income. Storing it is what lets the test read the engine
+        // rather than recompute the identity from its own inputs.
+        fcfeLessFcff: afterTaxInterest,
+        afterTaxInterestIncome: afterTaxInterest,
         fcfe: fcfeVal,
         discountFactor,
         presentValue: presentValueFcfe,
@@ -380,7 +596,7 @@ export function valuate(threeStatement, wacc, dcfInput) {
   // forecast growth rate; the Gordon perpetuity must capitalise the
   // steady-state equivalent instead. NWC reads come from the working-capital
   // schedule (raw schedule lines); a first-period terminal anchors on the
-  // cited BOP balance. The same normalisation applies to the FCFE floor and
+  // cited BOP balance. The same normalisation applies to the FCFE diagnostic and
   // the legacy path, which share the terminal-year cash flow.
   const terminalPeriodKey = periods[periods.length - 1];
   const wcSupporting =
@@ -586,7 +802,13 @@ export function valuate(threeStatement, wacc, dcfInput) {
   // BOP driver alone. Fail-closed: no static-share fallback path exists.
   // Resolved late (after all input/guard validation) so legacy fail-closed
   // error precedence is preserved.
-  const sharesSchedule = resolveSharesSchedule(dcfInput, assumptions, threeStatement);
+const sharesSchedule = resolveSharesSchedule(
+    dcfInput,
+    assumptions,
+    threeStatement,
+    periods,
+    options,
+  );
   const sharesOutstanding = sharesSchedule.sharesDcf;
 
   if (!Number.isFinite(sharesOutstanding) || sharesOutstanding <= 0) {
@@ -602,7 +824,7 @@ export function valuate(threeStatement, wacc, dcfInput) {
   const equityValueFcff = evFcff + netCashToday;
   const perShareFcff = (equityValueFcff * moneyScale) / sharesOutstanding;
 
-  // FCFE Floor (no cash add)
+  // FCFE diagnostic (no cash add)
   const evFcfe = pvExplicitFcfe + pvTerminalFcfe;
   const equityValueFcfe = evFcfe;
   const perShareFcfe = (equityValueFcfe * moneyScale) / sharesOutstanding;
@@ -654,9 +876,23 @@ export function valuate(threeStatement, wacc, dcfInput) {
     fcfeTerminalNormalised: fcfeTNormalised,
   });
 
+  const explicitSlice = fcffSchedule.slice(0, Math.min(periods.length, 5));
+  const fadeSlice = periods.length > 5 ? fcffSchedule.slice(5, periods.length) : [];
+
+  const pvExplicitStage = explicitSlice.reduce((sum, item) => sum + item.presentValue, 0);
+  const pvFadeStage = fadeSlice.reduce((sum, item) => sum + item.presentValue, 0);
+
+  const pvByStage = Object.freeze({
+    explicit: pvExplicitStage,
+    fade: pvFadeStage,
+    terminal: pvTerminalFcff,
+  });
+
   const fcffBlock = Object.freeze({
     schedule: Object.freeze(fcffSchedule),
     pvExplicit: pvExplicitFcff,
+    pvByStage,
+    terminalYear: terminalPeriodKey,
     terminalNormalization,
     terminalValue: terminalValueFcff,
     pvTerminal: pvTerminalFcff,
@@ -767,33 +1003,234 @@ export function valuate(threeStatement, wacc, dcfInput) {
     }),
   ]);
 
+  // ── Dated Valuation Seam Schedule (P10.2) ─────────────────────────────
+  const isDatedMode = dcfInput?.datedSeam === true || dcfInput?.mode === 'dated_seam';
+  const datedSchedule = [];
+  let pvExplicitDated = 0;
+  const seamPeriodKey = periods[0];
+  const seamPeriods = threeStatement.datedSeam;
+  if (!seamPeriods || typeof seamPeriods !== 'object') {
+    throw new EngineError(
+      'missing_seam_partition',
+      'ThreeStatementOutput.datedSeam is required to build the dated valuation seam.',
+      'threeStatement.datedSeam',
+    );
+  }
+  const cfSeamYear = threeStatement.cashFlow?.byPeriod?.[seamPeriodKey];
+
+  // Fail-closed reads: a missing declared partition is an error, never a
+  // derived stand-in (P10.2 "No engine-critical missing row may silently
+  // become zero" / "No implicit stand-in for a declared valuation period").
+  const fcff2026PostVal = requireSeamPartitionValue(
+    cfSeamYear,
+    'fcff',
+    'postValuation',
+    `${seamPeriodKey}.fcff.h2.postValuation`,
+  );
+  const fcff2026H1Actual = requireSeamPartitionValue(cfSeamYear, 'fcff', 'h1', `${seamPeriodKey}.fcff.h1`);
+  const fcff2026PreValuation = requireSeamPartitionValue(
+    cfSeamYear,
+    'fcff',
+    'preValuation',
+    `${seamPeriodKey}.fcff.h2.preValuation`,
+  );
+  const fcff2026FullYear = requireSeamPartitionValue(cfSeamYear, 'fcff', 'fullYear', `${seamPeriodKey}.fcff`);
+
+  for (let i = 0; i < periods.length; i += 1) {
+    const period = periods[i];
+    const periodEndDate = requirePeriodEndDate(period);
+    const discountExponent = calculateDiscountExponent(EFFECTIVE_VALUATION_DATE, periodEndDate);
+    const dfDated = 1 / Math.pow(1 + waccRate, discountExponent);
+    const undiscountedFcf = i === 0 ? fcff2026PostVal : fcffSchedule[i].fcf;
+    const pvDated = undiscountedFcf * dfDated;
+    pvExplicitDated += pvDated;
+
+    datedSchedule.push(Object.freeze({
+      period,
+      t: discountExponent,
+      periodEndDate,
+      discountExponent,
+      discountFactor: dfDated,
+      undiscountedFcf,
+      fcf: undiscountedFcf,
+      fcff: undiscountedFcf,
+      presentValue: pvDated,
+      isStub: i === 0,
+      stubDays: i === 0 ? seamPeriods.postValuationDays : null,
+      stubFraction: i === 0 ? POST_VALUATION_STUB_FRACTION : null,
+    }));
+  }
+
+  const finalDatedItem = datedSchedule[datedSchedule.length - 1];
+  const dfDated_T = finalDatedItem.discountFactor;
+  const pvTerminalDated = terminalValueFcff * dfDated_T;
+  const evDated = pvExplicitDated + pvTerminalDated;
+
+  const explicitDatedSlice = datedSchedule.slice(0, Math.min(periods.length, 5));
+  const fadeDatedSlice = periods.length > 5 ? datedSchedule.slice(5, periods.length) : [];
+  const pvExplicitStageDated = explicitDatedSlice.reduce((sum, item) => sum + item.presentValue, 0);
+  const pvFadeStageDated = fadeDatedSlice.reduce((sum, item) => sum + item.presentValue, 0);
+
+  const pvByStageDated = Object.freeze({
+    explicit: pvExplicitStageDated,
+    fade: pvFadeStageDated,
+    terminal: pvTerminalDated,
+  });
+
+  const bopCash = (bop && typeof bop.cash_and_cash_equivalents === 'number')
+    ? bop.cash_and_cash_equivalents
+    : cashToday;
+  // The pre-valuation roll-forward and the rolled cash balance are resolved by
+  // the three-statement seam, which fails closed when the declared partition is
+  // absent. The DCF never re-derives them from a defaulted zero.
+  const preValuationCashRoll = requireSeamNumber(
+    seamPeriods,
+    'preValuationCashChange',
+    'threeStatement.datedSeam.preValuationCashChange',
+  );
+  const rolledCashAtValuationDate = requireSeamNumber(
+    seamPeriods,
+    'rolledCashAtValuationDate',
+    'threeStatement.datedSeam.rolledCashAtValuationDate',
+  );
+  const netCashDated = rolledCashAtValuationDate + stiToday + ltiToday - debtToday;
+
+  const equityValueDated = evDated + netCashDated;
+  const perShareDated = (equityValueDated * moneyScale) / sharesOutstanding;
+
+  // Gates are COMPUTED from resolved seam legs and declared windows, never
+  // asserted as literal zeros. `threeStatement.datedSeam` owns the statement
+  // and day-count gaps (it fails closed on a missing row); the DCF adds the
+  // cash-flow-interval checks it alone can see.
+  const seamGateValue = (key) => requireSeamNumber(seamPeriods, key, `threeStatement.datedSeam.${key}`);
+  const datedStubStart = requireSeamString(
+    seamPeriods,
+    'effectiveValuationDate',
+    'threeStatement.datedSeam.effectiveValuationDate',
+  );
+  const datedStubEnd = requirePeriodEndDate(seamPeriodKey);
+  const bridgedStart = requireSeamString(
+    seamPeriods,
+    'reportingCutoff',
+    'threeStatement.datedSeam.reportingCutoff',
+  );
+  const h1Start = requireSeamString(seamPeriods, 'fy2026StartDate', 'threeStatement.datedSeam.fy2026StartDate');
+  const h1End = bridgedStart;
+  // Dollars of FY2026 FCFF represented in BOTH the rolled-forward bridge and
+  // the discounted schedule. Genuinely computed: a double-counted stub, an
+  // H1 amount left inside the discounted leg, or a wrong day fraction all
+  // drive this above zero.
+  const bridgedWindowFcff = fcff2026H1Actual + fcff2026PreValuation;
+  const discountedWindowFcff = fcff2026PostVal;
+  const h1FcffOverlapDollars = Math.max(
+    0,
+    bridgedWindowFcff + discountedWindowFcff - fcff2026FullYear,
+  );
+  const h1FcffOverlapDays = intervalOverlapDays(h1Start, h1End, datedStubStart, datedStubEnd);
+  const partitionIntersectionDays = intervalOverlapDays(
+    bridgedStart,
+    datedStubStart,
+    datedStubStart,
+    seamPeriods.fy2026EndDate,
+  );
+
+  const datedSeamBlock = Object.freeze({
+    effectiveValuationDate: EFFECTIVE_VALUATION_DATE,
+    reportingCutoff: REPORTING_CUTOFF_DATE,
+    terminalDate: requirePeriodEndDate(terminalPeriodKey),
+    preValuationDays: PRE_VALUATION_STUB_DAYS,
+    postValuationDays: POST_VALUATION_STUB_DAYS,
+    h2DaysTotal: H2_DAYS_TOTAL,
+    preValuationFraction: PRE_VALUATION_STUB_FRACTION,
+    postValuationFraction: POST_VALUATION_STUB_FRACTION,
+    schedule: Object.freeze(datedSchedule),
+    pvExplicit: pvExplicitDated,
+    pvByStage: pvByStageDated,
+    terminalValue: terminalValueFcff,
+    pvTerminal: pvTerminalDated,
+    enterpriseValue: evDated,
+    netCash: netCashDated,
+    rolledCashAtValuationDate,
+    bopCash,
+    preValuationCashRoll,
+    equityValue: equityValueDated,
+    perShare: perShareDated,
+    sharesOutstanding,
+    terminalYear: terminalPeriodKey,
+    seamPeriod: seamPeriodKey,
+    windows: Object.freeze({
+      h1Actual: Object.freeze({ start: h1Start, end: h1End, role: 'bop_reported' }),
+      preValuation: Object.freeze({ start: bridgedStart, end: datedStubStart, role: 'bop_roll_forward' }),
+      postValuation: Object.freeze({ start: datedStubStart, end: datedStubEnd, role: 'discounted' }),
+    }),
+    cashFlowWindows: Object.freeze({
+      bridgedWindowFcff,
+      discountedWindowFcff,
+      fullYearFcff: fcff2026FullYear,
+      h1ActualFcff: fcff2026H1Actual,
+      preValuationFcff: fcff2026PreValuation,
+    }),
+    gates: Object.freeze({
+      h1FcffOverlap: h1FcffOverlapDollars,
+      h1FcffOverlapDays,
+      ocfGap: seamGateValue('ocfGap'),
+      icfGap: seamGateValue('icfGap'),
+      cffGap: seamGateValue('cffGap'),
+      cashRollGap: seamGateValue('cashRollGap'),
+      partitionGap: seamGateValue('partitionGap'),
+      partitionIntersection: partitionIntersectionDays,
+      allOutputFinite: Number.isFinite(perShareDated) && Number.isFinite(evDated) && Number.isFinite(equityValueDated),
+    }),
+  });
+
   const result = {
     // ── Contract outputs (spec §3.2 & Task P4.2 B & Task P6R2.4 B.2) ─────
     wacc: waccRate,
     terminalGrowthRate,
     horizon,
     periods: Object.freeze(periods.slice()),
-    schedule: Object.freeze(fcffSchedule),
-    pvExplicit: pvExplicitFcff,
+    schedule: Object.freeze(isDatedMode ? datedSchedule : fcffSchedule),
+    pvExplicit: isDatedMode ? pvExplicitDated : pvExplicitFcff,
     terminalValue: terminalValueFcff,
-    pvTerminal: pvTerminalFcff,
-    enterpriseValue: evFcff,
+    pvTerminal: isDatedMode ? pvTerminalDated : pvTerminalFcff,
+    enterpriseValue: isDatedMode ? evDated : evFcff,
     /** Alias of `enterpriseValue` for convenience. */
-    ev: evFcff,
-    netCash: netCashToday,
-    equityValue: equityValueFcff,
-    perShare: perShareFcff,
+    ev: isDatedMode ? evDated : evFcff,
+    netCash: isDatedMode ? netCashDated : netCashToday,
+    equityValue: isDatedMode ? equityValueDated : equityValueFcff,
+    perShare: isDatedMode ? perShareDated : perShareFcff,
     sharesOutstanding,
     bopSharesOutstanding,
     shares: sharesSchedule,
-    bridge: bridgeToday,
+    bridge: isDatedMode
+      ? Object.freeze({
+          cash: rolledCashAtValuationDate,
+          shortTermInvestments: stiToday,
+          longTermInvestments: ltiToday,
+          netCash: netCashDated,
+          debt: debtToday,
+        })
+      : bridgeToday,
+    pvByStage: isDatedMode ? pvByStageDated : pvByStage,
+    terminalYear: terminalPeriodKey,
 
     // ── Dual-Path & Finding F Blocks ─────────────────────────────────────
     fcff: fcffBlock,
     fcfe: fcfeBlock,
     equivalence: equivalenceBlock,
     legacy: legacyBlock,
+    legacyFiveYear: legacyBlock,
+    datedSeam: datedSeamBlock,
     basis: 'fcff',
+    /**
+     * Which basis produced the top-level figures above. `dated_seam` means
+     * date-derived fractional exponents, the post-valuation stub, and the
+     * rolled cash bridge. `integer_period_index` is the legacy comparison
+     * lane. Declared explicitly so a consumer can never infer the basis from
+     * a label or guess it from a value.
+     */
+    valuationBasis: isDatedMode ? 'dated_seam' : 'integer_period_index',
+    datedSeamMode: isDatedMode,
 
     // ── Valuation metadata ───────────────────────────────────────────────
     isComputed: true,
@@ -805,6 +1242,22 @@ export function valuate(threeStatement, wacc, dcfInput) {
   return deepFreeze(result);
 }
 
+export { calculateDiscountExponent };
+
+/**
+ * Valuates DCF under the Phase 10 dated valuation seam framework.
+ *
+ * @param {object} threeStatement
+ * @param {object|number} wacc
+ * @param {object} [dcfInput]
+ * @returns {object}
+ */
+export function valuateDatedSeam(threeStatement, wacc, dcfInput = {}) {
+  return valuate(threeStatement, wacc, { ...dcfInput, datedSeam: true });
+}
+
 export default Object.freeze({
   valuate,
+  valuateDatedSeam,
+  calculateDiscountExponent,
 });

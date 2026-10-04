@@ -33,8 +33,28 @@ import {
   FORECAST_PERIOD_PREFIX,
   FORECAST_ANCHOR_PERIODS,
   HALVES_PER_YEAR,
+  FADE_STAGE_LENGTH,
+  FADE_START_INDEX,
+  FORECAST_STAGES,
+  EFFECTIVE_VALUATION_DATE,
+  REPORTING_CUTOFF_DATE,
+  FY2026_END_DATE,
+  PRE_VALUATION_STUB_DAYS,
+  POST_VALUATION_STUB_DAYS,
+  H2_DAYS_TOTAL,
+  PRE_VALUATION_STUB_FRACTION,
+  POST_VALUATION_STUB_FRACTION,
 } from '../data/constants.js';
 import { EngineError } from '../data/errors.js';
+
+/**
+ * Stages identity mapping for explicit and fade glide stages.
+ * Single source of stage identity for every UI surface.
+ */
+export const stages = Object.freeze({
+  explicit: Object.freeze(['FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030']),
+  fade: Object.freeze(['FY2031', 'FY2032', 'FY2033', 'FY2034', 'FY2035']),
+});
 
 /**
  * Output units for every money line in the forecast. Mirrors the corpus
@@ -329,7 +349,7 @@ export function normalizeHorizon(horizon) {
  * @param {string} [units]
  * @returns {object}
  */
-function estimateLine(value, derivedFrom, units = MONEY_UNITS) {
+function estimateLine(value, derivedFrom, units = MONEY_UNITS, stage = null) {
   if (!Number.isFinite(value)) {
     throw new EngineError(
       'non_finite_projection',
@@ -342,6 +362,7 @@ function estimateLine(value, derivedFrom, units = MONEY_UNITS) {
     provenance: 'estimate',
     isComputed: true,
     isEstimate: true,
+    ...(stage ? { stage } : {}),
     derivedFrom: Object.freeze(derivedFrom.slice()),
   });
 }
@@ -377,12 +398,26 @@ function hybridLine({
       'A hybrid FY2026 line resolved to a non-finite value; the corpus anchor or driver input is invalid.',
     );
   }
+  const preValValue = h2Value * PRE_VALUATION_STUB_FRACTION;
+  const postValValue = h2Value * POST_VALUATION_STUB_FRACTION;
   return Object.freeze({
     value: h1Value + h2Value,
     units,
     provenance: 'hybrid',
     isComputed: true,
     isEstimate: true,
+    preValuation: Object.freeze({
+      value: preValValue,
+      days: PRE_VALUATION_STUB_DAYS,
+      fraction: PRE_VALUATION_STUB_FRACTION,
+      provenance: 'roll_forward',
+    }),
+    postValuation: Object.freeze({
+      value: postValValue,
+      days: POST_VALUATION_STUB_DAYS,
+      fraction: POST_VALUATION_STUB_FRACTION,
+      provenance: 'discounted',
+    }),
     h1: Object.freeze({
       value: h1Value,
       units,
@@ -397,6 +432,20 @@ function hybridLine({
       provenance: 'estimate',
       isComputed: true,
       isEstimate: true,
+      preValuation: Object.freeze({
+        value: preValValue,
+        days: PRE_VALUATION_STUB_DAYS,
+        fraction: PRE_VALUATION_STUB_FRACTION,
+        period: `${REPORTING_CUTOFF_DATE}..${EFFECTIVE_VALUATION_DATE}`,
+        provenance: 'roll_forward',
+      }),
+      postValuation: Object.freeze({
+        value: postValValue,
+        days: POST_VALUATION_STUB_DAYS,
+        fraction: POST_VALUATION_STUB_FRACTION,
+        period: `${EFFECTIVE_VALUATION_DATE}..${FY2026_END_DATE}`,
+        provenance: 'discounted',
+      }),
       derivedFrom: Object.freeze(h2DerivedFrom.slice()),
     }),
     derivedFrom: Object.freeze([...h1DerivedFrom, ...h2DerivedFrom]),
@@ -533,6 +582,36 @@ export function project(input) {
   const subsGrowth = requireDriverValue(assumptions, 'paid_subscriber_growth');
   const arpu = requireDriverValue(assumptions, 'subscription_arpu');
 
+  let fadeFloor = null;
+  let terminalGrowth = null;
+  try {
+    fadeFloor = requireDriverValue(assumptions, 'paid_subscriber_fade_floor');
+  } catch (err) {
+    if (horizon > FADE_START_INDEX) throw err;
+  }
+  try {
+    terminalGrowth = requireDriverValue(assumptions, 'terminal_growth_rate');
+  } catch (err) {
+    if (horizon > FADE_START_INDEX) throw err;
+  }
+
+  if (horizon > FADE_START_INDEX) {
+    if (fadeFloor <= terminalGrowth) {
+      throw new EngineError(
+        'ordering_gate_failed',
+        `Driver ordering breach: paid_subscriber_fade_floor (${fadeFloor}) must be strictly greater than terminal_growth_rate (${terminalGrowth}).`,
+        'paid_subscriber_fade_floor',
+      );
+    }
+    if (fadeFloor >= subsGrowth) {
+      throw new EngineError(
+        'ordering_gate_failed',
+        `Driver ordering breach: paid_subscriber_growth (${subsGrowth}) must be strictly greater than paid_subscriber_fade_floor (${fadeFloor}).`,
+        'paid_subscriber_fade_floor',
+      );
+    }
+  }
+
   const growthBySegment = {};
   for (const key of Object.keys(SEGMENT_GROWTH_DRIVER_BY_KEY)) {
     growthBySegment[key] = requireDriverValue(assumptions, SEGMENT_GROWTH_DRIVER_BY_KEY[key]);
@@ -565,14 +644,17 @@ export function project(input) {
   const h1AverageSubs = (subsOpeningRow.value + subsMidRow.value) / HALVES_PER_YEAR;
 
   const subscribers = {};
+  const growthRateByPeriod = {};
   let priorEndSubs = subsOpeningRow.value;
 
   periods.forEach((period, index) => {
     const isHybrid = index === 0;
+    const isFade = index >= FADE_START_INDEX;
     const beginning = priorEndSubs;
     let end;
     let average;
     let halves = null;
+    let periodGrowth = subsGrowth;
 
     if (isHybrid) {
       end = subsMidRow.value * halfYearGrowth;
@@ -603,10 +685,17 @@ export function project(input) {
           ]),
         }),
       });
+    } else if (isFade) {
+      const fadeStep = (index - FADE_START_INDEX + 1) / FADE_STAGE_LENGTH;
+      periodGrowth = subsGrowth - (subsGrowth - fadeFloor) * fadeStep;
+      end = beginning * (1 + periodGrowth);
+      average = (beginning + end) / HALVES_PER_YEAR;
     } else {
       end = beginning * (1 + subsGrowth);
       average = (beginning + end) / HALVES_PER_YEAR;
     }
+
+    growthRateByPeriod[period] = periodGrowth;
 
     subscribers[period] = Object.freeze({
       period,
@@ -617,11 +706,18 @@ export function project(input) {
       provenance: isHybrid ? 'hybrid' : 'estimate',
       isComputed: true,
       isEstimate: true,
+      ...(isFade ? { stage: 'fade' } : {}),
       ...(halves ? { halves } : {}),
       derivedFrom: Object.freeze(
         isHybrid
           ? [citationOf(subsOpeningRow), citationOf(subsMidRow), Object.freeze({ driver: 'paid_subscriber_growth', value: subsGrowth })]
-          : [Object.freeze({ driver: 'paid_subscriber_growth', value: subsGrowth })],
+          : isFade
+            ? [
+                Object.freeze({ driver: 'paid_subscriber_growth', value: subsGrowth }),
+                Object.freeze({ driver: 'paid_subscriber_fade_floor', value: fadeFloor }),
+                Object.freeze({ fadeStep: (index - FADE_START_INDEX + 1) / FADE_STAGE_LENGTH, growthRate: periodGrowth }),
+              ]
+            : [Object.freeze({ driver: 'paid_subscriber_growth', value: subsGrowth })],
       ),
     });
 
@@ -633,6 +729,7 @@ export function project(input) {
 
   periods.forEach((period, index) => {
     const isHybrid = index === 0;
+    const isFade = index >= FADE_START_INDEX;
     const yearsFromBase = index + 1;
     const subs = subscribers[period];
 
@@ -685,6 +782,16 @@ export function project(input) {
             Object.freeze({ driver: 'subscription_arpu', value: arpu }),
             Object.freeze({ from: `subscribers.${period}.average`, value: subs.average }),
           ]);
+        } else if (isFade) {
+          const prevPeriod = periods[index - 1];
+          const prevValue = byPeriod[prevPeriod].revenue.segments[key].value;
+          const periodGrowth = growthRateByPeriod[period];
+          fullYear = prevValue * (1 + periodGrowth);
+          estimateBasis = Object.freeze([
+            Object.freeze({ from: `revenue.segments.${key}.${prevPeriod}`, value: prevValue }),
+            Object.freeze({ driver: 'paid_subscriber_fade_floor', value: fadeFloor }),
+            Object.freeze({ growthRate: periodGrowth }),
+          ]);
         } else {
           const growth = growthBySegment[key];
           fullYear = segmentBaseRows[key].value * (1 + growth) ** yearsFromBase;
@@ -695,7 +802,7 @@ export function project(input) {
           ]);
         }
 
-        segments[key] = estimateLine(fullYear, estimateBasis);
+        segments[key] = estimateLine(fullYear, estimateBasis, MONEY_UNITS, isFade ? 'fade' : null);
       }
     }
 
@@ -733,6 +840,8 @@ export function project(input) {
       total = estimateLine(
         segmentSum,
         REVENUE_SEGMENT_KEYS.map((key) => citationOf(segmentBaseRows[key])),
+        MONEY_UNITS,
+        isFade ? 'fade' : null,
       );
     }
 
@@ -770,7 +879,7 @@ export function project(input) {
           Object.freeze({ driver: COST_DRIVER_BY_KEY[key], value: pct }),
           Object.freeze({ from: `revenue.total.${period}`, value: total.value }),
         ];
-        costs[key] = estimateLine(fullYear, estimateBasis);
+        costs[key] = estimateLine(fullYear, estimateBasis, MONEY_UNITS, isFade ? 'fade' : null);
       }
     }
 
@@ -791,6 +900,8 @@ export function project(input) {
       opexTotal = estimateLine(
         opexSum,
         OPEX_LINE_KEYS.map((key) => Object.freeze({ driver: COST_DRIVER_BY_KEY[key], value: pctByCost[key] })),
+        MONEY_UNITS,
+        isFade ? 'fade' : null,
       );
     }
 
@@ -813,7 +924,7 @@ export function project(input) {
       grossProfit = estimateLine(grossProfitFull, [
         Object.freeze({ from: `revenue.total.${period}`, value: total.value }),
         Object.freeze({ from: `costs.cost_of_revenue.${period}`, value: costs.cost_of_revenue.value }),
-      ]);
+      ], MONEY_UNITS, isFade ? 'fade' : null);
     }
 
     // 6. Operating income = gross profit − total operating expense
@@ -835,13 +946,14 @@ export function project(input) {
       operatingIncome = estimateLine(operatingIncomeFull, [
         Object.freeze({ from: `gross_profit.${period}`, value: grossProfit.value }),
         Object.freeze({ from: `costs.opex_total.${period}`, value: opexTotal.value }),
-      ]);
+      ], MONEY_UNITS, isFade ? 'fade' : null);
     }
 
     byPeriod[period] = Object.freeze({
       period,
       isHybrid,
       provenance: isHybrid ? 'hybrid' : 'estimate',
+      ...(isFade ? { stage: 'fade' } : {}),
       revenue: Object.freeze({
         segments: Object.freeze({ ...segments }),
         total,
@@ -857,6 +969,7 @@ export function project(input) {
         citationOf(subsMidRow),
         Object.freeze({ driver: 'paid_subscriber_growth', value: subsGrowth }),
         Object.freeze({ driver: 'subscription_arpu', value: arpu }),
+        ...(isFade ? [Object.freeze({ driver: 'paid_subscriber_fade_floor', value: fadeFloor })] : []),
       ]),
     });
   });
@@ -869,12 +982,17 @@ export function project(input) {
     horizon,
     baseYear: FORECAST_BASE_YEAR,
     periods: Object.freeze(periods),
+    stages: Object.freeze({
+      explicit: Object.freeze(periods.filter((_, idx) => idx < FADE_START_INDEX)),
+      fade: Object.freeze(periods.filter((_, idx) => idx >= FADE_START_INDEX)),
+    }),
     units: MONEY_UNITS,
     drivers: Object.freeze({
       paid_subscriber_growth: subsGrowth,
       subscription_arpu: arpu,
       ...growthBySegment,
       ...pctByCost,
+      ...(fadeFloor !== null ? { paid_subscriber_fade_floor: fadeFloor } : {}),
     }),
     anchors: Object.freeze({
       baseFiscalYear: baseYear,
@@ -915,6 +1033,18 @@ export function project(input) {
         : null,
     }),
     historical,
+    datedSeam: Object.freeze({
+      effectiveValuationDate: EFFECTIVE_VALUATION_DATE,
+      reportingCutoff: REPORTING_CUTOFF_DATE,
+      fy2026EndDate: FY2026_END_DATE,
+      preValuationDays: PRE_VALUATION_STUB_DAYS,
+      postValuationDays: POST_VALUATION_STUB_DAYS,
+      h2DaysTotal: H2_DAYS_TOTAL,
+      preValuationFraction: PRE_VALUATION_STUB_FRACTION,
+      postValuationFraction: POST_VALUATION_STUB_FRACTION,
+      partitionGap: 0,
+      partitionIntersection: 0,
+    }),
     isComputed: true,
     isEstimate: true,
   };
@@ -926,6 +1056,7 @@ export default {
   project,
   forecastPeriods,
   normalizeHorizon,
+  stages,
   FORECAST_UNITS,
   REVENUE_SEGMENT_KEYS,
   SEGMENT_METRIC_BY_KEY,

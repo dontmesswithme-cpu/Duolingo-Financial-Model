@@ -24,7 +24,19 @@
  */
 
 import { EngineError } from '../data/errors.js';
-import { HALVES_PER_YEAR } from '../data/constants.js';
+import {
+  HALVES_PER_YEAR,
+  EFFECTIVE_VALUATION_DATE,
+  REPORTING_CUTOFF_DATE,
+  FY2026_START_DATE,
+  FY2026_END_DATE,
+  PRE_VALUATION_STUB_DAYS,
+  POST_VALUATION_STUB_DAYS,
+  H2_DAYS_TOTAL,
+  PRE_VALUATION_STUB_FRACTION,
+  POST_VALUATION_STUB_FRACTION,
+  MILLISECONDS_PER_DAY,
+} from '../data/constants.js';
 import { extractRows } from '../data/schema.js';
 
 const MONEY_UNITS = 'thousands_usd';
@@ -238,12 +250,26 @@ function hybridLine({
       'A hybrid FY2026 line resolved to a non-finite value; corpus anchor or driver input is invalid.',
     );
   }
+  const preValValue = h2Value * PRE_VALUATION_STUB_FRACTION;
+  const postValValue = h2Value * POST_VALUATION_STUB_FRACTION;
   return Object.freeze({
     value: h1Value + h2Value,
     units,
     provenance: 'hybrid',
     isComputed: true,
     isEstimate: true,
+    preValuation: Object.freeze({
+      value: preValValue,
+      days: PRE_VALUATION_STUB_DAYS,
+      fraction: PRE_VALUATION_STUB_FRACTION,
+      provenance: 'roll_forward',
+    }),
+    postValuation: Object.freeze({
+      value: postValValue,
+      days: POST_VALUATION_STUB_DAYS,
+      fraction: POST_VALUATION_STUB_FRACTION,
+      provenance: 'discounted',
+    }),
     h1: Object.freeze({
       value: h1Value,
       units,
@@ -258,10 +284,142 @@ function hybridLine({
       provenance: 'estimate',
       isComputed: true,
       isEstimate: true,
+      preValuation: Object.freeze({
+        value: preValValue,
+        days: PRE_VALUATION_STUB_DAYS,
+        fraction: PRE_VALUATION_STUB_FRACTION,
+        period: `${REPORTING_CUTOFF_DATE}..${EFFECTIVE_VALUATION_DATE}`,
+        provenance: 'roll_forward',
+      }),
+      postValuation: Object.freeze({
+        value: postValValue,
+        days: POST_VALUATION_STUB_DAYS,
+        fraction: POST_VALUATION_STUB_FRACTION,
+        period: `${EFFECTIVE_VALUATION_DATE}..${FY2026_END_DATE}`,
+        provenance: 'discounted',
+      }),
       derivedFrom: Object.freeze(h2DerivedFrom.slice()),
     }),
     derivedFrom: Object.freeze([...h1DerivedFrom, ...h2DerivedFrom]),
   });
+}
+
+/**
+ * Reads one required cash-flow row for the dated valuation seam, failing closed.
+ *
+ * A missing engine-critical row may NEVER silently become zero (P10.2
+ * "Schedule completeness"). The dated seam is the bridge between the reported
+ * balance sheet and the discounted cash flows, so a defaulted row would certify
+ * a gap metric of zero over data that does not exist.
+ *
+ * @param {object|undefined} container Parent object expected to own the key.
+ * @param {string} key Required key.
+ * @param {string} path Dotted engine path used in the error `field`.
+ * @returns {object} The required row.
+ * @throws {EngineError} `missing_seam_partition` when absent or not an object.
+ */
+function requireSeamRow(container, key, path) {
+  const row = container && typeof container === 'object' ? container[key] : null;
+  if (!row || typeof row !== 'object') {
+    throw new EngineError(
+      'missing_seam_partition',
+      `Required dated-seam row "${path}" is missing from the three-statement output; the valuation seam fails closed rather than defaulting to zero.`,
+      path,
+    );
+  }
+  return row;
+}
+
+/**
+ * Reads one required finite money value from a seam row, failing closed.
+ *
+ * @param {object} row Seam row.
+ * @param {string} key Field name (`value`).
+ * @param {string} path Dotted engine path used in the error `field`.
+ * @returns {number} Finite value.
+ * @throws {EngineError} `missing_seam_partition` when absent or non-finite.
+ */
+function requireSeamValue(row, key, path) {
+  const value = row && typeof row === 'object' ? row[key] : undefined;
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new EngineError(
+      'missing_seam_partition',
+      `Required dated-seam value "${path}" is missing or non-finite; an engine-critical missing row may never silently become zero.`,
+      path,
+    );
+  }
+  return value;
+}
+
+/**
+ * Resolves the pre/post-valuation partition of a hybrid FY2026 line.
+ *
+ * @param {object} line Hybrid line exposing `value`, `h1`, and `h2`.
+ * @param {string} path Dotted engine path prefix.
+ * @returns {{ fullYear: number, h1Actual: number, h2Estimate: number,
+ *             preValuation: number, postValuation: number,
+ *             bridgedWindow: number, discountedWindow: number,
+ *             fullYearGap: number, h2PartitionGap: number, doubleCounted: number }}
+ * @throws {EngineError} `missing_seam_partition` when any leg is absent.
+ */
+function resolveSeamPartition(line, path) {
+  const fullYear = requireSeamValue(line, 'value', `${path}.value`);
+  const h1 = requireSeamRow(line, 'h1', `${path}.h1`);
+  const h2 = requireSeamRow(line, 'h2', `${path}.h2`);
+  const pre = requireSeamRow(h2, 'preValuation', `${path}.h2.preValuation`);
+  const post = requireSeamRow(h2, 'postValuation', `${path}.h2.postValuation`);
+
+  const h1Actual = requireSeamValue(h1, 'value', `${path}.h1.value`);
+  const h2Estimate = requireSeamValue(h2, 'value', `${path}.h2.value`);
+  const preValuation = requireSeamValue(pre, 'value', `${path}.h2.preValuation.value`);
+  const postValuation = requireSeamValue(post, 'value', `${path}.h2.postValuation.value`);
+
+  // Cash dated on or before the effective valuation date (H1 actual + pre-valuation
+  // roll-forward stub) is represented in the BOP bridge; only the post-valuation
+  // stub may be discounted.
+  const bridgedWindow = h1Actual + preValuation;
+  const discountedWindow = postValuation;
+
+  return Object.freeze({
+    fullYear,
+    h1Actual,
+    h2Estimate,
+    preValuation,
+    postValuation,
+    bridgedWindow,
+    discountedWindow,
+    fullYearGap: fullYear - (h1Actual + preValuation + postValuation),
+    h2PartitionGap: h2Estimate - (preValuation + postValuation),
+    doubleCounted: Math.max(0, bridgedWindow + discountedWindow - fullYear),
+  });
+}
+
+/**
+ * Counts whole days between two inclusive ISO calendar dates.
+ *
+ * @param {string} startIso ISO YYYY-MM-DD.
+ * @param {string} endIso ISO YYYY-MM-DD.
+ * @returns {number} Signed day count (end minus start).
+ */
+function daysBetween(startIso, endIso) {
+  const start = new Date(`${startIso}T00:00:00Z`).getTime();
+  const end = new Date(`${endIso}T00:00:00Z`).getTime();
+  return Math.round((end - start) / MILLISECONDS_PER_DAY);
+}
+
+/**
+ * Computes the overlap, in days, between two half-open calendar date ranges.
+ *
+ * @param {string} aStart First interval start.
+ * @param {string} aEnd First interval end.
+ * @param {string} bStart Second interval start.
+ * @param {string} bEnd Second interval end.
+ * @returns {number} Overlapping days (zero when the windows are disjoint).
+ */
+function intervalOverlapDays(aStart, aEnd, bStart, bEnd) {
+  const start = Math.max(new Date(`${aStart}T00:00:00Z`).getTime(), new Date(`${bStart}T00:00:00Z`).getTime());
+  const end = Math.min(new Date(`${aEnd}T00:00:00Z`).getTime(), new Date(`${bEnd}T00:00:00Z`).getTime());
+  return end > start ? Math.round((end - start) / MILLISECONDS_PER_DAY) : 0;
 }
 
 /**
@@ -967,6 +1125,79 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
     };
   }
 
+  // ── Dated valuation seam (P10.2) ──────────────────────────────────────
+  // Every leg below is resolved through the fail-closed seam readers and every
+  // gate is COMPUTED from those resolved values. No gate is a literal zero and
+  // no missing row may default to zero (P10.2 "Schedule completeness").
+  const seamPeriodEntry = periods
+    .map((periodKey) => ({ periodKey, row: cfByPeriod[periodKey] }))
+    .find(({ row }) => row && row.isHybrid === true);
+
+  if (!seamPeriodEntry) {
+    throw new EngineError(
+      'missing_seam_partition',
+      'No hybrid FY2026 cash-flow period is present in the projection; the dated valuation seam requires the H1-actual/H2-estimate year.',
+      'datedSeam',
+    );
+  }
+
+  const seamPeriod = seamPeriodEntry.periodKey;
+  const seamRow = seamPeriodEntry.row;
+  const seamOcf = resolveSeamPartition(
+    requireSeamRow(seamRow.operating_activities, 'total', `${seamPeriod}.operating_activities.total`),
+    `${seamPeriod}.operating_activities.total`,
+  );
+  const seamIcf = resolveSeamPartition(
+    requireSeamRow(seamRow.investing_activities, 'total', `${seamPeriod}.investing_activities.total`),
+    `${seamPeriod}.investing_activities.total`,
+  );
+  const seamCff = resolveSeamPartition(
+    requireSeamRow(seamRow.financing_activities, 'total', `${seamPeriod}.financing_activities.total`),
+    `${seamPeriod}.financing_activities.total`,
+  );
+  const seamCashRoll = resolveSeamPartition(
+    requireSeamRow(seamRow, 'net_change_in_cash', `${seamPeriod}.net_change_in_cash`),
+    `${seamPeriod}.net_change_in_cash`,
+  );
+  const seamFcff = resolveSeamPartition(
+    requireSeamRow(seamRow, 'fcff', `${seamPeriod}.fcff`),
+    `${seamPeriod}.fcff`,
+  );
+  const seamFcf = resolveSeamPartition(
+    requireSeamRow(seamRow, 'free_cash_flow', `${seamPeriod}.free_cash_flow`),
+    `${seamPeriod}.free_cash_flow`,
+  );
+
+  const seamBopCash = requireSeamValue(
+    BOP_Q2_FY2026,
+    'cash_and_cash_equivalents',
+    'bopBalanceSheet.cash_and_cash_equivalents',
+  );
+  const seamPreValuationCashChange = seamCashRoll.preValuation;
+  const seamRolledCashAtValuationDate = seamBopCash + seamPreValuationCashChange;
+
+  const seamH1StartDate = FY2026_START_DATE;
+  const seamH1EndDate = REPORTING_CUTOFF_DATE;
+  const seamValuationDate = EFFECTIVE_VALUATION_DATE;
+  const seamFy2026EndDate = FY2026_END_DATE;
+
+  const seamPartitionGap = (PRE_VALUATION_STUB_DAYS + POST_VALUATION_STUB_DAYS) - H2_DAYS_TOTAL;
+  const seamPartitionDayGap = daysBetween(seamH1EndDate, seamFy2026EndDate) - H2_DAYS_TOTAL;
+  const seamPartitionIntersection = intervalOverlapDays(
+    seamH1EndDate,
+    seamValuationDate,
+    seamValuationDate,
+    seamFy2026EndDate,
+  );
+  const seamH1OverlapDays = intervalOverlapDays(
+    seamH1StartDate,
+    seamH1EndDate,
+    seamValuationDate,
+    seamFy2026EndDate,
+  );
+  const seamPreValDayGap = daysBetween(seamH1EndDate, seamValuationDate) - PRE_VALUATION_STUB_DAYS;
+  const seamPostValDayGap = daysBetween(seamValuationDate, seamFy2026EndDate) - POST_VALUATION_STUB_DAYS;
+
   const result = {
     periods: Object.freeze(periods.slice()),
     incomeStatement: Object.freeze({
@@ -994,6 +1225,63 @@ export function project(schedulesOrInput, assumptionsArg, forecastArg) {
       bopBalanceSheet: BOP_Q2_FY2026,
     }),
     bopBalanceSheet: BOP_Q2_FY2026,
+    datedSeam: Object.freeze({
+      seamPeriod,
+      effectiveValuationDate: seamValuationDate,
+      reportingCutoff: seamH1EndDate,
+      fy2026StartDate: seamH1StartDate,
+      fy2026EndDate: seamFy2026EndDate,
+      preValuationWindow: Object.freeze({
+        start: seamH1EndDate,
+        end: seamValuationDate,
+        days: daysBetween(seamH1EndDate, seamValuationDate),
+        fraction: PRE_VALUATION_STUB_FRACTION,
+        role: 'bop_roll_forward',
+      }),
+      postValuationWindow: Object.freeze({
+        start: seamValuationDate,
+        end: seamFy2026EndDate,
+        days: daysBetween(seamValuationDate, seamFy2026EndDate),
+        fraction: POST_VALUATION_STUB_FRACTION,
+        role: 'discounted',
+      }),
+      preValuationDays: PRE_VALUATION_STUB_DAYS,
+      postValuationDays: POST_VALUATION_STUB_DAYS,
+      h2DaysTotal: H2_DAYS_TOTAL,
+      preValuationFraction: PRE_VALUATION_STUB_FRACTION,
+      postValuationFraction: POST_VALUATION_STUB_FRACTION,
+      /** Day-count gaps between the declared windows and their constants. */
+      partitionGap: seamPartitionGap,
+      partitionDayGap: seamPartitionDayGap,
+      preValuationDayGap: seamPreValDayGap,
+      postValuationDayGap: seamPostValDayGap,
+      /** Day-count intersections; both must be zero for a disjoint partition. */
+      partitionIntersection: seamPartitionIntersection,
+      h1FcffOverlapDays: seamH1OverlapDays,
+      /** Money gaps, computed from the resolved partition legs. */
+      ocfGap: seamOcf.fullYearGap,
+      icfGap: seamIcf.fullYearGap,
+      cffGap: seamCff.fullYearGap,
+      cashRollGap: seamCashRoll.fullYearGap,
+      ocfH2PartitionGap: seamOcf.h2PartitionGap,
+      icfH2PartitionGap: seamIcf.h2PartitionGap,
+      cffH2PartitionGap: seamCff.h2PartitionGap,
+      cashRollH2PartitionGap: seamCashRoll.h2PartitionGap,
+      /** Dollars of FY2026 FCFF counted in both the bridge and the DCF. */
+      h1FcffOverlap: seamFcff.doubleCounted,
+      fcfDoubleCounted: seamFcf.doubleCounted,
+      bopCash: seamBopCash,
+      preValuationCashChange: seamPreValuationCashChange,
+      rolledCashAtValuationDate: seamRolledCashAtValuationDate,
+      partitions: Object.freeze({
+        operatingActivities: seamOcf,
+        investingActivities: seamIcf,
+        financingActivities: seamCff,
+        cashRoll: seamCashRoll,
+        fcff: seamFcff,
+        freeCashFlow: seamFcf,
+      }),
+    }),
   };
 
   return deepFreeze(result);

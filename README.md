@@ -1,6 +1,6 @@
 # Duolingo Financial Model & Valuation Engine (NASDAQ: DUOL)
 
-[![Test Suite](https://img.shields.io/badge/tests-510%20passed-brightgreen.svg)](tests/)
+[![Test Suite](https://img.shields.io/badge/tests-1286%20passed-brightgreen.svg)](tests/)
 [![Flakes](https://img.shields.io/badge/flakes-0-brightgreen.svg)](tests/)
 [![Corpus](https://img.shields.io/badge/SEC%20corpus-706%20records-blue.svg)](src/data/historical/)
 [![Coverage](https://img.shields.io/badge/citation%20coverage-100%25-blue.svg)](docs/sources/sources.md)
@@ -13,38 +13,44 @@ An institutional-grade, zero-runtime-dependency interactive financial model and 
 
 ## 1. Executive Valuation Summary
 
-Our baseline Discounted Cash Flow model indicates that Duolingo is **Undervalued** at current market levels:
+Our canonical add-back DCF model indicates that Duolingo is **Overvalued** at current market levels (P10.7 Financial Reality PASS 2026-09-26, REVALIDATED O1 2026-10-04 on 1.49 beta basis; 10-period dated-seam production, FD-denominator relatives, 3-cluster agreement verdict):
 
 | Valuation Metric | Model Output | Benchmark / Context |
 |:---|:---:|:---|
-| **Market Share Price** (`MKT`) | **$148.36** | Market close benchmark snapshot |
-| **DCF Intrinsic Value** (`EST`) | **$249.36** | $249.3585 per share baseline |
-| **Implied Upside** | **+68.08%** | **UNDERVALUED** (threshold $\ge +15\%$) |
-| **WACC (Cost of Capital)** | **8.6638%** | CAPM build ($R_f = 4.73\%$, $\beta = 0.89$, $\text{ERP} = 4.42\%$, Debt-Free) |
-| **Terminal Growth Rate ($g$)** | **2.50%** | Gordon Growth perpetual rate |
-| **Enterprise Value (EV)** | **$9,487,885.62k** | Present value of explicit FCFs + Terminal Value |
-| **Net Cash Bridge** | **+$2,987,770.06k** | Cash ($2,752.1M) + STI ($133.0M) + LTI ($102.7M) − Debt ($0) |
-| **Implied Equity Value** | **$12,475,655.68k** | Enterprise Value + Net Cash |
-| **Diluted Shares Outstanding** | **50,031,000** | As reported in latest SEC filing |
-| **Rule of 40 (FY2030)** | **47.4%** | 16.1% 5Y Revenue CAGR + 31.4% FY2030 FCF Margin |
+| **Market Share Price** (`MKT`) | **$157.85** | DUOL close 2026-09-02 (benchmark only; never drives intrinsic value) |
+| **DCF Intrinsic Value — Current Shares** (`EST`) | **$152.15** | $152.1543 per share on 50,061,458 FD spot shares |
+| **DCF Intrinsic Value — Canonical Diluted** (`EST`) | **$112.74** | $112.7414 per share after modeled future dilution (67,562,285 shares) |
+| **Implied Upside (canonical)** | **−28.58%** | **OVERVALUED** (threshold $\le -15\%$) |
+| **WACC (Cost of Capital)** | **11.1225%** | CAPM build ($R_f = 4.79\%$, $\beta = 1.49$, $\text{ERP} = 4.25\%$, Debt-Free) |
+| **Terminal Growth Rate ($g$)** | **2.50%** | Gordon Growth perpetual rate (TV 49.69% of EV) |
+| **Enterprise Value (EV)** | **$6,181,615.23k** | PV of explicit + fade FCFF + Gordon terminal on normalized FY2035 FCFF |
+| **Net Cash Bridge (rolled)** | **+$1,435,448.73k** | Rolled cash ($1,199,776.73k) + STI ($132,979k) + LTI ($102,693k) − Debt ($0) |
+| **Implied Equity Value** | **$7,617,063.96k** | Enterprise Value + Rolled Net Cash |
+| **Current Fully Diluted Shares** | **50,061,458** | Point-in-time schedule (Basic 46,724,000 + TSM Options 520,458 + RSUs 2,817,000); WA 50,031,000 diagnostic only |
+| **Relative Methods (same FD denominator)** | **Comps $138.57 (Fair) · EV/EBITDAR $114.77 (Overvalued) · P/Levered FCF $240.29 (Undervalued) · SOTP $138.57 (decomp. only) · Per-User $347.91 (Undervalued)** | 3 evidence clusters → 2/3 majority **OVERVALUED** |
+| **Rule of 40** | **67.1%** | Revenue growth (+38.7%) + Adjusted EBITDA margin (28.4%), per financial-reality pack §5.1 |
 
-### Scenario Valuation Bands
-
-The model incorporates a multi-case delta engine that dynamically recalibrates all revenue, cost, tax, and working capital drivers:
+### Scenario Valuation Bands (canonical diluted basis, vs market $157.85)
 
 ```
            [Bear Case]                [Base Case]                    [Bull Case]
-             $132.16                    $249.36                        $532.17
-             (-10.9%)                   (+68.1%)                      (+258.7%)
-               FAIR                   UNDERVALUED                    UNDERVALUED
+             $61.47                     $112.74                        $238.07
+            (-61.06%)                   (-28.58%)                      (+50.82%)
+            OVERVALUED                  OVERVALUED                    UNDERVALUED
    |------------•--------------------------•------------------------------•------------|
- $100         $150                       $250                           $550
-          (Market $148.36)
+ $50          $100                       $150                           $250
+          (Market $157.85)
 ```
 
-- **Bear Case ($132.16 / −10.92%)**: Decelerating subscriber growth (12.4%), gross margin compressing to 70.2%, and lower terminal growth rate (2.0%). Mechanical recommendation: **FAIR**.
-- **Base Case ($249.36 / +68.08%)**: Baseline consensus trajectory with 18.4% paid subscriber growth, ARPU held at $80.50, disciplined operating leverage (13.1% FY2030 operating margin), and 2.5% terminal growth. Mechanical recommendation: **UNDERVALUED**.
-- **Bull Case ($532.17 / +258.71%)**: Accelerated monetization from Max/AI tiers (24.4% subscriber growth), FY2030 operating margin expanding to 19.1%, and 3.0% terminal growth. Mechanical recommendation: **UNDERVALUED**.
+- **Bear Case ($61.47 / −61.06%)**: Downside drivers. Mechanical recommendation: **OVERVALUED**.
+- **Base Case ($112.74 / −28.58%)**: Canonical add-back DCF after modeled future dilution (10-period dated seam, 2.5% terminal growth, 1.0% perpetual dilution). Mechanical recommendation: **OVERVALUED**.
+- **Bull Case ($238.07 / +50.82%)**: Upside drivers. Mechanical recommendation: **UNDERVALUED**.
+
+### Release Integrity (P10.8 Release Candidate)
+- **Test Suite**: 1286/1286 Node tests across 82 files + 22/22 real-Chromium browser specs, 0 flakes. Manifest: `tests/manifest.json` (83 files). Read-only gates: `npm run verify:js`, `regen_pins --check`, `git diff --exit-code` + `git status --porcelain` post-test.
+- **Pins**: `95972b149e0b837fd1b8d291b5902db3fb73dcff045e68a3c897fc01d58e0756` (`regen_pins --check` IN SYNC; regen refuses without the P10.7 signed pass report).
+- **Financial Reality**: PASS (P10.7, 2026-09-26; REVALIDATED O1 2026-10-04 on 1.49 beta basis) — report `docs/financial_reality/phase_10_report.json` (reviewer OP, bundle `271d84f7...`, model `2e875ed8...`), ledger 90 records, pack with independent re-performance (residuals 0.0). Director countersignature pending final approval.
+- **Deploy**: GitHub Pages serves the allowlisted static artifact (`index.html`, `src/`, `assets/`, `vendor/`); Vercel serves `/api/price` (GET-only, bounded, rate-limited, CORS-allowlisted). Local server binds `127.0.0.1` by default (`run.bat`; `--lan` opts in).
 
 ---
 
@@ -145,11 +151,25 @@ flowchart TD
 
 ## 6. Verification & Automated Test Suite
 
-The project includes an exhaustive automated test suite with **510 tests across 157 suites** and **0 flakes**:
+The project includes an exhaustive automated test suite with **1286 Node tests across 82 files (357 suites)** plus **22 real-Chromium browser specs**, and **0 flakes**:
 
 ```bash
-# Run complete offline test suite
+# Run complete offline test suite (read-only: must leave the tree clean)
 npm test
+
+# JS syntax gate (manifest-driven, no hand lists)
+npm run verify:js
+
+# Pin validation (read-only --check; regen refuses without P10.7 approval)
+node tools/regen_pins.mjs --check
+
+# Real Chromium suite (canonical invocation)
+npx playwright test --config=playwright.config.mjs tests/browser
+
+# Post-test cleanliness proof
+git diff --check
+git diff --exit-code
+git status --porcelain
 ```
 
 ### Test Coverage Highlights

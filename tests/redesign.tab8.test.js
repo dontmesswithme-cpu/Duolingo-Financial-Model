@@ -41,7 +41,7 @@ function stubContainer() {
   return el;
 }
 
-function bootApp() {
+function bootApp(opts = {}) {
   return getDatasets().then(({ historical, assumptions }) => {
     const { root, links, panes } = createTabRoot(['cover', 'assumptions', 'historicals', 'schedules', 'projections', 'valuation', 'summary', 'sensitivity']);
     const app = createApp({
@@ -51,6 +51,8 @@ function bootApp() {
       assumptions,
       root,
       now: () => Date.parse('2026-09-01T00:00:00.000Z'),
+      horizon: 5,
+      ...opts,
     });
     return { app, root, links, panes };
   });
@@ -65,26 +67,49 @@ function parseHeatmapCells(html) {
 }
 
 describe('RP8.2 — Scenario bands: Downside < Base < Upside strictly (engine + rendered)', () => {
-  test('engine per-share ordering holds with live pins 72.38/118.60/217.98', async () => {
+  // Two DIFFERENT lanes are asserted in this file and are not interchangeable. Measured:
+  //   engine-direct (runFullValuation, no datedSeam -> integer_period_index),
+  //     finite-roll intermediate: bear 71.9188 < base 117.5751 < bull 215.4863
+  //   app-rendered (createApp at horizon 5 -> dated_seam):
+  //     intermediate:  bear 72.0999 < base 120.4478 < bull 223.2163
+  //     canonical:     bear 71.3934 < base 119.2612 < bull 221.0123
+  test('engine-direct lane per-share ordering holds on the integer-period (no seam) pins 71.92/117.58/215.49', async () => {
+    // Engine-direct `runFullValuation` without `{ datedSeam: true }` is the
+    // integer-index legacy lane: P10.2 keeps it as the disclosed comparison and
+    // the FP.2 five-year regression baseline. The app-rendered lanes below run
+    // the canonical dated seam, so the two pin sets deliberately differ.
     const scenarios = await getScenarios();
-    assert.ok(Math.abs(scenarios.bear.perShare - 72.38) < 0.5, 'Bear pin ~72.38');
-    assert.ok(Math.abs(scenarios.base.perShare - 118.60) < 0.5, 'Base pin ~118.60');
-    assert.ok(Math.abs(scenarios.bull.perShare - 217.98) < 0.5, 'Bull pin ~217.98');
+    assert.equal(scenarios.base.dcf.valuationBasis, 'integer_period_index', 'engine-direct lane declares its basis');
+    // This asserts the ENGINE's scenario object, which legitimately carries the
+  // finite-roll intermediate. P10.6 changes what the surfaces DISPLAY, not engine
+  // data; the displayed spectrum is asserted on the canonical basis separately.
+  assert.ok(Math.abs(scenarios.bear.perShare - 71.9188) < 0.01, `Bear pin ~71.92, got ${scenarios.bear.perShare}`);
+    assert.ok(Math.abs(scenarios.base.perShare - 117.5751) < 0.01, `Base pin ~117.58, got ${scenarios.base.perShare}`);
+    assert.ok(Math.abs(scenarios.bull.perShare - 215.4863) < 0.01, `Bull pin ~215.49, got ${scenarios.bull.perShare}`);
     assert.ok(scenarios.bear.perShare < scenarios.base.perShare, 'Downside < Base');
     assert.ok(scenarios.base.perShare < scenarios.bull.perShare, 'Base < Upside');
   });
 
-  test('spectrum table renders the three bands with engine-true target prices', async () => {
+  test('spectrum table renders the three bands on the canonical basis', async () => {
     const { app, panes } = await bootApp();
     const html = sensPaneOf(panes).innerHTML;
     assert.match(html, /<table class="financial-summary-table scenario-spectrum-table">/);
     assert.equal((html.match(/<tr class="scenario-row-/g) || []).length, 3);
     assert.match(html, /Downside Case/);
-    assert.match(html, /\$72\.38/);
+    // P10.6: the spectrum states the CANONICAL after-future-dilution basis, the
+    // same basis as the valuation headline, the recommendation, the cover tile and
+    // the summary cards. Measured off the live app at horizon 5 (dated_seam):
+    //   canonical bear 71.39 < base 119.26 < bull 221.01
+    // (distinct from the engine-direct no-seam lane pinned in the test above).
     assert.match(html, /Base Case/);
-    assert.match(html, /\$118\.60/);
+    assert.match(html, /\$119\.26/);
     assert.match(html, /Upside Case/);
-    assert.match(html, /\$217\.98/);
+    assert.match(html, /\$221\.01/);
+    // The engine's own scenario values are unchanged and still engine-true; only
+    // the DISPLAY basis moved. Ordering still holds on the displayed figures.
+    const s = app.state().scenarios;
+    assert.ok(s.bear.perShare < s.base.perShare, 'engine bear < base');
+    assert.ok(s.base.perShare < s.bull.perShare, 'engine base < bull');
     assert.match(html, /Upside \/ \(Downside\) %/);
     assert.doesNotMatch(html, /Bear Case/);
     assert.doesNotMatch(html, /Bull Case/);
@@ -205,7 +230,11 @@ describe('RP8.2 — Active scenario dropdown (selector + live update)', () => {
     assert.match(html, /<option value="bear" selected>Downside Case<\/option>/);
     const activeCells = [...html.matchAll(/<td class="heatmap-cell heatmap-tier-\d+ active-cell"[^>]*>([^<]+)<\/td>/g)];
     assert.equal(activeCells.length, 1);
-    assert.equal(activeCells[0][1], '$72.38');
+    // P10.6: the WACC x g matrix cells are ENGINE data and remain on the finite-roll
+  // intermediate basis by construction. Re-deriving 45 cells on the perpetual basis
+  // is a modelling change, not a rendering one, so the surface LABELS its basis
+  // explicitly instead (asserted in tests/p106.basisLabeling.test.js).
+  assert.equal(activeCells[0][1], '$72.10');
     view.dispose();
     app.setScenario('base');
     app.dispose();
@@ -221,6 +250,7 @@ describe('RP8.2 — Active scenario dropdown (selector + live update)', () => {
       assumptions,
       root,
       now: () => Date.parse('2026-09-01T00:00:00.000Z'),
+      horizon: 5,
     });
     const s = app.state();
     const container = stubContainer();
@@ -238,11 +268,11 @@ describe('RP8.2 — Active scenario dropdown (selector + live update)', () => {
     });
     container.dispatch('change', { target: fakeSelect('bull') });
     assert.equal(app.state().scenario, 'bull');
-    assert.ok(Math.abs(app.state().dcf.perShare - 217.98) < 0.5, 'DCF target price follows the dropdown');
+    assert.ok(Math.abs(app.state().dcf.perShare - 223.21634421221) < 0.01, `DCF target price follows the dropdown, got ${app.state().dcf.perShare}`);
     sensLinkOf(links).dispatch('click');
     const html = sensPaneOf(panes).innerHTML;
     assert.match(html, /<option value="bull" selected>Upside Case<\/option>/);
-    assert.ok(html.includes('$217.98'), 'Tab 08 highlights the Upside center');
+    assert.ok(html.includes('$223.22'), 'Tab 08 highlights the Upside center');
     view.dispose();
     app.setScenario('base');
     app.dispose();

@@ -55,6 +55,7 @@ describe('P5.2  -  DI Constructor & Dependency Validation', () => {
       now: () => 1725148800000,
       historical,
       assumptions,
+      horizon: 5,
     });
 
     assert.ok(app);
@@ -74,7 +75,7 @@ describe('P5.2  -  DI Constructor & Dependency Validation', () => {
     assert.ok(state.dcf);
     assert.ok(state.recommendation);
     assert.equal(state.recommendation.label, 'overvalued');
-    assert.ok(Math.abs(state.dcf.perShare - 118.60167662384697) < 1e-6);
+    assert.ok(Math.abs(state.dcf.perShare - 120.44780046765) < 1e-6);
 
     app.dispose();
   });
@@ -132,6 +133,7 @@ describe('P5.2  -  Clamped Driver Inputs & Range Enforcement', () => {
       now: () => 0,
       historical,
       assumptions,
+      horizon: 5,
     });
 
     // Terminal growth bounds are [0, 0.04] with step 0.0025
@@ -195,25 +197,26 @@ describe('P5.2  -  Scenario Management & Delta Clamping', () => {
       now: () => 0,
       historical,
       assumptions,
+      horizon: 5,
     });
 
     // Base valuation (EP.3 normalised terminal)
     const basePerShare = app.state().dcf.perShare;
-    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-6);
+    assert.ok(Math.abs(basePerShare - 120.44780046765) < 1e-6);
 
     // Switch to Bear
     app.setScenario('bear');
     const bearPerShare = app.state().dcf.perShare;
     assert.equal(app.state().scenario, 'bear');
     assert.ok(bearPerShare < basePerShare);
-    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4);
+    assert.ok(Math.abs(bearPerShare - 72.09994528805) < 1e-4);
 
     // Switch to Bull
     app.setScenario('bull');
     const bullPerShare = app.state().dcf.perShare;
     assert.equal(app.state().scenario, 'bull');
     assert.ok(bullPerShare > basePerShare);
-    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4);
+    assert.ok(Math.abs(bullPerShare - 223.21634421221) < 1e-4);
 
     // Rejects invalid scenario name
     assert.throws(

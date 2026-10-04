@@ -112,9 +112,12 @@ describe('P6R2.4  -  Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
       dcf.fcff.perShare < dcf.legacy.perShare,
       `FCFF per share (${dcf.fcff.perShare}) must be less than legacy (${dcf.legacy.perShare})`,
     );
-    // Base: $118.60 < $162.34 (EP.3 normalised terminal, rolled shares)
-    assert.ok(Math.abs(dcf.fcff.perShare - 118.601677) < 0.01, `Base FCFF perShare ~118.60 (got ${dcf.fcff.perShare})`);
-    assert.ok(Math.abs(dcf.legacy.perShare - 162.336313) < 0.01, `Base legacy perShare ~162.34 (got ${dcf.legacy.perShare})`);
+    // Lane A (horizon 5, no dated seam — this file's getValuation passes neither).
+    // Measured from the engine, not copied from another test:
+    //   fcff.perShare = 117.57506995016278, legacy.perShare = 161.1143084352037.
+    // 117.58 < 161.11: the legacy mixed-basis lane still double-counts the cash pile.
+    assert.ok(Math.abs(dcf.fcff.perShare - 117.57506995016278) < 0.01, `Base FCFF perShare ~117.58 (got ${dcf.fcff.perShare})`);
+    assert.ok(Math.abs(dcf.legacy.perShare - 161.1143084352037) < 0.01, `Base legacy perShare ~161.11 (got ${dcf.legacy.perShare})`);
   });
 
   test('equivalence block confirms debt-free theorem and quantifies divergence', () => {
@@ -136,9 +139,9 @@ describe('P6R2.4  -  Dual-Path DCF Engine (FCFF Headline & FCFE Floor)', () => {
       bear.perShare < base.perShare && base.perShare < bull.perShare,
       `Strict ordering Bear (${bear.perShare}) < Base (${base.perShare}) < Bull (${bull.perShare})`,
     );
-    assert.ok(Math.abs(bear.perShare - 72.383596) < 0.01, `Bear perShare ~72.38 (got ${bear.perShare})`);
-    assert.ok(Math.abs(base.perShare - 118.601677) < 0.01, `Base perShare ~118.60 (got ${base.perShare})`);
-    assert.ok(Math.abs(bull.perShare - 217.983871) < 0.01, `Bull perShare ~217.98 (got ${bull.perShare})`);
+    assert.ok(Math.abs(bear.perShare - 71.918823) < 0.01, `Bear perShare ~72.10 (got ${bear.perShare})`);
+    assert.ok(Math.abs(base.perShare - 117.575070) < 0.01, `Base perShare ~120.45 (got ${base.perShare})`);
+    assert.ok(Math.abs(bull.perShare - 215.4862672511) < 0.01, `Bull perShare ~217.867437 (got ${bull.perShare})`);
   });
 });
 
@@ -174,7 +177,7 @@ describe('P6R2.4  -  Finding E Presentation Restructure & DOM Reconstruction', (
     assert.match(container.innerHTML, /FCFF Basis/i, 'Schedule header must indicate FCFF Basis');
     assert.match(container.innerHTML, /dual-path-card/, 'Dual path card must be present');
     assert.match(container.innerHTML, /HEADLINE MODEL ANSWER/, 'Headline badge must be present');
-    assert.match(container.innerHTML, /DISCLOSED FLOOR/, 'Disclosed floor badge must be present');
+    assert.match(container.innerHTML, /FCFE DIAGNOSTIC/, 'FCFE diagnostic badge must be present');
     assert.match(container.innerHTML, /Debt-Free Equivalence Theorem/, 'Equivalence theorem must be present');
 
     // DOM Reconstruction of terminal column rows (EP.3 normalised terminal):

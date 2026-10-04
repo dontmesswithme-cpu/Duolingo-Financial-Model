@@ -25,7 +25,9 @@ import { TabulatorFull as DefaultTabulator } from './tabulator.js';
 
 export const HISTORICAL_PERIODS = Object.freeze(['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025']);
 export const FORECAST_PERIODS = Object.freeze(['FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030']);
+export const FADE_PERIODS = Object.freeze(['FY2031', 'FY2032', 'FY2033', 'FY2034', 'FY2035']);
 export const ALL_PERIODS = Object.freeze([...HISTORICAL_PERIODS, ...FORECAST_PERIODS]);
+export const ALL_SCHEDULE_PERIODS = Object.freeze([...HISTORICAL_PERIODS, ...FORECAST_PERIODS, ...FADE_PERIODS]);
 
 /**
  * Builds Tabulator column definitions across the 10-year span.
@@ -33,12 +35,16 @@ export const ALL_PERIODS = Object.freeze([...HISTORICAL_PERIODS, ...FORECAST_PER
  * @param {object} [options]
  * @param {boolean} [options.isPct=false]
  * @param {'thousands'|'millions'} [options.unit='thousands']
+ * @param {'explicit'|'fade'} [options.stage='explicit']
  * @returns {Array<object>}
  */
-export function buildScheduleColumns({ isPct = false, unit = 'thousands' } = {}) {
+export function buildScheduleColumns({ isPct = false, unit = 'thousands', stage = 'explicit' } = {}) {
   const isMillions = unit === 'millions';
   const scale = isMillions ? 1e3 : 1;
   const decimals = Number(isMillions);
+  const isFade = stage === 'fade';
+  const targetPeriods = isFade ? FADE_PERIODS : FORECAST_PERIODS;
+  const badgeMarking = isFade ? 'FADE' : 'EST';
 
   return [
     {
@@ -73,14 +79,14 @@ export function buildScheduleColumns({ isPct = false, unit = 'thousands' } = {})
         return formatAccounting(displayVal, { decimals, showCurrency: true, zeroDisplay });
       },
     })),
-    ...FORECAST_PERIODS.map((period) => ({
+    ...targetPeriods.map((period) => ({
       title: period,
       field: period,
       headerSort: false,
       hozAlign: 'right',
       editor: false,
       minWidth: 95,
-      titleFormatter: () => estSuffix(period, 'EST'),
+      titleFormatter: () => estSuffix(period, badgeMarking),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
         if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
@@ -102,16 +108,18 @@ export function buildScheduleColumns({ isPct = false, unit = 'thousands' } = {})
  * @param {object} threeStatement Output of threeStatement.project()
  * @param {object} [options]
  * @param {'thousands'|'millions'} [options.unit='thousands']
+ * @param {'explicit'|'fade'} [options.stage='explicit']
  * @returns {string} HTML string containing 5 .gate-card elements
  */
-export function renderGateCards(threeStatement, { unit = 'thousands' } = {}) {
+export function renderGateCards(threeStatement, { unit = 'thousands', stage = 'explicit' } = {}) {
   const isMillions = unit === 'millions';
   const scale = isMillions ? 1e3 : 1;
   const decimals = Number(isMillions);
+  const targetPeriods = stage === 'fade' ? FADE_PERIODS : FORECAST_PERIODS;
 
   let brokenDependency = false;
 
-  return FORECAST_PERIODS.map((period) => {
+  return targetPeriods.map((period) => {
     const bc = threeStatement?.balanceCheck?.byPeriod?.[period];
     const isMissing = !bc || typeof bc !== 'object';
     if (isMissing) {
@@ -201,6 +209,7 @@ export function renderSchedules({
   let currentThreeStatement = threeStatement;
   let currentUnit = unit === 'millions' ? 'millions' : 'thousands';
   let currentScheduleFilter = 'all';
+  let currentStage = 'explicit';
   let disposed = false;
   const tabulatorInstances = [];
   const tabulatorConfigs = [];
@@ -224,7 +233,7 @@ export function renderSchedules({
 
     return rows.map((r) => {
       const rowObj = { ...r };
-      for (const p of ALL_PERIODS) {
+      for (const p of ALL_SCHEDULE_PERIODS) {
         let val = null;
         if (HISTORICAL_PERIODS.includes(p) && currentSchedules?.workingCapital?.byPeriod?.[p]) {
           const wcP = currentSchedules.workingCapital.byPeriod[p];
@@ -240,7 +249,7 @@ export function renderSchedules({
           else if (r.id === 'total_wc_liabilities') val = wcP.liabilities?.total_working_capital_liabilities?.value;
           else if (r.id === 'nwc') val = wcP.net_working_capital?.value;
           else if (r.id === 'delta_nwc') val = wcP.change_in_net_working_capital?.value;
-        } else if (FORECAST_PERIODS.includes(p)) {
+        } else if (FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) {
           const projWc = currentThreeStatement?.supporting?.workingCapital?.byPeriod?.[p];
           if (projWc) {
             if (r.id === 'ar') val = projWc.assets?.accounts_receivable?.value;
@@ -275,7 +284,7 @@ export function renderSchedules({
 
     return rows.map((r) => {
       const rowObj = { ...r };
-      for (const p of ALL_PERIODS) {
+      for (const p of ALL_SCHEDULE_PERIODS) {
         let val = null;
         if (HISTORICAL_PERIODS.includes(p) && currentSchedules?.ppe?.byPeriod?.[p]) {
           const ppeP = currentSchedules.ppe.byPeriod[p];
@@ -285,7 +294,7 @@ export function renderSchedules({
           else if (r.id === 'net_ppe') val = ppeP.ending_balance?.value;
           else if (r.id === 'gross_ppe') val = ppeP.breakdown?.gross_ppe?.value;
           else if (r.id === 'acc_dep') val = ppeP.breakdown?.accumulated_depreciation?.value;
-        } else if (FORECAST_PERIODS.includes(p)) {
+        } else if (FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) {
           const projPpe = currentThreeStatement?.supporting?.ppe?.byPeriod?.[p];
           if (projPpe) {
             if (r.id === 'bop_net') val = projPpe.beginning_balance?.value;
@@ -312,7 +321,7 @@ export function renderSchedules({
 
     return rows.map((r) => {
       const rowObj = { ...r };
-      for (const p of ALL_PERIODS) {
+      for (const p of ALL_SCHEDULE_PERIODS) {
         let val = null;
         if (HISTORICAL_PERIODS.includes(p) && currentSchedules?.intangibleAmortization?.byPeriod?.[p]) {
           const intP = currentSchedules.intangibleAmortization.byPeriod[p];
@@ -322,7 +331,7 @@ export function renderSchedules({
           else if (r.id === 'net_intangibles') val = intP.ending_balance?.value;
           else if (r.id === 'gross_intangibles') val = intP.breakdown?.gross_intangibles?.value;
           else if (r.id === 'acc_amort') val = intP.breakdown?.accumulated_amortization?.value;
-        } else if (FORECAST_PERIODS.includes(p)) {
+        } else if (FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) {
           const projInt = currentThreeStatement?.supporting?.intangibleAmortization?.byPeriod?.[p];
           if (projInt) {
             if (r.id === 'bop_net') val = projInt.beginning_balance?.value;
@@ -345,13 +354,13 @@ export function renderSchedules({
 
     return rows.map((r) => {
       const rowObj = { ...r };
-      for (const p of ALL_PERIODS) {
+      for (const p of ALL_SCHEDULE_PERIODS) {
         let val = null;
         if (HISTORICAL_PERIODS.includes(p) && currentSchedules?.sbc?.byPeriod?.[p]) {
           const sbcP = currentSchedules.sbc.byPeriod[p];
           if (r.id === 'sbc_exp') val = sbcP.sbc_expense?.value;
           else if (r.id === 'sbc_pct') val = sbcP.sbc_pct_of_revenue?.value;
-        } else if (FORECAST_PERIODS.includes(p)) {
+        } else if (FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) {
           const projSbc = currentThreeStatement?.supporting?.sbc?.byPeriod?.[p];
           if (projSbc) {
             if (r.id === 'sbc_exp') val = projSbc.sbc_expense?.value;
@@ -388,7 +397,7 @@ export function renderSchedules({
 
     return rows.map((r) => {
       const rowObj = { ...r };
-      for (const p of ALL_PERIODS) {
+      for (const p of ALL_SCHEDULE_PERIODS) {
         let val = null;
         if (r.id === 'total_debt') {
           if (isDebtFree) {
@@ -408,7 +417,7 @@ export function renderSchedules({
             if (typeof histLease === 'number' && Number.isFinite(histLease)) {
               val = histLease;
             }
-          } else if (FORECAST_PERIODS.includes(p)) {
+          } else if (FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) {
             const fcLease = currentThreeStatement?.balanceSheet?.byPeriod?.[p]?.non_current_liabilities?.long_term_operating_lease_liability?.value;
             if (typeof fcLease === 'number' && Number.isFinite(fcLease)) {
               val = fcLease;
@@ -435,7 +444,7 @@ export function renderSchedules({
   }
 
   function renderBalanceCheckCard() {
-    const cardsHtml = renderGateCards(currentThreeStatement, { unit: currentUnit });
+    const cardsHtml = renderGateCards(currentThreeStatement, { unit: currentUnit, stage: currentStage });
     return `
       <div class="hard-gate-section balance-check-card" id="hard-gate-section" data-statement-card="balance">
         <div class="statement-card-header gate-section-header">
@@ -512,6 +521,19 @@ export function renderSchedules({
       }
     }
 
+    const stagePills = container.querySelectorAll ? container.querySelectorAll('.pill-btn[data-forecast-stage], .stage-btn[data-forecast-stage]') : [];
+    for (const pill of stagePills) {
+      if (pill && typeof pill.addEventListener === 'function') {
+        const handler = (e) => {
+          e?.preventDefault?.();
+          const s = pill.getAttribute ? pill.getAttribute('data-forecast-stage') : null;
+          if (s) setStage(s);
+        };
+        pill.addEventListener('click', handler);
+        listeners.push({ target: pill, type: 'click', handler });
+      }
+    }
+
     const filterButtons = container.querySelectorAll ? container.querySelectorAll('.schedule-pill-btn[data-schedule-tab]') : [];
     for (const btn of filterButtons) {
       if (btn && typeof btn.addEventListener === 'function') {
@@ -524,6 +546,13 @@ export function renderSchedules({
         listeners.push({ target: btn, type: 'click', handler });
       }
     }
+  }
+
+  function setStage(newStage) {
+    if (newStage !== 'explicit' && newStage !== 'fade') return;
+    if (newStage === currentStage) return;
+    currentStage = newStage;
+    render();
   }
 
   function setUnit(newUnit) {
@@ -560,7 +589,7 @@ export function renderSchedules({
     listeners.length = 0;
 
     const wcData = buildWcData();
-    const wcCols = buildScheduleColumns({ unit: currentUnit });
+    const wcCols = buildScheduleColumns({ unit: currentUnit, stage: currentStage });
     const wcConfig = {
       statement: 'workingCapital',
       data: wcData,
@@ -588,7 +617,7 @@ export function renderSchedules({
     tabulatorConfigs.push(wcConfig);
 
     const ppeData = buildPpeData();
-    const ppeCols = buildScheduleColumns({ unit: currentUnit });
+    const ppeCols = buildScheduleColumns({ unit: currentUnit, stage: currentStage });
     const ppeConfig = {
       statement: 'ppe',
       data: ppeData,
@@ -612,7 +641,7 @@ export function renderSchedules({
     tabulatorConfigs.push(ppeConfig);
 
     const intData = buildIntangiblesData();
-    const intCols = buildScheduleColumns({ unit: currentUnit });
+    const intCols = buildScheduleColumns({ unit: currentUnit, stage: currentStage });
     const intConfig = {
       statement: 'intangibles',
       data: intData,
@@ -636,7 +665,7 @@ export function renderSchedules({
     tabulatorConfigs.push(intConfig);
 
     const sbcData = buildSbcData();
-    const sbcCols = buildScheduleColumns({ isPct: false, unit: currentUnit });
+    const sbcCols = buildScheduleColumns({ isPct: false, unit: currentUnit, stage: currentStage });
     const sbcConfig = {
       statement: 'sbc',
       data: sbcData,
@@ -652,7 +681,7 @@ export function renderSchedules({
     tabulatorConfigs.push(sbcConfig);
 
     const debtData = buildDebtData();
-    const debtCols = buildScheduleColumns({ unit: currentUnit });
+    const debtCols = buildScheduleColumns({ unit: currentUnit, stage: currentStage });
     const debtConfig = {
       statement: 'debt',
       data: debtData,
@@ -725,6 +754,13 @@ export function renderSchedules({
             <p class="schedules-subtitle" id="schedules-subtitle">Detailed schedules supporting the 3-statement model. Figures in USD ${unitText} unless otherwise stated.</p>
           </div>
           <div class="schedules-controls-strip">
+            <div class="stage-toggle-container">
+              <span class="units-toggle-label">FORECAST STAGE</span>
+              <div class="stage-mode-toggle pill-control" role="group" aria-label="Forecast Stage">
+                <button type="button" class="pill-btn stage-btn ${currentStage === 'explicit' ? 'active' : ''}" data-forecast-stage="explicit" aria-pressed="${currentStage === 'explicit'}">Explicit FY26–30</button>
+                <button type="button" class="pill-btn stage-btn ${currentStage === 'fade' ? 'active' : ''}" data-forecast-stage="fade" aria-pressed="${currentStage === 'fade'}">Fade FY31–35</button>
+              </div>
+            </div>
             <div class="units-toggle-container">
               <span class="units-toggle-label">DISPLAY UNITS</span>
               <div class="units-mode-toggle pill-control" role="group" aria-label="Display Units">
@@ -789,6 +825,10 @@ export function renderSchedules({
     setUnit,
     getUnit() {
       return currentUnit;
+    },
+    setStage,
+    getStage() {
+      return currentStage;
     },
     setScheduleFilter,
     getScheduleFilter() {

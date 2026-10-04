@@ -79,6 +79,14 @@ export function createTabs({ root, tabs = TAB_KEYS, onTabChange } = {}) {
     for (const link of links) {
       const match = getElementKey(link) === key;
       markActive(link, match, true);
+      // F-UI-4: keep the active tab visible inside the horizontally
+      // scrollable nav on narrow viewports (guarded for stub DOM).
+      if (match && typeof link.scrollIntoView === 'function') {
+        try {
+          link.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        } catch { /* non-visual stub DOM */
+        }
+      }
     }
     for (const pane of panes) {
       const match = getElementKey(pane) === key;

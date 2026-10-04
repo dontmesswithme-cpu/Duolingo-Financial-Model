@@ -48,19 +48,22 @@ const P3_CORPUS_RECORD_COUNT = 706;
  *
  * Sourced 2026-09-02:
  *   rf   = 4.79%  (FRED DGS10, 2026-09-01)
- *   beta = 0.89   (stockanalysis.com / computed OLS, 2026-08-31)
- *   ERP  = 4.46%  (Damodaran, NYU Stern, 2026-01-05)
- *   Re   = 0.0479 + 0.89 × 0.0446 = 0.087594
+ *   beta = 1.49   (bottom-up peer MEAN unlevered beta, 2026-08-31; NOT the
+ *                  DUOL own-regression slope of 0.89, which is a disclosed
+ *                  cross-check only, and NOT the peer median of 1.47 — at n=3
+ *                  the median is definitionally Netflix alone)
+ *   ERP  = 4.25%  (Damodaran 3M trailing, 2026-09-01)
+ *   Re   = 0.0479 + 1.49 × 0.0425 = 0.111225
  *   px   = 157.85 (last completed close, 2026-09-02)
  *   sh   = 50,031,000 (Q2 FY2026 10-Q diluted weighted-average)
  *   E    = 157.85 × 50,031,000 = 7,897,393,350
  */
 const PIN = Object.freeze({
   riskFreeRate: 0.0479,
-  beta: 1.47,
+  beta: 1.49,
   equityRiskPremium: 0.0425,
-  costOfEquity: 0.110375,
-  wacc: 0.110375,
+  costOfEquity: 0.111225,
+  wacc: 0.111225,
   sharePrice: 157.85,
   sharesOutstanding: 50031000,
   marketCap: 7897393350,

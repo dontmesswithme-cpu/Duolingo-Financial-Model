@@ -1,4 +1,4 @@
-﻿# Universal Engineering Conventions & Standards
+# Universal Engineering Conventions & Standards
 
 > **Purpose**: This document establishes the non-negotiable technical, architectural, and quality standards for all development work. Both Worker (`DS`) and Reviewer (`OP`) must adhere to these standards.
 
@@ -120,6 +120,11 @@ This specification is domain-neutral. Projects may append language-specific rule
 - Colors are emitted only by render functions via CSS classes (`cell-input`, `cell-formula`, `cell-link`) — never hand-set.
 - OP audit rule: any hardcoded input cell lacking the `cell-input` class (or any formula cell styled as input) is a rejection condition.
 
+#### Inline Styles Policy — Authored vs Runtime (F-UI-6)
+- **Authored source is zero-inline-style, always.** `index.html` and every `src/ui/*.js` file must contain zero `style=` attributes and zero runtime style manipulation (`.style.*`, `setAttribute('style'`). Enforced by `tests/ui.inline_styles.test.js` plus the existing per-tab `zero style=` gates.
+- **Runtime Tabulator styles are allowlisted, never authored.** The vendored Tabulator grid (`vendor/tabulator/`, imported only via `src/ui/tabulator.js`) generates layout inline styles at runtime (column widths, frozen-column offsets, virtual-DOM positioning). Those `[style]` attributes in the live DOM are third-party/runtime-generated, not hand-authored markup, and are explicitly scoped: any live-DOM `[style]` outside `.tabulator` is a violation. The rendered-DOM audit (`scratch/ui_audit_screenshots_fix/`) classifies `[style]` per tab as `tabulator-runtime` vs `authored/other`; acceptance is authored/other == 0 with the Tabulator allowlist documented here.
+- **No silent reintroduction.** Any new runtime styling source beyond Tabulator requires a conventions amendment plus a test update; unexplained inline styles cannot be treated as clean by omission.
+
 #### Purity & Testability
 - All `src/engine/` and `src/data/` modules are pure: no DOM, no `fetch`, no `Date.now`, no `Math.random` inside `src/engine/` — the current period is injected as a parameter.
 - App construction via DI factory `createApp({ data, engine, root, now })`; everything opened/subscribed during init is closed/removed in `dispose()`.
@@ -149,9 +154,19 @@ This specification is domain-neutral. Projects may append language-specific rule
 
 ## 6. Economic Identity Rules (Economy Phase — Permanent)
 
-> Landed per rule with its sub-phase (EP.2: SBC Settlement + Settlement Registry; EP.3: Terminal Steady-State Law + Pin Genesis). Locked by Director ruling 2026-09-10; amendable only by Director order.
+> Landed per rule with its sub-phase (EP.2: SBC Settlement + Settlement Registry; EP.3: Terminal Steady-State Law + Pin Genesis; FP.4: Fade Stage Law). Locked by Director ruling 2026-09-10; amendable only by Director order.
 
 1. **SBC Settlement Rule (R2 formula, EP.2)**: the OCF stock-based-compensation add-back is GAAP-correct at statement level, but the DCF must pay for the offsetting future issuance. `shares_DCF = shares_BOP + Σ (SBC_t ÷ market_share_price)` over FY2026–FY2030, where `shares_BOP` is the MKT diluted-shares driver (grants already made), `SBC_t` is the per-period SBC embedded in each period's cash-flow statement (hybrid FY2026 = cited H1 corpus row + H2 CF leg — never the CF line alone, never the annualized schedule), and `market_share_price` is the MKT spot driver. No buyback netting in the headline path (buybacks stay financing flows, value-neutral at fair price); uncharged netting (retiring shares without charging the cash) is a rejection condition on sight. Statements stay GAAP-clean; settlement lives in the valuation layer (`src/engine/shares.js`, consumed at the DCF per-share division).
 2. **Settlement Registry (EP.2)**: no undeclared add-backs. Every OCF add-back names a settlement path in `src/engine/invariants.js` (`SETTLEMENT_REGISTRY`): D&A → ICF capex (settled), SBC → EIG-B share roll-forward (settled EP.2). Any operating-activity line outside the registry (beyond the net-income base, the total, and the working-capital movement) fails EIG-C coverage. Registry statuses are load-bearing: `pending-*` entries document known-unsettled economics, never silent passes.
 3. **Terminal Steady-State Law (EP.3)**: the final forecast year's working-capital inflow is priced at forecast growth and must never be capitalised raw into perpetuity. Terminal construction replaces it with the perpetuity-rate equivalent: `fcffTNormalised = fcff_T − (−ΔNWC_T) + (−NWC_T × g)`, with NWC from the working-capital schedule (BOP-anchored for a first-period terminal); the FCFE floor and legacy paths sharing the terminal-year flow normalise identically. Violations live almost entirely in the terminal (PV(TV) ≈ 73% of EV here), so the law is exact, not approximate.
 4. **Pin Genesis (EP.3)**: hand-typed pins are rejected; hash-stamped regeneration only. `tools/regen_pins.mjs` emits every e2e pin plus the docstring header numbers from one machine pass and stamps the run (SHA-256 over `src/data/assumptions.json` + engine sources outside comments). Tests verify stored hash == recomputed hash; any source change without regen — or any pin that disagrees with live engine output — fails loudly with a diff of what moved. Regen is idempotent (unchanged inputs rewrite nothing).
+5. **Fade Stage Law (FP.4)**: explicit-stage growth must converge toward the terminal anchor through a declared driver glide with a floor strictly between the explicit rate and g; a terminal value may never sit on a growth rate the explicit path never approaches (the cliff prohibition).
+
+---
+
+## 7. Release-Candidate Discipline (P10.8 / O2 — Permanent)
+
+1. **Read-only tests**: `npm test` never mutates the tree. Pin validation runs `regen_pins --check` (or tmpdir) only — a writing regen inside the suite is a FAIL. Post-test proof: `git diff --exit-code` + `git status --porcelain` (CI enforces).
+2. **Test manifest**: `tests/manifest.json` pins the exact file list + count (82 Node + 1 browser spec; 83 total). `npm run verify:js` runs `node --check` over every manifest + walked JS file — no hand-expanded lists.
+3. **Pins move in P10.8 / O2 only**, after all code/data/period/benchmark/share/method/UI decisions are final, and `regen_pins.mjs` refuses without the P10.7 signed pass report. Current pins: `95972b149e0b837fd1b8d291b5902db3fb73dcff045e68a3c897fc01d58e0756` IN SYNC on the authorized 1.49 beta / 11.1225% WACC basis.
+4. **Docs agree with pins**: README/spec/conventions/index.html metadata are generated outputs reconciled after final pins (P10.8 §8); phase logs stay archival and are never rewritten.

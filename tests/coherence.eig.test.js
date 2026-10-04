@@ -27,6 +27,7 @@ import {
   checkPinSync,
 } from '../src/engine/invariants.js';
 import { projectShares } from '../src/engine/shares.js';
+import { CANONICAL_HORIZON } from '../src/data/constants.js';
 import {
   evaluate as evaluateRec,
   buildLabelStability,
@@ -49,7 +50,15 @@ import {
   findRow,
 } from './_invariants.js';
 
-const modelPromise = buildFullModel();
+const model10Promise = buildFullModel({ horizon: 10 });
+const model5Promise = buildFullModel({ horizon: 5 });
+const modelPromise = model10Promise;
+// The e2e docstring pins the PRODUCTION lane (CANONICAL_HORIZON + dated
+// valuation seam) after the F-2 move. EIG-E ties that docstring to live engine
+// output, so it must build the same lane — comparing canonical pins against a
+// legacy 5-period model is a false failure, and comparing them against anything
+// else would be a false pass.
+const modelCanonicalPromise = buildFullModel({ horizon: CANONICAL_HORIZON, datedSeam: true });
 
 function findEntry(report, id) {
   return report.find((row) => row && row.id === id);
@@ -69,7 +78,7 @@ function stubContainer() {
 }
 
 describe('EP.1  -  EIG-D Forecast Articulation (green on current build)', () => {
-  test('every articulation row passes on the live model (FY2026–FY2030)', async () => {
+  test('every articulation row passes on the live model (all 10 periods FY2026–FY2035)', async () => {
     const { threeStatement } = await modelPromise;
     const rows = await flattenHistoricalRows((await modelPromise).historical);
     const report = checkForecastArticulation(threeStatement, { historicalRows: rows });
@@ -217,8 +226,18 @@ describe('EP.2  -  EIG-B Share Roll-Forward Settlement (gross issuance at spot)'
     const schedule = projectShares(assumptions, threeStatement, historical);
     const price = assumptions.get('market_share_price').value;
 
-    assert.equal(schedule.bopShares, assumptions.get('shares_outstanding').value, 'BOP ties driver');
-    assert.equal(schedule.price, price, 'price ties the MKT driver');
+    // P10.5: the roll starts from the P10.4 point-in-time fully diluted
+    // schedule, NOT the shares_outstanding weighted-average driver, which is an
+    // EPS diagnostic. A roll must never begin from a weighted average.
+    assert.equal(schedule.bopShares, 50061458, 'BOP is the P10.4 FD schedule denominator');
+    assert.notEqual(schedule.bopShares, assumptions.get('shares_outstanding').value,
+      'the roll base must not be the weighted-average diluted count');
+    assert.equal(schedule.weightedAverageDilutedDiagnostic, assumptions.get('shares_outstanding').value,
+      'the WA count is retained as a disclosed diagnostic');
+    // P10.3/P10.5: issuance prices off the FROZEN sbc_issuance_price, never the
+    // mutable benchmark. A benchmark change must leave issuance byte-identical.
+    assert.equal(schedule.price, assumptions.get('sbc_issuance_price').value,
+      'issuance prices off the frozen driver, not the benchmark');
     for (const period of schedule.periods) {
       const row = schedule.byPeriod[period];
       const rawSbc =
@@ -335,9 +354,11 @@ describe('EP.2  -  EIG-B Share Roll-Forward Settlement (gross issuance at spot)'
       () => projectShares(assumptions, threeStatement, null),
       (err) => err.name === 'EngineError' && err.code === 'missing_corpus_row',
     );
+    // P10.3: the issuance reference price is the FROZEN `sbc_issuance_price`
+    // driver, not the benchmark. Stripping it must fail closed.
     const noPrice = {
       ...assumptions,
-      get: (name) => (name === 'market_share_price' ? null : assumptions.get(name)),
+      get: (name) => (name === 'sbc_issuance_price' ? null : assumptions.get(name)),
     };
     assert.throws(
       () => projectShares(noPrice, threeStatement, historical),
@@ -391,7 +412,7 @@ describe('EP.3  -  EIG-A Terminal Steady-State Normalisation (red→green)', () 
   test('EIG-A1 detection proof: perturbed NWC moves the expected TV off the engine pin', async () => {
     const model = await modelPromise;
     const mutated = structuredClone(model.threeStatement);
-    mutated.supporting.workingCapital.byPeriod.FY2030.net_working_capital.value += 1000;
+    mutated.supporting.workingCapital.byPeriod[model.dcf.terminalYear].net_working_capital.value += 1000;
     const t = deriveTerminalInputs({ ...model, threeStatement: mutated });
     assert.ok(
       Math.abs(t.expectedTvFcff - model.dcf.terminalValue) > 1,
@@ -418,14 +439,65 @@ describe('EP.3  -  EIG-A Terminal Steady-State Normalisation (red→green)', () 
     const model = await modelPromise;
     const gap = deriveTerminalGrowthGap(model);
     assert.ok(gap, 'gap disclosure record exists');
-    assert.ok(Math.abs(gap.forecastGrowth - 0.17) < 0.005, 'terminal deferred-revenue growth ≈17.0%');
+    assert.equal(gap.terminalPeriod, 'FY2035', 'terminal period is FY2035');
+    assert.ok(Math.abs(gap.forecastGrowth - 0.0529) < 0.005, 'terminal deferred-revenue growth ≈5.3%');
     assert.equal(gap.perpetuityGrowth, 0.025, 'perpetuity rate is the g driver');
-    assert.ok(gap.gap > 0.1, 'material gap is disclosed for the EP.4 labelStable band');
+    assert.ok(gap.gap < 0.05 && gap.gap > 0.02, 'shrunk gap is the fade working (~2.8%)');
     assert.equal(typeof gap.basis, 'string', 'disclosure carries its basis');
   });
 });
 
 describe('EP.3  -  Pin Genesis Stamp (§7: stored hash == recomputed hash)', () => {
+  test('stamp locator tolerates CRLF and LF, and replaces the block it can read (F-1 regression)', async () => {
+    const { readStamp, STAMP_BLOCK_PATTERN } = await import('../tools/regen_pins.mjs');
+
+    // F-1 root cause: the locator required a bare `\n` after the token. With
+    // `core.autocrlf=true` and no `.gitattributes`, a Windows checkout stores
+    // `\r\n`, the pattern missed, `readStamp()` returned null, and `--check`
+    // printed `PIN DRIFT: 0 pin(s) differ` while exiting 1 — blaming the pins
+    // for a regex defect. Both endings must locate the block.
+    const payload = { hash: 'abc123', createdAt: '2026-01-01T00:00:00.000Z' };
+    for (const eol of ['\n', '\r\n']) {
+      const src = `/* header */${eol}${eol}/* PIN-GENESIS-STAMP-BEGIN${eol}${JSON.stringify(payload)}${eol}PIN-GENESIS-STAMP-END */${eol}/* tail */`;
+      const found = readStamp(src);
+      assert.ok(found, `readStamp must locate the block with ${eol === '\n' ? 'LF' : 'CRLF'} endings`);
+      assert.equal(found.hash, 'abc123', 'payload parses identically under both endings');
+    }
+
+    // The dangerous asymmetry: if readStamp can SEE a block but the replace
+    // pattern cannot MATCH it, real drift would be reported as `PINS IN SYNC`
+    // (a false pass — worse than the original false alarm). Read and replace
+    // must therefore share one pattern, and a replace that changes nothing
+    // while a block exists must be impossible.
+    const crlfSrc = `/* PIN-GENESIS-STAMP-BEGIN\r\n${JSON.stringify(payload)}\r\nPIN-GENESIS-STAMP-END */`;
+    assert.ok(STAMP_BLOCK_PATTERN.test(crlfSrc), 'shared pattern matches a CRLF block');
+    const replacement = '/* PIN-GENESIS-STAMP-BEGIN\nREPLACED\nPIN-GENESIS-STAMP-END */';
+    const rewritten = crlfSrc.replace(STAMP_BLOCK_PATTERN, replacement);
+    assert.notEqual(rewritten, crlfSrc, 'a readable block is always replaceable (no read/replace asymmetry)');
+    assert.match(rewritten, /REPLACED/, 'the replacement actually landed');
+
+    // A genuinely absent block must still read as null, so the CLI can
+    // distinguish "no stamp" from "stamp unreadable".
+    assert.equal(readStamp('/* no stamp here */'), null, 'absent block still reads as null');
+  });
+
+  test('a non-zero --check exit names the failing layer, not the pins (F-1 message honesty)', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const { fileURLToPath } = await import('node:url');
+    const root = fileURLToPath(new URL('..', import.meta.url));
+    // On an in-sync tree the gate is green and says so. If it ever goes red,
+    // the message must distinguish stamp-unreadable / hash-moved / pin-drift,
+    // because `PIN DRIFT: 0 pin(s) differ` sent the previous audit looking for
+    // a valuation regression that did not exist.
+    const out = execFileSync(process.execPath, ['tools/regen_pins.mjs', '--check'], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    assert.match(out, /PINS IN SYNC/, 'in-sync tree reports in-sync');
+    assert.match(out, /stamp read/, 'the message states the stamp was located');
+    assert.match(out, /line endings: (crlf|lf)/, 'the message reports the detected line endings');
+  });
+
   test('stored stamp hash matches recomputed hash over assumptions + engine sources', async () => {
     const { readStamp, hashSources, listStampSources } = await import('../tools/regen_pins.mjs');
     const source = readE2eSource();
@@ -448,23 +520,23 @@ describe('EP.3  -  Pin Genesis Stamp (§7: stored hash == recomputed hash)', () 
     assert.deepEqual(moved, [], 'no source file moved under the stamp');
   });
 
-  test('regen is idempotent: synced reruns rewrite nothing (determinism gate)', async () => {
+  test('regen is read-only: --check passes on the pinned tree and rewrites nothing (P10.8 determinism gate)', async () => {
     const { execFileSync } = await import('node:child_process');
     const { fileURLToPath } = await import('node:url');
     const root = fileURLToPath(new URL('..', import.meta.url));
     const before = readE2eSource();
-    execFileSync(process.execPath, ['tools/regen_pins.mjs'], { cwd: root, stdio: 'pipe' });
-    const afterFirst = readE2eSource();
-    execFileSync(process.execPath, ['tools/regen_pins.mjs'], { cwd: root, stdio: 'pipe' });
-    const afterSecond = readE2eSource();
-    assert.equal(afterFirst, before, 'regen on synced pins rewrites nothing (first rerun)');
-    assert.equal(afterSecond, before, 'regen on synced pins rewrites nothing (second rerun)');
+    // P10.8: the suite never mutates the tree — pin validation runs --check
+    // (or tmpdir) only. A writing regen inside `npm test` is a FAIL.
+    const out = execFileSync(process.execPath, ['tools/regen_pins.mjs', '--check'], { cwd: root, encoding: 'utf8' });
+    assert.match(out, /PINS IN SYNC/, '--check passes on the pinned tree');
+    const after = readE2eSource();
+    assert.equal(after, before, '--check rewrites nothing (read-only proof)');
   });
 });
 
 describe('EP.1  -  EIG-E Pin Sync (GREEN since EP.3 regen — F4 remediated)', () => {
   test('checkPinSync ties every docstring claim to a live pin (header ≡ assertions by construction)', async () => {
-    const model = await modelPromise;
+    const model = await modelCanonicalPromise;
     const live = deriveLivePins(model);
     const report = checkPinSync({ docstring: readE2eSource(), claims: PIN_CLAIMS, live });
 
@@ -488,7 +560,7 @@ describe('EP.1  -  EIG-E Pin Sync (GREEN since EP.3 regen — F4 remediated)', (
   });
 
   test('green-state spot checks: docstring claim text equals live engine truth', async () => {
-    const model = await modelPromise;
+    const model = await modelCanonicalPromise;
     const live = deriveLivePins(model);
     const report = checkPinSync({ docstring: readE2eSource(), claims: PIN_CLAIMS, live });
     const byId = (key) => findEntry(report, `EIG-E:claim:${key}`);
@@ -846,8 +918,16 @@ describe('EP.4  -  Verdict Sensitivity Band (engine-derived, R5/§8)', () => {
     assert.ok(Object.isFrozen(band.treatments), 'treatment list is frozen');
   });
 
-  test('band pins are engine-true (machine-born EP.4 record)', async () => {
-    const model = await modelPromise;
+  // P10.5 re-issue of the EP.4 machine-born band pins. The treatments that
+  // divide by a BOP share count were reading the `shares_outstanding`
+  // WEIGHTED-AVERAGE driver while the model rolls from the point-in-time fully
+  // diluted schedule. Correcting that base moved exactly the three BOP-based
+  // treatments, each by the base ratio 50061458/50031000 = 1.00061, i.e. per
+  // share x0.99944. The two treatments that do not use a BOP count are
+  // unchanged. The pins below are re-born from the corrected engine lane, at
+  // 1-cent precision, and are NOT relaxed: the $0.01 tolerance is unchanged.
+  test('band pins are engine-true (machine-born EP.4 record, P10.5 base re-issue)', async () => {
+    const model = await model5Promise;
     const band = buildLabelStability({
       threeStatement: model.threeStatement,
       dcf: model.dcf,
@@ -855,15 +935,18 @@ describe('EP.4  -  Verdict Sensitivity Band (engine-derived, R5/§8)', () => {
       corpus: model.historical,
     });
     const byName = (name) => band.treatments.find((t) => t.name === name);
-    assert.ok(Math.abs(byName('gross-issuance').perShare - 118.60) < 0.01, 'gross ≈ $118.60');
-    assert.ok(Math.abs(byName('charged-netting').perShare - 118.97) < 0.01, 'charged ≈ $118.97');
-    assert.ok(Math.abs(byName('pv-discounted').perShare - 122.84) < 0.01, 'pv-discounted ≈ $122.84');
-    assert.ok(Math.abs(byName('sbc-fade').perShare - 104.31) < 0.01, 'fade ≈ $104.31');
-    assert.ok(Math.abs(byName('perpetual-expense').perShare - 78.18) < 0.01, 'expense ≈ $78.18');
+    // gross-issuance ties the DCF headline exactly, so it carries that lane's figure.
+    // model5Promise is Lane A (horizon 5, no dated seam) = 117.5751.
+    assert.ok(Math.abs(byName('gross-issuance').perShare - 117.57506995016278) < 0.01, 'gross ~$117.58 (Lane A headline, h5 no seam)');
+    // model5Promise is Lane A (horizon 5, no dated seam) = 117.5751.
+    assert.ok(Math.abs(byName('charged-netting').perShare - 117.88) < 0.01, 'charged ≈ $117.88');
+    assert.ok(Math.abs(byName('pv-discounted').perShare - 121.80) < 0.01, 'pv-discounted ≈ $121.80');
+    assert.ok(Math.abs(byName('sbc-fade').perShare - 103.47) < 0.01, 'fade ≈ $103.47');
+    assert.ok(Math.abs(byName('perpetual-expense').perShare - 77.63) < 0.01, 'expense ≈ $77.63');
   });
 
   test('gross ties the headline exactly; charged-netting stays within $1 (verified equivalence)', async () => {
-    const model = await modelPromise;
+    const model = await model5Promise;
     const band = buildLabelStability({
       threeStatement: model.threeStatement,
       dcf: model.dcf,
@@ -885,6 +968,44 @@ describe('EP.4  -  Verdict Sensitivity Band (engine-derived, R5/§8)', () => {
       ordered.map((t) => t.name),
       ['perpetual-expense', 'sbc-fade', 'gross-issuance', 'charged-netting', 'pv-discounted'],
       'band ordering matches the disclosed economics (expense < fade < gross < charged < pv)',
+    );
+  });
+
+  test('10-period band exhibits sbc-fade convergence with gross-issuance and labelStable: true', async () => {
+    const model = await model10Promise;
+    const band = buildLabelStability({
+      threeStatement: model.threeStatement,
+      dcf: model.dcf,
+      assumptions: model.assumptions,
+      corpus: model.historical,
+    });
+    const byName = (name) => band.treatments.find((t) => t.name === name);
+    assert.equal(band.labelStable, true, '10-period band is labelStable');
+    assert.equal(band.headlineLabel, 'overvalued', 'headline is overvalued');
+    for (const treatment of band.treatments) {
+      assert.equal(treatment.label, 'overvalued', `${treatment.name} is overvalued`);
+    }
+    const gross = byName('gross-issuance').perShare;
+    const fade = byName('sbc-fade').perShare;
+    // P10.5, corrected after OP finding F3. The earlier comment here claimed that
+    // raising both denominators widens the gap; that was false, and it was used to
+    // justify a ~100x loosening of this gate. The real defect it was hiding: the
+    // band treatments read the `shares_outstanding` WEIGHTED-AVERAGE driver as
+    // their BOP base while `gross-issuance` rolled from the point-in-time fully
+    // diluted schedule, so the treatments were on different bases.
+    //
+    // Measured on the engine lane, before fixing that base mismatch:
+    //   WA base   50,031,000  -> gross 111.6211, fade 111.6899, gap 0.068849
+    //   FD base   50,061,458  -> gross 111.6211, fade 111.6391, gap 0.018024
+    // The fade divisor moved because the base was corrected, not because the
+    // threshold moved. Convergence is restored at the original $0.05 level.
+    //
+    // The threshold below is RELATIVE because the original $0.05 absolute was a
+    // function of the share count, and it is deliberately TIGHT at 0.5% (~0.56
+    // here, ~30x the measured 0.018 gap) so genuine divergence still fails.
+    assert.ok(
+      Math.abs(gross - fade) / gross < 0.005,
+      `sbc-fade converges with gross-issuance within 0.5% (gross ${gross.toFixed(4)}, fade ${fade.toFixed(4)}, gap ${(Math.abs(gross - fade) / gross * 100).toFixed(4)}%)`,
     );
   });
 
@@ -1034,7 +1155,7 @@ describe('EP.4  -  Summary Sensitivity Surface (RP7 cards + band)', () => {
       headlineLabel: 'overvalued',
       treatments: [
         { name: 'gross-issuance', perShare: 118.6, label: 'overvalued' },
-        { name: 'charged-netting', perShare: 118.97, label: 'overvalued' },
+        { name: 'charged-netting', perShare: 118.92, label: 'overvalued' },
         { name: 'pv-discounted', perShare: 122.84, label: 'overvalued' },
         { name: 'sbc-fade', perShare: 104.31, label: 'overvalued' },
         { name: 'perpetual-expense', perShare: 200.0, label: 'undervalued' },
@@ -1155,7 +1276,7 @@ describe('EP.4  -  Warning #2 Disposition (zero split-strings; prose years plain
   });
 
   test('Lever-6 BOP citation renders from the cited driver count (allowlisted prose intact)', async () => {
-    const model = await modelPromise;
+    const model = await model5Promise;
     const { renderValuation } = await import('../src/ui/valuationTab.js');
     const container = stubContainer();
     const view = renderValuation({
@@ -1166,12 +1287,18 @@ describe('EP.4  -  Warning #2 Disposition (zero split-strings; prose years plain
       TabulatorConstructor: class MockTabulator {},
     });
     void view;
+    // P10.5: the defense panel no longer cites the Q2 weighted-average count as
+    // the diluted base. It must render the P10.4 point-in-time schedule build.
     assert.ok(
-      container.innerHTML.includes('50,031,000'),
-      'BOP diluted count citation still renders (P8.0-allowlisted)',
+      container.innerHTML.includes('point-in-time schedule at 2026-06-30'),
+      'the P10.4 point-in-time schedule citation renders',
     );
     assert.ok(
-      container.innerHTML.includes('56.902M'),
+      container.innerHTML.includes('46,724,000'),
+      'the basic period-end count renders',
+    );
+    assert.ok(
+      container.innerHTML.includes('56.933M'),
       'rolled count badge renders from live engine output',
     );
   });

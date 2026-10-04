@@ -100,35 +100,38 @@ export function apply(base, scenario = DEFAULT_SCENARIO) {
       );
     }
 
-    const rawValue = driver.value + delta;
-    const min = driver.min;
-    const max = driver.max;
+    let clampedValue = driver.value;
+    if (typeof driver.value === 'number') {
+      const rawValue = driver.value + delta;
+      const min = driver.min;
+      const max = driver.max;
 
-    let clampedValue = rawValue;
-    if (rawValue < min) {
-      clampedValue = min;
-      clampedDrivers.push(
-        Object.freeze({
-          name: driver.name,
-          requested: rawValue,
-          applied: clampedValue,
-          bound: 'min',
-          min,
-          max,
-        }),
-      );
-    } else if (rawValue > max) {
-      clampedValue = max;
-      clampedDrivers.push(
-        Object.freeze({
-          name: driver.name,
-          requested: rawValue,
-          applied: clampedValue,
-          bound: 'max',
-          min,
-          max,
-        }),
-      );
+      clampedValue = rawValue;
+      if (typeof min === 'number' && rawValue < min) {
+        clampedValue = min;
+        clampedDrivers.push(
+          Object.freeze({
+            name: driver.name,
+            requested: rawValue,
+            applied: clampedValue,
+            bound: 'min',
+            min,
+            max,
+          }),
+        );
+      } else if (typeof max === 'number' && rawValue > max) {
+        clampedValue = max;
+        clampedDrivers.push(
+          Object.freeze({
+            name: driver.name,
+            requested: rawValue,
+            applied: clampedValue,
+            bound: 'max',
+            min,
+            max,
+          }),
+        );
+      }
     }
 
     const appliedDriver = Object.freeze({
@@ -140,7 +143,7 @@ export function apply(base, scenario = DEFAULT_SCENARIO) {
       max: driver.max,
       step: driver.step,
       units: driver.units,
-      scenarioDeltas: Object.freeze({ ...driver.scenarioDeltas }),
+      scenarioDeltas: driver.scenarioDeltas ? Object.freeze({ ...driver.scenarioDeltas }) : null,
       notes: driver.notes,
       marking: driver.marking,
       asOf: driver.asOf,

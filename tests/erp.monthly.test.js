@@ -25,7 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { percent } from '../src/ui/format.js';
-import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
+import { P104_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ASSUMPTIONS_PATH = path.join(ROOT, 'src/data/assumptions.json');
@@ -117,10 +117,56 @@ describe('P6R3.1  -  Quality Gates: Scope & Invariance', () => {
       diff = execSync('git diff HEAD -- src/data/assumptions.json', { cwd: ROOT, encoding: 'utf8' }).trim();
     }
     assert.ok(diff.length > 0, 'assumptions.json must have diff vs baseline');
-    const changedLines = diff.split('\n').filter((l) => l.startsWith('+') || l.startsWith('-'));
-    for (const line of changedLines) {
-      if (line.startsWith('+++') || line.startsWith('---')) continue;
-      assert.ok(
+    const FP1_EXACT_BLOCK_LINES = new Set([
+      '{',
+      '"name": "paid_subscriber_fade_floor",',
+      '"label": "Paid Subscriber Fade Floor",',
+      '"group": "revenue",',
+      '"value": 0.04,',
+      '"min": 0.01,',
+      '"max": 0.1,',
+      '"step": 0.001,',
+      '"units": "ratio",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": -0.01,',
+      '"bull": 0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.D: Linear fade floor for subscriber growth over FY2031–FY2035 (default 4.0%), bounded by terminal_growth_rate < fade_floor < paid_subscriber_growth."',
+      '},',
+      '"name": "sbc_fade_end_pct_of_revenue",',
+      '"label": "SBC Fade End (% of Revenue)",',
+      '"group": "sbc",',
+      '"value": 0.08,',
+      '"min": 0.03,',
+      '"max": 0.15,',
+      '"step": 0.0025,',
+      '"units": "pct_of_revenue",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": 0.01,',
+      '"bull": -0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.C: Steady-state terminal SBC-to-revenue ratio endpoint (default 8.0%, matching SBC_FADE_STEADY_STATE_PCT), promoted into base FY2031–FY2035 path."',
+      '},',
+      '{',
+      '"name": "fade_shape",',
+      '"label": "Growth Fade Shape",',
+      '"group": "market",',
+      '"value": "linear",',
+      '"units": "shape",',
+      '"marking": "EST",',
+      '"notes": "EST judgment per Phase 9 FP.B: Linear fade trajectory for the FY2031–FY2035 glide stage (v1; geometric named as future extension, not a silent alternative)."',
+      '}',
+    ]);
+
+    function isAllowedLine(line) {
+      const stripped = line.replace(/^[+-]\s*/, '').trim();
+      if (FP1_EXACT_BLOCK_LINES.has(stripped)) return true;
+      return (
+        line.includes('paid_subscriber_fade_floor') ||
+        line.includes('sbc_fade_end_pct_of_revenue') ||
+        line.includes('fade_shape') ||
         line.includes('equity_risk_premium') ||
         line.includes('0.0446') ||
         line.includes('0.0425') ||
@@ -135,20 +181,168 @@ describe('P6R3.1  -  Quality Gates: Scope & Invariance', () => {
         line.includes('peers_beta.json') ||
         line.includes('Spotify') ||
         line.includes('Hamada') ||
-        line.includes('provider') ||
-        line.includes('stockanalysis') ||
-        line.includes('EDGAR') ||
-        line.includes('url') ||
-        line.includes('notes'),
-        `Unexpected change in assumptions.json: ${line}`,
+        line.includes('stockanalysis.com') ||
+        line.includes('157.85') ||
+        line.includes('156.24') ||
+        line.includes('158.47') ||
+        line.includes('154.30') ||
+        line.includes('1,294,851') ||
+        line.includes('752,400') ||
+        line.includes('155.00') ||
+        line.includes('159.20') ||
+        line.includes('154.50') ||
+        line.includes('11.1225%') ||
+        line.includes('853.75bps') ||
+        line.includes('8.6638%') ||
+        line.includes('616bps') ||
+        line.includes('50,031') ||
+        line.includes('40,387,012') ||
+        line.includes('6,399,257') ||
+        line.includes('46,786,269') ||
+        line.includes('treasury-stock-method') ||
+        line.includes('Securities and Exchange Commission') ||
+        line.includes('duol-20260630.htm') ||
+        line.includes('FRED') ||
+        line.includes('H.15 Selected Interest Rates') ||
+        line.includes('spot/statistics') ||
+        line.includes('duol/statistics') ||
+        line.includes('paid-subscriber observations') ||
+        line.includes('subscription revenue 873,442') ||
+        line.includes('H1 FY2026 cited repurchases 69,603') ||
+        line.includes('EST judgment - H1 like-for-like') ||
+        line.includes('EST judgment — H1 like-for-like') ||
+        line.includes('EST judgment - held constant') ||
+        line.includes('EST judgment — held constant') ||
+        line.includes('EST judgment - normalized structural rate') ||
+        line.includes('EST judgment — normalized structural rate') ||
+        line.includes('FY2025 actual: proceeds from stock option') ||
+        line.includes('FY2025 actual magnitude: taxes paid related') ||
+        line.includes('FY2025 actual: interest income') ||
+        // P10.3: the frozen `sbc_issuance_price` driver (canonical benchmark
+        // contract - issuance must not be driven by the benchmark). Authorized
+        // by docs/phases/phase_10.md §P10.3; value is the same MKT snapshot
+        // close already allow-listed above, so no new market figure enters.
+        line.includes('sbc_issuance_price') ||
+        line.includes('SBC Issuance Price (Frozen)') ||
+        line.includes('FROZEN issuance reference price') ||
+        line.includes('benchmark-only input') ||
+        line.includes('Held constant across all three scenarios') ||
+        // P10.8 beta re-anchor: the driver moves from the peer MEDIAN (1.47) to the
+        // peer MEAN (1.49). This is a sanctioned re-basing of one enumerated driver,
+        // not a new input: no new peer, price, or market figure enters, and the
+        // per-peer regressions and Hamada legs are unchanged. Scoped to the two
+        // numerals so a THIRD beta value, or a `"value":` change on any other
+        // driver, still FAILS.
+        line.includes('"value": 1.49,') ||
+        line.includes('"value": 1.47,') ||
+        line.includes('Bottom-up MEAN unlevered beta = 1.49') ||
+        line.includes('Bottom-up median unlevered beta = 1.47') ||
+        line.includes('mean = 1.4919 (1.49)') ||
+        line.includes('median = 1.4713 (rounded to step 0.01 = 1.47)') ||
+        line.includes('Peer statistics: mean = 1.4919') ||
+        line.includes('MEAN, not median, is the basis') ||
+        line.includes('median is definitionally the middle observation') ||
+        line.includes('median outlier-resistance') ||
+        line.includes('mean unlevered asset beta (1.49)') ||
+        line.includes('median unlevered asset beta (1.47)') ||
+        line.includes('Peer regression quality independently favours') ||
+        line.includes('rejected on its own statistics') ||
+        line.includes('not used: DUOL own') ||
+        line.includes('Cross-check disclosed alongside and NOT used')
       );
     }
+
+    const changedLines = diff.split('\n').filter((l) => l.startsWith('+') || l.startsWith('-'));
+
+    // P10.3 scope rule: the ONLY authorized addition to assumptions.json is one
+    // contiguous `+` block that introduces the frozen `sbc_issuance_price`
+    // driver (docs/phases/phase_10.md §P10.3 "Benchmark Contract"). Scoping the
+    // allowance to that exact block keeps the gate's strength: a `"min": 10,`
+    // line anywhere else, or a second added driver, is still a FAIL.
+    const blockStart = changedLines.findIndex((l) => l.includes('"name": "sbc_issuance_price"'));
+    let blockEnd = -1;
+    if (blockStart !== -1) {
+      for (let i = blockStart; i < changedLines.length; i += 1) {
+        if (!changedLines[i].startsWith('+')) {
+          blockEnd = i;
+          break;
+        }
+      }
+      if (blockEnd === -1) blockEnd = changedLines.length;
+    }
+    const inAuthorizedBlock = (line, index) =>
+      blockStart !== -1 && index >= blockStart && index < blockEnd;
+
+    changedLines.forEach((line, index) => {
+      if (line.startsWith('+++') || line.startsWith('---')) return;
+      if (inAuthorizedBlock(line, index)) return;
+      assert.ok(
+        isAllowedLine(line),
+        `Unexpected change in assumptions.json: ${line}`,
+      );
+    });
+  });
+
+  test('NEGATIVE CONTROL: bogus assumptions line is rejected by gate matcher', () => {
+    const FP1_EXACT_BLOCK_LINES = new Set([
+      '{',
+      '"name": "paid_subscriber_fade_floor",',
+      '"label": "Paid Subscriber Fade Floor",',
+      '"group": "revenue",',
+      '"value": 0.04,',
+      '"min": 0.01,',
+      '"max": 0.1,',
+      '"step": 0.001,',
+      '"units": "ratio",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": -0.01,',
+      '"bull": 0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.D: Linear fade floor for subscriber growth over FY2031–FY2035 (default 4.0%), bounded by terminal_growth_rate < fade_floor < paid_subscriber_growth."',
+      '},',
+      '"name": "sbc_fade_end_pct_of_revenue",',
+      '"label": "SBC Fade End (% of Revenue)",',
+      '"group": "sbc",',
+      '"value": 0.08,',
+      '"min": 0.03,',
+      '"max": 0.15,',
+      '"step": 0.0025,',
+      '"units": "pct_of_revenue",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": 0.01,',
+      '"bull": -0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.C: Steady-state terminal SBC-to-revenue ratio endpoint (default 8.0%, matching SBC_FADE_STEADY_STATE_PCT), promoted into base FY2031–FY2035 path."',
+      '},',
+      '{',
+      '"name": "fade_shape",',
+      '"label": "Growth Fade Shape",',
+      '"group": "market",',
+      '"value": "linear",',
+      '"units": "shape",',
+      '"marking": "EST",',
+      '"notes": "EST judgment per Phase 9 FP.B: Linear fade trajectory for the FY2031–FY2035 glide stage (v1; geometric named as future extension, not a silent alternative)."',
+      '}',
+    ]);
+    const bogus = '+     "value": 999,';
+    const stripped = bogus.replace(/^[+-]\s*/, '').trim();
+    assert.equal(FP1_EXACT_BLOCK_LINES.has(stripped), false);
+    assert.equal(
+      bogus.includes('equity_risk_premium') ||
+      bogus.includes('paid_subscriber_fade_floor') ||
+      bogus.includes('sbc_fade_end_pct_of_revenue') ||
+      bogus.includes('fade_shape'),
+      false,
+      'bogus line must be rejected by assumptions gate',
+    );
   });
 
   test('engine diff against v1.0-P6R3-base touched only authorized engine files', () => {
-    // Authorized drift from the P6R3 cost-of-capital baseline is the Economy
-    // Phase set (EP_AUTHORIZED_ENGINE). EP authorization: Director un-park
-    // order 2026-09-10, `docs/logs/ds/economy_phase.md` §5.
+    // Authorized drift from the P6R3 cost-of-capital baseline: the Economy
+    // Phase set, RP10 ratios, plus the Phase 9 Three-Stage Fade engine modules
+    // (P104_AUTHORIZED_ENGINE, authorized by docs/phases/phase_9.md §3 Task FP.1 Deliverables).
     //
     // Hardening note (EP-FIX1, F1): this gate previously ran a bare `git diff`
     // inside try/catch — blind to untracked files (so `invariants.js` and
@@ -157,7 +351,7 @@ describe('P6R3.1  -  Quality Gates: Scope & Invariance', () => {
     // tracked diff with `git ls-files --others` and fails closed on an
     // unresolvable baseline; assertions run outside any `try`.
     // See tests/_scope_gate.js.
-    const unauthorized = unauthorizedEngineFiles('v1.0-P6R3-base', EP_AUTHORIZED_ENGINE);
+    const unauthorized = unauthorizedEngineFiles('v1.0-P6R3-base', P104_AUTHORIZED_ENGINE);
     assert.deepEqual(
       unauthorized,
       [],
@@ -179,7 +373,7 @@ describe('P6R3.1  -  Quality Gates: Scope & Invariance', () => {
     const probePath = path.join(ROOT, 'src', 'engine', probeName);
     fs.writeFileSync(probePath, '// scope-gate tamper probe (deleted in finally)\n', 'utf8');
     try {
-      const flagged = unauthorizedEngineFiles('v1.0-P6R3-base', EP_AUTHORIZED_ENGINE);
+      const flagged = unauthorizedEngineFiles('v1.0-P6R3-base', P104_AUTHORIZED_ENGINE);
       assert.deepEqual(
         flagged,
         [`src/engine/${probeName}`],

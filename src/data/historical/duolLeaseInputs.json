@@ -1,0 +1,78 @@
+{
+  "artifact": "duolingoLeaseInputs",
+  "version": "1.0",
+  "owner": "P10.7",
+  "purpose": "Cited data layer for the two lease legs that the relative methods and the cross-method disclosure both consume: the operating lease cost added back to reach EBITDAR, and the long-term operating lease liability capitalised into Enterprise Value.",
+  "whyThisExists": "P10.4 finding F2: rent lived as an uncited literal. A lease figure that feeds EV/EBITDAR must be a cited filing input with verified primary-source provenance.",
+  "filing": {
+    "form": "10-Q",
+    "registrant": "Duolingo, Inc.",
+    "cik": "0001562088",
+    "accession": "0001628280-26-053603",
+    "filedOn": "2026-08-06",
+    "periodOfReport": "2026-06-30",
+    "documentUrl": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+    "retrievedAt": "2026-09-26T06:33:07.647Z"
+  },
+  "leaseCost": {
+    "label": "Operating lease cost added back to EBITDA to reach EBITDAR",
+    "value": 12071,
+    "units": "USD thousands",
+    "provenanceStatus": "verified_primary_filing_annual",
+    "citation": {
+      "statement": "Note 9. Leases - Schedule of Components of Lease Cost (Details)",
+      "renderedTable": "R58",
+      "renderedTableUrl": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/R58.htm",
+      "accession": "0001628280-26-012494",
+      "form": "10-K",
+      "periodOfReport": "2025-12-31",
+      "measurementPeriod": "12 Months Ended Dec. 31, 2025",
+      "retrievedAt": "2026-09-26T06:33:07.900Z",
+      "rFileSha256": "6ee76828d7e1b1843e31eb29e1814bf3edfba80525b96c70f9ec54231ce21681",
+      "rFileBytes": 22289
+    },
+    "disclosure": "Operating lease cost is an annual flow from FY2025 Form 10-K Note 9 (R58.htm) used as the annual run-rate add-back to forward EBITDA to reach forward EBITDAR, as interim 10-Qs under ASC 842 do not disclose quarterly lease cost components.",
+    "unresolved": []
+  },
+  "leaseLiability": {
+    "label": "Long-term operating lease liability capitalised into Enterprise Value",
+    "value": 86136,
+    "units": "USD thousands",
+    "provenanceStatus": "verified_primary_filing_balance_sheet",
+    "citation": {
+      "statement": "Unaudited Condensed Consolidated Balance Sheets",
+      "renderedTable": "R2",
+      "renderedTableUrl": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/R2.htm",
+      "accession": "0001628280-26-053603",
+      "form": "10-Q",
+      "periodOfReport": "2026-06-30",
+      "measurementPeriod": "As of June 30, 2026",
+      "retrievedAt": "2026-09-26T06:33:07.647Z",
+      "rFileSha256": "848fba2cd731ec6990f64b17ebf6920d18b2456bb14200a90446f72de4ee5ea6",
+      "rFileBytes": 132371
+    },
+    "disclosure": "The current portion of operating lease liabilities is reported within accrued expenses and is not separately broken out in the quarterly filing; only the noncurrent operating lease liability line ($86,136k) is capitalised into Enterprise Value. That asymmetry is disclosed rather than smoothed over.",
+    "unresolved": []
+  },
+  "annualReference": {
+    "label": "FY2025 Form 10-K Note 9 operating lease cost, annual",
+    "value": 12071,
+    "units": "USD thousands",
+    "note": "Quoted for the annual view in the cross-method disclosure. Reconciles with leaseCost.",
+    "provenanceStatus": "verified_primary_filing_annual",
+    "citation": {
+      "statement": "Note 9. Leases - Schedule of Components of Lease Cost (Details)",
+      "form": "10-K",
+      "accession": "0001628280-26-012494",
+      "renderedTable": "R58",
+      "renderedTableUrl": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/R58.htm",
+      "periodOfReport": "2025-12-31",
+      "measurementPeriod": "12 Months Ended Dec. 31, 2025",
+      "retrievedAt": "2026-09-26T06:33:07.900Z",
+      "rFileSha256": "6ee76828d7e1b1843e31eb29e1814bf3edfba80525b96c70f9ec54231ce21681",
+      "rFileBytes": 22289
+    },
+    "unresolved": []
+  },
+  "gateRule": "src/data/leaseGate.js requires every lease input to carry a filing citation with accession, statement and rendered-table URL, and requires a non-empty provenanceStatus. An input whose provenanceStatus begins with 'unverified' must be surfaced in disclosure as unverified rather than described as filed."
+}

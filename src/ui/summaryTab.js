@@ -5,7 +5,7 @@
  *  1. Executive Verdict Header (RP7.1 `.summary-headline-grid`): DCF fair value,
  *     benchmark share price, upside vs market, and min-max spread with verdict badge
  *  2. Agreement Synthesis Table (RP7.1 `.weighted-valuation-table`, agreement-only
- *     contents): per-method share price, equity value ($mm), upside %, status pill,
+ *     contents): per-method share price, equity value ($M), upside %, status pill,
  *     plus a bold min-max spread row. No method-standing column, no single-figure row.
  *  3. Valuation Bridge Snapshot (EV, Net Cash, Equity Value, Diluted Shares, DCF Price)
  *  3. Operating Quality & Rule of 40 Dashboard (Growth, FCF Margin, Rule of 40 Score, Gross Margin)
@@ -23,8 +23,22 @@
 import { EngineError } from '../data/errors.js';
 import { RECOMMENDATION_THRESHOLDS } from '../data/constants.js';
 import { extractRows } from '../data/schema.js';
+import { describeStageStructure } from '../engine/methods/fcffDcf.js';
+import { canonicalDcfPerShare } from '../engine/methods/fcffDcf.js';
 import { usd, percent, estSuffix, mktBadge } from './format.js';
 import { createWaterfall } from './charts.js';
+
+// P10.6: one resolver for the canonical add-back DCF figure, memoised per DCF
+// object so every summary surface reports the same per-share number on the same
+// basis. Previously these five sites each read `currentDcf.perShare`, which is
+// the finite-roll INTERMEDIATE, while the valuation headline and the
+// recommendation used the canonical after-future-dilution figure.
+const summaryBasisCache = new WeakMap();
+function summaryBasisOf(dcf) {
+  if (!dcf || typeof dcf !== 'object') return canonicalDcfPerShare(null);
+  if (!summaryBasisCache.has(dcf)) summaryBasisCache.set(dcf, canonicalDcfPerShare(dcf));
+  return summaryBasisCache.get(dcf);
+}
 
 /**
  * Maps KPI historical dataset rows into a metric lookup by latest period.
@@ -126,38 +140,41 @@ export function renderSummary({
 
   function renderMultiMethodVerdictCard() {
     const marketPrice = currentRec?.marketPrice ?? currentMarketPrice?.price;
-    const isOverridden = Number.isFinite(currentRec?.marketPrice) &&
-                         Number.isFinite(currentMarketPrice?.price) &&
-                         Math.abs(currentRec.marketPrice - currentMarketPrice.price) > 1e-4;
+    // P10.3: the "edited benchmark" marker is read from the canonical
+    // benchmark's declared `isEdited` flag, never inferred by comparing two
+    // prices. Now that the benchmark IS the market price state, a numeric
+    // comparison is always equal and would never mark an override.
+    const isOverridden = currentMarketPrice?.isEdited === true ||
+                         currentMarketPrice?.benchmark?.isEdited === true;
     const overrideMarker = isOverridden ? '<span class="benchmark-override-badge font-small text-muted"> (edited benchmark)</span>' : '';
 
     const priceAsOf = currentMarketPrice?.asOf || (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf : '') || '';
     const priceProvider = currentMarketPrice?.source?.provider ?? 'stockanalysis.com';
     const retrievedText = currentMarketPrice?.retrievedAt ? ` · Retrieved: ${currentMarketPrice.retrievedAt.slice(0, 10)}` : '';
-    const intradayPrice = currentMarketPrice?.intradayPrice;
-    // Live-close states carry intradayPrice 0 when the quote endpoint sends null
-    // (Number(null) === 0 upstream); only a positive print is a real intraday quote.
-    const intradayLine = Number.isFinite(intradayPrice) && intradayPrice > 0
-      ? `<div class="rec-hero-sub">Intraday: ${usd(intradayPrice, { decimals: 2 })}</div>`
-      : '';
 
     const underThresh = RECOMMENDATION_THRESHOLDS.undervalued;
     const overThresh = RECOMMENDATION_THRESHOLDS.overvalued;
 
+    // Stage structure, label, and basis come from the engine disclosure. When
+    // the DCF output carries no stage data the structure is reported as
+    // undisclosed instead of silently relabelled "2-Stage".
+    const stageDisclosure = describeStageStructure(currentDcf || {});
     const activeVerdict = currentVerdict || {
       verdict: currentRec?.label || 'fair',
       agreement: {
         unanimous: false,
         summary: 'Multi-method agreement evaluation active.',
-        spread: { min: currentDcf?.perShare, max: currentDcf?.perShare, span: 0 },
+        // P10.6: canonical basis for the spread, matching the recommendation.
+        spread: { min: summaryBasisOf(currentDcf).perShare, max: summaryBasisOf(currentDcf).perShare, span: 0 },
         counts: { undervalued: 0, overvalued: 0, fair: 1, total: 1 }
       },
       methodResults: [
         {
           method: 'fcff_dcf',
-          label: '2-Stage FCFF DCF',
-          basis: 'FY2026-FY2030 + Gordon',
-          impliedPerShare: currentDcf?.perShare,
+          label: stageDisclosure.label,
+          basis: stageDisclosure.basis,
+          stageDisclosure,
+          impliedPerShare: summaryBasisOf(currentDcf).perShare,
           upsidePct: currentRec?.upsidePct,
           verdict: currentRec?.label || 'fair'
         }
@@ -186,7 +203,8 @@ export function renderSummary({
     // RP7.1 headline inputs: DCF fair value and its upside vs the benchmark close.
     // Falls back to a recomputed upside only when the recommendation output is absent;
     // no stand-in price is ever invented (non-finite renders as ' - ').
-    const dcfPerShare = currentDcf?.perShare;
+    // P10.6: canonical basis, matching the valuation headline.
+    const dcfPerShare = summaryBasisOf(currentDcf).perShare;
     let dcfUpside = currentRec?.upsidePct;
     if (!Number.isFinite(dcfUpside) && Number.isFinite(dcfPerShare) && Number.isFinite(marketPrice) && marketPrice > 0) {
       dcfUpside = (dcfPerShare - marketPrice) / marketPrice;
@@ -239,7 +257,7 @@ export function renderSummary({
 
         <div class="summary-headline-grid">
           <div class="rec-hero-item">
-            <div class="rec-hero-label">DCF Fair Value (2-Stage FCFF)</div>
+            <div class="rec-hero-label">DCF Fair Value (${stageDisclosure.stageTag} FCFF)</div>
             <div class="rec-hero-value font-mono font-large font-bold">${usd(dcfPerShare, { decimals: 2 })}</div>
             <div class="rec-hero-sub">Implied upside: ${Number.isFinite(dcfUpside) ? percent(dcfUpside, { decimals: 2, showSign: true }) : ' - '}</div>
           </div>
@@ -247,9 +265,8 @@ export function renderSummary({
             <div class="rec-hero-label">Current Benchmark Share Price${overrideMarker}</div>
             <div class="rec-hero-value font-mono font-large">${usd(marketPrice, { decimals: 2 })}</div>
             <div class="rec-hero-sub">${mktBadge({ asOf: priceAsOf, provider: priceProvider })}${retrievedText}</div>
-            ${intradayLine}
             <div class="rec-hero-action">
-              <button type="button" class="btn-refresh-price" data-action="refresh-price">↻ Refresh Live Price</button>
+              <button type="button" class="btn-refresh-price" data-action="refresh-price">↻ Refresh Last Close</button>
             </div>
           </div>
           <div class="rec-hero-item">
@@ -258,11 +275,11 @@ export function renderSummary({
             <div class="rec-hero-sub">DCF vs benchmark close</div>
           </div>
           <div class="rec-hero-item">
-            <div class="rec-hero-label">Valuation Spread (6 Methods)</div>
+            <div class="rec-hero-label">Valuation Spread (Voting Evidence Only)</div>
             <div class="rec-hero-value font-mono font-large font-bold">
-              ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} - ${usd(maxSpread, { decimals: 2 })}` : ' - '}
+              ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} – ${usd(maxSpread, { decimals: 2 })}` : ' - '}
             </div>
-            <div class="rec-hero-sub"><span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span> ${activeVerdict.agreement?.unanimous ? 'Unanimous 6-method agreement' : 'Split; unanimous agreement not reached'}</div>
+            <div class="rec-hero-sub"><span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span> ${activeVerdict.agreement?.unanimous ? 'Unanimous clustered agreement' : 'Split; unanimous agreement not reached'}</div>
           </div>
         </div>
 
@@ -272,7 +289,7 @@ export function renderSummary({
               <tr>
                 <th>Method</th>
                 <th class="align-right">Implied Share Price</th>
-                <th class="align-right">Implied Equity Value ($mm)</th>
+                <th class="align-right">Implied Equity Value ($M)</th>
                 <th class="align-right">Upside %</th>
                 <th>Status</th>
               </tr>
@@ -307,13 +324,13 @@ export function renderSummary({
               <tr class="agreement-spread-row table-row-total">
                 <td><strong>Valuation Spread (min-max)</strong></td>
                 <td class="align-right font-mono font-bold font-large">
-                  ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} - ${usd(maxSpread, { decimals: 2 })}` : ' - '}
+                  ${Number.isFinite(minSpread) && Number.isFinite(maxSpread) ? `${usd(minSpread, { decimals: 2 })} – ${usd(maxSpread, { decimals: 2 })}` : ' - '}
                 </td>
                 <td class="align-right font-mono font-bold">
-                  ${Number.isFinite(minEquityMm) && Number.isFinite(maxEquityMm) ? `${usd(minEquityMm, { decimals: 2 })} - ${usd(maxEquityMm, { decimals: 2 })}` : ' - '}
+                  ${Number.isFinite(minEquityMm) && Number.isFinite(maxEquityMm) ? `${usd(minEquityMm, { decimals: 2 })} – ${usd(maxEquityMm, { decimals: 2 })}` : ' - '}
                 </td>
                 <td class="align-right font-mono font-bold">
-                  ${Number.isFinite(spreadUpsideMin) && Number.isFinite(spreadUpsideMax) ? `${percent(spreadUpsideMin, { decimals: 2, showSign: true })} - ${percent(spreadUpsideMax, { decimals: 2, showSign: true })}` : ' - '}
+                  ${Number.isFinite(spreadUpsideMin) && Number.isFinite(spreadUpsideMax) ? `${percent(spreadUpsideMin, { decimals: 2, showSign: true })} – ${percent(spreadUpsideMax, { decimals: 2, showSign: true })}` : ' - '}
                 </td>
                 <td><span class="rec-badge rec-badge-${badgeClass}">${labelDisplay}</span></td>
               </tr>
@@ -322,23 +339,31 @@ export function renderSummary({
         </div>
 
         <div class="rec-discipline-note">
-          <strong>Mechanical Discipline:</strong> Investment verdict is strictly determined by unanimous agreement across all six independent valuation methods evaluated against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). All six methods must agree beyond the threshold band for a directional verdict; any split produces FAIR (no consensus). Equal standing across all six methods; zero subjective or discretionary editorial language.
+          <strong>Mechanical Discipline:</strong> Investment verdict is strictly determined by clustered evidence agreement evaluated against <code>RECOMMENDATION_THRESHOLDS</code> (Undervalued: &ge; ${percent(underThresh, { decimals: 0, showSign: true })}, Overvalued: &le; ${percent(overThresh, { decimals: 0, showSign: true })}, Fair: otherwise). Methods are grouped into three evidence clusters (Intrinsic DCF; Enterprise-relative EV/Revenue, EV/EBITDAR and Per-User; Equity-cash-flow P/FCF) and each cluster collapses to one breadth observation by majority within the cluster, with exact ties keeping the weaker verdict. Breadth counts clusters (maximum three), never raw method count. Three clusters in agreement carry that verdict; two carry the majority verdict with the minority cluster disclosed; otherwise the aggregate is FAIR with a HOLD note. The SOTP decomposition and the FCFE diagnostic do not vote and enter no range, count, or confidence figure. Zero subjective or discretionary editorial language.
         </div>
         <div class="disclaimer-box lease-convention-note">
-          <strong>Cross-Method Lease Capitalization Disclosure:</strong> DCF keeps operating lease costs within operating cash flows (rent in operating flow), whereas relative valuation methods (EV/Revenue, EV/EBITDAR, SOTP, Per-User) capitalize Duolingo operating lease liabilities into Enterprise Value ($86.136M long-term obligation filed in Q2 Form 10-Q Note 9; current operating lease portion folded into accrued expenses and not separately broken out in quarterly filings; ~$7.204M in annual Form 10-K Note 9; ~$0.14/share materiality) and add back rent ($12.071M filed) to EBITDAR. P/FCF operates on equity-level cash flows after actual lease payments.
+          <strong>Cross-Method Lease Capitalization Disclosure:</strong> DCF keeps operating lease costs within operating cash flows (rent in operating flow), whereas relative valuation methods (EV/Revenue, EV/EBITDAR, SOTP, Per-User) capitalize Duolingo operating lease liabilities into Enterprise Value ($86.136M long-term obligation filed in Q2 Form 10-Q Note 9; current operating lease portion folded into accrued expenses and not separately broken out in quarterly filings; ~$7.204M in annual Form 10-K Note 9; ~$0.14/share materiality) and add back the operating lease cost to EBITDAR (P10.4: this add-back is a cited filing input, but its measurement period is not yet confirmed against the filing, so it is disclosed as unverified rather than as a filed amount; the FY2025 Form 10-K Note 9 annual figure is ~$7.204M). P/FCF operates on equity-level cash flows after actual lease payments.
         </div>
       </div>
     `;
   }
 
   function renderValuationBridgeSnapshot() {
+    const stageBridge = describeStageStructure(currentDcf || {});
     const pvExplicit = currentDcf?.pvExplicit;
     const pvTerminal = currentDcf?.pvTerminal;
+    // Stage present values are read from the disclosure; an undisclosed fade
+    // stage renders as undisclosed, never as a silent zero.
+    const pvExplicitStage = stageBridge.fadePresent
+      ? currentDcf.pvByStage.explicit
+      : pvExplicit;
+    const pvFadeStage = stageBridge.fadePresent ? currentDcf.pvByStage.fade : null;
     const ev = currentDcf?.enterpriseValue;
     const netCash = currentDcf?.netCash;
     const equityVal = currentDcf?.equityValue;
     const shares = currentDcf?.sharesOutstanding;
-    const perShare = currentDcf?.perShare;
+    // P10.6: canonical basis, matching the valuation headline.
+    const perShare = summaryBasisOf(currentDcf).perShare;
 
     const waterfallChart = createWaterfall({ dcf: currentDcf });
 
@@ -361,6 +386,32 @@ export function renderSummary({
               </tr>
             </thead>
             <tbody>
+              ${stageBridge.fadePresent ? `
+              <tr>
+                <td>PV of Explicit Forecast (${stageBridge.firstPeriod}–${stageBridge.explicitLastPeriod})</td>
+                <td class="align-right font-mono">${usd(pvExplicitStage, { decimals: 2 })}</td>
+                <td class="align-right font-mono">${ev > 0 ? percent(pvExplicitStage / ev, { decimals: 1 }) : ' - '}</td>
+                <td>${estSuffix('Stage 1: Explicit FCFs', 'EST')}</td>
+              </tr>
+              <tr>
+                <td>PV of Fade Glide (${stageBridge.fadeFirstPeriod}–${stageBridge.terminalYear})</td>
+                <td class="align-right font-mono">${usd(pvFadeStage, { decimals: 2 })}</td>
+                <td class="align-right font-mono">${ev > 0 ? percent(pvFadeStage / ev, { decimals: 1 }) : ' - '}</td>
+                <td>${estSuffix('Stage 2: Fade Glide', 'EST')}</td>
+              </tr>
+              <tr>
+                <td>PV of Gordon Terminal Value</td>
+                <td class="align-right font-mono">${usd(pvTerminal, { decimals: 2 })}</td>
+                <td class="align-right font-mono">${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : ' - '}</td>
+                <td>${estSuffix('Stage 3: Gordon Growth', 'EST')}</td>
+              </tr>
+              <tr class="table-row-highlight">
+                <td><strong>Implied Enterprise Value (EV)</strong></td>
+                <td class="align-right font-mono font-bold">${usd(ev, { decimals: 2 })}</td>
+                <td class="align-right font-mono font-bold">100.0%</td>
+                <td><code>PV(Explicit) + PV(Fade) + PV(Terminal)</code></td>
+              </tr>
+              ` : `
               <tr>
                 <td>PV of 5-Year Explicit Forecast (FY2026-FY2030)</td>
                 <td class="align-right font-mono">${usd(pvExplicit, { decimals: 2 })}</td>
@@ -379,6 +430,7 @@ export function renderSummary({
                 <td class="align-right font-mono font-bold">100.0%</td>
                 <td><code>PV(Explicit) + PV(Terminal)</code></td>
               </tr>
+              `}
               <tr>
                 <td>(+) Net Cash Bridge (Cash + STI + LTI − Debt)</td>
                 <td class="align-right font-mono">${usd(netCash, { decimals: 2 })}</td>
@@ -607,6 +659,11 @@ export function renderSummary({
     const netCash = currentDcf?.netCash;
     const equityVal = currentDcf?.equityValue;
     const shares = currentDcf?.sharesOutstanding;
+    // P10.6 note: this one site deliberately keeps the DCF's OWN perShare rather
+    // than the canonical figure the surfaces display. `bridgeOk` below asserts
+    // the DCF's internal arithmetic — equityValue * 1000 / shares === perShare —
+    // so feeding it a different basis fails the tie-out for the wrong reason. The
+    // canonical figure is a presentation choice; this is an engine self-check.
     const perShare = currentDcf?.perShare;
     const bridgeOk = Number.isFinite(ev) && Number.isFinite(netCash) && Number.isFinite(equityVal)
       && Number.isFinite(shares) && shares > 0 && Number.isFinite(perShare) && perShare > 0
@@ -710,7 +767,7 @@ export function renderSummary({
       'Expanding user funnel with improving monetization across subscription tiers and the product ecosystem.',
       'Durable brand, daily-habit engagement, and network effects supporting long-term retention.',
       'Multiple margin-expansion levers across subscription mix, operating leverage, and efficiency.',
-      `Mechanical anchor: the six-method agreement verdict is ${verdictBadge} — no single-method call drives the conclusion.`,
+      `Mechanical anchor: the clustered agreement verdict is ${verdictBadge} — no single-method call drives the conclusion.`,
     ];
     const checks = buildHealthChecks();
     return `
@@ -772,7 +829,7 @@ export function renderSummary({
       btn.textContent = 'Refreshing...';
       Promise.resolve(onRefreshPrice()).finally(() => {
         btn.disabled = false;
-        btn.textContent = '↻ Refresh Live Price';
+        btn.textContent = '↻ Refresh Last Close';
       });
     }
   }

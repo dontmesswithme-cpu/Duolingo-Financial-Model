@@ -132,7 +132,7 @@ describe('RP1.1  -  Cover Tab View Controller (src/ui/coverTab.js)', () => {
       sharesOutstanding: 50031000,
     };
     const mockWacc = {
-      wacc: { value: 0.110375 },
+      wacc: { value: 0.111225 },
     };
     const mockRec = {
       recommendation: 'fair',
@@ -172,7 +172,7 @@ describe('RP1.1  -  Cover Tab View Controller (src/ui/coverTab.js)', () => {
     assert.ok(container.innerHTML.includes('$144.08'), 'Must display live DCF per share $144.08');
     assert.ok(container.innerHTML.includes('$157.85'), 'Must display live market price $157.85');
     assert.ok(container.innerHTML.includes('-8.7%'), 'Must display live implied upside %');
-    assert.ok(container.innerHTML.includes('11.04%'), 'Must display active WACC 11.04%');
+    assert.ok(container.innerHTML.includes('11.12%'), 'Must display active WACC 11.12%');
     assert.ok(container.innerHTML.includes('2.50%'), 'Must display terminal growth 2.50%');
     assert.ok(container.innerHTML.includes('50.03M'), 'Must display formatted diluted shares count');
     assert.ok(container.innerHTML.includes('$116.20 – $443.68'), 'Must display multi-method spread');
@@ -413,6 +413,7 @@ describe('RP1 Live App Controller Integration', () => {
       assumptions,
       root,
       now: () => 1725148800000,
+      horizon: 5,
     });
 
     // Verify Cover pane received hydrated markup
@@ -422,8 +423,10 @@ describe('RP1 Live App Controller Integration', () => {
     assert.ok(coverPane.innerHTML.includes('Model Integrity'), 'Cover pane must contain checklist');
     assert.ok(coverPane.innerHTML.includes('Architecture &amp; Section Directory') || coverPane.innerHTML.includes('Architecture & Section Directory'), 'Cover pane must contain directory');
 
-    // Dynamic valuation figure check from live calculation engine (EP.3 normalised terminal)
-    assert.ok(coverPane.innerHTML.includes('$118.60'), 'Cover pane must display live DCF per share $118.60');
+    // Dynamic valuation figure check from the live calculation engine.
+    // P10.6: the cover fair-value tile states the CANONICAL basis (after modeled future
+    // dilution), NOT the finite-roll intermediate. On Lane B (createApp at horizon 5 with
+    assert.ok(coverPane.innerHTML.includes('$119.26'), 'Cover pane must display the canonical DCF per share (Lane B canonical: horizon 5 + dated seam)');
     assert.ok(coverPane.innerHTML.includes('$157.85'), 'Cover pane must display live market price $157.85');
 
     // Trigger driver change: market price update
@@ -432,7 +435,16 @@ describe('RP1 Live App Controller Integration', () => {
 
     // Trigger driver change: terminal growth update
     app.setDriver('terminal_growth_rate', 0.035);
-    assert.ok(coverPane.innerHTML.includes('$129.04'), 'Cover pane must recalculate DCF fair value to $129.04');
+    // P10.3: the benchmark is benchmark-only, so editing the market price moves
+    // the market-price card and the upside but NOT the DCF fair value. The DCF
+    // here is the g=3.50% recalculation, with issuance frozen at
+    // `sbc_issuance_price` (unchanged by the 160.00 benchmark edit above).
+    // The g=3.50% recalculation re-runs the DCF, and the DCF divisor is the
+    // point-in-time fully diluted schedule, so this figure moves with the roll
+    // base rather than being a fixed headline.
+    // P10.6: stated on the CANONICAL basis. Measured off the live cover render at
+    // g = 3.50%: canonical 129.86 (up from the 119.26 pre-edit canonical figure).
+    assert.ok(coverPane.innerHTML.includes('$129.86'), 'Cover pane must recalculate the canonical DCF fair value to $129.86 at g=3.50%');
     assert.ok(coverPane.innerHTML.includes('3.50%'), 'Cover pane must update terminal growth rate display to 3.50%');
 
     app.dispose();

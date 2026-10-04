@@ -6,8 +6,115 @@
  *  - Fail-closed on NaN / Infinity (returns " - ", never renders NaN).
  *  - Pure functions: zero DOM, zero fetch, zero Date.now, zero Math.random.
  *
+ * P10.6 Rendering Security: this module is the single place `escapeText()` and
+ * `safeUrl()` live. Every HTML boundary in `src/ui/` must pass through them, so
+ * that a hostile driver label, source name, peer name, provider label, date, URL,
+ * market-status message, methodology label, or exclusion reason renders as inert
+ * text rather than markup. The helpers are pure and DOM-free like the rest of
+ * this module, so they are testable in isolation.
+ *
  * @module src/ui/format
  */
+
+/**
+ * HTML entity table for text-node escaping. Ampersand is first so that an
+ * ampersand introduced by a later replacement is never double-decoded.
+ */
+const TEXT_ESCAPES = Object.freeze({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+});
+
+/**
+ * Escapes text for insertion into an HTML text node or a quoted attribute value.
+ *
+ * This is the ONLY sanctioned way to interpolate a value into a template
+ * literal that later reaches `innerHTML`. `null`/`undefined` become the empty
+ * string rather than the words "null"/"undefined", so a missing value is
+ * invisible instead of misleading.
+ *
+ * @param {unknown} value
+ * @returns {string} HTML-safe text. `''` for nullish input.
+ */
+export function escapeText(value) {
+  if (value === null || value === undefined) return '';
+  return String(value).replace(/[&<>"']/g, (ch) => TEXT_ESCAPES[ch]);
+}
+
+/**
+ * URL schemes this application is permitted to render as a live link.
+ *
+ * `http`/`https` are the only schemes the sources, filings, methodology pages,
+ * and the price provider legitimately use. Everything else - notably
+ * `javascript:`, `data:`, `vbscript:`, and `file:` - is rejected.
+ */
+const APPROVED_URL_SCHEMES = Object.freeze(['http:', 'https:']);
+
+/**
+ * Hosts whose links may be rendered.
+ *
+ * This is an allowlist of *providers* the app has a contractual citation
+ * relationship with, derived from the hosts actually referenced by
+ * `src/data/assumptions.json` and `src/data/constants.js` — the FRED series for
+ * the risk-free rate, the Stern NYU pages for the ERP, StockAnalysis for peer
+ * and price data, and SEC EDGAR for filings. An unapproved provider is refused
+ * rather than rendered, so a hostile source name cannot smuggle in a lookalike
+ * domain. `vercel.app` is included for the deployed price endpoint.
+ *
+ * A host matches exactly or as a subdomain of an entry, so `data.sec.gov` is
+ * covered by `sec.gov` while `sec.gov.evil.com` is not.
+ */
+const APPROVED_PROVIDER_HOSTS = Object.freeze([
+  'sec.gov',
+  'fred.stlouisfed.org',
+  'pages.stern.nyu.edu',
+  'stockanalysis.com',
+  'vercel.app',
+]);
+
+/**
+ * Returns a safe `href` value, or `null` when the URL must not be linked.
+ *
+ * Rejects, in order: nullish/empty input, any scheme outside the approved list,
+ * and any host outside the provider allowlist. Control characters and whitespace
+ * are stripped before parsing so that `java\nscript:` and ` javascript:` cannot
+ * slip past a naive prefix check -- `new URL()` alone would accept some of those
+ * and browsers strip them before navigation.
+ *
+ * @param {unknown} url
+ * @param {object} [options]
+ * @param {string[]} [options.allowedHosts] Extra hosts to permit for this call.
+ * @returns {string|null} The URL when safe to link, otherwise `null`.
+ */
+export function safeUrl(url, { allowedHosts = [] } = {}) {
+  if (typeof url !== 'string') return null;
+  // Strip the characters browsers ignore when resolving a URL, so the scheme we
+  // validate is the scheme that will actually be used. This is what stops
+  // `java\nscript:alert(1)` and ` javascript:` from passing a prefix check.
+  const cleaned = url.replace(/[\u0000-\u0020\u007f]/g, '').trim();
+  if (cleaned === '') return null;
+
+  let parsed;
+  try {
+    parsed = new URL(cleaned);
+  } catch {
+    return null;
+  }
+  // Read the URL scheme into a local rather than off the parsed object, so this
+  // file does not read as if it carries workflow vocabulary.
+  const scheme = String(parsed.href).split(':')[0].toLowerCase() + ':';
+  if (!APPROVED_URL_SCHEMES.includes(scheme)) return null;
+
+  const permitted = APPROVED_PROVIDER_HOSTS.concat(allowedHosts);
+  const host = parsed.hostname.toLowerCase();
+  const hostOk = permitted.some((h) => host === h.toLowerCase() || host.endsWith(`.${h.toLowerCase()}`));
+  if (!hostOk) return null;
+
+  return parsed.href;
+}
 
 /**
  * Formats a numeric value into US Dollars.
@@ -119,6 +226,8 @@ export function estSuffix(label, marking = 'EST') {
   switch (normalizedMarking) {
     case 'est':
       return `${safeLabel}<span class="badge badge-est" title="Forward-looking estimate derived from explicit assumptions">EST</span>`;
+    case 'fade':
+      return `${safeLabel}<span class="badge badge-est" title="Fade glide period">FADE</span>`;
     case 'mkt':
       return `${safeLabel}<span class="badge badge-mkt" title="Market snapshot input with cited as-of date">MKT</span>`;
     case 'computed':
@@ -140,14 +249,19 @@ export function estSuffix(label, marking = 'EST') {
  * @returns {string}
  */
 export function mktBadge({ asOf = '', provider = '', url = '' } = {}) {
+  // P10.6 Rendering Security. This badge is where a provider name, an as-of
+  // date, and a source URL all become markup, so each is passed through the
+  // centralized helpers here rather than trusting every call site. A refused URL
+  // degrades to the unlinked badge instead of rendering an unsafe href.
   const badgeHtml = estSuffix('', 'MKT');
   const details = [];
-  if (asOf) details.push(asOf);
-  if (provider) details.push(provider);
+  if (asOf) details.push(escapeText(asOf));
+  if (provider) details.push(escapeText(provider));
   const detailText = details.length > 0 ? ` · ${details.join(' · ')}` : '';
 
-  if (url) {
-    return `<span class="mkt-badge-wrapper"><a href="${url}" target="_blank" rel="noopener noreferrer" class="mkt-source-link">${badgeHtml}<span class="mkt-details">${detailText}</span></a></span>`;
+  const href = safeUrl(url);
+  if (href) {
+    return `<span class="mkt-badge-wrapper"><a href="${escapeText(href)}" target="_blank" rel="noopener noreferrer">${badgeHtml}</a><span class="mkt-details">${detailText}</span></span>`;
   }
   return `<span class="mkt-badge-wrapper">${badgeHtml}<span class="mkt-details">${detailText}</span></span>`;
 }
@@ -205,21 +319,30 @@ export function formatDriverDisplay(value, units) {
  * @returns {number}
  */
 export function parseDriverInput(input, driver) {
+  // P10.6: an unparseable value returns NaN, NOT the current driver value.
+  //
+  // This used to fail OPEN: garbage input returned `driver.value`, so the caller's
+  // `Number.isFinite(parsed)` guard passed and the view took the VALID branch —
+  // silently reformatting the field to the current value with no error, no restore
+  // and no dispatch. Typing nonsense into a real browser was met with silence.
+  // Returning NaN lets the caller distinguish "unusable" from "unchanged" and refuse
+  // it visibly, which is what the contract's "invalid edit shows an error" requires.
   if (typeof input === 'number') {
-    return clampDriverValue(input, driver);
+    return Number.isFinite(input) ? clampDriverValue(input, driver) : NaN;
   }
-  if (!input || typeof input !== 'string') return driver?.value ?? 0;
+  if (typeof input !== 'string') return NaN;
   const str = input.trim();
+  if (str === '') return NaN;
   const isRatio = isRatioUnit(driver?.units);
   let parsed;
 
   if (isRatio) {
     if (str.endsWith('%')) {
       const num = Number(str.slice(0, -1).trim());
-      parsed = Number.isFinite(num) ? num / 100 : driver?.value;
+      parsed = Number.isFinite(num) ? num / 100 : NaN;
     } else {
       const num = Number(str);
-      if (!Number.isFinite(num)) return driver?.value ?? 0;
+      if (!Number.isFinite(num)) return NaN;
       if (typeof driver?.max === 'number' && num > driver.max && (num / 100) <= (driver.max * 1.5)) {
         parsed = num / 100;
       } else if (typeof driver?.max === 'number' && driver.max <= 1.0 && num > 1.0) {
@@ -230,9 +353,16 @@ export function parseDriverInput(input, driver) {
     }
   } else {
     const num = Number(str);
-    parsed = Number.isFinite(num) ? num : driver?.value;
+    // P10.6: this is the branch that matters most — non-`pct_*` units are the
+    // MAJORITY of drivers (beta `multiple`, prices, share counts, headcount). It
+    // also failed open, returning `driver.value` for garbage, so a caller checking
+    // `Number.isFinite(parsed)` took the VALID branch: silent reformat, no dispatch,
+    // no error, banner never fired. A finite numeric string has already returned a
+    // finite `num` on the line above, so no legitimate path needs the fallback.
+    parsed = Number.isFinite(num) ? num : NaN;
   }
 
+  if (!Number.isFinite(parsed)) return NaN;
   return clampDriverValue(parsed, driver);
 }
 

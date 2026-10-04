@@ -107,7 +107,11 @@ describe('P8.2  -  SOTP Valuation: Two Segments & Multiples', () => {
 
     const expectedPerShare = (expectedEquity * 1e3) / sharesOutstanding;
     assert.ok(Math.abs(res.impliedPerShare - expectedPerShare) < 1e-4);
-    assert.ok(Math.abs(res.impliedPerShare - 141.59) < 0.1);
+    // P10.7 F2 (ENTAILED, disclosed): SPOT short-term investments corrected from
+    // EUR 1,047M to the filed EUR 3,450M, cutting SPOT capitalized EV by 2,739.42.
+    // SPOT EV/FwdEBITDAR drops 30.09x -> 29.3274x; SPOT remains the 2-name median
+    // with NFLX, so the SOTP sensitivity median and this pin fall. Engine-derived.
+    assert.ok(Math.abs(res.impliedPerShare - 138.66) < 0.1);
 
     // Min-Max range across peer revenue multiples
     const minEv = totalForwardRevenue * res.multipleRange.min;
@@ -148,7 +152,11 @@ describe('P8.2  -  SOTP Valuation: Two Segments & Multiples', () => {
     const expectedSensEquity = expectedSensEv + duolInputs.netCashCapitalized;
     const expectedSensPerShare = (expectedSensEquity * 1e3) / duolInputs.sharesOutstanding;
     assert.ok(Math.abs(res.sensitivity.impliedPerShare - expectedSensPerShare) < 1e-4);
-    assert.ok(Math.abs(res.sensitivity.impliedPerShare - 116.20) < 0.1);
+    // P10.7 F2 (ENTAILED, disclosed): the SPOT EV/FwdEBITDAR multiple falls
+    // 30.09x -> 29.3274x on the corrected short-term investments, so the
+    // SPOT+NFLX sensitivity median drops 25.2760x -> 24.8480x and this pin falls
+    // 116.20 -> 114.84. Engine-derived, not hand-typed.
+    assert.ok(Math.abs(res.sensitivity.impliedPerShare - 114.84) < 0.1);
   });
 
   test('exports leaseConvention disclosure gate (R3)', () => {

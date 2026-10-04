@@ -10,6 +10,19 @@
     :root {
       --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
       --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+      /* Typography Scale (Max 20px) */
+      --text-xs: 11px;   /* captions, pills, eyebrows, table sub-labels (replaces 10/10.5/11.5) */
+      --text-sm: 12px;   /* secondary UI, tab labels, callout body (replaces 12.5) */
+      --text-base: 13px; /* body / table cells / prose */
+      --text-md: 14px;   /* driver labels, gate periods, emphasis rows */
+      --text-lg: 15px;   /* card titles (.cover-card-title, .statement-card-header, audit titles) */
+      --text-xl: 16px;   /* workspace/method/drawer titles */
+      --text-2xl: 18px;  /* rec-headline, kpi-box-value */
+      --text-hero: 20px; /* hard cap — app-title, bridge-kpi-value, all former 22–32px */
+      --leading-tight: 1.2;
+      --leading-snug: 1.4;
+      --leading-base: 1.5;
       --color-header-bg: #0B1E36;
       --color-header-text: #FFFFFF;
       --color-page-bg: #F8FAFC;
@@ -50,8 +63,8 @@
       background: var(--color-page-bg);
       color: var(--color-text-primary);
       font-family: var(--font-sans);
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: var(--text-md);
+      line-height: var(--leading-base);
     }
 
     table, th, td, .metric-card, .tabulator-cell, .tabular-nums, .num, .cell-calc, .cell-input {
@@ -80,7 +93,7 @@
       border-radius: 16px;
       padding: 6px 14px;
       font-family: var(--font-sans);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
       cursor: pointer;
@@ -104,8 +117,8 @@
       border-radius: var(--radius);
       padding: 14px 18px;
       color: var(--color-text-primary);
-      font-size: 13px;
-      line-height: 1.5;
+      font-size: var(--text-base);
+      line-height: var(--leading-base);
     }
 
     .callout-warning {
@@ -114,8 +127,8 @@
       border-radius: var(--radius);
       padding: 14px 18px;
       color: var(--color-text-primary);
-      font-size: 13px;
-      line-height: 1.5;
+      font-size: var(--text-base);
+      line-height: var(--leading-base);
     }
 
     .callout-warning .callout-title {
@@ -128,7 +141,7 @@
       align-items: center;
       padding: 2px 8px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       background: var(--color-badge-under-bg);
       color: var(--color-badge-under-text);
@@ -139,7 +152,7 @@
       align-items: center;
       padding: 2px 8px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       background: var(--color-badge-fair-bg);
       color: var(--color-badge-fair-text);
@@ -150,7 +163,7 @@
       align-items: center;
       padding: 2px 8px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       background: var(--color-badge-over-bg);
       color: var(--color-badge-over-text);
@@ -218,11 +231,11 @@
 
     .app-title {
       margin: 0;
-      font-size: 20px;
+      font-size: var(--text-hero);
       font-weight: 700;
       letter-spacing: -0.01em;
       color: var(--color-header-text);
-      line-height: 1.2;
+      line-height: var(--leading-tight);
     }
 
     .brand-sub-row {
@@ -233,7 +246,7 @@
 
     .ticker-pill {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
@@ -244,13 +257,13 @@
 
     .brand-sub-sep {
       color: rgba(255, 255, 255, 0.35);
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .app-subtitle {
       margin: 0;
       color: var(--color-text-muted);
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .header-meta-block {
@@ -268,14 +281,14 @@
     }
 
     .meta-label {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 500;
       color: var(--color-text-muted);
       text-align: right;
     }
 
     .meta-value {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-header-text);
       min-width: 130px;
@@ -338,10 +351,10 @@
 
     .tab-num {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       color: var(--color-text-muted);
-      line-height: 1.2;
+      line-height: var(--leading-tight);
       margin-bottom: 2px;
     }
 
@@ -350,10 +363,10 @@
     }
 
     .tab-label {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
-      line-height: 1.2;
+      line-height: var(--leading-tight);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -363,6 +376,54 @@
     .tab-link[data-active] .tab-label {
       color: var(--color-text-primary);
       font-weight: 700;
+    }
+
+    /* F-UI-4: mobile nav readability. Desktop keeps equal-width flex tabs.
+       On narrow viewports tabs keep their full labels at a readable minimum
+       width inside a horizontally scrollable nav (no document overflow), with
+       a visible scroll affordance and keyboard-friendly scroll region. */
+    .nav-scroll-hint {
+      display: none;
+      margin: 0;
+      padding: 6px 12px;
+      background: #0B1E36;
+      color: #CBD5E1;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+
+    .app-tab-nav {
+      scrollbar-width: thin;
+    }
+
+    @media (max-width: 768px) {
+      .app-tab-nav,
+      .tabs {
+        scroll-padding: 12px;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+      }
+
+      .app-tab-nav .tab-link,
+      .tabs .tab-link {
+        flex: 0 0 auto;
+        min-width: 132px;
+        max-width: 190px;
+        scroll-snap-align: start;
+      }
+
+      .app-tab-nav .tab-label,
+      .tabs .tab-label {
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+      }
+
+      .nav-scroll-hint {
+        display: block;
+      }
     }
 
     .sr-only {
@@ -389,7 +450,7 @@
     .tab-pane[hidden] { display: none !important; }
 
     .tab-pane h2 {
-      font-size: 18px;
+      font-size: var(--text-2xl);
       margin: 0 0 16px;
       color: var(--color-text-primary);
     }
@@ -432,7 +493,7 @@
     }
 
     .cover-card-title {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       margin: 0 0 12px 0;
       color: var(--color-text-primary);
@@ -451,7 +512,7 @@
     }
 
     .cover-card-sub {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 400;
       color: var(--color-text-muted);
       margin-left: 4px;
@@ -464,8 +525,8 @@
     }
 
     .cover-prose {
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: var(--text-base);
+      line-height: var(--leading-base);
       color: var(--color-text-secondary);
       margin: 0 0 20px 0;
     }
@@ -500,7 +561,7 @@
     }
 
     .stat-pill-label {
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -508,7 +569,7 @@
     }
 
     .stat-pill-value {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       color: var(--color-text-primary);
       font-family: var(--font-sans);
@@ -524,7 +585,7 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       margin: 0;
     }
 
@@ -568,7 +629,7 @@
 
     .badge-upside {
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
@@ -611,7 +672,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       padding: 2px 0;
       background: transparent;
       border: none;
@@ -635,7 +696,7 @@
     }
 
     .status-check-tag {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: #15803D;
       text-align: right;
@@ -667,14 +728,14 @@
     }
 
     .cover-section-title {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       margin: 0 0 4px;
       color: var(--color-text-primary);
     }
 
     .cover-section-subtitle {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-text-muted);
       margin: 0;
     }
@@ -682,14 +743,14 @@
     .architecture-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12.5px;
+      font-size: var(--text-sm);
     }
 
     .architecture-table th {
       background: var(--color-page-bg);
       font-weight: 600;
       color: var(--color-text-muted);
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       padding: 8px 10px;
@@ -717,7 +778,7 @@
       font-weight: 700;
       width: 34px;
       color: var(--color-text-muted);
-      font-size: 11px;
+      font-size: var(--text-xs);
     }
 
     .architecture-table td.col-tab-name {
@@ -728,8 +789,8 @@
 
     .architecture-table td.col-tab-desc {
       color: var(--color-text-secondary);
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: var(--text-sm);
+      line-height: var(--leading-snug);
     }
 
     .architecture-table td.col-tab-goto {
@@ -741,7 +802,7 @@
       appearance: none;
       background: transparent;
       border: none;
-      font-size: 16px;
+      font-size: var(--text-xl);
       font-weight: 700;
       color: var(--color-accent-blue);
       cursor: pointer;
@@ -770,7 +831,7 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       margin: 0;
     }
 
@@ -797,6 +858,15 @@
       color: var(--color-text-primary);
     }
 
+    /* F-UI-3: DCF divisor row is an engine-computed (EST) output, visually
+       distinguished from the filed MKT driver row above it. */
+    .assump-row-dcf {
+      background: var(--color-accent-blue-soft);
+      border-radius: 4px;
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
     .cover-methods-card {
       display: flex;
       flex-direction: column;
@@ -805,7 +875,7 @@
     .methods-summary-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: var(--text-sm);
       margin-bottom: 10px;
     }
 
@@ -813,7 +883,7 @@
       background: var(--color-page-bg);
       font-weight: 600;
       color: var(--color-text-muted);
-      font-size: 10px;
+      font-size: var(--text-xs);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       padding: 5px 6px;
@@ -835,7 +905,7 @@
       background: var(--color-page-bg);
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
-      font-size: 11.5px;
+      font-size: var(--text-xs);
       margin-top: auto;
     }
 
@@ -877,7 +947,7 @@
     }
 
     .callout-title {
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 700;
       color: var(--color-text-primary);
     }
@@ -885,8 +955,8 @@
     .callout-info p,
     .callout-warning p {
       margin: 0;
-      font-size: 12px;
-      line-height: 1.5;
+      font-size: var(--text-sm);
+      line-height: var(--leading-base);
       color: var(--color-text-secondary);
     }
 
@@ -897,7 +967,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-text-muted);
     }
 
@@ -941,15 +1011,15 @@
       background: #fffbe6;
       border-radius: var(--radius);
       padding: 14px 16px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: #594300;
-      line-height: 1.6;
+      line-height: var(--leading-base);
     }
 
     /* Universal Cell & Driver Styling */
     .cell-input {
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 600;
       color: var(--color-blue-input) !important;
     }
@@ -967,7 +1037,7 @@
     .badge {
       display: inline-block;
       font-family: var(--font-mono);
-      font-size: 10px;
+      font-size: var(--text-xs);
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
@@ -1002,7 +1072,7 @@
       display: inline-flex;
       align-items: center;
       margin-left: 6px;
-      font-size: 11px;
+      font-size: var(--text-xs);
     }
 
     .mkt-source-link {
@@ -1018,7 +1088,7 @@
     }
 
     .mkt-details {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-muted);
       font-weight: 500;
     }
@@ -1037,40 +1107,9 @@
       border-radius: var(--radius);
     }
 
-    .scenario-picker-title {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--color-muted);
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-
     .scenario-btn-group {
       display: flex;
       gap: 8px;
-    }
-
-    .scenario-btn {
-      padding: 8px 16px;
-      font-weight: 600;
-      font-size: 13px;
-      border-radius: var(--radius);
-      border: 1px solid var(--color-border);
-      background: var(--color-surface);
-      color: var(--color-text);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .scenario-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-    }
-
-    .scenario-btn.active {
-      background: var(--color-accent);
-      border-color: var(--color-accent);
-      color: #ffffff;
     }
 
     .driver-group-card {
@@ -1079,15 +1118,6 @@
       border-radius: var(--radius);
       overflow: hidden;
       background: var(--color-surface);
-    }
-
-    .driver-group-header {
-      padding: 12px 16px;
-      background: var(--color-page);
-      border-bottom: 1px solid var(--color-border);
-      font-weight: 650;
-      font-size: 14px;
-      color: var(--color-text);
     }
 
     .driver-row {
@@ -1105,21 +1135,11 @@
 
     .driver-label-row {
       font-weight: 600;
-      font-size: 14px;
+      font-size: var(--text-md);
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 4px;
-    }
-
-    .driver-label {
-      color: var(--color-text);
-    }
-
-    .driver-notes {
-      font-size: 12px;
-      color: var(--color-muted);
-      margin-top: 2px;
     }
 
     .driver-slider {
@@ -1202,7 +1222,7 @@
       width: 100px;
       padding: 6px 8px;
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 600;
       color: var(--color-blue-input);
       border: 1px solid var(--color-blue-input);
@@ -1212,7 +1232,7 @@
     }
 
     .driver-units {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-muted);
       min-width: 40px;
     }
@@ -1241,7 +1261,7 @@
       background: transparent;
       border-bottom: none;
       font-weight: 700;
-      font-size: 15px;
+      font-size: var(--text-lg);
       color: var(--color-text-primary);
     }
 
@@ -1253,7 +1273,7 @@
       width: 100%;
       border-collapse: collapse;
       min-width: 800px;
-      font-size: 13px;
+      font-size: var(--text-base);
     }
 
     .financial-table th, .financial-table td {
@@ -1262,7 +1282,7 @@
     }
 
     .header-cell {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-muted);
       background: var(--color-page);
@@ -1286,7 +1306,7 @@
     .table-num-cell {
       text-align: right;
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: var(--text-base);
     }
 
     .ttm-cell {
@@ -1309,7 +1329,7 @@
 
     .citation-sup {
       color: var(--color-accent);
-      font-size: 11px;
+      font-size: var(--text-xs);
       margin-left: 2px;
       text-decoration: none;
       font-weight: 600;
@@ -1334,14 +1354,14 @@
     }
 
     .kpi-def {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-muted);
       margin-top: 2px;
       max-width: 260px;
       white-space: normal;
       overflow: visible;
       text-overflow: clip;
-      line-height: 1.4;
+      line-height: var(--leading-snug);
       cursor: help;
     }
 
@@ -1362,7 +1382,7 @@
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
       font-family: var(--font-sans);
-      font-size: 13px;
+      font-size: var(--text-base);
     }
 
     .tabulator .tabulator-header {
@@ -1370,7 +1390,7 @@
       border-bottom: 2px solid var(--color-border);
       color: var(--color-muted);
       font-weight: 600;
-      font-size: 12px;
+      font-size: var(--text-sm);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -1401,8 +1421,8 @@
       border-right: 1px solid var(--color-border);
       padding: 8px 12px;
       vertical-align: middle;
-      font-size: 13px;
-      line-height: 20px;
+      font-size: var(--text-base);
+      line-height: var(--leading-base);
     }
 
     .tabulator .tabulator-cell.tabulator-frozen {
@@ -1478,11 +1498,11 @@
 
     .check-period {
       font-weight: 700;
-      font-size: 13px;
+      font-size: var(--text-base);
     }
 
     .check-details {
-      font-size: 12px;
+      font-size: var(--text-sm);
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -1510,7 +1530,7 @@
     }
 
     .hybrid-intro {
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-muted);
       margin: 0 0 16px;
     }
@@ -1530,7 +1550,7 @@
 
     .hybrid-box-title {
       font-weight: 600;
-      font-size: 12px;
+      font-size: var(--text-sm);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--color-muted);
@@ -1542,7 +1562,7 @@
     .hybrid-box-row {
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
+      font-size: var(--text-base);
       margin-bottom: 6px;
     }
 
@@ -1587,16 +1607,16 @@
     }
 
     .valuation-section-desc {
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-muted);
       margin: 0 0 16px;
-      line-height: 1.5;
+      line-height: var(--leading-base);
     }
 
     .financial-summary-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: var(--text-base);
     }
 
     .financial-summary-table th, .financial-summary-table td {
@@ -1607,7 +1627,7 @@
 
     .financial-summary-table th {
       background: var(--color-page);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-muted);
       text-transform: uppercase;
@@ -1623,11 +1643,11 @@
     }
 
     .financial-summary-table .font-large {
-      font-size: 14px;
+      font-size: var(--text-md);
     }
 
     .financial-summary-table .font-huge {
-      font-size: 16px;
+      font-size: var(--text-xl);
       color: var(--color-accent);
     }
 
@@ -1653,7 +1673,7 @@
 
     .card-subheading {
       margin: 12px 0 8px 0;
-      font-size: 14px;
+      font-size: var(--text-md);
       font-weight: 600;
       color: var(--color-text);
     }
@@ -1693,7 +1713,7 @@
     }
 
     .bridge-kpi-title {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       text-transform: uppercase;
       color: var(--color-muted);
@@ -1701,13 +1721,13 @@
     }
 
     .bridge-kpi-value {
-      font-size: 20px;
+      font-size: var(--text-hero);
       font-weight: 700;
       color: var(--color-text);
     }
 
     .bridge-kpi-sub {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-muted);
     }
 
@@ -1734,14 +1754,14 @@
     .projections-title {
       margin: 0 0 4px;
       color: var(--color-text-primary);
-      font-size: 22px;
+      font-size: var(--text-hero);
       font-weight: 700;
     }
 
     .projections-subtitle {
       margin: 0;
       color: var(--color-text-secondary);
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .kpi-strip {
@@ -1762,7 +1782,7 @@
 
     .projection-kpi-label {
       color: var(--color-text-secondary);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -1771,7 +1791,7 @@
     .projection-kpi-value {
       margin-top: 8px;
       color: var(--color-text-primary);
-      font-size: 25px;
+      font-size: var(--text-hero);
       font-weight: 700;
       line-height: 1;
       font-variant-numeric: tabular-nums;
@@ -1783,7 +1803,7 @@
       gap: 8px;
       margin-top: 8px;
       color: var(--color-text-muted);
-      font-size: 10px;
+      font-size: var(--text-xs);
     }
 
     .projection-kpi-benchmark {
@@ -1812,14 +1832,14 @@
     .statement-workspace-title {
       margin: 0 0 3px;
       color: var(--color-text-primary);
-      font-size: 16px;
+      font-size: var(--text-xl);
       font-weight: 700;
     }
 
     .statement-workspace-subtitle {
       margin: 0;
       color: var(--color-text-secondary);
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .projection-statement-switcher {
@@ -1843,7 +1863,7 @@
       color: var(--color-text-secondary);
       cursor: pointer;
       font-family: var(--font-sans);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       white-space: nowrap;
     }
@@ -1937,7 +1957,7 @@
     }
 
     .rec-section-tag {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -1945,7 +1965,7 @@
     }
 
     .rec-headline {
-      font-size: 18px;
+      font-size: var(--text-2xl);
       font-weight: 700;
       margin: 4px 0 0;
       color: var(--color-text);
@@ -1955,7 +1975,7 @@
       display: inline-block;
       padding: 6px 16px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -2026,7 +2046,7 @@
     }
 
     .sparkline-title {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -2034,7 +2054,7 @@
     }
 
     .sparkline-value {
-      font-size: 22px;
+      font-size: var(--text-hero);
       font-weight: 700;
       color: var(--color-text-primary);
       line-height: 1.1;
@@ -2046,7 +2066,7 @@
 
     .delta-badge {
       display: inline-block;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       padding: 1px 7px;
       border-radius: 10px;
@@ -2095,9 +2115,9 @@
     }
 
     .sparkline-sub {
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       color: var(--color-text-muted);
-      line-height: 1.4;
+      line-height: var(--leading-snug);
     }
 
     /* RP7.2 side-by-side thesis and model health cards */
@@ -2128,9 +2148,9 @@
       display: flex;
       gap: 10px;
       align-items: flex-start;
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-text-primary);
-      line-height: 1.5;
+      line-height: var(--leading-base);
     }
 
     .thesis-num::before {
@@ -2143,7 +2163,7 @@
       border-radius: 50%;
       background: var(--color-accent-blue-soft);
       color: var(--color-accent-blue);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       flex-shrink: 0;
     }
@@ -2161,7 +2181,7 @@
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       padding: 6px 0;
       border-bottom: 1px solid var(--color-border-subtle);
     }
@@ -2203,13 +2223,13 @@
     }
 
     .health-detail {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-text-muted);
       font-family: var(--font-mono);
     }
 
     .health-status {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       white-space: nowrap;
     }
@@ -2230,7 +2250,7 @@
       margin-top: 12px;
       padding-top: 10px;
       border-top: 1px solid var(--color-border);
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       color: var(--color-text-secondary);
       display: flex;
       align-items: center;
@@ -2238,17 +2258,38 @@
     }
 
     /* RP8.1 sensitivity heatmap matrix: 9x5 WACC x terminal growth workstation */
+    /* F-UI-5: visible scroll affordance + sticky first column for mobile. */
+    .matrix-scroll-hint {
+      margin: 0 0 8px;
+      padding: 6px 10px;
+      background: var(--color-accent-blue-soft);
+      border: 1px solid #BFDBFE;
+      border-radius: var(--radius);
+      color: var(--color-text-secondary);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-align: center;
+    }
+
     .matrix-table-scroll {
       overflow-x: auto;
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
       background: var(--color-surface);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .matrix-table-scroll:focus-visible {
+      outline: 2px solid var(--color-accent-blue);
+      outline-offset: 2px;
     }
 
     .sensitivity-matrix-table {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: var(--text-base);
       min-width: 620px;
     }
 
@@ -2269,16 +2310,20 @@
 
     .matrix-corner {
       text-align: left;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-muted);
       background: var(--color-page);
       white-space: nowrap;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      box-shadow: 1px 0 0 var(--color-border);
     }
 
     .matrix-g-col {
       text-align: right;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-muted);
       background: var(--color-page);
@@ -2288,10 +2333,14 @@
     .matrix-wacc-label {
       text-align: left;
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 500;
       background: var(--color-surface);
       white-space: nowrap;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      box-shadow: 1px 0 0 var(--color-border);
     }
 
     .matrix-active-row .matrix-wacc-label {
@@ -2302,7 +2351,7 @@
     .heatmap-cell {
       text-align: right;
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: var(--text-base);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
@@ -2329,7 +2378,7 @@
     }
 
     .matrix-axis-note {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-text-muted);
       margin: 8px 2px 0;
     }
@@ -2340,7 +2389,7 @@
       align-items: center;
       gap: 8px;
       margin-left: 10px;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-secondary);
       vertical-align: middle;
@@ -2349,7 +2398,7 @@
 
     .scenario-select {
       font-family: var(--font-sans);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-primary);
       background: var(--color-surface);
@@ -2386,30 +2435,30 @@
     }
 
     .rec-hero-label {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-muted);
       margin-bottom: 6px;
     }
 
     .rec-hero-value {
-      font-size: 24px;
+      font-size: var(--text-hero);
       font-weight: 700;
       margin-bottom: 4px;
     }
 
     .rec-hero-sub {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-muted);
     }
 
     .rec-discipline-note {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-muted);
       background: rgba(0, 0, 0, 0.02);
       border-radius: var(--radius);
       padding: 8px 12px;
-      line-height: 1.4;
+      line-height: var(--leading-snug);
     }
 
     .text-positive {
@@ -2436,7 +2485,7 @@
     }
 
     .kpi-box-title {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-muted);
       margin-bottom: 6px;
@@ -2445,14 +2494,14 @@
     }
 
     .kpi-box-value {
-      font-size: 18px;
+      font-size: var(--text-2xl);
       font-weight: 700;
       color: var(--color-text);
       margin-bottom: 2px;
     }
 
     .kpi-box-sub {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-muted);
     }
 
@@ -2461,7 +2510,7 @@
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
       padding: 12px 16px;
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .kpi-citation-title {
@@ -2474,7 +2523,7 @@
       margin: 0;
       padding-left: 20px;
       color: var(--color-muted);
-      line-height: 1.5;
+      line-height: var(--leading-base);
     }
 
     /* Sensitivity & Scenario Styles */
@@ -2492,13 +2541,13 @@
     }
 
     .scenario-desc {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-muted);
       max-width: 320px;
     }
 
     .scenario-name {
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 700;
     }
 
@@ -2525,23 +2574,16 @@
       border-radius: var(--radius);
       color: var(--color-muted);
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: var(--text-sm);
       margin: 0;
       padding: 16px;
-    }
-
-    .app-footer {
-      border-top: 1px solid var(--color-border);
-      color: var(--color-muted);
-      font-size: 12px;
-      padding: 16px 24px 32px;
     }
 
     /* Live Price Staleness Banner & Refresh Controls (Task P6R2.5 Finding G) */
     .live-price-banner {
       padding: 12px 16px;
       border-radius: var(--radius);
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 600;
       margin-bottom: 16px;
       display: flex;
@@ -2557,12 +2599,6 @@
       border-left: 5px solid #d97706;
     }
 
-    .live-price-banner.live-price-intraday {
-      background: #eff6ff;
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
-      border-left: 5px solid #2563eb;
-    }
 
     .live-price-banner.live-price-live_close {
       background: #ecfdf5;
@@ -2577,7 +2613,7 @@
       border-radius: var(--radius);
       color: var(--color-accent);
       cursor: pointer;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       padding: 4px 8px;
       margin-top: 4px;
@@ -2625,7 +2661,7 @@
       padding: 10px 14px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 13px;
+      font-size: var(--text-base);
       user-select: none;
       color: var(--color-text);
       background: #fafbfc;
@@ -2648,7 +2684,7 @@
       justify-content: center;
       width: 18px;
       height: 18px;
-      font-size: 10px;
+      font-size: var(--text-xs);
       border-radius: 3px;
       background: var(--color-accent-soft);
       color: var(--color-accent);
@@ -2661,7 +2697,7 @@
     }
 
     .defense-summary-title {
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 600;
     }
 
@@ -2673,7 +2709,7 @@
 
     .defense-value-badge {
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       padding: 2px 8px;
       border-radius: 4px;
@@ -2685,8 +2721,8 @@
     .defense-content {
       padding: 14px 16px;
       border-top: 1px solid var(--color-border);
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: var(--text-base);
+      line-height: var(--leading-base);
       color: var(--color-text);
       display: flex;
       flex-direction: column;
@@ -2695,7 +2731,7 @@
     }
 
     .defense-section-label {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -2736,7 +2772,7 @@
     .defense-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: var(--text-sm);
       margin-top: 4px;
     }
 
@@ -2786,7 +2822,7 @@
     .dcf-primary-kicker,
     .dcf-primary-section-label {
       color: var(--color-muted);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -2794,7 +2830,7 @@
 
     .dcf-primary-price {
       color: var(--color-text);
-      font-size: 32px;
+      font-size: var(--text-hero);
       font-weight: 700;
       margin: 10px 0 4px;
     }
@@ -2802,11 +2838,11 @@
     .dcf-primary-range,
     .dcf-primary-benchmark {
       color: var(--color-muted);
-      font-size: 11px;
+      font-size: var(--text-xs);
     }
 
     .dcf-primary-upside {
-      font-size: 20px;
+      font-size: var(--text-hero);
       font-weight: 700;
       margin-top: 18px;
     }
@@ -2821,7 +2857,7 @@
 
     .dcf-primary-components .financial-summary-table {
       margin-top: 6px;
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .dcf-runtime-list {
@@ -2842,11 +2878,11 @@
 
     .dcf-runtime-list dt {
       color: var(--color-muted);
-      font-size: 11px;
+      font-size: var(--text-xs);
     }
 
     .dcf-runtime-list dd {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       margin: 0;
       text-align: right;
@@ -2899,13 +2935,13 @@
     }
 
     .method-detail-title {
-      font-size: 16px;
+      font-size: var(--text-xl);
       font-weight: 700;
       margin: 0;
     }
 
     .method-detail-basis {
-      font-size: 12px;
+      font-size: var(--text-sm);
       margin-top: 2px;
     }
 
@@ -2916,7 +2952,7 @@
     }
 
     .method-detail-metric-label {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -2924,7 +2960,7 @@
     }
 
     .method-detail-metric-value {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       margin-top: 2px;
     }
@@ -2936,7 +2972,7 @@
     }
 
     .method-detail-block-label {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -2944,8 +2980,8 @@
     }
 
     .method-detail-note {
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: var(--text-base);
+      line-height: var(--leading-base);
       color: var(--color-text);
       margin: 0;
     }
@@ -2977,7 +3013,7 @@
     }
 
     .assumptions-title {
-      font-size: 22px;
+      font-size: var(--text-hero);
       font-weight: 700;
       color: var(--color-text-primary);
       margin: 0;
@@ -2985,9 +3021,39 @@
     }
 
     .assumptions-subtitle {
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-text-secondary);
       margin: 0;
+    }
+
+    /* P10.3: visible field error for a rejected driver edit. */
+    .field-error-banner {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--color-negative, #b91c1c);
+      border-left-width: 3px;
+      border-radius: var(--radius-sm, 2px);
+      background: var(--color-negative-subtle, #fef2f2);
+      color: var(--color-negative, #b91c1c);
+      font-size: var(--text-small);
+    }
+
+    .field-error-label {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field-error-field {
+      font-weight: 700;
+    }
+
+    .field-error-message {
+      color: var(--color-text-primary, #111827);
     }
 
     .assumptions-controls-right {
@@ -3005,7 +3071,7 @@
     }
 
     .legend-title {
-      font-size: 10px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -3016,7 +3082,7 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 500;
       color: var(--color-text-secondary);
     }
@@ -3060,7 +3126,7 @@
       border-radius: 16px;
       padding: 6px 14px;
       font-family: var(--font-sans);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
       cursor: pointer;
@@ -3087,7 +3153,7 @@
       border-radius: 6px;
       padding: 6px 14px;
       font-family: var(--font-sans);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
       cursor: pointer;
@@ -3116,7 +3182,7 @@
     }
 
     .scenario-picker-title {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -3135,7 +3201,7 @@
       border-radius: 4px;
       padding: 4px 12px;
       font-family: var(--font-sans);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       color: var(--color-text-secondary);
       cursor: pointer;
@@ -3184,7 +3250,7 @@
       background: #F8FAFC;
       border-bottom: 1px solid var(--color-border);
       padding: 10px 16px;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -3229,7 +3295,7 @@
     }
 
     .driver-label {
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 600;
       color: var(--color-text-primary);
     }
@@ -3241,7 +3307,7 @@
       padding: 0 2px;
       color: var(--color-text-muted);
       cursor: pointer;
-      font-size: 13px;
+      font-size: var(--text-base);
       line-height: 1;
       border-radius: 50%;
       display: inline-flex;
@@ -3254,10 +3320,22 @@
       color: var(--color-accent-blue);
     }
 
+  .driver-field-error {
+    display: block;
+    color: #b42318;
+    font-size: var(--text-xs);
+    line-height: var(--leading-snug);
+    margin-top: 2px;
+  }
+  .driver-val-pill.is-invalid {
+    border-color: #b42318;
+    box-shadow: inset 0 0 0 1px #b42318;
+  }
+
     .driver-notes {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-text-muted);
-      line-height: 1.3;
+      line-height: var(--leading-snug);
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
@@ -3265,7 +3343,7 @@
 
     .driver-unit-badge {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-secondary);
       text-align: right;
@@ -3347,7 +3425,7 @@
       background: #F0F9FF;
       color: var(--color-blue-input);
       font-family: var(--font-mono);
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       font-weight: 700;
       text-align: right;
       font-variant-numeric: tabular-nums;
@@ -3371,7 +3449,7 @@
     .assumptions-matrix-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .assumptions-matrix-table th {
@@ -3412,7 +3490,7 @@
     .matrix-section-row td {
       background: #F1F5F9;
       font-weight: 700;
-      font-size: 11px;
+      font-size: var(--text-xs);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--color-text-primary);
@@ -3427,7 +3505,7 @@
       border-radius: 3px;
       padding: 1px 3px;
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-blue-input) !important;
       text-align: right;
@@ -3450,7 +3528,7 @@
     .matrix-subhead-row td {
       background: #FAFAFA;
       font-weight: 600;
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-text-secondary);
       text-align: left;
     }
@@ -3501,7 +3579,7 @@
     }
 
     .historicals-title {
-      font-size: 22px;
+      font-size: var(--text-hero);
       font-weight: 700;
       letter-spacing: -0.01em;
       color: var(--color-text-primary);
@@ -3509,7 +3587,7 @@
     }
 
     .historicals-subtitle {
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-text-secondary);
       margin: 0;
     }
@@ -3531,7 +3609,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-text-primary);
     }
 
@@ -3558,7 +3636,7 @@
       border: 1px solid var(--color-accent-blue);
       border-radius: 6px;
       color: var(--color-accent-blue);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       padding: 6px 14px;
       cursor: pointer;
@@ -3590,25 +3668,25 @@
     }
 
     .historicals-kpi-card-label {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
     }
 
     .historicals-kpi-card-val {
-      font-size: 26px;
+      font-size: var(--text-hero);
       font-weight: 700;
       font-family: var(--font-sans);
       font-variant-numeric: tabular-nums;
       color: var(--color-text-primary);
-      line-height: 1.2;
+      line-height: var(--leading-tight);
       margin: 2px 0;
     }
 
     .historicals-kpi-pill {
       display: inline-flex;
       align-items: center;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       padding: 2px 6px;
@@ -3647,14 +3725,14 @@
     }
 
     .statement-title-block h3 {
-      font-size: 16px;
+      font-size: var(--text-xl);
       font-weight: 700;
       color: var(--color-text-primary);
       margin: 0 0 2px;
     }
 
     .statement-title-block p {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-text-secondary);
       margin: 0;
     }
@@ -3672,7 +3750,7 @@
       border: none;
       background: transparent;
       padding: 6px 14px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
       border-radius: 4px;
@@ -3702,7 +3780,7 @@
     }
 
     .active-statement-label {
-      font-size: 14px;
+      font-size: var(--text-md);
       font-weight: 700;
       color: var(--color-text-primary);
     }
@@ -3722,7 +3800,7 @@
       background: #FFFFFF;
       border: 1px solid var(--color-border);
       border-radius: 4px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
       cursor: pointer;
@@ -3749,6 +3827,7 @@
 
     .statement-table-wrapper.hidden,
     .tabulator-cards-wrapper.hidden,
+    .trend-view-panel.hidden,
     .td-annual.hidden,
     .th-annual.hidden,
     .td-quarterly.hidden,
@@ -3761,7 +3840,7 @@
       border-collapse: separate;
       border-spacing: 0;
       font-family: var(--font-sans);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-variant-numeric: tabular-nums;
     }
 
@@ -3839,8 +3918,70 @@
       background: #F8FAFC;
     }
 
+    /* RP10.2 — Computed Ratio Footer Rows.
+       Reuses the standing freeze-pane selectors and standing colour tokens only
+       (no new colour values): the divider band is --color-border-subtle, which
+       reads as a section header above the --color-page-bg total/subtotal bands.
+       Both row families re-declare their pinned :first-child background, because a
+       transparent pin would let a horizontally scrolled column bleed through. */
+    .statement-table tr.ratio-divider-row td,
+    .statement-table tr.row-ratio td {
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .statement-table tr.ratio-divider-row td {
+      background: var(--color-border-subtle);
+      border-top: 1px solid var(--color-border);
+      padding: 6px 12px;
+    }
+
+    .statement-table tr.ratio-divider-row td:first-child {
+      position: sticky; left: 0;
+      z-index: 5;
+      background: var(--color-border-subtle);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .statement-table tbody tr.ratio-divider-row:hover td {
+      background-color: var(--color-border-subtle);
+      cursor: default;
+    }
+
+    .statement-table tbody tr.ratio-divider-row:hover td:first-child {
+      background-color: var(--color-border-subtle);
+    }
+
+    .statement-table tr.row-ratio td {
+      background: var(--color-card-bg);
+    }
+
+    .statement-table tr.row-ratio td:first-child {
+      position: sticky; left: 0;
+      z-index: 5;
+      background: var(--color-card-bg);
+    }
+
+    /* RP10.2 — Ratio inspector content typography, inside the standing drawer components. */
+    .ratio-def-text {
+      font-size: var(--text-sm);
+      line-height: var(--leading-base);
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .ratio-provenance-note {
+      font-size: var(--text-xs);
+      line-height: var(--leading-base);
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
     .statement-footnote {
-      font-size: 11px;
+      font-size: var(--text-xs);
       color: var(--color-text-muted);
       margin-top: 2px;
     }
@@ -3888,14 +4029,14 @@
     }
 
     .drawer-metric-title {
-      font-size: 16px;
+      font-size: var(--text-xl);
       font-weight: 700;
       margin: 0;
       color: var(--color-text-primary);
     }
 
     .drawer-metric-tag {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-muted);
       text-transform: uppercase;
@@ -3906,7 +4047,7 @@
       appearance: none;
       background: transparent;
       border: none;
-      font-size: 22px;
+      font-size: var(--text-hero);
       line-height: 1;
       cursor: pointer;
       color: var(--color-text-muted);
@@ -3942,7 +4083,7 @@
     }
 
     .drawer-stat-label {
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-muted);
       text-transform: uppercase;
@@ -3950,7 +4091,7 @@
     }
 
     .drawer-stat-val {
-      font-size: 14px;
+      font-size: var(--text-md);
       font-weight: 700;
       color: var(--color-text-primary);
       font-variant-numeric: tabular-nums;
@@ -3968,7 +4109,7 @@
     }
 
     .drawer-section-title {
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 700;
       color: var(--color-text-secondary);
       text-transform: uppercase;
@@ -3985,7 +4126,7 @@
     .drawer-mini-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11.5px;
+      font-size: var(--text-xs);
     }
 
     .drawer-mini-table th {
@@ -4049,7 +4190,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .drawer-comp-label {
@@ -4060,7 +4201,7 @@
     .drawer-comp-val {
       font-weight: 600;
       font-family: var(--font-mono);
-      font-size: 11.5px;
+      font-size: var(--text-xs);
       color: var(--color-text-secondary);
     }
 
@@ -4091,7 +4232,7 @@
     }
 
     .drawer-empty-comp {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-text-muted);
       font-style: italic;
       padding: 8px 12px;
@@ -4114,7 +4255,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .provenance-label {
@@ -4153,14 +4294,14 @@
     }
 
     .audit-center-title {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       color: var(--color-text-primary);
       margin: 0 0 4px;
     }
 
     .audit-center-subtitle {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-text-muted);
       margin: 0;
     }
@@ -4214,7 +4355,7 @@
     }
 
     .badge-filing-form {
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       font-weight: 700;
       padding: 2px 7px;
       border-radius: 4px;
@@ -4234,7 +4375,7 @@
     }
 
     .filing-period-pill {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       padding: 2px 6px;
       border-radius: 4px;
@@ -4244,13 +4385,13 @@
     }
 
     .filing-card-title {
-      font-size: 12.5px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-primary);
     }
 
     .filing-chevron {
-      font-size: 16px;
+      font-size: var(--text-xl);
       color: var(--color-text-muted);
       transition: transform 0.2s ease;
     }
@@ -4281,22 +4422,22 @@
     }
 
     .filing-meta-label {
-      font-size: 10.5px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-muted);
       text-transform: uppercase;
     }
 
     .filing-meta-val {
-      font-size: 11.5px;
+      font-size: var(--text-xs);
       font-weight: 500;
       color: var(--color-text-primary);
     }
 
     .filing-notes-block {
-      font-size: 11.5px;
+      font-size: var(--text-xs);
       color: var(--color-text-secondary);
-      line-height: 1.45;
+      line-height: var(--leading-snug);
       background: #FFFFFF;
       border: 1px solid var(--color-border-subtle);
       border-radius: 4px;
@@ -4321,7 +4462,7 @@
       border: 1px solid var(--color-border);
       border-radius: 4px;
       color: var(--color-accent-blue);
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       text-decoration: none;
       transition: all 0.15s ease;
@@ -4363,6 +4504,7 @@
        RW1.1: Canonical Unified Card/Section Header Treatment (APP-WIDE)
        ========================================================================= */
     .trend-title-block,
+    .ratio-analysis-title-block,
     .operating-kpis-title-block,
     .statement-title-block,
     .audit-center-title-block,
@@ -4378,6 +4520,7 @@
     }
 
     .trend-main-title,
+    .ratio-analysis-main-title,
     .operating-kpis-main-title,
     .workspace-main-title,
     .statement-title-block h3,
@@ -4387,19 +4530,20 @@
     .scenario-picker-title,
     .driver-group-header,
     .statement-card-header {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       color: var(--color-text-primary);
       margin: 0 0 2px 0;
     }
 
     .trend-subtitle,
+    .ratio-analysis-subtitle,
     .operating-kpis-subtitle,
     .workspace-subtitle,
     .statement-title-block p,
     .audit-center-subtitle,
     .cover-section-subtitle {
-      font-size: 12px;
+      font-size: var(--text-sm);
       color: var(--color-text-muted);
       margin: 0;
     }
@@ -4418,7 +4562,7 @@
       border: none;
       background: transparent;
       padding: 5px 12px;
-      font-size: 12px;
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-secondary);
       border-radius: 4px;
@@ -4447,6 +4591,42 @@
 
     .trend-charts-grid.single-chart {
       grid-template-columns: 1fr;
+    }
+
+    /* Trend Explorer view panels (RP10.3). The RP3.3 header keeps its title block
+       and its level-metric pill group exactly as ref_03 has them; the new view
+       switcher sits beside that group as a second pill container, so the header
+       gains a control without relocating an existing one. */
+    .trend-header-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Ratio pill row (RP10.3): a second, wrapping pill row inside the Charts
+       panel. The pills are `.trend-pill-btn`, so active and hover states stay
+       byte-identical to the level pills; only grouping and spacing are declared. */
+    .trend-ratio-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--color-border);
+      background: #FFFFFF;
+    }
+
+    .trend-pill-btn-ratio {
+      padding: 4px 10px;
+      font-size: var(--text-xs);
+    }
+
+    /* Ratio Analysis panel (RP10.3). The grouped catalogue table reuses
+       `.statement-table`; only the panel's own padding is declared here. */
+    .trend-view-panel[data-trend-view-panel="ratio"] {
+      padding: 16px 20px 20px;
+      background: #FFFFFF;
     }
 
     .trend-bar-chart-card,
@@ -4548,7 +4728,7 @@
     }
 
     .operating-kpi-label {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-muted);
       white-space: nowrap;
@@ -4557,14 +4737,14 @@
     }
 
     .operating-kpi-val {
-      font-size: 22px;
+      font-size: var(--text-hero);
       font-weight: 700;
       color: var(--color-text-primary);
       letter-spacing: -0.5px;
     }
 
     .operating-kpi-pill {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 600;
       color: var(--color-text-secondary);
       background: var(--color-page-bg);
@@ -4624,7 +4804,7 @@
     }
 
     .schedules-title {
-      font-size: 22px;
+      font-size: var(--text-hero);
       font-weight: 700;
       letter-spacing: -0.01em;
       color: var(--color-text-primary);
@@ -4632,7 +4812,7 @@
     }
 
     .schedules-subtitle {
-      font-size: 13px;
+      font-size: var(--text-base);
       color: var(--color-text-secondary);
       margin: 0;
     }
@@ -4651,7 +4831,7 @@
     }
 
     .units-toggle-label {
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       letter-spacing: 0.05em;
       color: var(--color-text-muted);
@@ -4688,7 +4868,7 @@
 
     .schedule-pill-btn {
       padding: 8px 16px;
-      font-size: 13px;
+      font-size: var(--text-base);
       font-weight: 600;
       border-radius: 6px;
       background: #F8FAFC;
@@ -4716,7 +4896,7 @@
     }
 
     .gate-section-title {
-      font-size: 15px;
+      font-size: var(--text-lg);
       font-weight: 700;
       color: var(--color-text-primary);
       margin: 0;
@@ -4753,7 +4933,7 @@
     }
 
     .gate-card-period {
-      font-size: 14px;
+      font-size: var(--text-md);
       font-weight: 700;
       color: var(--color-text-primary);
     }
@@ -4762,7 +4942,7 @@
       background: #ECFDF5;
       color: #059669;
       border: 1px solid #A7F3D0;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 4px;
@@ -4775,7 +4955,7 @@
       background: #FEF2F2;
       color: #DC2626;
       border: 1px solid #FECACA;
-      font-size: 11px;
+      font-size: var(--text-xs);
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 4px;
@@ -4799,7 +4979,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: var(--text-sm);
     }
 
     .gate-ledger-label {
@@ -4807,8 +4987,8 @@
     }
 
     .gate-ledger-val {
-      font-family: var(--font-family-mono, monospace);
-      font-size: 12px;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-primary);
     }
@@ -4901,8 +5081,8 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      font-size: 12px;
-      line-height: 1.5;
+      font-size: var(--text-sm);
+      line-height: var(--leading-base);
       color: #92400E;
     }
 
@@ -4959,7 +5139,7 @@
       <div class="header-meta-block">
         <div class="header-meta-row">
           <span class="meta-label">Valuation Date</span>
-          <span class="meta-value">Sep 1, 2026</span>
+          <span class="meta-value" data-header-meta="valuation-date">Sep 2, 2026</span>
         </div>
         <div class="header-meta-row">
           <span class="meta-label">Model Version</span>
@@ -4974,46 +5154,47 @@
 
     <nav class="app-tab-nav tabs" role="tablist" aria-label="Model sections">
       <button class="tab-link" type="button" role="tab" id="tab-control-cover"
-              data-tab-link="cover" aria-controls="tab-cover" aria-selected="false">
-        <span class="tab-num">01</span>
+              data-tab-link="cover" aria-controls="tab-cover" aria-selected="false" title="01 Cover &amp; TOC" aria-label="01 Cover &amp; TOC">
+        <span class="tab-num" aria-hidden="true">01</span>
         <span class="tab-label">Cover &amp; TOC</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-assumptions"
-              data-tab-link="assumptions" aria-controls="tab-assumptions" aria-selected="false">
-        <span class="tab-num">02</span>
+              data-tab-link="assumptions" aria-controls="tab-assumptions" aria-selected="false" title="02 Assumptions / Drivers" aria-label="02 Assumptions / Drivers">
+        <span class="tab-num" aria-hidden="true">02</span>
         <span class="tab-label">Assumptions / Drivers</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-historicals"
-              data-tab-link="historicals" aria-controls="tab-historicals" aria-selected="false">
-        <span class="tab-num">03</span>
+              data-tab-link="historicals" aria-controls="tab-historicals" aria-selected="false" title="03 Historicals" aria-label="03 Historicals">
+        <span class="tab-num" aria-hidden="true">03</span>
         <span class="tab-label">Historicals</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-schedules"
-              data-tab-link="schedules" aria-controls="tab-schedules" aria-selected="false">
-        <span class="tab-num">04</span>
+              data-tab-link="schedules" aria-controls="tab-schedules" aria-selected="false" title="04 Supporting Schedules" aria-label="04 Supporting Schedules">
+        <span class="tab-num" aria-hidden="true">04</span>
         <span class="tab-label">Supporting Schedules</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-projections"
-              data-tab-link="projections" aria-controls="tab-projections" aria-selected="false">
-        <span class="tab-num">05</span>
+              data-tab-link="projections" aria-controls="tab-projections" aria-selected="false" title="05 Projections (3-Statement)" aria-label="05 Projections (3-Statement)">
+        <span class="tab-num" aria-hidden="true">05</span>
         <span class="tab-label">Projections (3-Statement)</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-valuation"
-              data-tab-link="valuation" aria-controls="tab-valuation" aria-selected="false">
-        <span class="tab-num">06</span>
+              data-tab-link="valuation" aria-controls="tab-valuation" aria-selected="false" title="06 Valuation" aria-label="06 Valuation">
+        <span class="tab-num" aria-hidden="true">06</span>
         <span class="tab-label">Valuation</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-summary"
-              data-tab-link="summary" aria-controls="tab-summary" aria-selected="false">
-        <span class="tab-num">07</span>
+              data-tab-link="summary" aria-controls="tab-summary" aria-selected="false" title="07 Summary / Output" aria-label="07 Summary / Output">
+        <span class="tab-num" aria-hidden="true">07</span>
         <span class="tab-label">Summary / Output</span>
       </button>
       <button class="tab-link" type="button" role="tab" id="tab-control-sensitivity"
-              data-tab-link="sensitivity" aria-controls="tab-sensitivity" aria-selected="false">
-        <span class="tab-num">08</span>
+              data-tab-link="sensitivity" aria-controls="tab-sensitivity" aria-selected="false" title="08 Sensitivity / Scenarios" aria-label="08 Sensitivity / Scenarios">
+        <span class="tab-num" aria-hidden="true">08</span>
         <span class="tab-label">Sensitivity / Scenarios</span>
       </button>
     </nav>
+    <p class="nav-scroll-hint" aria-hidden="true">Scroll horizontally to reach all 8 sections &rarr;</p>
   </header>
 
   <main>
@@ -5034,7 +5215,7 @@
             <div class="stat-pill-row">
               <div class="stat-pill">
                 <span class="stat-pill-label">Valuation Date</span>
-                <span class="stat-pill-value" id="cover-stat-asof">Sep 1, 2026</span>
+                <span class="stat-pill-value" id="cover-stat-asof">Sep 2, 2026</span>
               </div>
               <div class="stat-pill">
                 <span class="stat-pill-label">Current Share Price</span>
@@ -5121,7 +5302,7 @@
                   <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
                   <span class="status-check-label">Valuation Framework</span>
                 </div>
-                <span class="status-check-tag">6 Methods</span>
+                <span class="status-check-tag">3 Evidence Clusters</span>
               </li>
               <li class="status-check-item">
                 <div class="status-check-left">
@@ -5142,7 +5323,7 @@
                   <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
                   <span class="status-check-label">Last Updated</span>
                 </div>
-                <span class="status-check-tag">Sep 1, 2026</span>
+                <span class="status-check-tag">Sep 2, 2026</span>
               </li>
             </ul>
           </article>
@@ -5199,13 +5380,13 @@
                 <tr data-jump-tab="valuation" class="arch-row">
                   <td class="col-tab-num">06</td>
                   <td class="col-tab-name">Valuation</td>
-                  <td class="col-tab-desc">Multi-method valuation synthesis (2-Stage FCFF DCF, EV/Rev, EV/EBITDAR, P/FCF, SOTP, Per-User), CAPM WACC build, enterprise-to-equity bridge, and thesis directory.</td>
+                  <td class="col-tab-desc">Multi-method valuation synthesis (3 Evidence Clusters · 5 Voting Rows), CAPM WACC build, enterprise-to-equity bridge, and thesis directory.</td>
                   <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="valuation" aria-label="Go to Valuation">&rarr;</button></td>
                 </tr>
                 <tr data-jump-tab="summary" class="arch-row">
                   <td class="col-tab-num">07</td>
                   <td class="col-tab-name">Summary / Output</td>
-                  <td class="col-tab-desc">Executive dashboard, valuation verdict card, 6-method comparison table, live price state, and key ratios.</td>
+                  <td class="col-tab-desc">Executive dashboard, valuation verdict card, multi-method comparison table, live price state, and key ratios.</td>
                   <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="summary" aria-label="Go to Summary / Output">&rarr;</button></td>
                 </tr>
                 <tr data-jump-tab="sensitivity" class="arch-row">
@@ -5249,8 +5430,12 @@
                   <span class="assump-value" id="cover-assump-tax">&mdash;</span>
                 </div>
                 <div class="assump-row">
-                  <span class="assump-label">Shares Outstanding (Diluted)</span>
-                  <span class="assump-value" id="cover-assump-shares">&mdash;</span>
+                  <span class="assump-label">Diluted Shares — Filed (MKT)</span>
+                  <span class="assump-value" id="cover-assump-shares" data-source="assumptions:shares_outstanding" title="Filed diluted shares (MKT) via SEC 10-Q Note 11 (WA diagnostic only); DCF per-share uses the rolled divisor below.">&mdash;</span>
+                </div>
+                <div class="assump-row assump-row-dcf">
+                  <span class="assump-label">DCF Divisor — Rolled (EST)</span>
+                  <span class="assump-value" id="cover-assump-shares-dcf" data-source="dcf:sharesOutstanding" title="Engine DCF divisor (EST): filed BOP shares plus future SBC issuance at spot (intermediate roll before perpetual dilution); the per-share denominator.">&mdash;</span>
                 </div>
                 <div class="assump-row">
                   <span class="assump-label">Net Debt (Latest)</span>
@@ -5548,7 +5733,7 @@
     <!-- Tab 7: Summary -->
     <section class="tab-pane" role="tabpanel" id="tab-summary" data-tab-pane data-tab="summary" aria-labelledby="tab-control-summary" hidden>
       <h2>Executive Summary &amp; Output Dashboard</h2>
-      <p class="placeholder">Executive agreement verdict, six-method dispersion spread, EV bridge, operating KPIs, thesis, and model health.</p>
+      <p class="placeholder">Executive agreement verdict, clustered valuation dispersion spread, EV bridge, operating KPIs, thesis, and model health.</p>
     </section>
 
     <!-- Tab 8: Sensitivity -->
@@ -5570,7 +5755,7 @@
     <div class="footer-right">
       <span>v1.0-P4</span>
       <span class="footer-sep">|</span>
-      <span>Sep 1, 2026</span>
+      <span>Sep 2, 2026</span>
     </div>
   </footer>
 

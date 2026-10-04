@@ -1134,15 +1134,30 @@ export function projectSbc(schedule, drivers, periodInputs) {
         revenue: typeof data === 'number' ? data : data.revenue ?? 0,
       }));
 
-  const sbcPct = requireDriverValue(drivers, ['sbc_target_pct_of_revenue', 'sbc_pct_revenue']);
+  const sbcPctTarget = requireDriverValue(drivers, ['sbc_target_pct_of_revenue', 'sbc_pct_revenue']);
+
+  let sbcFadeEnd = null;
+  const hasFade = normalizedInputs.length > 5;
+  if (hasFade) {
+    sbcFadeEnd = requireDriverValue(drivers, ['sbc_fade_end_pct_of_revenue']);
+  }
 
   const byPeriod = {};
   const periods = [];
 
-  for (const input of normalizedInputs) {
+  for (let i = 0; i < normalizedInputs.length; i++) {
+    const input = normalizedInputs[i];
     const period = input.period;
     periods.push(period);
     const revenue = Number.isFinite(input.revenue) ? input.revenue : 0;
+
+    let sbcPct = sbcPctTarget;
+    const isFade = i >= 5;
+    if (isFade) {
+      const fadeStep = (i - 5 + 1) / 5;
+      sbcPct = sbcPctTarget - (sbcPctTarget - sbcFadeEnd) * fadeStep;
+    }
+
     const sbcExpense = revenue * sbcPct;
 
     byPeriod[period] = {
@@ -1152,8 +1167,10 @@ export function projectSbc(schedule, drivers, periodInputs) {
       sbc_pct_of_revenue: { value: sbcPct, units: 'ratio', isComputed: true, isEstimate: true },
       isComputed: true,
       isEstimate: true,
+      ...(isFade ? { stage: 'fade' } : {}),
       derivedFrom: [
-        { driver: 'sbc_target_pct_of_revenue', value: sbcPct },
+        { driver: 'sbc_target_pct_of_revenue', value: sbcPctTarget },
+        ...(isFade ? [{ driver: 'sbc_fade_end_pct_of_revenue', value: sbcFadeEnd }] : []),
       ],
     };
   }

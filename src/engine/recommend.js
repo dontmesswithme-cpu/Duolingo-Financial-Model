@@ -48,7 +48,8 @@ import threeStatementEngine from './threeStatement.js';
 import { apply as applyScenario } from './scenarios.js';
 import { build as buildWacc } from './wacc.js';
 import { valuate as valuateDcf } from './dcf.js';
-import { projectShares } from './shares.js';
+import { projectShares, fullyDilutedSchedule } from './shares.js';
+import { valuateFcffDcf } from './methods/fcffDcf.js';
 
 /** Derived / judgment marking. */
 const EST = 'EST';
@@ -195,6 +196,9 @@ export function buildSensitivityGrid(input) {
   const threeStatement = input.threeStatement ?? input.threeStatementBase;
   const assumptions = input.assumptions ?? input.assumptionsBase;
   const horizon = input.horizon;
+  // Production threads the P10.2 dated valuation seam through every cell so the
+  // grid center and the headline value are built on one identical basis.
+  const datedSeamInput = input.datedSeam === true ? { datedSeam: true } : {};
 
   if (!threeStatement || typeof threeStatement !== 'object') {
     throw new EngineError(
@@ -244,7 +248,9 @@ export function buildSensitivityGrid(input) {
     }
     gridShares = input.shares;
   } else if (typeof input.corpus !== 'undefined') {
-    gridShares = projectShares(assumptions, threeStatement, input.corpus);
+    gridShares = projectShares(assumptions, threeStatement, input.corpus, {
+      fullyDilutedSchedule: fullyDilutedSchedule(),
+    });
   } else {
     throw new EngineError(
       'missing_input',
@@ -303,6 +309,7 @@ export function buildSensitivityGrid(input) {
         },
         horizon,
         shares: gridShares,
+        ...datedSeamInput,
       });
 
       const cellRecord = Object.freeze({
@@ -326,6 +333,7 @@ export function buildSensitivityGrid(input) {
     assumptions,
     horizon,
     shares: gridShares,
+    ...datedSeamInput,
   });
 
   const gridResult = {
@@ -411,7 +419,14 @@ export function buildLabelStability(input) {
   }
 
   const price = requireDriverValue(assumptions, 'market_share_price').value;
-  const bopShares = requireDriverValue(assumptions, 'shares_outstanding').value;
+  // P10.5: the band treatments must roll from the SAME base as the share
+  // schedule, or the treatments silently diverge from each other. This line
+  // still read the `shares_outstanding` weighted-average driver while
+  // `gross-issuance` used the point-in-time fully diluted schedule, which is
+  // what pushed the sbc-fade / gross-issuance gap from 0.018 to 0.069 and broke
+  // the frozen FP.2 convergence gate. The base is now the FD schedule, and the
+  // weighted-average count is not a valuation base anywhere in this module.
+  const bopShares = fullyDilutedSchedule().denominator;
   const sbcTarget = requireDriverValue(assumptions, 'sbc_target_pct_of_revenue').value;
   const scale = UNITS.thousands_usd.scale;
 
@@ -440,7 +455,9 @@ export function buildLabelStability(input) {
   if (typeof input.corpus !== 'undefined') {
     corpus = input.corpus;
   }
-  const sharesSchedule = projectShares(assumptions, threeStatement, corpus);
+  const sharesSchedule = projectShares(assumptions, threeStatement, corpus, {
+    fullyDilutedSchedule: fullyDilutedSchedule(),
+  });
 
   const discountFactorOf = (period) => {
     if (!Array.isArray(dcf.schedule)) {
@@ -569,11 +586,23 @@ export function buildLabelStability(input) {
   // dials fade linearly from the target driver to the steady-state constant
   // while statements stay frozen — the coherent rebuild is the deferred §10.4
   // revision. Direction and level follow the disclosed band (below gross).
+  const sbcFadeEndRecord = assumptions && typeof assumptions.get === 'function'
+    ? assumptions.get('sbc_fade_end_pct_of_revenue')
+    : null;
+  const sbcFadeEnd = sbcFadeEndRecord && typeof sbcFadeEndRecord.value === 'number'
+    ? sbcFadeEndRecord.value
+    : SBC_FADE_STEADY_STATE_PCT;
+
   const fadeSpan = periods.length - 1;
-  const fadePctAt = (index) =>
-    fadeSpan > 0
-      ? sbcTarget - (sbcTarget - SBC_FADE_STEADY_STATE_PCT) * (index / fadeSpan)
+  const fadePctAt = (index) => {
+    if (periods.length > 5) {
+      if (index < 5) return sbcTarget;
+      return sbcTarget - (sbcTarget - sbcFadeEnd) * ((index - 5 + 1) / 5);
+    }
+    return fadeSpan > 0
+      ? sbcTarget - (sbcTarget - sbcFadeEnd) * (index / fadeSpan)
       : sbcTarget;
+  };
   let fadedPvExplicit = 0;
   let fadedIssuance = 0;
   for (let i = 0; i < periods.length; i += 1) {
@@ -659,7 +688,7 @@ function requireFiniteBandNumber(value, context) {
  * @param {'bear'|'base'|'bull'} [scenario=DEFAULT_SCENARIO] Scenario name
  * @returns {object} Frozen FullValuationOutput
  */
-export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCENARIO) {
+export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCENARIO, options = {}) {
   if (!historical) {
     throw new EngineError(
       'missing_input',
@@ -685,8 +714,15 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
     activeAssumptions = applyScenario(assumptions, scenario);
   }
 
+  const horizon = options && typeof options.horizon === 'number' ? options.horizon : undefined;
+  const datedSeamInput = options && options.datedSeam === true ? { datedSeam: true } : {};
+
   const schedulesOut = schedulesEngine.build(historical, activeAssumptions);
-  const forecastOut = forecastEngine.project({ historical, assumptions: activeAssumptions });
+  const forecastOut = forecastEngine.project({
+    historical,
+    assumptions: activeAssumptions,
+    ...(typeof horizon === 'number' ? { horizon } : {}),
+  });
   const threeStatementOut = threeStatementEngine.project(
     schedulesOut,
     activeAssumptions,
@@ -699,11 +735,32 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
   const dcfOut = valuateDcf(threeStatementOut, waccOut, {
     assumptions: activeAssumptions,
     corpus: historical,
+    ...(typeof horizon === 'number' ? { horizon } : {}),
+    ...datedSeamInput,
   });
 
-  const marketPrice = requireDriverValue(activeAssumptions, 'market_share_price').value;
+  // P10.3 benchmark parity: the comparison price is the CANONICAL benchmark the
+  // controller holds, not a re-read of the driver. The benchmark is a
+  // recommendation input only — it never reaches the DCF above.
+  const marketPrice = Number.isFinite(options?.marketPrice) && options.marketPrice > 0
+    ? options.marketPrice
+    : requireDriverValue(activeAssumptions, 'market_share_price').value;
 
-  const recOut = evaluate(dcfOut.perShare, marketPrice);
+  // P10.5 F1. The recommendation is driven by the CANONICAL add-back DCF — the
+  // after-modelled-future-dilution output — and NOT by `dcfOut.perShare`, which
+  // is the finite-roll intermediate. The contract allows only the canonical
+  // output to drive a recommendation. This call previously used the
+  // intermediate, so the headline, its upside and every consumer of the
+  // recommendation were computed on a figure the contract says is not
+  // recommendable. Fixing it here rather than in the app means the base case AND
+  // every scenario are corrected by one change, since all of them are produced
+  // by this function. Falls back to the intermediate only if the engine produced
+  // no canonical figure, which its positivity guards make unreachable.
+  const canonicalPerShare = valuateFcffDcf(dcfOut).isCanonicalAddBackDcf;
+  const recOut = evaluate(
+    typeof canonicalPerShare === 'number' ? canonicalPerShare : dcfOut.perShare,
+    marketPrice,
+  );
 
   const labelStability = buildLabelStability({
     threeStatement: threeStatementOut,
@@ -734,6 +791,70 @@ export function runFullValuation(historical, assumptions, scenario = DEFAULT_SCE
   };
 
   return deepFreeze(fullOutput);
+}
+
+
+/**
+ * P10.5: the contract requires an explicit SBC/revenue sensitivity around the
+ * terminal endpoint. The endpoint is an SBC EXPENSE endpoint, not a dilution
+ * rate, and conflating the two is the specific error this naming exists to
+ * prevent: a reader who sees "8% dilution" would apply it to the share count
+ * instead of to revenue.
+ *
+ * The range is NOT typed here. It is derived from the driver record own upper
+ * bound, so a change to sbc_fade_end_pct_of_revenue in assumptions.json moves
+ * the sensitivity with it instead of leaving a stale literal behind. An earlier
+ * version hardcoded the bounds and the RTYPE freeze gate caught it.
+ *
+ * @param {Object} driverRecord The sbc_fade_end_pct_of_revenue driver record.
+ * @returns {ReadonlyArray<number>} [endpoint, upperBound]
+ */
+export function sbcSensitivityRange(driverRecord) {
+  if (!driverRecord || typeof driverRecord !== 'object') {
+    throw new EngineError(
+      'missing_sbc_endpoint',
+      'sbcSensitivityRange requires the sbc_fade_end_pct_of_revenue driver record.',
+    );
+  }
+  const endpoint = driverRecord.value;
+  const upper = driverRecord.max;
+  if (typeof endpoint !== 'number' || !Number.isFinite(endpoint)) {
+    throw new EngineError(
+      'invalid_sbc_endpoint',
+      `sbc_fade_end_pct_of_revenue must be a finite number (received ${endpoint}).`,
+    );
+  }
+  if (typeof upper !== 'number' || !Number.isFinite(upper) || upper <= endpoint) {
+    throw new EngineError(
+      'invalid_sbc_endpoint',
+      `sbc_fade_end_pct_of_revenue must declare a max above its value (value ${endpoint}, max ${upper}).`,
+    );
+  }
+  return Object.freeze([endpoint, upper]);
+}
+
+/**
+ * Builds the disclosed SBC/revenue sensitivity record.
+ *
+ * @param {Object} driverRecord The sbc_fade_end_pct_of_revenue driver record.
+ * @param {number[]} [scenarios] Scenario deltas already applied by the caller.
+ * @returns {Readonly<Object>}
+ */
+export function buildSbcSensitivity(driverRecord, scenarios = []) {
+  const range = sbcSensitivityRange(driverRecord);
+  return Object.freeze({
+    endpointPctOfRevenue: range[0],
+    range,
+    scenarios: Object.freeze(scenarios.slice()),
+    kind: 'sbc_expense_endpoint',
+    isDilutionRate: false,
+    disclosure:
+      'The SBC fade endpoint is an SBC EXPENSE as a percentage of revenue, not a dilution rate. ' +
+      'It sets how much stock compensation the steady state expenses; it does not set how many ' +
+      'shares are issued. Share issuance is modelled separately from the frozen sbc_issuance_price ' +
+      'and the P10.4 fully diluted schedule. The sensitivity bounds are read from the driver ' +
+      'record, so they move with the driver rather than being restated here.',
+  });
 }
 
 export default Object.freeze({

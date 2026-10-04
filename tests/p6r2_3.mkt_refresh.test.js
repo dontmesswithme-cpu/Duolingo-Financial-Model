@@ -22,7 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
-import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
+import { P104_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ASSUMPTIONS_PATH = path.join(ROOT, 'src/data/assumptions.json');
@@ -124,13 +124,13 @@ describe('P6R2.3  -  MKT Anchor Refresh: market_share_price ($157.85 Close)', ()
 });
 
 describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
-  test('Cost of equity / WACC re-derivation at refreshed anchors: Re = 11.0375%', () => {
+  test('Cost of equity / WACC re-derivation at refreshed anchors: Re = 11.1225%', () => {
     const rf = driversByName.risk_free_rate.value;
     const beta = driversByName.beta.value;
     const erp = driversByName.equity_risk_premium.value;
 
     const re = rf + beta * erp;
-    assert.ok(Math.abs(re - 0.110375) < 1e-6, `Re must equal 0.110375 (got ${re})`);
+    assert.ok(Math.abs(re - 0.111225) < 1e-6, `Re must equal 0.111225 (got ${re})`);
   });
 
   test('Derived market capitalization: 157.85 × 50,031,000 = 7,897,393,350', () => {
@@ -149,24 +149,63 @@ describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
       diff = execSync('git diff HEAD -- src/data/assumptions.json', { cwd: ROOT, encoding: 'utf8' }).trim();
     }
     assert.ok(diff.length > 0, 'assumptions.json must have diff vs baseline');
-    const changedFields = diff.split('\n').filter((l) => l.startsWith('+') || l.startsWith('-'));
-    for (const line of changedFields) {
-      if (line.startsWith('+++') || line.startsWith('---')) continue;
-      assert.ok(
-        line.includes('Beta') ||
-        line.includes('beta') ||
-        line.includes('0.89') ||
-        line.includes('1.47') ||
-        line.includes('peers_beta') ||
-        line.includes('Spotify') ||
-        line.includes('Hamada') ||
-        line.includes('stockanalysis') ||
-        line.includes('EDGAR') ||
+    const FP1_EXACT_BLOCK_LINES = new Set([
+      '{',
+      '"name": "paid_subscriber_fade_floor",',
+      '"label": "Paid Subscriber Fade Floor",',
+      '"group": "revenue",',
+      '"value": 0.04,',
+      '"min": 0.01,',
+      '"max": 0.1,',
+      '"step": 0.001,',
+      '"units": "ratio",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": -0.01,',
+      '"bull": 0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.D: Linear fade floor for subscriber growth over FY2031–FY2035 (default 4.0%), bounded by terminal_growth_rate < fade_floor < paid_subscriber_growth."',
+      '},',
+      '"name": "sbc_fade_end_pct_of_revenue",',
+      '"label": "SBC Fade End (% of Revenue)",',
+      '"group": "sbc",',
+      '"value": 0.08,',
+      '"min": 0.03,',
+      '"max": 0.15,',
+      '"step": 0.0025,',
+      '"units": "pct_of_revenue",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": 0.01,',
+      '"bull": -0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.C: Steady-state terminal SBC-to-revenue ratio endpoint (default 8.0%, matching SBC_FADE_STEADY_STATE_PCT), promoted into base FY2031–FY2035 path."',
+      '},',
+      '{',
+      '"name": "fade_shape",',
+      '"label": "Growth Fade Shape",',
+      '"group": "market",',
+      '"value": "linear",',
+      '"units": "shape",',
+      '"marking": "EST",',
+      '"notes": "EST judgment per Phase 9 FP.B: Linear fade trajectory for the FY2031–FY2035 glide stage (v1; geometric named as future extension, not a silent alternative)."',
+      '}',
+    ]);
+
+    function isAllowedLine(line) {
+      const stripped = line.replace(/^[+-]\s*/, '').trim();
+      if (FP1_EXACT_BLOCK_LINES.has(stripped)) return true;
+      return (
+        line.includes('paid_subscriber_fade_floor') ||
+        line.includes('sbc_fade_end_pct_of_revenue') ||
+        line.includes('fade_shape') ||
         line.includes('risk_free_rate') ||
-        line.includes('4.79%') ||
-        line.includes('4.73%') ||
+        line.includes('0.0392') ||
+        line.includes('0.0391') ||
         line.includes('0.0479') ||
         line.includes('0.0473') ||
+        line.includes('4.79%') ||
+        line.includes('4.73%') ||
         line.includes('2026-09-01') ||
         line.includes('2026-08-28') ||
         line.includes('equity_risk_premium') ||
@@ -179,19 +218,173 @@ describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
         line.includes('4.42%') ||
         line.includes('4.25%') ||
         line.includes('ERPbymonth') ||
+        line.includes('beta') ||
+        line.includes('Beta') ||
+        line.includes('0.89') ||
+        line.includes('1.47') ||
+        line.includes('peers_beta') ||
+        line.includes('Spotify') ||
+        line.includes('Hamada') ||
         line.includes('market_share_price') ||
         line.includes('157.85') ||
         line.includes('148.36') ||
+        line.includes('156.24') ||
+        line.includes('158.47') ||
+        line.includes('154.30') ||
+        line.includes('1,294,851') ||
+        line.includes('840,635') ||
+        line.includes('144.69') ||
+        line.includes('149.62') ||
+        line.includes('144.46') ||
         line.includes('2026-09-02') ||
         line.includes('2026-08-31') ||
-        line.includes('notes') ||
-        line.includes('value') ||
-        line.includes('provider') ||
-        line.includes('url') ||
-        line.includes('asOf'),
-        `Unexpected change in assumptions.json: ${line}`,
+        line.includes('11.1225%') ||
+        line.includes('853.75bps') ||
+        line.includes('8.6638%') ||
+        line.includes('616bps') ||
+        line.includes('50,031') ||
+        line.includes('40,387,012') ||
+        line.includes('6,399,257') ||
+        line.includes('46,786,269') ||
+        line.includes('treasury-stock-method') ||
+        line.includes('Securities and Exchange Commission') ||
+        line.includes('duol-20260630.htm') ||
+        line.includes('FRED') ||
+        line.includes('H.15 Selected Interest Rates') ||
+        line.includes('stockanalysis.com') ||
+        line.includes('EDGAR') ||
+        line.includes('spot/statistics') ||
+        line.includes('duol/statistics') ||
+        line.includes('New_Home_Page/datafile/histimpl.html') ||
+        line.includes('EST judgment - H1 like-for-like') ||
+        line.includes('EST judgment — H1 like-for-like') ||
+        line.includes('EST judgment - held constant') ||
+        line.includes('EST judgment — held constant') ||
+        line.includes('EST judgment - normalized structural rate') ||
+        line.includes('EST judgment — normalized structural rate') ||
+        line.includes('FY2025 actual: proceeds from stock option') ||
+        line.includes('FY2025 actual magnitude: taxes paid related') ||
+        line.includes('FY2025 actual: interest income') ||
+        line.includes('paid-subscriber observations') ||
+        line.includes('subscription revenue 873,442') ||
+        line.includes('H1 FY2026 cited repurchases 69,603') ||
+        // P10.3: the frozen `sbc_issuance_price` driver (canonical benchmark
+        // contract - issuance must not be driven by the benchmark). Authorized
+        // by docs/phases/phase_10.md §P10.3; the value is the same MKT snapshot
+        // close already allow-listed above, so no new market figure enters.
+        line.includes('sbc_issuance_price') ||
+        line.includes('SBC Issuance Price (Frozen)') ||
+        line.includes('FROZEN issuance reference price') ||
+        line.includes('benchmark-only input') ||
+        line.includes('Held constant across all three scenarios') ||
+        // P10.8 beta re-anchor: the driver moves from the peer MEDIAN (1.47) to the
+        // peer MEAN (1.49). A sanctioned re-basing of one enumerated driver, not a
+        // new input: no new peer, price, or market figure enters, and the per-peer
+        // regressions and Hamada legs are unchanged. Scoped to the two numerals so a
+        // THIRD beta value, or a `"value":` change on any other driver, still FAILS.
+        line.includes('"value": 1.49,') ||
+        line.includes('"value": 1.47,') ||
+        line.includes('Bottom-up MEAN unlevered beta = 1.49') ||
+        line.includes('Bottom-up median unlevered beta = 1.47') ||
+        line.includes('Peer statistics: mean = 1.4919') ||
+        line.includes('mean = 1.4919 (1.49)') ||
+        line.includes('median = 1.4713 (rounded to step 0.01 = 1.47)') ||
+        line.includes('MEAN, not median, is the basis') ||
+        line.includes('median is definitionally the middle observation') ||
+        line.includes('median outlier-resistance') ||
+        line.includes('mean unlevered asset beta (1.49)') ||
+        line.includes('median unlevered asset beta (1.47)') ||
+        line.includes('Peer regression quality independently favours') ||
+        line.includes('rejected on its own statistics') ||
+        line.includes('not used: DUOL own') ||
+        line.includes('Cross-check disclosed alongside and NOT used')
       );
     }
+
+    const changedFields = diff.split('\n').filter((l) => l.startsWith('+') || l.startsWith('-'));
+
+    // P10.3 scope rule: the ONLY authorized addition is one contiguous `+` block
+    // introducing the frozen `sbc_issuance_price` driver (§P10.3). The allowance
+    // is scoped to that exact block, so a structural line anywhere else, or a
+    // second added driver, still FAILS.
+    const blockStart = changedFields.findIndex((l) => l.includes('"name": "sbc_issuance_price"'));
+    let blockEnd = -1;
+    if (blockStart !== -1) {
+      for (let i = blockStart; i < changedFields.length; i += 1) {
+        if (!changedFields[i].startsWith('+')) {
+          blockEnd = i;
+          break;
+        }
+      }
+      if (blockEnd === -1) blockEnd = changedFields.length;
+    }
+    const inAuthorizedBlock = (line, index) =>
+      blockStart !== -1 && index >= blockStart && index < blockEnd;
+
+    changedFields.forEach((line, index) => {
+      if (line.startsWith('+++') || line.startsWith('---')) return;
+      if (inAuthorizedBlock(line, index)) return;
+      assert.ok(
+        isAllowedLine(line),
+        `Unexpected change in assumptions.json: ${line}`,
+      );
+    });
+  });
+
+  test('NEGATIVE CONTROL: bogus assumptions line is rejected by gate matcher', () => {
+    const FP1_EXACT_BLOCK_LINES = new Set([
+      '{',
+      '"name": "paid_subscriber_fade_floor",',
+      '"label": "Paid Subscriber Fade Floor",',
+      '"group": "revenue",',
+      '"value": 0.04,',
+      '"min": 0.01,',
+      '"max": 0.1,',
+      '"step": 0.001,',
+      '"units": "ratio",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": -0.01,',
+      '"bull": 0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.D: Linear fade floor for subscriber growth over FY2031–FY2035 (default 4.0%), bounded by terminal_growth_rate < fade_floor < paid_subscriber_growth."',
+      '},',
+      '"name": "sbc_fade_end_pct_of_revenue",',
+      '"label": "SBC Fade End (% of Revenue)",',
+      '"group": "sbc",',
+      '"value": 0.08,',
+      '"min": 0.03,',
+      '"max": 0.15,',
+      '"step": 0.0025,',
+      '"units": "pct_of_revenue",',
+      '"marking": "EST",',
+      '"scenarioDeltas": {',
+      '"bear": 0.01,',
+      '"bull": -0.01',
+      '},',
+      '"notes": "EST judgment per Phase 9 FP.C: Steady-state terminal SBC-to-revenue ratio endpoint (default 8.0%, matching SBC_FADE_STEADY_STATE_PCT), promoted into base FY2031–FY2035 path."',
+      '},',
+      '{',
+      '"name": "fade_shape",',
+      '"label": "Growth Fade Shape",',
+      '"group": "market",',
+      '"value": "linear",',
+      '"units": "shape",',
+      '"marking": "EST",',
+      '"notes": "EST judgment per Phase 9 FP.B: Linear fade trajectory for the FY2031–FY2035 glide stage (v1; geometric named as future extension, not a silent alternative)."',
+      '}',
+    ]);
+    const bogus = '+     "value": 999,';
+    const stripped = bogus.replace(/^[+-]\s*/, '').trim();
+    assert.equal(FP1_EXACT_BLOCK_LINES.has(stripped), false);
+    assert.equal(
+      bogus.includes('equity_risk_premium') ||
+      bogus.includes('paid_subscriber_fade_floor') ||
+      bogus.includes('sbc_fade_end_pct_of_revenue') ||
+      bogus.includes('fade_shape'),
+      false,
+      'bogus line must be rejected by assumptions gate',
+    );
   });
 
   test('historical corpus 706-record count invariant is strictly preserved', () => {
@@ -209,8 +402,8 @@ describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
     // Authorized drift from the P6R2.3 anchor-refresh baseline: the P6R3
     // cost-of-capital files (beta.js, market.js), the P6R2 model-rigor revision
     // (threeStatement.js), the P8 method modules (filtered out by the helper),
-    // plus the Economy Phase set (EP_AUTHORIZED_ENGINE). Director un-park order
-    // 2026-09-10, `docs/logs/ds/economy_phase.md` §5.
+    // the Economy Phase set, RP10 ratios, plus the Phase 9 Three-Stage Fade
+    // engine modules (P104_AUTHORIZED_ENGINE, docs/phases/phase_10.md §3 Task FP.1).
     //
     // Hardening note (EP-FIX1, F1): the previous bare `git diff` inside
     // try/catch could not see untracked engine modules and degraded to an
@@ -219,7 +412,7 @@ describe('P6R2.3  -  Refreshed Anchor Mathematics & Quality Gates', () => {
       'src/engine/beta.js',
       'src/engine/market.js',
       'src/engine/threeStatement.js',
-      ...EP_AUTHORIZED_ENGINE,
+      ...P104_AUTHORIZED_ENGINE,
     ];
     const unauthorized = unauthorizedEngineFiles('v1.0-P6R2-base', authorized);
     assert.deepEqual(

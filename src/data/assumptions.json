@@ -504,7 +504,7 @@
     "name": "beta",
     "label": "Levered Equity Beta",
     "group": "market",
-    "value": 1.47,
+    "value": 1.49,
     "min": 0.2,
     "max": 2.5,
     "step": 0.01,
@@ -513,7 +513,7 @@
       "bear": 0.15,
       "bull": -0.15
     },
-    "notes": "MKT snapshot as of 2026-08-31: Bottom-up median unlevered beta = 1.47 across locked peer set (Spotify, Roblox, Netflix). Per-peer 60-month OLS regressions against S&P 500 (2021-09 to 2026-08) and Hamada unlevering on filed FY2025 D/E: (1) Spotify (SPOT): levered β = 1.5860, D/E = 1.64% (€1,956M total debt / $119,529M market cap), t = 21.0% -> unlevered β = 1.5657 (1.57); (2) Roblox (RBLX): levered β = 1.4742, D/E = 3.12% ($1,788M total debt / $57,398M market cap), t = 21.0% -> unlevered β = 1.4387 (1.44); (3) Netflix (NFLX): levered β = 1.5258, D/E = 4.29% ($16,976M total debt / $395,870M market cap), t = 13.7% -> unlevered β = 1.4713 (1.47). Peer statistics: median = 1.4713 (rounded to step 0.01 = 1.47), mean = 1.4919 (1.49), span = 0.1270 (0.13). Duolingo is debt-free (D = 0), so the median unlevered asset beta (1.47) applies directly without relevering (no Hamada adjustment applies). Cross-checks: Vasicek-shrunk own-regression (DUOL 60-observation window 2021-09 to 2026-08 OLS β = 0.890488, rounded to 0.89, t ≈ 1.72, R² = 4.83%, stderr = 0.519187 against S&P 500 Index) disclosed alongside; peer dispersion visible. Bear/bull deltas widen or narrow the systematic-risk input.",
+    "notes": "MKT snapshot as of 2026-08-31: Bottom-up MEAN unlevered beta = 1.49 across locked peer set (Spotify, Roblox, Netflix). Per-peer 60-month OLS regressions against S&P 500 (2021-09 to 2026-08) and Hamada unlevering on filed FY2025 D/E: (1) Spotify (SPOT): levered beta = 1.5860, D/E = 1.64% (EUR1,956M total debt / $119,529M market cap), t = 21.0% -> unlevered beta = 1.5657 (1.57); (2) Roblox (RBLX): levered beta = 1.4742, D/E = 3.12% ($1,788M total debt / $57,398M market cap), t = 21.0% -> unlevered beta = 1.4387 (1.44); (3) Netflix (NFLX): levered beta = 1.5258, D/E = 4.29% ($16,976M total debt / $395,870M market cap), t = 13.7% -> unlevered beta = 1.4713 (1.47). Peer statistics: mean = 1.4919 (rounded to step 0.01 = 1.49); span = 0.1270 (0.13), about 8.6% of the mean, so dispersion is tight and contains no outlier. MEAN, not median, is the basis: at n = 3 the median is definitionally the middle observation (Netflix 1.4713), so it quotes one peer rather than summarising the set; the median outlier-resistance advantage has nothing to resist here. Peer regression quality independently favours the peer set: R2 = 30.38% (SPOT), 28.85% (NFLX), 12.94% (RBLX). Duolingo is debt-free (D = 0), so the mean unlevered asset beta (1.49) applies directly without relevering (no Hamada adjustment applies). Cross-check disclosed alongside and NOT used: DUOL own 60-observation regression (2021-09 to 2026-08 OLS beta = 0.890488, rounded to 0.89, t = 1.72, R2 = 4.83%, stderr = 0.519187 against the S&P 500 Index). That own regression is unreliable and is rejected on its own statistics: R2 = 4.83% means the market explains under 5% of Duolingo return variance, and the standard error puts the one-sigma band at roughly 0.37-1.41. Bear/bull deltas widen or narrow the systematic-risk input.",
     "marking": "MKT",
     "asOf": "2026-08-31",
     "source": {
@@ -555,7 +555,7 @@
       "bear": -0.005,
       "bull": 0.005
     },
-    "notes": "EST judgment - long-run perpetuity growth for the Gordon terminal value. Set at 2.5%: strictly below the Base WACC (11.0375%, ~853.75bps of Gordon headroom) and below the long-run US nominal GDP growth ceiling of ~4.0% (~2.0% real + ~2.0% inflation), so the perpetuity never implies Duolingo outgrowing the economy that hosts it. Max bound is TERMINAL_GROWTH_BOUNDS.max (0.04) from constants.js. Not an MKT input - no market price reveals long-run growth - so it carries no as-of date. Contract-reading note: the P4.1 contract text says this driver is 'bounded below US nominal GDP growth'; that reads as an inversion of the standard Gordon ceiling (a perpetuity cannot grow faster than nominal GDP forever), so it is implemented here as an UPPER bound. OP ruling requested.",
+    "notes": "EST judgment - long-run perpetuity growth for the Gordon terminal value. Set at 2.5%: strictly below the Base WACC (11.1225%, ~862.25bps of Gordon headroom) and below the long-run US nominal GDP growth ceiling of ~4.0% (~2.0% real + ~2.0% inflation), so the perpetuity never implies Duolingo outgrowing the economy that hosts it. Max bound is TERMINAL_GROWTH_BOUNDS.max (0.04) from constants.js. Not an MKT input - no market price reveals long-run growth - so it carries no as-of date. Contract-reading note: the P4.1 contract text says this driver is 'bounded below US nominal GDP growth'; that reads as an inversion of the standard Gordon ceiling (a perpetuity cannot grow faster than nominal GDP forever), so it is implemented here as an UPPER bound. OP ruling requested.",
     "marking": "EST"
   },
   {
@@ -599,6 +599,68 @@
       "provider": "U.S. Securities and Exchange Commission - Form 10-Q, Duolingo, Inc. (CIK 0001562088)",
       "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm"
     }
+  },
+  {
+    "name": "sbc_issuance_price",
+    "label": "SBC Issuance Price (Frozen)",
+    "group": "market",
+    "value": 157.85,
+    "min": 10,
+    "max": 2000,
+    "step": 0.01,
+    "units": "usd_per_share",
+    "scenarioDeltas": {
+      "bear": 0,
+      "bull": 0
+    },
+    "notes": "FROZEN issuance reference price for share issuance (SBC / issuance price). P10.3 contract: the benchmark is a benchmark-only input and must never move share issuance, terminal dilution, or intrinsic per-share value, so issuance uses this separate frozen driver. Provenance: MKT snapshot as of 2026-09-02 via stockanalysis.com, official closing price .85. Held constant across all three scenarios (deltas 0) because issuance is a share-count mechanic, not a valuation input.",
+    "marking": "MKT",
+    "asOf": "2026-09-02",
+    "source": {
+      "provider": "stockanalysis.com",
+      "url": "https://stockanalysis.com/stocks/duol/history/"
+    }
+  },
+  {
+    "name": "paid_subscriber_fade_floor",
+    "label": "Paid Subscriber Fade Floor",
+    "group": "revenue",
+    "value": 0.04,
+    "min": 0.01,
+    "max": 0.1,
+    "step": 0.001,
+    "units": "ratio",
+    "marking": "EST",
+    "scenarioDeltas": {
+      "bear": -0.01,
+      "bull": 0.01
+    },
+    "notes": "EST judgment per Phase 9 FP.D: Linear fade floor for subscriber growth over FY2031–FY2035 (default 4.0%), bounded by terminal_growth_rate < fade_floor < paid_subscriber_growth."
+  },
+  {
+    "name": "sbc_fade_end_pct_of_revenue",
+    "label": "SBC Fade End (% of Revenue)",
+    "group": "sbc",
+    "value": 0.08,
+    "min": 0.03,
+    "max": 0.15,
+    "step": 0.0025,
+    "units": "pct_of_revenue",
+    "marking": "EST",
+    "scenarioDeltas": {
+      "bear": 0.01,
+      "bull": -0.01
+    },
+    "notes": "EST judgment per Phase 9 FP.C: Steady-state terminal SBC-to-revenue ratio endpoint (default 8.0%, matching SBC_FADE_STEADY_STATE_PCT), promoted into base FY2031–FY2035 path."
+  },
+  {
+    "name": "fade_shape",
+    "label": "Growth Fade Shape",
+    "group": "market",
+    "value": "linear",
+    "units": "shape",
+    "marking": "EST",
+    "notes": "EST judgment per Phase 9 FP.B: Linear fade trajectory for the FY2031–FY2035 glide stage (v1; geometric named as future extension, not a silent alternative)."
   }
 ]
 

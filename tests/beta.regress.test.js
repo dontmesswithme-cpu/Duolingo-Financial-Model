@@ -280,7 +280,11 @@ describe('P6R2.2  -  Corpus Price Series & Regression Verification', () => {
     const reg = regress(pricesDataset);
     const computedRounded = Number(reg.beta.toFixed(2));
     assert.strictEqual(computedRounded, 0.89, 'DUOL single-stock OLS slope rounded to 0.01 step is 0.89');
-    assert.strictEqual(betaDriver.value, 1.47, 'P6R3.2 re-anchors beta driver to peer median (1.47)');
+    // The DUOL own-regression slope (0.89) is a DISCLOSED CROSS-CHECK, not the
+    // driver value; the driver is the bottom-up peer figure. It is anchored on the
+    // peer MEAN (1.49), not the median (1.47) — see the beta driver notes, which
+    // carry the n=3 argument for why the median is the wrong statistic here.
+    assert.strictEqual(betaDriver.value, 1.49, 'beta driver is anchored on the bottom-up peer MEAN (1.49)');
 
     // Driver metadata verification
     assert.strictEqual(betaDriver.marking, 'MKT');

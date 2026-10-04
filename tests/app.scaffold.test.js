@@ -97,11 +97,13 @@ describe('AppState contract', () => {
     const { app } = buildApp();
     const state = app.state();
 
+    // FP-FIX1 (F-B2): labelStability is an enumerable AppState member representing the EP.4 verdict-sensitivity band.
     assert.deepEqual(Object.keys(state).sort(), [
       'assumptions',
       'dcf',
       'dirty',
       'forecast',
+      'labelStability',
       'recommendation',
       'scenario',
       'schedules',
@@ -111,7 +113,7 @@ describe('AppState contract', () => {
 
     assert.equal(state.scenario, 'base');
     assert.equal(state.dirty, false);
-    for (const key of ['assumptions', 'schedules', 'forecast', 'threeStatement', 'wacc', 'dcf', 'recommendation']) {
+    for (const key of ['assumptions', 'schedules', 'forecast', 'threeStatement', 'wacc', 'dcf', 'recommendation', 'labelStability']) {
       assert.equal(state[key], null, `${key} must be null before the pipeline is wired`);
     }
     app.dispose();

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duolingo, Inc. (DUOL) — Cover · Direction B / Airy Minimal</title>
+<style>
+  * { box-sizing:border-box; border-radius:0 !important; }
+  html, body { max-width:100%; }
+  body {
+    margin:0; background:#F7F5F1; color:#1B2A3A;
+    font:14px/1.7 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust:100%; overflow-wrap:break-word;
+  }
+  .page {
+    max-width:900px; margin:0 auto; background:#fff;
+    border-left:1px solid #E3DFD5; border-right:1px solid #E3DFD5;
+    padding:74px 78px 66px;
+  }
+  h1, h2, h3 { font-family:Georgia, "Times New Roman", serif; font-weight:400; margin:0; }
+
+  .label {
+    font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:#9C9789;
+  }
+  .mock {
+    display:inline-block; border:1px solid #C9C4B6; padding:2px 8px;
+    font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#9C9789;
+    margin-top:16px; white-space:nowrap;
+  }
+  img, svg { max-width:100%; }
+  svg { height:auto; }
+  .ico { width:12px; height:12px; vertical-align:-1px; }
+
+  /* 01 masthead */
+  .mast { text-align:center; }
+  .owl { width:52px; height:52px; display:block; margin:0 auto 22px; }
+  .mast h1 { font-size:44px; line-height:1.1; letter-spacing:-.015em; }
+  .mast .tk { display:block; margin-top:14px; }
+  .mast .sub { margin-top:20px; font-size:13px; color:#9C9789; }
+  .meta {
+    display:flex; justify-content:center; gap:64px; flex-wrap:wrap;
+    margin-top:44px; padding:26px 0; border-top:1px solid #E3DFD5; border-bottom:1px solid #E3DFD5;
+  }
+  .meta div { text-align:center; }
+  .meta .v { font-family:Georgia, serif; font-size:24px; font-variant-numeric:tabular-nums; margin-top:8px; }
+
+  /* 02 recommendation */
+  .rec { text-align:center; padding:52px 0 46px; }
+  .rec .main { font-family:Georgia, serif; font-size:30px; letter-spacing:.04em; margin-top:16px; }
+  .rec .main b { font-variant-numeric:tabular-nums; }
+  .rec .note { margin-top:14px; font-size:12.5px; color:#9C9789; }
+
+  /* sections */
+  section { padding-top:52px; }
+  h2 { font-size:15px; letter-spacing:.20em; text-transform:uppercase; font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; color:#1B2A3A; padding-bottom:16px; border-bottom:1px solid #E3DFD5; }
+  h2 .n { color:#C4BFB1; margin-right:14px; }
+
+  /* 03 thesis */
+  .thesis { margin:0; padding:0; list-style:none; }
+  .thesis li { padding:26px 0 26px 30px; border-bottom:1px solid #EFECE4; position:relative; }
+  .thesis li:last-child { border-bottom:0; }
+  .thesis li::before { content:""; position:absolute; left:0; top:36px; width:14px; height:1px; background:#C4BFB1; }
+  .thesis p { margin:0; font-size:15.5px; line-height:1.75; }
+
+  /* tables */
+  .tbl-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%; }
+  .tbl-scroll table { min-width:540px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { padding:16px 14px; text-align:left; border-bottom:1px solid #EFECE4; }
+  th { font:400 10px/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing:.20em; text-transform:uppercase; color:#9C9789; border-bottom:1px solid #E3DFD5; white-space:nowrap; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  td:first-child, th:first-child { padding-left:0; }
+  td:last-child, th:last-child { padding-right:0; }
+  tr.total td { border-bottom:1px solid #1B2A3A; border-top:1px solid #1B2A3A; font-weight:600; }
+
+  /* charts */
+  .charts { display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-top:34px; }
+  .chart-box p { margin:0 0 18px; font-size:10px; letter-spacing:.20em; text-transform:uppercase; color:#9C9789; }
+
+  /* 06 guesses */
+  .guesses { display:grid; grid-template-columns:repeat(4, 1fr); gap:30px 34px; margin-top:8px; }
+  .g .k { font-size:10px; letter-spacing:.20em; text-transform:uppercase; color:#9C9789; }
+  .g .v { font-family:Georgia, serif; font-size:21px; font-variant-numeric:tabular-nums; margin-top:7px; }
+
+  /* 07 risks */
+  .risk { padding:30px 0; border-bottom:1px solid #EFECE4; display:grid; grid-template-columns:1fr 210px; gap:44px; }
+  .risk:last-of-type { border-bottom:0; }
+  .risk h3 { font-size:19px; }
+  .risk p { margin:12px 0 0; font-size:14px; color:#4A5568; }
+  .slider { align-self:start; }
+  .slider .k { font-size:10px; letter-spacing:.20em; text-transform:uppercase; color:#9C9789; }
+  .slider .track { height:1px; background:#D8D3C6; margin:16px 0 10px; position:relative; }
+  .slider .track i { position:absolute; top:-4px; width:1px; height:9px; background:#1B2A3A; }
+  .slider .track i::after { content:""; position:absolute; left:-4px; top:-4px; width:9px; height:9px; border:1px solid #1B2A3A; background:#fff; }
+  .slider .v { font-size:12.5px; color:#4A5568; font-variant-numeric:tabular-nums; }
+
+  /* 08 directory + footer */
+  .dir { margin:0; padding:0; list-style:none; }
+  .dir li { display:flex; align-items:baseline; gap:14px; padding:14px 0; border-bottom:1px solid #EFECE4; font-size:14px; }
+  .dir .k { font-family:Georgia, serif; color:#C4BFB1; width:26px; flex:0 0 26px; }
+  .dir .d { flex:1 1 auto; }
+  footer { margin-top:56px; padding-top:26px; border-top:1px solid #E3DFD5; font-size:11.5px; line-height:1.75; color:#9C9789; }
+  footer p { margin:0 0 12px; }
+  footer .na { color:#1B2A3A; letter-spacing:.18em; text-transform:uppercase; font-size:10px; }
+
+  @media (max-width:640px) {
+    body { font-size:13.5px; }
+    .page { border:0; padding:40px 22px 40px; }
+    .mast h1 { font-size:29px; }
+    .owl { width:42px; height:42px; margin-bottom:18px; }
+    .meta { gap:26px 34px; padding:22px 0; }
+    .meta .v { font-size:19px; }
+    .rec { padding:36px 0 32px; }
+    .rec .main { font-size:21px; }
+    section { padding-top:38px; }
+    .charts { grid-template-columns:1fr; gap:34px; }
+    .guesses { grid-template-columns:1fr 1fr; gap:22px; }
+    .risk { grid-template-columns:1fr; gap:20px; padding:24px 0; }
+    .risk h3 { font-size:17px; }
+    h2 { font-size:13px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ 01 · MASTHEAD ============ -->
+  <header class="mast">
+    <img class="owl" src="../../assets/branding/duolingo-owl.svg" alt="Duolingo">
+    <div class="label">Equity Research &nbsp;·&nbsp; Consumer Learning</div>
+    <h1>Duolingo, Inc.</h1>
+    <span class="tk label">NASDAQ: DUOL</span>
+    <div class="sub">A three-statement model and six-method valuation.<br>Cover sheet — illustrative layout only.</div>
+    <span class="mock">MOCKUP — dummy data</span>
+
+    <div class="meta">
+      <div><div class="label">Date</div><div class="v">12 Sep 2026</div></div>
+      <div><div class="label">Target</div><div class="v">$###.##</div></div>
+      <div><div class="label">Market</div><div class="v">$###.##</div></div>
+    </div>
+  </header>
+
+  <!-- ============ 02 · RECOMMENDATION ============ -->
+  <div class="rec">
+    <div class="label">Recommendation</div>
+    <div class="main">OVERWEIGHT &nbsp;—&nbsp; UNDERVALUED <b>+##.#%</b></div>
+    <div class="note">Base case $###.## against a market price of $###.##</div>
+  </div>
+
+  <!-- ============ 03 · THESIS ============ -->
+  <section>
+    <h2><span class="n">03</span>Thesis</h2>
+    <ol class="thesis">
+      <li><p>### user base compounding at ##% drives ##.#M paid subscribers by FY##, lifting revenue to $###.#M at a ##% CAGR.</p></li>
+      <li><p>### Max and AI tiers raise blended ARPU to $###.##, expanding EBIT margin from ##.#% to ##.#% without a step-change in cost.</p></li>
+      <li><p>### debt-free cash generation funds a ##.#% FCF margin, yet the market pays $###.## for a business worth $###.## on our base case.</p></li>
+    </ol>
+  </section>
+
+  <!-- ============ 04 · BUSINESS SNAPSHOT ============ -->
+  <section>
+    <h2><span class="n">04</span>Business snapshot</h2>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr><th>Metric</th><th class="n">Value</th><th class="n">YoY</th><th class="n">FY##E</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Daily active users</td><td class="n">##.#M</td><td class="n">+##%</td><td class="n">##.#M</td></tr>
+          <tr><td>Monthly active users</td><td class="n">###M</td><td class="n">+##%</td><td class="n">###M</td></tr>
+          <tr><td>Paid subscribers</td><td class="n">##.#M</td><td class="n">+##%</td><td class="n">##.#M</td></tr>
+          <tr class="total"><td>Revenue</td><td class="n">$###.#M</td><td class="n">+##%</td><td class="n">$###.#M</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box">
+        <p>Fig. 1 — DAU trend</p>
+        <svg viewBox="0 0 300 96" role="img" aria-label="Dummy sparkline of DAU trend">
+          <line x1="4" y1="80" x2="296" y2="80" stroke="#EFECE4" stroke-width="1"/>
+          <polyline points="4,70 34,64 64,67 94,55 124,58 154,46 184,49 214,36 244,30 274,21 296,16"
+                    fill="none" stroke="#1B2A3A" stroke-width="1.3" stroke-linejoin="round"/>
+          <circle cx="296" cy="16" r="2.4" fill="#1B2A3A"/>
+          <text x="4" y="94" font-size="8.5" fill="#B6B1A3" font-family="Helvetica">FY##</text>
+          <text x="296" y="94" font-size="8.5" fill="#B6B1A3" text-anchor="end" font-family="Helvetica">FY##E &nbsp;+##%</text>
+        </svg>
+      </div>
+      <div class="chart-box">
+        <p>Fig. 2 — Bear / Base / Bull</p>
+        <svg viewBox="0 0 280 96" role="img" aria-label="Dummy Bear Base Bull valuation bar chart">
+          <line x1="22" y1="78" x2="272" y2="78" stroke="#E3DFD5" stroke-width="1"/>
+          <line x1="22" y1="14" x2="272" y2="14" stroke="#EFECE4" stroke-width="1"/>
+          <line x1="22" y1="46" x2="272" y2="46" stroke="#EFECE4" stroke-width="1"/>
+          <rect x="52" y="46" width="40" height="32" fill="#F4F2EC" stroke="#B6B1A3" stroke-width="1"/>
+          <rect x="120" y="28" width="40" height="50" fill="#1B2A3A"/>
+          <rect x="188" y="16" width="40" height="62" fill="#fff" stroke="#1B2A3A" stroke-width="1"/>
+          <text x="72" y="92" font-size="8.5" text-anchor="middle" fill="#B6B1A3" font-family="Helvetica">BEAR</text>
+          <text x="140" y="92" font-size="8.5" text-anchor="middle" fill="#1B2A3A" font-family="Helvetica">BASE</text>
+          <text x="208" y="92" font-size="8.5" text-anchor="middle" fill="#B6B1A3" font-family="Helvetica">BULL</text>
+          <text x="72" y="42" font-size="8" text-anchor="middle" fill="#B6B1A3" font-family="Helvetica">$###</text>
+          <text x="140" y="24" font-size="8" text-anchor="middle" fill="#1B2A3A" font-family="Helvetica">$###</text>
+          <text x="208" y="12" font-size="8" text-anchor="middle" fill="#B6B1A3" font-family="Helvetica">$###</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · VALUATION ============ -->
+  <section>
+    <h2><span class="n">05</span>Valuation summary — six methods</h2>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Basis</th><th class="n">Fair value</th><th class="n">Upside</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2-stage FCFF DCF</td><td>FY##–## + Gordon</td><td class="n">$###.##</td><td class="n">+##.#%</td></tr>
+          <tr><td>Trading comparables</td><td>Peer EV/Revenue</td><td class="n">$###.##</td><td class="n">+##.#%</td></tr>
+          <tr><td>EV / EBITDAR</td><td>Peer median</td><td class="n">$###.##</td><td class="n">+##.#%</td></tr>
+          <tr><td>P / FCF</td><td>Peer median</td><td class="n">$###.##</td><td class="n">−##.#%</td></tr>
+          <tr><td>Sum-of-the-parts</td><td>Core + ###</td><td class="n">$###.##</td><td class="n">+##.#%</td></tr>
+          <tr><td>Per-user</td><td>EV/MAU · EV/DAU</td><td class="n">$###.##</td><td class="n">+##.#%</td></tr>
+          <tr class="total"><td>Weighted target</td><td>Base case</td><td class="n">$###.##</td><td class="n">+##.#%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="label" style="margin-top:26px; letter-spacing:.14em;">
+      <img class="ico" src="../../assets/icons/ui/check-circle.svg" alt="ok">
+      Cross-checked — all six methods tie back to the ### assumptions
+    </p>
+    <p class="label" style="margin-top:10px; line-height:1.9; letter-spacing:.16em; text-transform:none;">
+      <img class="ico" src="../../assets/icons/ui/info-circle.svg" alt="">
+      Every figure on this page is a placeholder. Nothing here is an estimate of value.
+    </p>
+  </section>
+
+  <!-- ============ 06 · KEY GUESSES ============ -->
+  <section>
+    <h2><span class="n">06</span>Key guesses</h2>
+    <div class="guesses">
+      <div class="g"><div class="k">WACC</div><div class="v">##.##%</div></div>
+      <div class="g"><div class="k">Terminal g</div><div class="v">#.##%</div></div>
+      <div class="g"><div class="k">Sales CAGR</div><div class="v">##.#%</div></div>
+      <div class="g"><div class="k">EBIT margin</div><div class="v">##.#%</div></div>
+      <div class="g"><div class="k">FCF margin</div><div class="v">##.#%</div></div>
+      <div class="g"><div class="k">Tax rate</div><div class="v">##.#%</div></div>
+      <div class="g"><div class="k">Diluted shares</div><div class="v">##.##M</div></div>
+      <div class="g"><div class="k">Net debt</div><div class="v">$###M</div></div>
+    </div>
+  </section>
+
+  <!-- ============ 07 · RISKS ============ -->
+  <section>
+    <h2><span class="n">07</span>Risks — each tied to a slider</h2>
+
+    <div class="risk">
+      <div>
+        <h3><img class="ico" src="../../assets/icons/ui/alert-triangle.svg" alt=""> (i) Subscriber growth stalls</h3>
+        <p>### DAU-to-paid conversion flattens; ##% growth instead of ##% cuts revenue to $###.#M.</p>
+      </div>
+      <div class="slider">
+        <div class="k">Growth slider</div>
+        <div class="track"><i style="left:34%"></i></div>
+        <div class="v">##% → ##% &nbsp;·&nbsp; $###.##</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div>
+        <h3><img class="ico" src="../../assets/icons/ui/alert-triangle.svg" alt=""> (ii) AI cost drag on margin</h3>
+        <p>### inference and content cost push EBIT margin to ##.#%; FCF margin falls to ##.#%.</p>
+      </div>
+      <div class="slider">
+        <div class="k">Margin slider</div>
+        <div class="track"><i style="left:58%"></i></div>
+        <div class="v">##.#% → ##.#% &nbsp;·&nbsp; $###.##</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div>
+        <h3><img class="ico" src="../../assets/icons/ui/alert-triangle.svg" alt=""> (iii) Multiple de-rating</h3>
+        <p>### higher-for-longer rates add ##bps to WACC; terminal value drops $###.## per share.</p>
+      </div>
+      <div class="slider">
+        <div class="k">WACC slider</div>
+        <div class="track"><i style="left:72%"></i></div>
+        <div class="v">##.##% → ##.##% &nbsp;·&nbsp; $###.##</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 · DIRECTORY + DISCLAIMER ============ -->
+  <section>
+    <h2><span class="n">08</span>Inside this model</h2>
+    <ul class="dir">
+      <li><span class="k">01</span><span class="d">Cover sheet — this page</span></li>
+      <li><span class="k">02</span><span class="d">Assumptions — drivers &amp; sliders</span></li>
+      <li><span class="k">03</span><span class="d">Financials — three-statement build</span></li>
+      <li><span class="k">04</span><span class="d">Valuation — six methods</span></li>
+      <li><span class="k">05</span><span class="d">Sensitivity — Bear / Base / Bull</span></li>
+      <li><span class="k">06</span><span class="d">Risks &amp; mitigants</span></li>
+      <li><span class="k">07</span><span class="d">Sources — SEC EDGAR ###</span></li>
+      <li><span class="k">08</span><span class="d">Disclaimer</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><span class="na">Not investment advice.</span></p>
+    <p>
+      This is a layout mockup. All figures, ratings, dates and targets are placeholders
+      (<b>$###.##</b>, <b>##%</b>, <b>##.#M</b>) and are not estimates of value. No security is recommended.
+      <img class="ico" src="../../assets/icons/ui/external-link.svg" alt=""> full disclaimer · sources
+    </p>
+    <p>Duolingo FM · Equity Research (illustrative) · Cover — Direction B / Airy Minimal · <span class="mock" style="margin-top:0">MOCKUP — dummy data</span></p>
+  </footer>
+
+</div>
+</body>
+</html>

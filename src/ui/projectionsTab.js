@@ -28,7 +28,9 @@ import { createRevenueFcfChart, createMarginChart } from './charts.js';
 
 const HISTORICAL_PERIODS = Object.freeze(['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025']);
 const FORECAST_PERIODS = Object.freeze(['FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030']);
-const ALL_PERIODS = Object.freeze([...HISTORICAL_PERIODS, ...FORECAST_PERIODS]);
+const EXPLICIT_PERIODS = FORECAST_PERIODS;
+const FADE_PERIODS = Object.freeze(['FY2031', 'FY2032', 'FY2033', 'FY2034', 'FY2035']);
+const ALL_PERIODS = Object.freeze([...HISTORICAL_PERIODS, ...EXPLICIT_PERIODS, ...FADE_PERIODS]);
 
 function readProjectionValue(period, path, threeStatement) {
   let value = threeStatement?.[path[0]]?.byPeriod?.[period];
@@ -56,9 +58,9 @@ export function computeProjectionKpis(threeStatement) {
 
   return Object.freeze([
     Object.freeze({ key: 'revenue-cagr', label: 'Revenue CAGR', value: cagr, format: 'percent', benchmark: '2026E–2030E', sublabel: 'Forward revenue growth' }),
-    Object.freeze({ key: 'operating-margin', label: 'Operating Margin', value: revenue2030 > 0 && ebit2030 !== null ? ebit2030 / revenue2030 : null, format: 'percent', benchmark: '2030E', sublabel: 'Terminal-year EBIT margin' }),
-    Object.freeze({ key: 'fcf-margin', label: 'FCF Margin', value: revenue2030 > 0 && fcf2030 !== null ? fcf2030 / revenue2030 : null, format: 'percent', benchmark: '2030E', sublabel: 'Terminal-year UFCF margin' }),
-    Object.freeze({ key: 'net-income', label: 'Net Income', value: netIncome2030 === null ? null : netIncome2030 / 1e3, format: 'usd-mm', benchmark: '2030E · US$ mm', sublabel: 'Terminal-year net income' }),
+    Object.freeze({ key: 'operating-margin', label: 'Operating Margin', value: revenue2030 > 0 && ebit2030 !== null ? ebit2030 / revenue2030 : null, format: 'percent', benchmark: '2030E', sublabel: 'Explicit-horizon (2030E) EBIT margin' }),
+    Object.freeze({ key: 'fcf-margin', label: 'FCF Margin', value: revenue2030 > 0 && fcf2030 !== null ? fcf2030 / revenue2030 : null, format: 'percent', benchmark: '2030E', sublabel: 'Explicit-horizon (2030E) UFCF margin' }),
+    Object.freeze({ key: 'net-income', label: 'Net Income', value: netIncome2030 === null ? null : netIncome2030 / 1e3, format: 'usd-mm', benchmark: '2030E · US$ mm', sublabel: 'Explicit-horizon (2030E) net income' }),
   ]);
 }
 
@@ -107,10 +109,15 @@ function createHistoricalLookup(historical) {
  * @param {object} [options]
  * @param {boolean} [options.isPct=false]
  * @param {'thousands'|'millions'} [options.displayUnit='thousands']
+ * @param {'explicit'|'fade'} [options.stage='explicit']
  * @returns {Array<object>}
  */
-export function buildProjectionColumns({ isPct = false, displayUnit = 'thousands' } = {}) {
+export function buildProjectionColumns({ isPct = false, displayUnit = 'thousands', stage = 'explicit' } = {}) {
   const scale = displayUnit === 'millions' ? 1 / 1e3 : 1;
+  const isFade = stage === 'fade';
+  const targetPeriods = isFade ? FADE_PERIODS : EXPLICIT_PERIODS;
+  const badgeMarking = isFade ? 'FADE' : 'EST';
+
   return [
     {
       title: 'Financial Statement Line Item',
@@ -140,14 +147,14 @@ export function buildProjectionColumns({ isPct = false, displayUnit = 'thousands
         return isRatio ? percent(val) : usd(val, { decimals: 0, scale });
       },
     })),
-    ...FORECAST_PERIODS.map((period) => ({
+    ...targetPeriods.map((period) => ({
       title: `${period}E`,
       field: period,
       headerSort: false,
       hozAlign: 'right',
       editor: false,
       minWidth: 95,
-      titleFormatter: () => estSuffix(`${period}E`, 'EST'),
+      titleFormatter: () => estSuffix(`${period}E`, badgeMarking),
       formatter: (cell) => {
         const val = typeof cell.getValue === 'function' ? cell.getValue() : cell;
         if (val === null || val === undefined || !Number.isFinite(val)) return ' - ';
@@ -184,6 +191,7 @@ export function renderProjections({
   let disposed = false;
   let activeStatement = 'incomeStatement';
   let displayUnit = 'thousands';
+  let currentStage = 'explicit';
   const tabulatorInstances = [];
   const tabulatorConfigs = [];
 
@@ -241,7 +249,7 @@ export function renderProjections({
           else if (r.id === 'ebt') val = hist['pretax_income']?.[p];
           else if (r.id === 'tax') val = hist['income_tax']?.[p];
           else if (r.id === 'ni') val = hist['net_income']?.[p];
-        } else if (FORECAST_PERIODS.includes(p) && currentThreeStatement?.incomeStatement?.byPeriod?.[p]) {
+        } else if ((FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) && currentThreeStatement?.incomeStatement?.byPeriod?.[p]) {
           const isP = currentThreeStatement.incomeStatement.byPeriod[p];
           if (r.id === 'rev_sub') val = isP.revenue?.segments?.subscription?.value;
           else if (r.id === 'rev_ads') val = isP.revenue?.segments?.advertising?.value;
@@ -336,7 +344,7 @@ export function renderProjections({
             const liabilitiesAndEquity = hist['total_liabilities_and_stockholders_equity']?.[p];
             val = Number.isFinite(assets) && Number.isFinite(liabilitiesAndEquity) ? assets - liabilitiesAndEquity : null;
           }
-        } else if (FORECAST_PERIODS.includes(p) && currentThreeStatement?.balanceSheet?.byPeriod?.[p]) {
+        } else if ((FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) && currentThreeStatement?.balanceSheet?.byPeriod?.[p]) {
           const bsP = currentThreeStatement.balanceSheet.byPeriod[p];
           if (r.id === 'cash') val = bsP.current_assets?.cash_and_cash_equivalents?.value;
           else if (r.id === 'sti') val = bsP.current_assets?.short_term_investments?.value;
@@ -427,7 +435,7 @@ export function renderProjections({
           else if (r.id === 'net_cash_change') val = hist['net_change_in_cash']?.[p];
           else if (r.id === 'beginning_cash') val = hist['cash_beginning_of_period']?.[p];
           else if (r.id === 'ending_cash') val = hist['cash_end_of_period']?.[p];
-        } else if (FORECAST_PERIODS.includes(p) && currentThreeStatement?.cashFlow?.byPeriod?.[p]) {
+        } else if ((FORECAST_PERIODS.includes(p) || FADE_PERIODS.includes(p)) && currentThreeStatement?.cashFlow?.byPeriod?.[p]) {
           const cfP = currentThreeStatement.cashFlow.byPeriod[p];
           if (r.id === 'ni') val = cfP.operating_activities?.net_income?.value;
           else if (r.id === 'da') val = cfP.operating_activities?.depreciation_and_amortization?.value;
@@ -467,15 +475,21 @@ export function renderProjections({
     const is2026 = currentThreeStatement?.incomeStatement?.byPeriod?.FY2026;
     const revH1 = is2026?.revenue?.total?.h1?.value;
     const revH2 = is2026?.revenue?.total?.h2?.value;
+    const revH2Pre = is2026?.revenue?.total?.h2?.preValuation?.value;
+    const revH2Post = is2026?.revenue?.total?.h2?.postValuation?.value;
     const revTot = is2026?.revenue?.total?.value;
 
     const ebitH1 = is2026?.operating_income?.h1?.value;
     const ebitH2 = is2026?.operating_income?.h2?.value;
+    const ebitH2Pre = is2026?.operating_income?.h2?.preValuation?.value;
+    const ebitH2Post = is2026?.operating_income?.h2?.postValuation?.value;
     const ebitTot = is2026?.operating_income?.value;
 
     const cf2026 = currentThreeStatement?.cashFlow?.byPeriod?.FY2026;
     const fcfH1 = cf2026?.free_cash_flow?.h1?.value;
     const fcfH2 = cf2026?.free_cash_flow?.h2?.value;
+    const fcfH2Pre = cf2026?.free_cash_flow?.h2?.preValuation?.value;
+    const fcfH2Post = cf2026?.free_cash_flow?.h2?.postValuation?.value;
     const fcfTot = cf2026?.free_cash_flow?.value;
 
     return `
@@ -485,25 +499,31 @@ export function renderProjections({
         </div>
         <div class="hybrid-card-content">
           <p class="hybrid-intro">
-            FY2026 is modeled with strict hybrid provenance: <strong>H1 Actuals</strong> are transcribed directly from reported Q1 &amp; Q2 FY2026 SEC filings, while <strong>H2 Estimates</strong> reflect driver-based forecast models (ensuring <code>H1 + H2 === FY2026</code>).
+            FY2026 is modeled with strict hybrid provenance: <strong>H1 Actuals</strong> are transcribed directly from reported Q1 &amp; Q2 FY2026 SEC filings, while <strong>H2 Estimates</strong> reflect driver-based forecast models (ensuring <code>H1 + H2 === FY2026</code>). Furthermore, H2 is partitioned into a <strong>Pre-Valuation Stub</strong> (64 days to 2026-09-02, roll-forward) and a <strong>Post-Valuation Stub</strong> (120 days from 2026-09-02, discounted in DCF).
           </p>
           <div class="hybrid-metrics-grid">
             <div class="hybrid-metric-box">
               <div class="hybrid-box-title">Total Revenue (<span data-unit-label>${unitLabel()}</span>)</div>
               <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${formatProjectionValue(revH1)}</strong></div>
               <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${formatProjectionValue(revH2, 2)}</strong></div>
+              <div class="hybrid-box-row text-muted font-italic"><span>↳ Pre-Val Stub (64d):</span> <span>${formatProjectionValue(revH2Pre, 2)}</span></div>
+              <div class="hybrid-box-row text-muted font-italic"><span>↳ Post-Val Stub (120d):</span> <span>${formatProjectionValue(revH2Post, 2)}</span></div>
               <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${formatProjectionValue(revTot, 2)}</strong></div>
             </div>
             <div class="hybrid-metric-box">
               <div class="hybrid-box-title">Operating Income (<span data-unit-label>${unitLabel()}</span>)</div>
               <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${formatProjectionValue(ebitH1)}</strong></div>
               <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${formatProjectionValue(ebitH2, 2)}</strong></div>
+              <div class="hybrid-box-row text-muted font-italic"><span>↳ Pre-Val Stub (64d):</span> <span>${formatProjectionValue(ebitH2Pre, 2)}</span></div>
+              <div class="hybrid-box-row text-muted font-italic"><span>↳ Post-Val Stub (120d):</span> <span>${formatProjectionValue(ebitH2Post, 2)}</span></div>
               <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${formatProjectionValue(ebitTot, 2)}</strong></div>
             </div>
             <div class="hybrid-metric-box">
               <div class="hybrid-box-title">Free Cash Flow (<span data-unit-label>${unitLabel()}</span>)</div>
               <div class="hybrid-box-row"><span>H1 Actual (Cited):</span> <strong>${formatProjectionValue(fcfH1)}</strong></div>
               <div class="hybrid-box-row"><span>H2 Driver Estimate:</span> <strong>${formatProjectionValue(fcfH2, 2)}</strong></div>
+              <div class="hybrid-box-row text-muted font-italic"><span>↳ Pre-Val Stub (64d):</span> <span>${formatProjectionValue(fcfH2Pre, 2)}</span></div>
+              <div class="hybrid-box-row text-muted font-italic"><span>↳ Post-Val Stub (120d):</span> <span>${formatProjectionValue(fcfH2Post, 2)}</span></div>
               <div class="hybrid-box-row hybrid-total"><span>Full Year FY2026:</span> <strong>${formatProjectionValue(fcfTot, 2)}</strong></div>
             </div>
           </div>
@@ -523,7 +543,7 @@ export function renderProjections({
     tabulatorConfigs.length = 0;
 
     const isData = buildIncomeData();
-    const isCols = buildProjectionColumns({ displayUnit });
+    const isCols = buildProjectionColumns({ displayUnit, stage: currentStage });
     const isConfig = {
       statement: 'incomeStatement',
       data: isData,
@@ -539,7 +559,7 @@ export function renderProjections({
     tabulatorConfigs.push(isConfig);
 
     const bsData = buildBalanceData();
-    const bsCols = buildProjectionColumns({ displayUnit });
+    const bsCols = buildProjectionColumns({ displayUnit, stage: currentStage });
     const bsConfig = {
       statement: 'balanceSheet',
       data: bsData,
@@ -555,7 +575,7 @@ export function renderProjections({
     tabulatorConfigs.push(bsConfig);
 
     const cfData = buildCashFlowData();
-    const cfCols = buildProjectionColumns({ displayUnit });
+    const cfCols = buildProjectionColumns({ displayUnit, stage: currentStage });
     const cfConfig = {
       statement: 'cashFlow',
       data: cfData,
@@ -580,9 +600,13 @@ export function renderProjections({
         <div class="projection-workspace-header">
           <div>
             <h3 class="statement-workspace-title">Financial Statements</h3>
-            <p class="statement-workspace-subtitle">Linked FY2021–FY2030E statements. Figures <span data-unit-label>${unitLabel()}</span>.</p>
+            <p class="statement-workspace-subtitle">Linked ${currentStage === 'fade' ? 'FY2031E–FY2035E' : 'FY2026E–FY2030E'} statements. Figures <span data-unit-label>${unitLabel()}</span>.</p>
           </div>
           <div class="projection-workspace-controls">
+            <div class="projection-stage-toggle pill-control" role="group" aria-label="Forecast Stage">
+              <button type="button" class="pill-btn stage-btn${currentStage === 'explicit' ? ' active is-active' : ''}" data-forecast-stage="explicit" aria-pressed="${currentStage === 'explicit'}">Explicit FY26–30</button>
+              <button type="button" class="pill-btn stage-btn${currentStage === 'fade' ? ' active is-active' : ''}" data-forecast-stage="fade" aria-pressed="${currentStage === 'fade'}">Fade FY31–35</button>
+            </div>
             <div class="projection-statement-switcher" role="tablist" aria-label="Projection statement switcher">
               <button type="button" class="projection-switch-btn is-active" data-projection-statement="incomeStatement" role="tab" aria-selected="true">Income Statement</button>
               <button type="button" class="projection-switch-btn" data-projection-statement="balanceSheet" role="tab" aria-selected="false">Balance Sheet</button>
@@ -627,7 +651,7 @@ export function renderProjections({
       <div class="projections-view-wrapper">
         <div class="projections-header-block">
           <h2 class="projections-title">05. Projections (3-Statement)</h2>
-          <p class="projections-subtitle">Integrated Income Statement, Balance Sheet &amp; Cash Flow Forecast (FY2026E–FY2030E)</p>
+          <p class="projections-subtitle">Integrated Income Statement, Balance Sheet &amp; Cash Flow Forecast (${currentStage === 'fade' ? 'FY2031E–FY2035E' : 'FY2026E–FY2030E'})</p>
         </div>
         ${renderProjectionKpis(currentThreeStatement)}
         ${chartsHtml}
@@ -657,6 +681,7 @@ export function renderProjections({
     if (typeof container.querySelectorAll === 'function') {
       const statementButtons = [...container.querySelectorAll('[data-projection-statement]')];
       const unitButtons = [...container.querySelectorAll('[data-projection-unit]')];
+      const stageButtons = [...container.querySelectorAll('[data-forecast-stage]')];
       const panels = [...container.querySelectorAll('[data-statement-panel]')];
 
       const setStatement = (key) => {
@@ -680,8 +705,14 @@ export function renderProjections({
         render();
       };
 
+      const setStage = (stage) => {
+        currentStage = stage === 'fade' ? 'fade' : 'explicit';
+        render();
+      };
+
       for (const button of statementButtons) button.addEventListener('click', () => setStatement(button.getAttribute('data-projection-statement')));
       for (const button of unitButtons) button.addEventListener('click', () => setUnit(button.getAttribute('data-projection-unit')));
+      for (const button of stageButtons) button.addEventListener('click', () => setStage(button.getAttribute('data-forecast-stage')));
       setStatement(activeStatement);
     }
   }
@@ -692,6 +723,13 @@ export function renderProjections({
     update(newThreeStatement, newHistorical = null) {
       currentThreeStatement = newThreeStatement;
       currentHistorical = newHistorical || currentHistorical;
+      render();
+    },
+    getStage() {
+      return currentStage;
+    },
+    setStage(stage) {
+      currentStage = stage === 'fade' ? 'fade' : 'explicit';
       render();
     },
     dispose() {

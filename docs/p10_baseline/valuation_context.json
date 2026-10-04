@@ -1,0 +1,136 @@
+{
+  "benchmark_price": {
+    "asOf": "2026-09-02",
+    "currency": "USD",
+    "notes": "Official closing price via stockanalysis.com for the last completed trading session. Benchmark-only input; does not drive DCF cash flows, share issuance, or intrinsic value.",
+    "provider": "stockanalysis.com",
+    "status": "valid",
+    "url": "https://stockanalysis.com/stocks/duol/history/",
+    "value": 157.85
+  },
+  "canonical": true,
+  "dcf_periods": {
+    "explicit_stage": {
+      "description": "Explicit forecast stage",
+      "length": 5,
+      "periods": [
+        "FY2026",
+        "FY2027",
+        "FY2028",
+        "FY2029",
+        "FY2030"
+      ]
+    },
+    "fade_stage": {
+      "description": "Fade glide stage",
+      "length": 5,
+      "periods": [
+        "FY2031",
+        "FY2032",
+        "FY2033",
+        "FY2034",
+        "FY2035"
+      ]
+    },
+    "terminal_stage": {
+      "description": "Gordon growth on normalised steady-state FCFF",
+      "growth_rate": 0.025,
+      "terminal_period": "FY2035"
+    }
+  },
+  "effective_valuation_date": "2026-09-02",
+  "evidence_clusters": {
+    "clusters": {
+      "enterprise_relative": {
+        "methods": [
+          "EV/Revenue",
+          "EV/EBITDAR",
+          "Per-user"
+        ],
+        "weight": "Single cluster observation by internal majority vote"
+      },
+      "equity_cash_flow": {
+        "methods": [
+          "P/FCF"
+        ],
+        "weight": "Single cluster observation"
+      },
+      "intrinsic": {
+        "canonical_method": "FCFF DCF",
+        "methods": [
+          "DCF (FCFF canonical)"
+        ],
+        "weight": "Single cluster observation"
+      }
+    },
+    "collapse_rule": "Multiple methods within a cluster collapse to one breadth observation by majority vote within the cluster. Verdict ordering: overvalued < fair < undervalued; exact ties keep weaker (minimum) verdict. Final verdict: 3/3 agree -> that verdict; 2/3 agree -> majority verdict; otherwise -> fair (HOLD). Max 3 breadth observations.",
+    "fcfe_role": "Diagnostic reconciliation check only (FCFE - FCFF = after-tax interest income). Never a floor, range endpoint, recommendation, or vote.",
+    "sotp_role": "Optional segment decomposition only under EV/Revenue. Receives zero vote while duplicating EV/Revenue."
+  },
+  "forecast_periods": {
+    "horizon_periods": 10,
+    "legacy_five_year_comparison": "Legacy 5-year comparison path retained for explicit disclosure only; cannot control production relative values or release outputs.",
+    "periods": [
+      "FY2026",
+      "FY2027",
+      "FY2028",
+      "FY2029",
+      "FY2030",
+      "FY2031",
+      "FY2032",
+      "FY2033",
+      "FY2034",
+      "FY2035"
+    ],
+    "production_horizon": "10 periods (sole production horizon)"
+  },
+  "reporting_cutoff": "2026-06-30",
+  "share_issuance_policy": {
+    "dcf_dilution_modeling": "Modeled exactly once. DCF reports current-share value and canonical value after modeled future dilution.",
+    "perpetual_dilution_rate": {
+      "default": 0.01,
+      "range": [
+        0,
+        0.02
+      ],
+      "rule": "shares_{t+1} = shares_t * (1 + d_perm); positivity: (1 + d_perm) > 0 and (ke - d_perm) > 0"
+    },
+    "sbc_addback": "SBC added back to GAAP operating cash flow.",
+    "sbc_issuance_price": {
+      "notes": "Separate frozen issuance price for dilution sensitivities; decoupled from mutable market benchmark price.",
+      "value": 157.85
+    }
+  },
+  "shares": {
+    "current_fully_diluted_shares": {
+      "count": 50061458,
+      "basis": "Point-in-time fully diluted share schedule at 2026-06-30, read from the cited Form 10-Q (accession 0001628280-26-053603, filed 2026-08-06): basic period-end 46,724,000 (Class A 40,325,000 outstanding + Class B 6,399,000 outstanding) plus incremental options 520,458 (treasury stock method on 636,000 options at a $21.09 weighted-average exercise price against a $116.09 method price derived from the filing own aggregate intrinsic value) plus RSUs and other awards 2,817,000 plus founder awards 0 (performance conditions not met at the measurement date; 720,000 in the comparable prior-year quarter).",
+      "components": {
+        "basic_period_end": 46724000,
+        "incremental_options": 520458,
+        "rsus_and_other_awards": 2817000,
+        "founder_awards_met": 0
+      },
+      "measurementDate": "2026-06-30",
+      "artifact": "src/data/historical/duolFullyDiluted.json",
+      "engine": "src/engine/fullyDiluted.js",
+      "owner": "P10.4",
+      "role": "Production denominator for all present-day relative valuation methods (EV/Revenue, EV/EBITDAR, P/FCF, SOTP decomposition, Per-User). Never uses the DCF terminal share roll.",
+      "supersedes": {
+        "count": 50700000,
+        "basis": "P10.0 approximation (~50.7m with basic 46,786,269, derived from 40,387,012 Class A issued rather than the 40,325,000 Class A outstanding, and before options, RSUs and awards were built out to a single reconciled schedule).",
+        "supersededBy": "P10.4 point-in-time fully diluted schedule",
+        "note": "The P10.0 baseline manifest remains the point-in-time record of that phase. This context document is the living contract and now carries the ruled schedule."
+      },
+      "issuerCrossCheck": "The issuer own Q2 FY2026 dilutive components (519 options + 2,817 RSUs + 0 founder awards = 3,336) equal exactly the 50,031 diluted-less-46,695 basic weighted-average spread, and the point-in-time treasury-stock-method increment of 520,458 lands within 0.3% of the issuer 519,000."
+    },
+    "weighted_average_diluted_shares": {
+      "count": 50031000,
+      "asOf": "2026-08-06",
+      "doc": "Form 10-Q for quarter ended 2026-06-30, Note 11 (accession 0001628280-26-053603)",
+      "role": "EPS diagnostic only. Must not be used as a valuation denominator."
+    }
+  },
+  "terminal_period": "FY2035",
+  "version": "1.0"
+}

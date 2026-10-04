@@ -355,7 +355,7 @@ export async function loadAssumptions(options = {}) {
     } else {
       const frozenDriver = Object.freeze({
         ...driver,
-        scenarioDeltas: Object.freeze({ ...driver.scenarioDeltas }),
+        scenarioDeltas: driver.scenarioDeltas ? Object.freeze({ ...driver.scenarioDeltas }) : null,
       });
       drivers.push(frozenDriver);
       byName[frozenDriver.name] = frozenDriver;
@@ -388,4 +388,43 @@ export async function loadAssumptions(options = {}) {
     },
   });
 }
+
+/**
+ * Loads and validates the Phase 10 immutable valuation context.
+ *
+ * @param {object} [options]
+ * @param {string} [options.location='docs/p10_baseline/valuation_context.json']
+ * @param {(location: string) => Promise<string>} [options.readText]
+ * @returns {Promise<object>}
+ */
+export async function loadValuationContext({ location = 'docs/p10_baseline/valuation_context.json', readText = defaultReadText } = {}) {
+  let text;
+  try {
+    text = await readText(location);
+  } catch (cause) {
+    throw new ConfigError(
+      `Could not read valuation context file "${location}": ${cause.message}`,
+      location,
+    );
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (cause) {
+    throw new ConfigError(
+      `Valuation context file "${location}" is not valid JSON: ${cause.message}`,
+      location,
+    );
+  }
+
+  const res = validateRecord(parsed, SCHEMAS.valuationContext, location);
+  if (!res.ok) {
+    const summary = `loadValuationContext() failed closed on "${location}" with ${res.errors.length} violation(s):\n${res.errors.map((e) => `  - ${e.field}: ${e.message}`).join('\n')}`;
+    throw new ConfigError(summary, location);
+  }
+
+  return Object.freeze(parsed);
+}
+
 

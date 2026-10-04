@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
+import { P104_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
 import { createApp, computeSensitivityAxes } from '../src/app.js';
@@ -163,7 +163,14 @@ describe('P6R2.1  -  Axis Derivation & Shrink Guard Unit Mechanics (computeSensi
 });
 
 describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp)', () => {
-  test('default (base) state: center cell is exactly row 5, col 3 and equals active valuation pin $118.60', async () => {
+  // Lane B: these build through the real createApp at `horizon: 5`, which forces
+  // PRODUCTION_DATED_SEAM = true, so the basis is the 5-period DATED SEAM (not the
+  // engine-default no-seam Lane A these pins used to carry). Measured off the live
+  // controller at horizon 5 with the dated seam:
+  //   base 120.44780046765 | bear 72.09994528805 | bull 223.21634421221
+  // These move with the beta driver (Re 11.0375% -> 11.1225% at beta 1.49), which is
+  // why they differ from the older 121.43/72.53/225.65 figures.
+  test('default (base) state: center cell is exactly row 5, col 3 and equals active valuation pin $120.45', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -172,6 +179,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
       engine: getAppEngine(),
       historical,
       assumptions,
+      horizon: 5,
     });
 
     const s = app.state();
@@ -190,12 +198,12 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6, 'Center cell perShare must match active pin');
-    assert.ok(Math.abs(centerCell.perShare - 118.60167662384697) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 120.44780046765) < 1e-4);
 
     app.dispose();
   });
 
-  test('bear-active state: center cell is row 5, col 3 and equals active Bear pin $72.38', async () => {
+  test('bear-active state: center cell is row 5, col 3 and equals active Bear pin $72.10', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -204,6 +212,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
       engine: getAppEngine(),
       historical,
       assumptions,
+      horizon: 5,
     });
 
     app.setScenario('bear');
@@ -222,12 +231,12 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6);
-    assert.ok(Math.abs(centerCell.perShare - 72.38359613050305) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 72.09994528805) < 1e-4);
 
     app.dispose();
   });
 
-  test('bull-active state: center cell is row 5, col 3 and equals active Bull pin $217.98', async () => {
+  test('bull-active state: center cell is row 5, col 3 and equals active Bull pin $223.22', async () => {
     const { historical, assumptions } = await getDatasets();
     const app = createApp({
       root: createHtmlContainer(),
@@ -236,6 +245,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
       engine: getAppEngine(),
       historical,
       assumptions,
+      horizon: 5,
     });
 
     app.setScenario('bull');
@@ -254,7 +264,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
     const centerCell = grid.matrix[centerWacc][centerG];
     assert.ok(centerCell);
     assert.ok(Math.abs(centerCell.perShare - s.dcf.perShare) < 1e-6);
-    assert.ok(Math.abs(centerCell.perShare - 217.98387088789931) < 1e-4);
+    assert.ok(Math.abs(centerCell.perShare - 223.21634421221) < 1e-4);
 
     app.dispose();
   });
@@ -268,6 +278,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
       engine: getAppEngine(),
       historical,
       assumptions,
+      horizon: 5,
     });
 
     // 1. Slider edit in Base: terminal growth rate = 0.0275 (step = 0.0025)
@@ -311,6 +322,7 @@ describe('P6R2.1  -  Controller Integration & Center Invariance Sweep (createApp
       engine: getAppEngine(),
       historical,
       assumptions,
+      horizon: 5,
     });
 
     for (const sc of ['base', 'bear', 'bull']) {
@@ -494,9 +506,9 @@ describe('P6R2.1  -  Engine Invariance & Quality Gates', () => {
   test('git diff v1.0-P6R-base -- src/engine/ touched only authorized files', () => {
     // Authorized drift from the P6R baseline: the P6R2 model-rigor revision
     // (threeStatement.js), the P6R2.3/P6R3 cost-of-capital files (market.js,
-    // beta.js), the P8 method modules (excluded by the helper), and the Economy
-    // Phase set. EP authorization: Director un-park order 2026-09-10,
-    // `docs/logs/ds/economy_phase.md` §5.
+    // beta.js), the P8 method modules (excluded by the helper), the Economy
+    // Phase set, RP10 ratios, and the Phase 9 engine modules
+    // (P104_AUTHORIZED_ENGINE, docs/phases/phase_10.md §3 Task FP.1).
     //
     // Structural repair (EP-FIX1, F2): the assertion used to sit INSIDE the
     // `try` block, so its AssertionError was swallowed by the `catch` and the
@@ -506,7 +518,7 @@ describe('P6R2.1  -  Engine Invariance & Quality Gates', () => {
       'src/engine/beta.js',
       'src/engine/market.js',
       'src/engine/threeStatement.js',
-      ...EP_AUTHORIZED_ENGINE,
+      ...P104_AUTHORIZED_ENGINE,
     ];
     const unauthorized = unauthorizedEngineFiles('v1.0-P6R-base', authorized);
     assert.deepEqual(

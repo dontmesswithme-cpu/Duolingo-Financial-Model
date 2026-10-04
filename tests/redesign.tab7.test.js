@@ -156,7 +156,10 @@ describe('RP7.2 — Thesis and model health cards', () => {
     assert.equal((thesisBlock.match(/<li>/g) || []).length, 5);
     assert.doesNotMatch(thesisBlock, /\$/);
     assert.equal(thesisBlock.match(/\b\d{4,}\b/), null, 'Thesis prose carries no 4+ digit figures');
-    assert.ok(thesisBlock.includes('FAIR'), 'Pillar 5 anchors on the live verdict word');
+    assert.ok(
+      /OVERVALUED|UNDERVALUED|FAIR/.test(thesisBlock),
+      'Pillar 5 anchors on the live clustered verdict word'
+    );
     view.dispose();
   });
 
@@ -208,12 +211,12 @@ describe('RP7.2 — Reactivity, verdict-change path and polarity guard', () => {
       assumptions: data.assumptions, threeStatement: data.threeStatement,
       verdict: data.verdict, methods: data.methods, sensitivityGrid: data.sensGrid,
     });
-    assert.ok(container.innerHTML.includes('FAIR VALUE (NO CONSENSUS)'));
+    assert.ok(container.innerHTML.includes('OVERVALUED'));
     const shifted = aggregateVerdicts(data.methods, data.marketPrice * 0.5);
     assert.equal(shifted.verdict, 'undervalued');
     view.update(data.dcf, data.rec, null, data.historical, data.assumptions, data.threeStatement, null, shifted, data.methods, data.sensGrid);
     assert.ok(container.innerHTML.includes('UNDERVALUED'), 'Headline badge follows the live verdict');
-    assert.ok(!container.innerHTML.includes('FAIR VALUE (NO CONSENSUS)'), 'Stale verdict fully clears');
+    assert.ok(!container.innerHTML.includes('OVERVALUED'), 'Stale verdict fully clears');
     view.dispose();
   });
 
@@ -237,7 +240,7 @@ describe('RP7.2 — Reactivity, verdict-change path and polarity guard', () => {
     view.dispose();
   });
 
-  test('P8.3 wiring holds: 6 method rows post-update, crossed update yields 0', async () => {
+  test('P8.3 wiring holds: 5 voting method rows post-update, crossed update yields 0', async () => {
     const data = await buildEngineFixture();
     const container = bareContainer();
     const view = renderSummary({
@@ -245,7 +248,8 @@ describe('RP7.2 — Reactivity, verdict-change path and polarity guard', () => {
       assumptions: data.assumptions, threeStatement: data.threeStatement,
       verdict: data.verdict, methods: data.methods, sensitivityGrid: data.sensGrid,
     });
-    assert.equal((container.innerHTML.match(/<tr class="method-row-/g) || []).length, 6);
+    // P10.4: SOTP is decomposition-only, so the verdict table has 5 voting rows.
+    assert.equal((container.innerHTML.match(/<tr class="method-row-/g) || []).length, 5);
     view.update(data.dcf, data.rec, null, data.historical, data.assumptions, data.threeStatement, null, data.methods, data.verdict, data.sensGrid);
     assert.equal(container.innerHTML.match(/<tr class="method-row-/g), null);
     view.dispose();

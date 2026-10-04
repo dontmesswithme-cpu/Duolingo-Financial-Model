@@ -2,7 +2,7 @@
  * Tab 01 Cover & Model Architecture UI View Controller.
  *
  * Manages executive briefing HUD, live valuation snapshots, integrity checklist,
- * key baseline assumptions, and 6-method valuation summary.
+ * key baseline assumptions, and multi-method valuation summary.
  *
  * Purity contract: pure functions, zero fetch, zero Date.now, zero Math.random,
  * zero bare numeric literals > 999 outside comments.
@@ -12,12 +12,15 @@
 
 import { EngineError } from '../data/errors.js';
 import { RECOMMENDATION_THRESHOLDS } from '../data/constants.js';
+import { describeStageStructure } from '../engine/methods/fcffDcf.js';
+import { canonicalDcfPerShare } from '../engine/methods/fcffDcf.js';
+import { fullyDilutedSchedule } from '../engine/shares.js';
 import { usd, percent } from './format.js';
 
 const MONTH_NAMES = Object.freeze(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
 
 function formatDateClean(dateStr) {
-  if (!dateStr || typeof dateStr !== 'string') return 'Sep 1, 2026';
+  if (!dateStr || typeof dateStr !== 'string') return '-';
   const parts = dateStr.trim().split('-');
   if (parts.length === 3) {
     const y = parts[0];
@@ -31,7 +34,7 @@ function formatDateClean(dateStr) {
 }
 
 const DEFAULT_METHODS = Object.freeze([
-  { method: 'fcff_dcf', label: '2-Stage FCFF DCF', basis: 'FY2026-FY2030 + Gordon' },
+  { method: 'fcff_dcf', label: '3-Stage FCFF DCF', basis: 'FY2026–FY2035 + Gordon' },
   { method: 'comps', label: 'Trading Comparables', basis: 'Peer Median EV/Rev' },
   { method: 'ev_multiples', label: 'EV/EBITDAR Multiples', basis: 'Peer Median EV/EBITDAR' },
   { method: 'pfcf', label: 'P/FCF Multiple', basis: 'Peer Median P/FCF' },
@@ -40,7 +43,7 @@ const DEFAULT_METHODS = Object.freeze([
 ]);
 
 /**
- * Renders the 6-method valuation summary rows.
+ * Renders the multi-method valuation summary rows.
  *
  * @param {Array<object>} methodsList
  * @param {number|null} marketPrice
@@ -124,20 +127,29 @@ export function renderCover({
   function render() {
     if (disposed || !container) return;
 
-    // 1. Resolve live metrics from engine outputs fail-closed
+    // 1. Resolve live metrics from engine outputs fail-closed.
+    // P10.3 benchmark parity: the canonical benchmark is the source of record
+    // for the displayed price and as-of date. The driver is consulted ONLY when
+    // no benchmark object was supplied, so the cover can never show a different
+    // price than the summary, valuation, and sensitivity views.
     const assumpPrice = currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.value : currentAssumptions?.byName?.market_share_price?.value;
-    const effectivePrice = Number.isFinite(assumpPrice)
-      ? assumpPrice
-      : (Number.isFinite(currentMarketPrice?.price) ? currentMarketPrice.price : null);
+    const benchmarkPrice = currentMarketPrice?.benchmark?.value ?? currentMarketPrice?.price;
+    const effectivePrice = Number.isFinite(benchmarkPrice)
+      ? benchmarkPrice
+      : (Number.isFinite(assumpPrice) ? assumpPrice : null);
 
-    const asOfRaw = currentMarketPrice?.asOf ||
-      (currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf : currentAssumptions?.byName?.market_share_price?.asOf) ||
-      '';
+    const assumpAsOf = currentAssumptions?.get ? currentAssumptions.get('market_share_price')?.asOf : currentAssumptions?.byName?.market_share_price?.asOf;
+    const asOfRaw = currentMarketPrice?.asOf || assumpAsOf || '';
     const asOfDate = formatDateClean(asOfRaw);
 
-    const dcfFairValue = typeof currentDcf?.perShare === 'number' && Number.isFinite(currentDcf.perShare)
-      ? currentDcf.perShare
+    // P10.6: the cover fair-value tile states the CANONICAL basis, matching the
+    // valuation headline and the recommendation. The basis label travels with the
+    // figure so the tile cannot imply a number of unknown provenance.
+    const coverBasis = canonicalDcfPerShare(currentDcf);
+    const dcfFairValue = typeof coverBasis.perShare === 'number' && Number.isFinite(coverBasis.perShare)
+      ? coverBasis.perShare
       : null;
+    const dcfFairValueBasisLabel = coverBasis.basisLabel;
 
     const upsidePct = typeof currentRec?.upsidePct === 'number' && Number.isFinite(currentRec.upsidePct)
       ? currentRec.upsidePct
@@ -152,9 +164,42 @@ export function renderCover({
       : (currentWacc?.wacc?.value ?? currentWacc?.wacc ?? currentWacc?.value ?? null);
 
     const gVal = (currentAssumptions?.get ? currentAssumptions.get('terminal_growth_rate')?.value : currentAssumptions?.byName?.terminal_growth_rate?.value) ?? null;
+    // Forecast span comes from the engine's own period list and stage
+    // disclosure, never from a defaulted fade value or a hardcoded year.
+    const coverStages = describeStageStructure(currentDcf || {});
+    const disclosedPeriods = Array.isArray(currentThreeStatement?.periods) && currentThreeStatement.periods.length > 0
+      ? currentThreeStatement.periods
+      : (Array.isArray(currentDcf?.periods) ? currentDcf.periods : []);
+    const coverFirstPeriod = coverStages.firstPeriod ?? disclosedPeriods[0] ?? null;
+    const coverLastPeriod = disclosedPeriods.length > 0
+      ? disclosedPeriods[disclosedPeriods.length - 1]
+      : coverStages.terminalYear;
+    const coverSpan = coverFirstPeriod && coverLastPeriod
+      ? `${coverFirstPeriod} &ndash; ${coverLastPeriod}`
+      : 'not disclosed';
 
-    const sharesVal = currentDcf?.sharesOutstanding ??
-      (currentAssumptions?.get ? currentAssumptions.get('shares_diluted')?.value : currentAssumptions?.byName?.shares_diluted?.value) ?? null;
+    // U5 & U6: Explicit dual-source share semantics. The filed MKT driver
+    // (shares_outstanding, Note 11 weighted-average EPS diagnostic only) and the
+    // engine DCF divisor (intermediate roll through explicit and fade horizons)
+    // carry explicit diagnostic and basis labeling in their title and provenance.
+    const filedSharesRecord = currentAssumptions?.get
+      ? currentAssumptions.get('shares_outstanding')
+      : currentAssumptions?.byName?.shares_outstanding;
+    const filedSharesVal = typeof filedSharesRecord?.value === 'number' && Number.isFinite(filedSharesRecord.value)
+      ? filedSharesRecord.value
+      : null;
+    const filedSharesAsOf = typeof filedSharesRecord?.asOf === 'string' ? filedSharesRecord.asOf : '';
+    const filedSharesProvider = typeof filedSharesRecord?.source?.provider === 'string'
+      ? filedSharesRecord.source.provider
+      : 'SEC 10-Q Note 11';
+    const filedSharesFormatted = filedSharesVal !== null ? `${(filedSharesVal / 1e6).toFixed(2)}M` : ' - ';
+    const filedSharesTitle = `Filed diluted shares (MKT)${filedSharesAsOf ? ` as of ${filedSharesAsOf}` : ''} via ${filedSharesProvider}: Note 11 weighted-average EPS diagnostic only (cannot serve as valuation denominator; relative methods use ruled FD schedule 50.06M); DCF per-share uses rolled divisor below.`;
+
+    const dcfSharesVal = typeof currentDcf?.sharesOutstanding === 'number' && Number.isFinite(currentDcf.sharesOutstanding)
+      ? currentDcf.sharesOutstanding
+      : null;
+    const dcfSharesFormatted = dcfSharesVal !== null ? `${(dcfSharesVal / 1e6).toFixed(2)}M` : ' - ';
+    const dcfSharesTitle = 'Engine DCF divisor (EST): filed BOP shares plus future SBC issuance at spot (intermediate roll through explicit & fade horizons before perpetual dilution; per-share denominator).';
 
     // Revenue CAGR ('26–'30): 4-step CAGR convention from FY2026 to FY2030 = (rev2030 / rev2026) ** (1 / 4) - 1
     let revGrowthVal = null;
@@ -226,7 +271,6 @@ export function renderCover({
     const fcfMarginFormatted = fcfMarginVal !== null ? percent(fcfMarginVal, { decimals: 1 }) : ' — ';
     const netDebtFormatted = fundedDebtVal !== null ? usd(fundedDebtVal, { decimals: 0 }) : ' — ';
     const taxFormatted = percent(taxVal, { decimals: 1 });
-    const sharesFormatted = sharesVal !== null ? `${(sharesVal / 1e6).toFixed(2)}M` : ' - ';
 
     const methodsRowsHtml = renderMethodRows(currentMethods, effectivePrice);
 
@@ -298,7 +342,7 @@ export function renderCover({
               </div>
               <div class="snapshot-row">
                 <span class="snapshot-label">Forecast Period</span>
-                <span class="snapshot-value">FY2026 &ndash; FY2030</span>
+                <span class="snapshot-value">${coverSpan}</span>
               </div>
             </div>
           </article>
@@ -333,7 +377,7 @@ export function renderCover({
                   <img src="assets/icons/ui/check-circle.svg" alt="Verified" class="status-check-icon" width="16" height="16" />
                   <span class="status-check-label">Valuation Framework</span>
                 </div>
-                <span class="status-check-tag">6 Methods</span>
+                <span class="status-check-tag">3 Evidence Clusters</span>
               </li>
               <li class="status-check-item">
                 <div class="status-check-left">
@@ -405,19 +449,19 @@ export function renderCover({
                 <tr data-jump-tab="projections" class="arch-row">
                   <td class="col-tab-num">05</td>
                   <td class="col-tab-name">Projections (3-Statement)</td>
-                  <td class="col-tab-desc">FY2026&ndash;FY2030 linked IS, BS, and CF with automated balance gate validation.</td>
+                  <td class="col-tab-desc">${coverFirstPeriod && coverLastPeriod ? `${coverFirstPeriod}&ndash;${coverLastPeriod}` : 'Forecast span not disclosed'} linked IS, BS, and CF with automated balance gate validation.</td>
                   <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="projections" aria-label="Go to Projections">&rarr;</button></td>
                 </tr>
                 <tr data-jump-tab="valuation" class="arch-row">
                   <td class="col-tab-num">06</td>
                   <td class="col-tab-name">Valuation</td>
-                  <td class="col-tab-desc">Multi-method valuation synthesis (2-Stage FCFF DCF, EV/Rev, EV/EBITDAR, P/FCF, SOTP, Per-User), CAPM WACC build, enterprise-to-equity bridge, and thesis directory.</td>
+                  <td class="col-tab-desc">Multi-method valuation synthesis (3 Evidence Clusters · 5 Voting Rows), CAPM WACC build, enterprise-to-equity bridge, and thesis directory.</td>
                   <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="valuation" aria-label="Go to Valuation">&rarr;</button></td>
                 </tr>
                 <tr data-jump-tab="summary" class="arch-row">
                   <td class="col-tab-num">07</td>
                   <td class="col-tab-name">Summary / Output</td>
-                  <td class="col-tab-desc">Executive dashboard, valuation verdict card, 6-method comparison table, live price state, and key ratios.</td>
+                  <td class="col-tab-desc">Executive dashboard, valuation verdict card, multi-method comparison table, live price state, and key ratios.</td>
                   <td class="col-tab-goto"><button type="button" class="jump-btn" data-jump-tab="summary" aria-label="Go to Summary / Output">&rarr;</button></td>
                 </tr>
                 <tr data-jump-tab="sensitivity" class="arch-row">
@@ -461,8 +505,12 @@ export function renderCover({
                   <span class="assump-value" id="cover-assump-tax">${taxFormatted}</span>
                 </div>
                 <div class="assump-row">
-                  <span class="assump-label">Shares Outstanding (Diluted)</span>
-                  <span class="assump-value" id="cover-assump-shares">${sharesFormatted}</span>
+                  <span class="assump-label">Diluted Shares — Filed (MKT)</span>
+                  <span class="assump-value" id="cover-assump-shares" data-source="assumptions:shares_outstanding" title="${filedSharesTitle}">${filedSharesFormatted}</span>
+                </div>
+                <div class="assump-row assump-row-dcf">
+                  <span class="assump-label">DCF Divisor — Rolled (EST)</span>
+                  <span class="assump-value" id="cover-assump-shares-dcf" data-source="dcf:sharesOutstanding" title="${dcfSharesTitle}">${dcfSharesFormatted}</span>
                 </div>
                 <div class="assump-row">
                   <span class="assump-label">Net Debt (Latest)</span>

@@ -35,7 +35,7 @@ This guide explains how to apply and adapt this workflow to **any type of projec
 5. Appends submission to `docs/inbox_op.md` ending with `[END_OF_MESSAGE]`.
 6. Flips `docs/status_op.json` to `"state": "review_pending"` and increments `seq`.
 7. Overwrites `docs/DSmemory.md` with active state.
-8. Executes background watcher: `node tools/watch_ds_inbox.mjs`.
+8. Executes watcher in foreground: `node tools/watch_ds_inbox.mjs`. Watcher must always be armed in the foreground; if the harness force-closes it or times it out before the prescribed timeout, rearm in the foreground and keep rearming until timeout is reached.
 9. Upon wake-up: Conditionally resets `docs/status_op.json` to `"idle"` (if `"review_pending"`), reads `docs/inbox_ds.md`, and proceeds with next sub-phase or fixes.
 
 ### For the Reviewer Agent (`OP`):
@@ -43,9 +43,9 @@ This guide explains how to apply and adapt this workflow to **any type of projec
 2. Asserts `inbox_op.md` terminates with `[END_OF_MESSAGE]`.
 3. Conducts line-by-line audit against the Artifact Contract and [`docs/review_checklist.md`](docs/review_checklist.md).
 4. Runs automated tests and independent verification scripts in `scratch/`.
-5. If passed: Appends `REVIEW: PX.Y [PASS ✅]` to `docs/inbox_ds.md`, flips `status_ds.json` to `"worker_active"` (`seq++`), re-arms watcher (`node tools/watch_op_inbox.mjs`).
+5. If passed: Appends `REVIEW: PX.Y [PASS ✅]` to `docs/inbox_ds.md`, flips `status_ds.json` to `"worker_active"` (`seq++`), re-arms watcher in foreground (`node tools/watch_op_inbox.mjs`; rearm until timeout if harness force-closes early).
    - If final sub-phase: Issues `GATE PASS: Phase X`, updates `docs/status.md`, flips `status_ds.json` to `"completed"` (`seq++`), and runs `node tools/archive_phase.mjs phase_X`.
-6. If failed (< 3 times): Increments internal `consecutive_fails`, appends `REVIEW: PX.Y [FAIL ❌]` to `docs/inbox_ds.md`, flips `status_ds.json` to `"worker_active"` (`seq++`), re-arms watcher.
+6. If failed (< 3 times): Increments internal `consecutive_fails`, appends `REVIEW: PX.Y [FAIL ❌]` to `docs/inbox_ds.md`, flips `status_ds.json` to `"worker_active"` (`seq++`), re-arms watcher in foreground (`node tools/watch_op_inbox.mjs`; rearm until timeout if harness force-closes early).
 7. If 3rd consecutive failure: Trips circuit breaker, appends `ESCALATION: PX.Y [BLOCKED 🔴]` to `inbox_ds.md`, updates `status.md` to Blocked, flips `status_ds.json` to `"blocked"` (`seq++`), fires webhook, and halts.
 
 ---

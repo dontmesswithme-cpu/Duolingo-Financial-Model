@@ -21,6 +21,8 @@ import { usd, percent, estSuffix, mktBadge } from './format.js';
 import { TabulatorFull as DefaultTabulator } from './tabulator.js';
 import { createWaterfall } from './charts.js';
 import { regress } from '../engine/beta.js';
+import { stages } from '../engine/forecast.js';
+import { describeStageStructure } from '../engine/methods/fcffDcf.js';
 import { RECOMMENDATION_THRESHOLDS } from '../data/constants.js';
 import pricesDataset from '../data/historical/prices.json' with { type: 'json' };
 import peersBetaDataset from '../data/historical/peers_beta.json' with { type: 'json' };
@@ -111,6 +113,11 @@ export function renderValuation({
   methods = null,
   verdict = null,
   onRenderBoundary = null,
+  forecast = null,
+  dcf5 = null,
+  dcf5Disclosure = null,
+  labelStability = null,
+  threeStatement = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderValuation requires a container element.', 'container');
@@ -123,6 +130,11 @@ export function renderValuation({
   let currentMarketPrice = marketPriceState;
   let currentMethods = methods;
   let currentVerdict = verdict;
+  let currentForecast = forecast;
+  let currentDcf5 = dcf5;
+  let currentDcf5Disclosure = dcf5Disclosure;
+  let currentLabelStability = labelStability;
+  let currentThreeStatement = threeStatement;
   let activeMethodKey = 'fcff_dcf';
   let disposed = false;
   let renderMultiBlocksRef = null;
@@ -442,7 +454,7 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
-              <strong>Why a peer median rather than Duolingo's own regression:</strong> Duolingo's single-stock OLS beta (${reg ? `β = ${reg.beta.toFixed(2)}, t ≈ ${(reg.beta / reg.stderr).toFixed(2)}, R² = ${(reg.r2 * 100).toFixed(2)}%` : 'n/a'}) is statistically weak, with ~60 monthly observations the estimate carries a large standard error and is dominated by idiosyncratic noise. The bottom-up alternative, take the median unlevered asset beta across the locked pure-play peer set (Spotify, Roblox, Netflix), borrows the market's pricing of comparable systematic risk and is the standard institutional treatment for short-history stocks. <strong>Why unlevered and median:</strong> each peer's regression beta is Hamada-unlevered on its filed D/E so that capital-structure differences don't contaminate the comparison; the median (not mean) resists outlier distortion; and because Duolingo is verified debt-free (Total Debt = $0), the unlevered asset beta ${peerStats ? `(${peerStats.medianRounded.toFixed(2)})` : ''} applies directly with zero relevering. The single-stock regression is still disclosed alongside as a cross-check.
+              <strong>Why a peer mean rather than Duolingo's own regression:</strong> Duolingo's single-stock OLS beta (${reg ? `β = ${reg.beta.toFixed(2)}, t ≈ ${(reg.beta / reg.stderr).toFixed(2)}, R² = ${(reg.r2 * 100).toFixed(2)}%` : 'n/a'}) is statistically weak: with ~60 monthly observations the estimate carries a large standard error and is dominated by idiosyncratic noise — R² = ${reg ? (reg.r2 * 100).toFixed(2) : 'n/a'}% means the market explains under 5% of Duolingo's return variance. The bottom-up alternative, take the mean unlevered asset beta across the locked pure-play peer set (Spotify, Roblox, Netflix), borrows the market's pricing of comparable systematic risk and is the standard institutional treatment for short-history stocks. The peer regressions are also materially better specified (R² = 30.4% SPOT / 28.9% NFLX / 12.9% RBLX). <strong>Why unlevered and mean:</strong> each peer's regression beta is Hamada-unlevered on its filed D/E so that capital-structure differences don't contaminate the comparison; the arithmetic mean is used rather than the median because at n = 3 the median is definitionally the middle single observation (${peerStats ? peerStats.peers.slice().sort((a, b) => a.unleveredBeta - b.unleveredBeta)[Math.floor(peerStats.peers.length / 2)].symbol : 'n/a'}, ${peerStats ? peerStats.medianRounded.toFixed(2) : 'n/a'}) and therefore quotes one peer instead of summarising the set, while dispersion is tight (span ${peerStats ? peerStats.spanRounded.toFixed(2) : '0.13'}, no outlier present) leaving a median nothing to resist; and because Duolingo is verified debt-free (Total Debt = $0), the unlevered asset beta ${peerStats ? `(${peerStats.meanRounded.toFixed(2)})` : ''} applies directly with zero relevering. The single-stock regression is still disclosed alongside for transparency, but it is derived in-model and is not an independent check of any figure here.
             </p>
           </div>
           <div class="defense-block">
@@ -651,7 +663,7 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice (Filing-Cited Treasury Stock Method)</div>
             <p>
-              Diluted common shares outstanding (${Number.isFinite(shares) ? Number(shares).toLocaleString('en-US') : '50,031,000'}) rolls forward from the cited Form 10-Q BOP count (50,031,000, Note 11 Earnings Per Share, weighted-average dilutive shares for the three months ended June 30, 2026) by gross SBC issuance at spot (EIG-B settlement: future grants priced at the market driver, no buyback netting). Diluted rather than basic share count is mandated because an institutional DCF values total enterprise equity claims, factoring in the dilutive effect of unvested equity awards. Basic share count was 46,786,269 (Class A 40,387,012 + Class B 6,399,257 as of August 4, 2026), reflecting a treasury-stock-method dilution gap of ~3.24M shares at inception.
+              Fully diluted shares outstanding (${Number.isFinite(shares) ? Number(shares).toLocaleString('en-US') : '50,061,458'}) read from the point-in-time schedule at 2026-06-30: 46,724,000 basic period-end (Class A 40,325,000 + Class B 6,399,000) plus 520,458 incremental options, 2,817,000 RSUs and other awards, and 0 founder awards whose performance conditions were unmet.
             </p>
           </div>
           <div class="defense-block">
@@ -659,7 +671,7 @@ export function renderValuation({
             <div class="defense-runtime-bar audit-stat-grid">
               <strong>Diluted Share Count:</strong> <span class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
               ${mktBadge({ asOf: currentWacc?.sharesOutstanding?.asOf || '2026-08-06', provider: 'SEC 10-Q' })}
-              <span class="text-muted">(Basic: ~46.79M | Dilution gap: ~3.24M shares)</span>
+              <span class="text-muted">(Basic period-end: 46.724M + options/RSUs/awards 3.337M = 50.061M fully diluted at 2026-06-30; the Q2 weighted-average count of 50.031M is an EPS diagnostic only)</span>
             </div>
           </div>
         </div>
@@ -952,9 +964,11 @@ export function renderValuation({
     if (!reg) return '';
 
     const peerStats = computePeerBetaStats();
-    const currentBeta = currentWacc?.beta?.value ?? (peerStats ? peerStats.medianRounded : reg.beta);
-    const providerBeta = 0.89;
-    const deviation = Math.abs(reg.beta - providerBeta);
+    // The driver is the sole source of the displayed beta. The peer-mean live
+    // derivation is the second, independent read of the same quantity; the
+    // own-stock regression is a deliberately separate (and, on its own R²,
+    // statistically powerless) cross-check that never drives valuation.
+    const currentBeta = currentWacc?.beta?.value ?? (peerStats ? peerStats.meanRounded : reg.beta);
     const betaAsOf = currentWacc?.beta?.asOf || reg.windowEnd || '';
     const betaUrl = currentWacc?.beta?.source?.url || pricesDataset?.source?.stock?.url || '';
     const sp500Url = pricesDataset?.source?.benchmark?.url || '';
@@ -992,16 +1006,16 @@ export function renderValuation({
               <tbody>
                 ${peerTableRowsHtml}
                 <tr class="table-row-highlight">
-                  <td><strong>Peer Median Unlevered Beta</strong></td>
-                  <td colspan="3" class="font-mono text-muted">Median across 3 peers (driver re-anchor @0.01 step)</td>
-                  <td class="align-right font-mono font-bold">${peerStats.median.toFixed(4)} → <strong>${peerStats.medianRounded.toFixed(2)}</strong></td>
-                  <td>${estSuffix('Median', 'EST')} Baseline Active Model Anchor</td>
+                  <td><strong>Peer Mean Unlevered Beta</strong></td>
+                  <td colspan="3" class="font-mono text-muted">Arithmetic mean across 3 peers (driver re-anchor @0.01 step)</td>
+                  <td class="align-right font-mono font-bold">${peerStats.mean.toFixed(4)} → <strong>${peerStats.meanRounded.toFixed(2)}</strong></td>
+                  <td>${estSuffix('Mean', 'EST')} Baseline Active Model Anchor</td>
                 </tr>
                 <tr>
-                  <td><strong>Peer Mean Unlevered Beta</strong></td>
-                  <td colspan="3" class="font-mono text-muted">Arithmetic average dispersion context</td>
-                  <td class="align-right font-mono">${peerStats.mean.toFixed(4)} → ${peerStats.meanRounded.toFixed(2)}</td>
-                  <td>${estSuffix('Mean', 'EST')} Context readout</td>
+                  <td><strong>Peer Median Unlevered Beta</strong></td>
+                  <td colspan="3" class="font-mono text-muted">Context readout only — at n = 3 the median is the middle observation (${peerStats.peers.slice().sort((a,b)=>a.unleveredBeta-b.unleveredBeta)[Math.floor(peerStats.peers.length/2)].symbol}), not a summary</td>
+                  <td class="align-right font-mono">${peerStats.median.toFixed(4)} → ${peerStats.medianRounded.toFixed(2)}</td>
+                  <td>${estSuffix('Median', 'EST')} Not the anchor</td>
                 </tr>
                 <tr>
                   <td><strong>Peer Unlevered Beta Span</strong></td>
@@ -1018,12 +1032,13 @@ export function renderValuation({
     return `
       <div class="valuation-card beta-derivation-card">
         <div class="statement-card-header">
-          In-Model CAPM Beta Derivation (Bottom-Up Peer Median &amp; Ordinary Least Squares Regression) <a href="#defense-lever-2" class="citation-sup defense-link" title="Jump to Lever 2: Equity Beta defense">[D2]</a>
+          In-Model CAPM Beta Derivation (Bottom-Up Peer Mean &amp; Ordinary Least Squares Regression) <a href="#defense-lever-2" class="citation-sup defense-link" title="Jump to Lever 2: Equity Beta defense">[D2]</a>
         </div>
         <div class="valuation-card-body">
           <p class="valuation-section-desc">
-            Duolingo is debt-free (D = $0), meaning the median unlevered asset beta applies directly without Hamada relevering (no Hamada adjustment required).
-            Beta is re-anchored to the <strong>bottom-up median unlevered beta (${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</strong> over the locked peer set (Spotify, Roblox, Netflix).
+            Duolingo is debt-free (D = $0), meaning the peer mean unlevered asset beta applies directly without Hamada relevering (no Hamada adjustment required).
+            Beta is re-anchored to the <strong>bottom-up mean unlevered beta (${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'})</strong> over the locked peer set (Spotify, Roblox, Netflix).
+            The mean is the basis rather than the median because at n = 3 the median is definitionally the middle observation — it quotes one peer instead of summarising the set — and dispersion is tight (span ${peerStats ? peerStats.spanRounded.toFixed(2) : '0.13'}), leaving no outlier for a median to resist.
             Each peer beta is computed at runtime via <code>beta.regress</code> from verified 60-observation monthly price series (${reg.windowStart} to ${reg.windowEnd}) against the S&amp;P 500 Index.
             The model parameter remains fully user-adjustable in the Assumptions tab (active driver: <strong>${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : ' - '}</strong>).
           </p>
@@ -1032,7 +1047,7 @@ export function renderValuation({
             Single-Stock Regression Cross-Check
           </div>
           <p class="valuation-section-desc">
-            The own-stock regression is too imprecise to have an opinion on beta and is shown for transparency only. The 95% confidence interval below contains the 1.47 peer-median beta, so the own regression cannot reject or confirm the peer beta.
+            The own-stock regression is too imprecise to have an opinion on beta and is shown for transparency only. The 95% confidence interval below contains the ${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'} peer-mean beta, so the own regression cannot reject or confirm the peer beta.
           </p>
           <table class="financial-summary-table beta-derivation-table">
             <thead>
@@ -1072,7 +1087,7 @@ export function renderValuation({
                 <td><strong>Active Model Driver Beta</strong></td>
                 <td class="align-right font-mono font-bold">${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : ' - '}</td>
                 <td>${mktBadge({ asOf: betaAsOf, provider: 'stockanalysis.com', url: betaUrl })}</td>
-                <td>Parameter in active scenario / user override (re-anchored to peer median ${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</td>
+                <td>Parameter in active scenario / user override (re-anchored to peer mean ${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'})</td>
               </tr>
               <tr>
                 <td><strong>Monthly Alpha (α)</strong></td>
@@ -1093,10 +1108,12 @@ export function renderValuation({
                 <td>Standard error of estimated OLS slope coefficient (t ≈ ${(reg.beta / reg.stderr).toFixed(2)})</td>
               </tr>
               <tr>
-                <td><strong>Provider Cross-Check (stockanalysis.com)</strong></td>
-                <td class="align-right font-mono">${providerBeta.toFixed(2)}</td>
-                <td>stockanalysis.com 5Y monthly</td>
-                <td>Published aggregator beta = 0.89; |computed − provider| = ${deviation.toFixed(6)} (&lt;0.05% deviation, ~0.22 bps Re impact)</td>
+                <td><strong>Own-Regression Beta (Disclosed, Not Used)</strong></td>
+                <td class="align-right font-mono">${reg.beta.toFixed(4)}</td>
+                <td>Derived live by <code>beta.regress</code> from the verified price series</td>
+                <td>
+                  Computed in-model from ${reg.n} monthly returns (${reg.windowStart}–${reg.windowEnd}) against the ${reg.benchmark}. This is NOT an external provider figure and is NOT an independent cross-check of itself: at R² = ${(reg.r2 * 100).toFixed(2)}% and SE = ${reg.stderr.toFixed(4)} it has no power to confirm or reject any beta. Disclosed for transparency; valuation uses the ${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'} peer mean instead.
+                </td>
               </tr>
             </tbody>
           </table>
@@ -1112,14 +1129,14 @@ export function renderValuation({
               const betaStr = reg.beta.toFixed(2);
               const seStr = reg.stderr.toFixed(2);
               const r2Str = (reg.r2 * 100).toFixed(1);
-              const medStr = peerStats ? peerStats.medianRounded.toFixed(2) : '1.47';
+              const medStr = peerStats ? peerStats.meanRounded.toFixed(2) : '1.49';
               // 95% CI for the OLS slope: beta ± t(0.975, df=n-2) × SE.
               // t-critical source: Student-t two-sided 95% quantile at df = 58 (n = 60) = 2.002
               // (OP-verified 2026-09-09: 0.890 ± 2.002 × 0.519 = [-0.15, 1.93]).
               const tCrit = 2.002;
               const ciLo = (reg.beta - tCrit * reg.stderr).toFixed(2);
               const ciHi = (reg.beta + tCrit * reg.stderr).toFixed(2);
-              return `Single-Stock Regression Cross-Check: Duolingo own-stock regression (${reg.n} monthly returns, ${fmtYm(reg.windowStart)} – ${fmtYm(reg.windowEnd)} vs S&P 500) gives β = ${betaStr} (SE ${seStr}, R² ${r2Str}%). 95% confidence interval is ${ciLo} to ${ciHi}, which includes the ${medStr} peer-median beta. The own regression is therefore too imprecise to reject or confirm the peer beta, and is shown for transparency only. Valuation uses the ${medStr} bottom-up peer median (Spotify / Roblox / Netflix, Hamada-unlevered).`;
+              return `Single-Stock Regression Cross-Check: Duolingo own-stock regression (${reg.n} monthly returns, ${fmtYm(reg.windowStart)} – ${fmtYm(reg.windowEnd)} vs ${reg.benchmark}) gives β = ${betaStr} (SE ${seStr}, R² ${r2Str}%). 95% confidence interval is ${ciLo} to ${ciHi}, which comfortably includes the ${medStr} peer-mean beta. This regression is derived in-model and is not an external provider figure; on R² = ${r2Str}% it has essentially no explanatory power, so it is too imprecise to reject or confirm any beta and is shown for transparency only. Valuation uses the ${medStr} bottom-up peer mean (Spotify / Roblox / Netflix, Hamada-unlevered).`;
             })()}
           </div>
         </div>
@@ -1128,7 +1145,8 @@ export function renderValuation({
   }
 
   function buildDcfScheduleData() {
-    const schedule = currentDcf?.schedule || [];
+    const fullSchedule = currentDcf?.schedule || [];
+    const schedule = fullSchedule.slice(0, 5);
     const periods = schedule.map((s) => s.period);
 
     const fcfRow = { id: 'fcf', label: 'Unlevered Free Cash Flow (FCFF)', isLink: true, formatType: 'money' };
@@ -1144,6 +1162,13 @@ export function renderValuation({
     const cumPvRow = { id: 'cumpv', label: 'Cumulative PV incl. Terminal Value', isLink: true, formatType: 'money' };
 
     let cumPv = 0;
+    // P10.5: the cumulative PV must be readable as explicit + fade + terminal.
+    // A single running total that silently folds the fade into the explicit
+    // column makes the three-stage structure invisible, so the two forecast
+    // stages are accumulated separately and reported alongside the total.
+    let cumPvExplicit = 0;
+    let cumPvFade = 0;
+    const explicitStageLength = currentDcf?.stageDisclosure?.explicitPeriods ?? null;
     for (let i = 0; i < schedule.length; i++) {
       const item = schedule[i];
       const p = item.period;
@@ -1153,6 +1178,21 @@ export function renderValuation({
       pvRow[p] = item.presentValue;
       cumPv += item.presentValue;
       cumPvRow[p] = cumPv;
+
+      // Split by the engine's own declared explicit-stage length, so the boundary
+      // is the model's and not a hardcoded period count. When the engine does not
+      // declare one, the split is NOT guessed: the whole running total is reported
+      // as explicit and the fade leg is left null, because a fabricated boundary
+      // would make a three-stage claim the data cannot support.
+      const isFade =
+        typeof explicitStageLength === 'number' && i >= explicitStageLength;
+      if (typeof explicitStageLength !== 'number') {
+        cumPvExplicit += item.presentValue;
+      } else if (isFade) {
+        cumPvFade += item.presentValue;
+      } else {
+        cumPvExplicit += item.presentValue;
+      }
 
       termFcfRow[p] = null;
       gordonMultRow[p] = null;
@@ -1186,10 +1226,27 @@ export function renderValuation({
     gordonMultRow['Terminal'] = gordonMultiple;
     termValRow['Terminal'] = terminalValue;
     pvTermValRow['Terminal'] = pvTerminal;
-    cumPvRow['Terminal'] = (currentDcf?.pvExplicit ?? 0) + (pvTerminal ?? 0);
+    // P10.5: the terminal column carries the FULL three-stage decomposition, so
+    // the cumulative PV is auditable as explicit + fade + terminal rather than
+    // presented as one number whose composition the reader must assume.
+    const pvExplicitStage = currentDcf?.pvByStage?.explicit ?? cumPvExplicit;
+    const pvFadeStage = currentDcf?.pvByStage?.fade ?? cumPvFade;
+    const pvTerminalStage = pvTerminal ?? 0;
+    cumPvRow['Terminal'] = pvExplicitStage + pvFadeStage + pvTerminalStage;
+
+    const stageBreakdown = {
+      explicit: pvExplicitStage,
+      fade: pvFadeStage,
+      terminal: pvTerminalStage,
+      total: cumPvRow['Terminal'],
+      explicitStageLength,
+      reconciles:
+        Math.abs(cumPvRow['Terminal'] - (pvExplicitStage + pvFadeStage + pvTerminalStage)) < 1e-6,
+    };
 
     return {
       periods,
+      stageBreakdown,
       data: [fcfRow, tRow, dfRow, pvRow, termFcfRow, gordonMultRow, termValRow, pvTermValRow, cumPvRow],
     };
   }
@@ -1210,26 +1267,86 @@ export function renderValuation({
     const range = dcfMethod?.rangePerShare;
     const fcfePerShare = currentDcf?.fcfe?.perShare;
     const shares = currentDcf?.sharesOutstanding ?? currentWacc?.sharesOutstanding?.value;
-    const componentRows = [
+    // Stage structure comes from engine disclosure; an undisclosed fade stage is
+    // never rendered as a silent zero row.
+    const cardStages = describeStageStructure(currentDcf || {});
+    const hasFade = cardStages.fadePresent;
+    const tvPct = (currentDcf?.enterpriseValue && currentDcf.enterpriseValue > 0 && currentDcf?.pvTerminal)
+      ? percent(currentDcf.pvTerminal / currentDcf.enterpriseValue, { decimals: 1 })
+      : null;
+    const pvExplicitVal = hasFade ? currentDcf.pvByStage.explicit : currentDcf?.pvExplicit;
+    const pvFadeVal = hasFade ? currentDcf.pvByStage.fade : null;
+    const componentRows = (hasFade ? [
+      [`PV of Explicit Forecast (${cardStages.firstPeriod}–${cardStages.explicitLastPeriod})`, pvExplicitVal, 'PV(FCFF explicit stage)'],
+      [`PV of Fade Glide (${cardStages.fadeFirstPeriod}–${cardStages.terminalYear})`, pvFadeVal, 'PV(FCFF fade stage)'],
+      ['PV of Terminal Value', currentDcf?.pvTerminal, `PV(Gordon Terminal Value)${tvPct ? ` — ${tvPct} of EV` : ''}`],
+      ['Enterprise Value', currentDcf?.enterpriseValue, `PV Explicit + PV Fade + PV Terminal<!-- engine pvExplicit combines stage 1 + stage 2: ${usd(currentDcf?.pvExplicit, { decimals: 2 })} -->`],
+      ['Net Cash at Valuation Date', currentDcf?.netCash, 'Rolled cash + investments − debt'],
+      ['Equity Value', currentDcf?.equityValue, 'Enterprise Value + Net Cash'],
+    ] : [
       ['PV of Explicit Forecast', currentDcf?.pvExplicit, 'PV(FCFF FY2026E–FY2030E)'],
-      ['PV of Terminal Value', currentDcf?.pvTerminal, 'PV(Gordon Terminal Value)'],
+      ['PV of Terminal Value', currentDcf?.pvTerminal, `PV(Gordon Terminal Value)${tvPct ? ` — ${tvPct} of EV` : ''}`],
       ['Enterprise Value', currentDcf?.enterpriseValue, 'PV Explicit + PV Terminal'],
       ['Net Cash Today', currentDcf?.netCash, 'Cash + investments − debt'],
       ['Equity Value', currentDcf?.equityValue, 'Enterprise Value + Net Cash'],
-    ].map(([label, value, derivation]) => `
+    ]).map(([label, value, derivation]) => `
       <tr><td>${label}</td><td class="align-right font-mono">${usd(value, { decimals: 2 })}</td><td><code>${derivation}</code></td></tr>
     `).join('');
+
+    const fadeFloorRaw = currentAssumptions?.get
+      ? currentAssumptions.get('paid_subscriber_fade_floor')?.value
+      : currentAssumptions?.paid_subscriber_fade_floor?.value;
+    const fadeFloorText = (typeof fadeFloorRaw === 'number' && Number.isFinite(fadeFloorRaw))
+      ? percent(fadeFloorRaw, { decimals: 2 })
+      : ' — ';
+
+    // P10.5 F1. The three DCF outputs are rendered as three separate figures and
+    // the `mayRecommend` flag decides which one is the headline, rather than the
+    // card implying that one number is the answer. Only the after-future-dilution
+    // output is recommendable, so only that one is marked as driving the verdict.
+    const dcfOutputs = dcfMethod?.dcfOutputs ?? null;
+    const outputRow = (o, label, note) => {
+      if (!o || !Number.isFinite(o.perShare)) return '';
+      const recommendable = o.mayRecommend === true;
+      return `
+        <tr${recommendable ? ' class="table-row-grand-total"' : ''}>
+          <td>${label}${recommendable ? ' <strong>(CANONICAL — drives the verdict)</strong>' : ''}</td>
+          <td class="align-right font-mono">${usd(o.perShare, { decimals: 2 })}</td>
+          <td>${Number.isFinite(o.shares) ? `${usd(o.shares, { decimals: 0 })} shares` : ' — '}${note ? `<!-- ${note} -->` : ''}</td>
+        </tr>`;
+    };
+    const threeOutputRows = dcfOutputs
+      ? [
+        outputRow(dcfOutputs.currentShareValue, 'Current-share value', 'not recommendable'),
+        outputRow(
+          {
+            // `currentDcf.perShare` IS the finite-roll intermediate. The method
+            // row also retains it as `finiteRollIntermediatePerShare`; reading the
+            // DCF directly keeps the card correct regardless of which copy of the
+            // method rows this surface was handed.
+            perShare: dcfMethod?.finiteRollIntermediatePerShare ?? currentDcf?.perShare,
+            mayRecommend: false,
+            shares: currentDcf?.sharesOutstanding,
+          },
+          'After explicit and fade dilution (intermediate)',
+          'not recommendable',
+        ),
+        outputRow(dcfOutputs.afterFutureDilution, 'After modeled future dilution', 'canonical'),
+        outputRow(dcfOutputs.sbcExpenseCrossCheck, 'SBC expense cross-check', 'not recommendable'),
+      ].join('')
+      : '';
 
     return `
       <div class="valuation-card dcf-primary-card">
         <div class="statement-card-header">
-          2-Stage FCFF DCF (Primary Method)
+          ${cardStages.stageTag} FCFF DCF (Primary Method)
           <span class="rec-badge rec-badge-${verdictClass}">${verdict.toUpperCase()}</span>
         </div>
         <div class="valuation-card-body dcf-primary-grid">
           <section class="dcf-primary-headline">
             <div class="dcf-primary-kicker">Implied Value Per Share</div>
             <div class="dcf-primary-price font-mono">${usd(perShare, { decimals: 2 })}</div>
+            ${dcfOutputs ? '<div class="dcf-primary-benchmark">After modeled future dilution — the only recommendable output</div>' : ''}
             <div class="dcf-primary-range font-mono">Range: ${usd(range?.min, { decimals: 2 })} – ${usd(range?.max, { decimals: 2 })}</div>
             <div class="dcf-primary-upside ${upside >= 0 ? 'positive' : 'negative'}">${percent(upside, { decimals: 2 })}</div>
             <div class="dcf-primary-benchmark">vs. benchmark ${usd(benchmark, { decimals: 2 })}</div>
@@ -1238,14 +1355,22 @@ export function renderValuation({
             <div class="dcf-primary-section-label">DCF Component</div>
             <table class="financial-summary-table">
               <thead><tr><th>Component</th><th class="align-right">Value ($ thousands)</th><th>Derivation</th></tr></thead>
-              <tbody>${componentRows}<tr class="table-row-grand-total"><td><strong>Implied Per Share</strong></td><td class="align-right font-mono font-bold">${usd(perShare, { decimals: 2 })}</td><td><code>Equity Value ÷ Diluted Shares</code></td></tr></tbody>
+              <tbody>${componentRows}<tr class="table-row-grand-total"><td><strong>Implied Per Share</strong></td><td class="align-right font-mono"><strong>${usd(perShare, { decimals: 2 })}</strong></td><td><!-- the recommendation figure --></td></tr>
+              </tbody>
             </table>
+            ${threeOutputRows ? `
+            <div class="dcf-primary-section-label">Per-Share Outputs (P10.5)</div>
+            <table class="financial-summary-table" data-inspector-lever="dcf-three-outputs">
+              <thead><tr><th>Output</th><th class="align-right">Per Share</th><th>Denominator</th></tr></thead>
+              <tbody>${threeOutputRows}</tbody>
+            </table>` : ''}
           </section>
           <section class="dcf-primary-hud">
             <div class="dcf-primary-section-label">Key Runtime Parameters</div>
             <dl class="dcf-runtime-list">
               <div><dt>WACC (Discount Rate)</dt><dd class="font-mono">${percent(currentDcf?.wacc ?? currentWacc?.wacc?.value, { decimals: 4 })}</dd></div>
               <div><dt>Terminal Growth (g)</dt><dd class="font-mono">${percent(currentDcf?.terminalGrowthRate, { decimals: 2 })}</dd></div>
+              <div data-inspector-lever="fade-floor"><dt>Fade Floor (Subscribers)</dt><dd class="font-mono">${fadeFloorText}</dd></div>
               <div><dt>FCFE Cross-Path Per Share</dt><dd class="font-mono">${usd(fcfePerShare, { decimals: 2 })}</dd></div>
               <div><dt>Diluted Shares Outstanding</dt><dd class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</dd></div>
             </dl>
@@ -1317,6 +1442,11 @@ export function renderValuation({
     const perShare = currentDcf?.perShare;
 
     const waterfallChart = createWaterfall({ dcf: currentDcf });
+    const bridgeStages = describeStageStructure(currentDcf || {});
+    const bridgeHasFade = bridgeStages.fadePresent;
+    const pvExplicitStage = bridgeHasFade ? currentDcf.pvByStage.explicit : pvExplicit;
+    const pvFadeStage = bridgeHasFade ? currentDcf.pvByStage.fade : null;
+    const tvPct = ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : ' - ';
 
     return `
       <div class="valuation-card bridge-card" id="chart-ev-bridge">
@@ -1341,10 +1471,32 @@ export function renderValuation({
                   </tr>
                 </thead>
                 <tbody>
+                  ${bridgeHasFade ? `
                   <tr>
-                    <td>(+) PV of 5-Year Explicit Forecast Cash Flows (FY2026 - FY2030)</td>
+                    <td>(+) PV of Explicit Forecast (${bridgeStages.firstPeriod}–${bridgeStages.explicitLastPeriod})</td>
+                    <td class="align-right font-mono">${usd(pvExplicitStage, { decimals: 2 })}</td>
+                    <td>${estSuffix('Stage 1: Discounted FCFFs', 'EST')}</td>
+                  </tr>
+                  <tr>
+                    <td>(+) PV of Fade Glide (${bridgeStages.fadeFirstPeriod}–${bridgeStages.terminalYear})</td>
+                    <td class="align-right font-mono">${usd(pvFadeStage, { decimals: 2 })}</td>
+                    <td>${estSuffix('Stage 2: Fade FCFFs', 'EST')}</td>
+                  </tr>
+                  <tr>
+                    <td>(+) PV of Gordon Terminal Value (g = ${percent(gRate, { decimals: 1 })}) <a href="#defense-lever-4" class="citation-sup defense-link" title="Jump to Lever 4: Terminal Growth Rate defense">[D4]</a></td>
+                    <td class="align-right font-mono">${usd(pvTerminal, { decimals: 2 })}</td>
+                    <td>${estSuffix(`Stage 3 TV: ${usd(terminalValue, { decimals: 2 })} (${tvPct} of EV)`, 'EST')}</td>
+                  </tr>
+                  <tr class="table-row-highlight">
+                    <td><strong>(=) Implied Enterprise Value (EV)</strong></td>
+                    <td class="align-right font-mono font-bold">${usd(ev, { decimals: 2 })}</td>
+                    <td><code>PV(Explicit) + PV(Fade) + PV(Terminal)</code> <span class="text-muted">PV TV = ${tvPct} of EV</span><!-- engine pvExplicit combines stage 1 + stage 2: ${usd(pvExplicit, { decimals: 2 })} --></td>
+                  </tr>
+                  ` : `
+                  <tr>
+                    <td>(+) PV of Explicit Forecast Cash Flows (${bridgeStages.firstPeriod} – ${bridgeStages.terminalYear})</td>
                     <td class="align-right font-mono">${usd(pvExplicit, { decimals: 2 })}</td>
-                    <td>${estSuffix('Sum of 5Y Discounted FCFFs', 'EST')}</td>
+                    <td>${estSuffix(`Sum of ${bridgeStages.explicitPeriods} discounted FCFFs`, 'EST')}</td>
                   </tr>
                   <tr>
                     <td>(+) PV of Gordon Terminal Value (g = ${percent(gRate, { decimals: 1 })}) <a href="#defense-lever-4" class="citation-sup defense-link" title="Jump to Lever 4: Terminal Growth Rate defense">[D4]</a></td>
@@ -1356,6 +1508,7 @@ export function renderValuation({
                     <td class="align-right font-mono font-bold">${usd(ev, { decimals: 2 })}</td>
                     <td><code>PV(Explicit) + PV(Terminal)</code> <span class="text-muted">PV TV = ${ev > 0 ? percent(pvTerminal / ev, { decimals: 1 }) : ' - '} of EV</span></td>
                   </tr>
+                  `}
                   <tr>
                     <td>(+) Cash and Cash Equivalents (Latest Filed Balance Q2 FY2026)</td>
                     <td class="align-right font-mono">${usd(cash, { decimals: 2 })}</td>
@@ -1434,9 +1587,23 @@ export function renderValuation({
     const legacy = currentDcf?.legacy;
     const waccRate = currentDcf?.wacc ?? 0;
 
-    const fcffPerShare = fcff?.perShare ?? currentDcf?.perShare;
+    // The FCFF headline shown here MUST be the same figure the rest of the product
+    // headlines. `dcf.fcff.perShare` is the PRE-seam (net-cash-today) lane and does
+    // NOT follow `datedSeam` — dcf.js picks `perShareDated : perShareFcff` for the
+    // top-level headline but leaves the nested fcff block on the undated value. On
+    // the production dated seam that is a ~$3.20/share gap, so a card badged
+    // "HEADLINE MODEL ANSWER" would quote a number the valuation tab, cover,
+    // summary and verdict all disagree with. The top-level perShare is the
+    // authoritative, lane-aware headline; this block is only a decomposition.
+    const fcffPerShare = currentDcf?.perShare ?? fcff?.perShare;
     const fcfePerShare = fcfe?.perShare ?? 0;
-    const netCashToday = fcff?.netCashToday ?? currentDcf?.netCash ?? 0;
+    // Same seam discipline for the bridge legs: `dcf.fcff.*` stays on the pre-seam
+    // (net-cash-today) lane, so reading EV / net cash / equity from it here would
+    // render a bridge that does NOT sum to the headline per-share shown above.
+    // The top-level, lane-aware fields are authoritative for every headline figure.
+    const netCashToday = currentDcf?.netCash ?? fcff?.netCashToday ?? 0;
+    const fcffEnterpriseValue = currentDcf?.enterpriseValue ?? fcff?.enterpriseValue ?? 0;
+    const fcffEquityValue = currentDcf?.equityValue ?? fcff?.equityValue ?? 0;
     const divergence = equiv?.divergence ?? (fcffPerShare - fcfePerShare);
     const legacyPerShare = legacy?.perShare ?? 0;
 
@@ -1456,9 +1623,9 @@ export function renderValuation({
               <div class="dual-path-price-value font-mono font-huge font-bold">${usd(fcffPerShare, { decimals: 2 })}</div>
               <div class="dual-path-price-sub">Implied Target Price / Share</div>
               <ul class="dual-path-metrics-list font-mono">
-                <li><span>Enterprise Value (PV Explicit + PV TV):</span> <strong>${usd(fcff?.enterpriseValue ?? currentDcf?.enterpriseValue, { decimals: 0 })}</strong></li>
+                <li><span>Enterprise Value (PV Explicit + PV TV):</span> <strong>${usd(fcffEnterpriseValue, { decimals: 0 })}</strong></li>
                 <li><span>(+) Net Cash Today (Latest Filed Q2 FY2026):</span> <strong>${usd(netCashToday, { decimals: 0 })}</strong></li>
-                <li><span>(=) Implied Equity Value:</span> <strong>${usd(fcff?.equityValue ?? currentDcf?.equityValue, { decimals: 0 })}</strong></li>
+                <li><span>(=) Implied Equity Value:</span> <strong>${usd(fcffEquityValue, { decimals: 0 })}</strong></li>
                 <li><span>Discount Rate:</span> <strong>WACC = ${percent(waccRate, { decimals: 2 })}</strong></li>
               </ul>
               <div class="dual-path-footnote font-muted">
@@ -1466,8 +1633,8 @@ export function renderValuation({
               </div>
             </div>
 
-            <div class="dual-path-card-col floor-col">
-              <div class="dual-path-badge badge-floor">DISCLOSED FLOOR</div>
+            <div class="dual-path-card-col diagnostic-col">
+              <div class="dual-path-badge badge-diagnostic">FCFE DIAGNOSTIC</div>
               <div class="dual-path-path-title">Equity Basis: Free Cash Flow to Equity (FCFE)</div>
               <div class="dual-path-price-value font-mono font-huge font-bold">${usd(fcfePerShare, { decimals: 2 })}</div>
               <div class="dual-path-price-sub">Implied Target Price / Share</div>
@@ -1491,6 +1658,304 @@ export function renderValuation({
               Path Divergence (FCFF − FCFE): <strong>${divergence >= 0 ? '+' : ''}${usd(divergence, { decimals: 2 })} / share</strong>
               <span class="legacy-audit-tag font-muted">(Remediated legacy mixed-basis was ${usd(legacyPerShare, { decimals: 2 })}; double count retired)</span>
             </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFadeWalkthrough() {
+    const fadePeriods = stages?.fade || ['FY2031', 'FY2032', 'FY2033', 'FY2034', 'FY2035'];
+    const terminalYear = currentDcf?.schedule?.[currentDcf.schedule.length - 1]?.period ?? 'FY2035';
+
+    const getDriverVal = (name) => {
+      if (!currentAssumptions) return null;
+      const d = typeof currentAssumptions.get === 'function'
+        ? currentAssumptions.get(name)
+        : currentAssumptions[name];
+      return typeof d?.value === 'number' ? d.value : null;
+    };
+
+    // 1. Growth Path & Ordering
+    const subsGrowthBase = getDriverVal('paid_subscriber_growth');
+    const fadeFloor = getDriverVal('paid_subscriber_fade_floor');
+    const gRate = typeof currentDcf?.terminalGrowthRate === 'number'
+      ? currentDcf.terminalGrowthRate
+      : getDriverVal('terminal_growth_rate');
+
+    const subsGrowthText = typeof subsGrowthBase === 'number' ? percent(subsGrowthBase, { decimals: 2 }) : ' — ';
+    const fadeFloorText = typeof fadeFloor === 'number' ? percent(fadeFloor, { decimals: 2 }) : ' — ';
+    const gRateText = typeof gRate === 'number' ? percent(gRate, { decimals: 2 }) : ' — ';
+
+    const isOrdered = typeof subsGrowthBase === 'number' &&
+      typeof fadeFloor === 'number' &&
+      typeof gRate === 'number' &&
+      subsGrowthBase > fadeFloor &&
+      fadeFloor > gRate;
+
+    const growthRowsHtml = fadePeriods.map((p) => {
+      const subRecord = currentForecast?.subscribers?.[p];
+      const growthObj = subRecord?.derivedFrom?.find((x) => typeof x.growthRate === 'number');
+      const subGrowth = growthObj ? growthObj.growthRate : null;
+      const subGrowthText = typeof subGrowth === 'number' ? percent(subGrowth, { decimals: 2 }) : ' — ';
+      const subCount = typeof subRecord?.end === 'number' ? (subRecord.end / 1e6).toFixed(2) + 'M' : ' — ';
+      return `
+        <tr>
+          <td><strong>${p}</strong></td>
+          <td class="align-right font-mono">${subGrowthText}</td>
+          <td class="align-right font-mono">${subCount}</td>
+          <td>${estSuffix('Stage 2: Fade Glide', 'EST')}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // 2. SBC Glide
+    const sbcStart = getDriverVal('sbc_target_pct_of_revenue');
+    const sbcEnd = getDriverVal('sbc_fade_end_pct_of_revenue');
+    const sbcStartText = typeof sbcStart === 'number' ? percent(sbcStart, { decimals: 2 }) : ' — ';
+    const sbcEndText = typeof sbcEnd === 'number' ? percent(sbcEnd, { decimals: 2 }) : ' — ';
+
+    const sbcRowsHtml = fadePeriods.map((p) => {
+      const revVal = currentThreeStatement?.incomeStatement?.byPeriod?.[p]?.revenue?.total?.value;
+      const sbcVal = currentThreeStatement?.cashFlow?.byPeriod?.[p]?.operating_activities?.stock_based_compensation?.value;
+      const sbcPct = (typeof sbcVal === 'number' && typeof revVal === 'number' && revVal > 0) ? (sbcVal / revVal) : null;
+      return `
+        <tr>
+          <td><strong>${p}</strong></td>
+          <td class="align-right font-mono">${typeof revVal === 'number' ? usd(revVal, { decimals: 0 }) : ' — '}</td>
+          <td class="align-right font-mono">${typeof sbcVal === 'number' ? usd(sbcVal, { decimals: 0 }) : ' — '}</td>
+          <td class="align-right font-mono font-bold">${typeof sbcPct === 'number' ? percent(sbcPct, { decimals: 2 }) : ' — '}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // 3. Terminal Re-Anchor & TV% Drop
+    const waccRate = typeof currentDcf?.wacc === 'number'
+      ? currentDcf.wacc
+      : (typeof currentWacc?.wacc?.value === 'number' ? currentWacc.wacc.value : null);
+    const normFcff = currentDcf?.terminalNormalisedFcff ?? currentDcf?.legs?.fcffTerminalNormalised;
+    const termVal = currentDcf?.terminalValue;
+    const pvTermVal = currentDcf?.pvTerminal;
+
+    const tvPct10 = (typeof currentDcf?.enterpriseValue === 'number' && currentDcf.enterpriseValue > 0 && typeof currentDcf?.pvTerminal === 'number')
+      ? (currentDcf.pvTerminal / currentDcf.enterpriseValue)
+      : null;
+    const tvPct5 = (typeof currentDcf5?.enterpriseValue === 'number' && currentDcf5.enterpriseValue > 0 && typeof currentDcf5?.pvTerminal === 'number')
+      ? (currentDcf5.pvTerminal / currentDcf5.enterpriseValue)
+      : null;
+
+    const tvPct10Text = typeof tvPct10 === 'number' ? percent(tvPct10, { decimals: 2 }) : ' — ';
+    const tvPct5Text = typeof tvPct5 === 'number' ? percent(tvPct5, { decimals: 2 }) : ' — ';
+    const tvPctDrop = (typeof tvPct5 === 'number' && typeof tvPct10 === 'number') ? (tvPct5 - tvPct10) : null;
+    const tvPctDropText = typeof tvPctDrop === 'number' ? percent(tvPctDrop, { decimals: 2 }) : ' — ';
+
+    // 4. Dilution vs EV Mechanics & Label Stability
+    const ev5 = currentDcf5?.enterpriseValue;
+    const ev10 = currentDcf?.enterpriseValue;
+    const evChange = (typeof ev5 === 'number' && typeof ev10 === 'number' && ev5 > 0)
+      ? ((ev10 - ev5) / ev5)
+      : null;
+    const evChangeText = typeof evChange === 'number' ? percent(evChange, { decimals: 2, showSign: true }) : ' — ';
+
+    const sh5 = currentDcf5?.sharesOutstanding;
+    const sh10 = currentDcf?.sharesOutstanding;
+    const shChange = (typeof sh5 === 'number' && typeof sh10 === 'number' && sh5 > 0)
+      ? ((sh10 - sh5) / sh5)
+      : null;
+    const shChangeText = typeof shChange === 'number' ? percent(shChange, { decimals: 2, showSign: true }) : ' — ';
+
+    const sh5Formatted = typeof sh5 === 'number' ? (sh5 / 1e6).toFixed(2) + 'M' : ' — ';
+    const sh10Formatted = typeof sh10 === 'number' ? (sh10 / 1e6).toFixed(2) + 'M' : ' — ';
+    const perShareText = typeof currentDcf?.perShare === 'number' ? usd(currentDcf.perShare, { decimals: 2 }) : ' — ';
+
+    // Horizon and stage labels are derived from engine disclosure, never
+    // hardcoded. When the legacy lane is not built, the row states the reason
+    // instead of rendering a bare dash that reads as a missing value.
+    const activeHorizon = typeof currentDcf?.horizon === 'number' ? currentDcf.horizon : null;
+    const stageDisclosure = describeStageStructure(currentDcf || {});
+    const activeStageLabel = stageDisclosure.stageTag;
+    const legacyRowLabel = (currentDcf5Disclosure && typeof currentDcf5Disclosure.label === 'string')
+      ? currentDcf5Disclosure.label
+      : 'Legacy Horizon Model';
+    const legacyUnavailableReason = (currentDcf5Disclosure && currentDcf5Disclosure.available === false)
+      ? (currentDcf5Disclosure.reason || 'Legacy comparison lane not available.')
+      : null;
+    const legacyCell = (value, formatter) => (typeof value === 'number' ? formatter(value) : (legacyUnavailableReason || ' — '));
+    const activeRowLabel = `${activeHorizon === null ? 'Production' : `${activeHorizon}-Period`} ${activeStageLabel} Model (Active)`;
+
+    const isStable = currentLabelStability?.labelStable ?? null;
+    const headlineLabel = currentLabelStability?.headlineLabel || ' — ';
+    const treatments = Array.isArray(currentLabelStability?.treatments) ? currentLabelStability.treatments : [];
+
+    const treatmentsHtml = treatments.map((t) => `
+      <tr>
+        <td><strong>${t.name}</strong></td>
+        <td class="align-right font-mono">${typeof t.perShare === 'number' ? usd(t.perShare, { decimals: 2 }) : ' — '}</td>
+        <td><span class="rec-badge rec-badge-${t.label === 'overvalued' ? 'overvalued' : t.label === 'undervalued' ? 'undervalued' : 'fair'}">${String(t.label || '').toUpperCase()}</span></td>
+      </tr>
+    `).join('');
+
+    return `
+      <div class="valuation-card fade-walkthrough-card" id="fade-walkthrough-panel">
+        <div class="statement-card-header">
+          Three-Stage DCF Fade Walkthrough &amp; Convergence Architecture
+        </div>
+        <div class="valuation-card-body">
+          <p class="valuation-section-desc">
+            Rigorous 3-stage valuation decomposition bridging explicit forecast performance through the fade glide stage to the capitalized Gordon terminal perpetuity. Every metric and transition coordinate is derived dynamically at render time from live model outputs.
+          </p>
+          <div class="defense-rows-container">
+            <details class="defense-row" id="fade-row-growth">
+              <summary class="defense-summary">
+                <div class="defense-summary-left">
+                  <span class="defense-marker">▶</span>
+                  <span class="defense-summary-title">Fade Growth Path &amp; Ordering Gate (${fadeFloorText} Floor)</span>
+                </div>
+                <div class="defense-summary-right">
+                  <span class="defense-value-badge">${subsGrowthText} &gt; ${fadeFloorText} &gt; ${gRateText}</span>
+                </div>
+              </summary>
+              <div class="defense-content audit-defense-prose">
+                <div class="defense-block">
+                  <div class="defense-section-label">Annual Fade Growth Trajectory</div>
+                  <table class="defense-table font-mono">
+                    <thead>
+                      <tr><th>Period</th><th class="align-right">Paid Subscriber Growth</th><th class="align-right">Ending Subscribers</th><th>Stage Provenance</th></tr>
+                    </thead>
+                    <tbody>
+                      ${growthRowsHtml}
+                    </tbody>
+                  </table>
+                </div>
+                <div class="defense-block">
+                  <div class="defense-section-label">Ordering Gate &amp; Driver Monotonicity</div>
+                  <div class="defense-runtime-bar fade-stat-grid">
+                    <strong>Ordering Gate:</strong> <span class="font-mono">${subsGrowthText} &gt; ${fadeFloorText} &gt; ${gRateText}</span>
+                    ${isOrdered ? estSuffix('Ordering Validated', 'ACT') : estSuffix('Gate Check', 'EST')}
+                    <span class="text-muted">(${isOrdered ? 'Monotonicity strictly satisfied: explicit growth > fade floor > perpetuity growth' : 'Ordering condition pending or unverified'})</span>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details class="defense-row" id="fade-row-sbc">
+              <summary class="defense-summary">
+                <div class="defense-summary-left">
+                  <span class="defense-marker">▶</span>
+                  <span class="defense-summary-title">Stock-Based Compensation Glide &amp; Steady-State Endpoint</span>
+                </div>
+                <div class="defense-summary-right">
+                  <span class="defense-value-badge">${sbcStartText} → ${sbcEndText}</span>
+                </div>
+              </summary>
+              <div class="defense-content audit-defense-prose">
+                <div class="defense-block">
+                  <div class="defense-section-label">SBC Convergence Trajectory</div>
+                  <p>
+                    Stock-based compensation begins at the explicit operating target of <strong>${sbcStartText}</strong> of revenue and fades linearly across the glide stage to reach the steady-state endpoint of <strong>${sbcEndText}</strong> by terminal year <strong>${terminalYear}</strong>.
+                  </p>
+                  <table class="defense-table font-mono">
+                    <thead>
+                      <tr><th>Period</th><th class="align-right">Revenue ($ in thousands)</th><th class="align-right">SBC Expense ($ in thousands)</th><th class="align-right">SBC % of Revenue</th></tr>
+                    </thead>
+                    <tbody>
+                      ${sbcRowsHtml}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+
+            <details class="defense-row" id="fade-row-terminal">
+              <summary class="defense-summary">
+                <div class="defense-summary-left">
+                  <span class="defense-marker">▶</span>
+                  <span class="defense-summary-title">Terminal Value Re-Anchor &amp; TV Share of EV</span>
+                </div>
+                <div class="defense-summary-right">
+                  <span class="defense-value-badge">${tvPct5Text} → ${tvPct10Text} EV</span>
+                </div>
+              </summary>
+              <div class="defense-content audit-defense-prose">
+                <div class="defense-block">
+                  <div class="defense-section-label">Terminal Capitalization Parameters</div>
+                  <div class="defense-runtime-bar fade-stat-grid">
+                    <strong>Terminal Year:</strong> <span class="font-mono">${terminalYear}</span>
+                    <strong>Perpetuity Growth (g):</strong> <span class="font-mono">${gRateText}</span>
+                    <strong>WACC:</strong> <span class="font-mono">${typeof waccRate === 'number' ? percent(waccRate, { decimals: 4 }) : ' — '}</span>
+                  </div>
+                  <table class="defense-table font-mono">
+                    <thead>
+                      <tr><th>Metric</th><th class="align-right">Value ($ in thousands)</th><th>Derivation</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Normalised Terminal FCFF</td><td class="align-right">${typeof normFcff === 'number' ? usd(normFcff, { decimals: 2 }) : ' — '}</td><td><code>FCFF*<sub>${terminalYear}</sub></code> (steady-state WC replacement)</td></tr>
+                      <tr><td>Gordon Terminal Value (Undiscounted)</td><td class="align-right">${typeof termVal === 'number' ? usd(termVal, { decimals: 2 }) : ' — '}</td><td><code>[FCF* &times; (1 + g)] / (WACC − g)</code></td></tr>
+                      <tr><td>PV of Terminal Value</td><td class="align-right">${typeof pvTermVal === 'number' ? usd(pvTermVal, { decimals: 2 }) : ' — '}</td><td><code>TV &times; df<sub>${terminalYear}</sub></code></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="defense-block">
+                  <div class="defense-section-label">Structural TV% Drop Analysis</div>
+                  <table class="defense-table font-mono">
+                    <thead>
+                      <tr><th>Model Horizon</th><th class="align-right">Enterprise Value</th><th class="align-right">PV of Terminal Value</th><th class="align-right">TV % of EV</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>${legacyRowLabel}</td><td class="align-right">${legacyCell(ev5, (v) => usd(v, { decimals: 2 }))}</td><td class="align-right">${legacyCell(currentDcf5?.pvTerminal, (v) => usd(v, { decimals: 2 }))}</td><td class="align-right font-bold">${legacyUnavailableReason ? ' — ' : tvPct5Text}</td></tr>
+                      <tr class="table-row-highlight"><td>${activeRowLabel}</td><td class="align-right font-bold">${typeof ev10 === 'number' ? usd(ev10, { decimals: 2 }) : ' — '}</td><td class="align-right font-bold">${typeof pvTermVal === 'number' ? usd(pvTermVal, { decimals: 2 }) : ' — '}</td><td class="align-right font-bold">${tvPct10Text}</td></tr>
+                    </tbody>
+                  </table>
+                  <p class="text-muted font-italic">
+                    Extending explicit visibility through the 5-year fade stage reduces reliance on terminal perpetuity from <strong>${tvPct5Text}</strong> to <strong>${tvPct10Text}</strong> (a <strong>${tvPctDropText}</strong> reduction).
+                  </p>
+                </div>
+              </div>
+            </details>
+
+            <details class="defense-row" id="fade-row-dilution">
+              <summary class="defense-summary">
+                <div class="defense-summary-left">
+                  <span class="defense-marker">▶</span>
+                  <span class="defense-summary-title">Dilution vs Enterprise Value Mechanics &amp; Label Stability</span>
+                </div>
+                <div class="defense-summary-right">
+                  <span class="defense-value-badge">${isStable ? 'Unanimous Stable' : 'Sensitivity Monitored'} (${perShareText})</span>
+                </div>
+              </summary>
+              <div class="defense-content audit-defense-prose">
+                <div class="defense-block">
+                  <div class="defense-section-label">Dilution vs Enterprise Value Resolution</div>
+                  <table class="defense-table font-mono">
+                    <thead>
+                      <tr><th>Component</th><th class="align-right">5-Period Basis</th><th class="align-right">10-Period Basis</th><th class="align-right">Net Change</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Enterprise Value</td><td class="align-right">${typeof ev5 === 'number' ? usd(ev5, { decimals: 2 }) : ' — '}</td><td class="align-right">${typeof ev10 === 'number' ? usd(ev10, { decimals: 2 }) : ' — '}</td><td class="align-right font-bold">${evChangeText}</td></tr>
+                      <tr><td>Diluted Share Count</td><td class="align-right">${sh5Formatted}</td><td class="align-right">${sh10Formatted}</td><td class="align-right font-bold">${shChangeText}</td></tr>
+                      <tr class="table-row-highlight"><td>Implied Value Per Share</td><td class="align-right">${typeof currentDcf5?.perShare === 'number' ? usd(currentDcf5.perShare, { decimals: 2 }) : ' — '}</td><td class="align-right font-bold">${perShareText}</td><td class="align-right font-bold">${(typeof currentDcf5?.perShare === 'number' && typeof currentDcf?.perShare === 'number') ? percent((currentDcf.perShare - currentDcf5.perShare) / currentDcf5.perShare, { decimals: 2, showSign: true }) : ' — '}</td></tr>
+                    </tbody>
+                  </table>
+                  <p class="text-muted font-italic">
+                    Dilution expansion (${shChangeText}) outpaces enterprise value growth (${evChangeText}), resolving the live headline valuation to <strong>${perShareText}</strong>.
+                  </p>
+                </div>
+                <div class="defense-block">
+                  <div class="defense-section-label">Label Stability Across SBC Treatments</div>
+                  <table class="defense-table font-mono">
+                    <thead>
+                      <tr><th>SBC Treatment Path</th><th class="align-right">Implied Per Share</th><th>Verdict</th></tr>
+                    </thead>
+                    <tbody>
+                      ${treatmentsHtml}
+                    </tbody>
+                  </table>
+                  <p class="text-muted font-italic">
+                    Recommendation label stability: <strong>${isStable ? 'Unanimously ' + (headlineLabel !== ' — ' ? headlineLabel.toUpperCase() : 'STABLE') : (isStable === false ? 'Non-unanimous' : ' — ')}</strong> across all ${treatments.length} treatments.
+                  </p>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -1581,7 +2046,7 @@ export function renderValuation({
               <span class="method-badge">${methodFamily[key] || 'Method'}</span>
             </div>
             <div class="method-per-share font-mono font-bold font-large">${usd(m.impliedPerShare, { decimals: 2 })}</div>
-            <div class="method-range text-muted font-mono">${m.rangePerShare ? `Range: ${usd(m.rangePerShare.min, { decimals: 2 })}; ${usd(m.rangePerShare.max, { decimals: 2 })}` : (m.baseCount ? `${m.baseCount} Native Bases` : (m.segmentCount ? `${m.segmentCount} Segments` : ' - '))}</div>
+            <div class="method-range text-muted font-mono">${m.rangePerShare ? `Range: ${usd(m.rangePerShare.min, { decimals: 2 })} – ${usd(m.rangePerShare.max, { decimals: 2 })}` : (m.baseCount ? `${m.baseCount} Native Bases` : (m.segmentCount ? `${m.segmentCount} Segments` : ' - '))}</div>
             ${v ? `<span class="rec-badge rec-badge-${vClass}">${v.toUpperCase()}</span>` : ''}
           </button>
         `;
@@ -1592,11 +2057,11 @@ export function renderValuation({
     return `
       <div class="valuation-card multi-method-card" id="multi-method-valuation-panel">
         <div class="statement-card-header">
-          Multi-Method Valuation Synthesis (6 Valuation Methods)
+          Multi-Method Valuation Synthesis (3 Evidence Clusters · 5 Voting Rows)
         </div>
         <div class="valuation-card-body valuation-strip">
           <p class="valuation-section-desc">
-            Six institutional valuation methodologies evaluated under an unweighted agreement-only verdict engine (&plusmn;15% threshold vs live market price). Select any method below for its full derivation: inputs, multiples, peer dispersion, and per-share bridge.
+            Three evidence clusters (5 voting methods) evaluated under an unweighted agreement-only verdict engine (&plusmn;15% threshold vs live market price). SOTP decomposition-only, FCFE diagnostic-only. Select any method below for its full derivation: inputs, multiples, peer dispersion, and per-share bridge.
           </p>
           <div class="multi-method-grid">
             ${summaryCards}
@@ -1680,23 +2145,49 @@ export function renderValuation({
     if (m.method === 'fcff_dcf') {
       const fcff = m.fcff || {};
       const fcfe = m.fcfe || {};
+      // The method carries its own stage disclosure; fall back to describing the
+      // live DCF output. The label is never sniffed out of a string and an
+      // undisclosed fade stage is never reported as zero.
+      const methodStages = m.stageDisclosure && typeof m.stageDisclosure === 'object'
+        ? m.stageDisclosure
+        : describeStageStructure(currentDcf || {});
+      const hasFade = methodStages.fadePresent;
+      const fadeUndisclosed = methodStages.stageStructure === 'three_stage_unquantified';
+      const pvExplicitVal = hasFade
+        ? (currentDcf?.pvByStage?.explicit ?? fcff.pvByStage?.explicit)
+        : (currentDcf?.pvExplicit ?? fcff.pvExplicit);
+      const pvFadeVal = hasFade ? (currentDcf?.pvByStage?.fade ?? fcff.pvByStage?.fade) : null;
+      const terminalYear = currentDcf?.schedule?.[currentDcf.schedule.length - 1]?.period ?? methodStages.terminalYear;
+      const terminalT = currentDcf?.schedule?.length ?? methodStages.explicitPeriods;
+      const stageTag = methodStages.stageTag;
+
       bodyHtml = `
       <div class="method-detail-block">
-        <div class="method-detail-block-label">Methodology; 2-Stage FCFF DCF</div>
+        <div class="method-detail-block-label">Methodology; ${stageTag} FCFF DCF</div>
         <p class="method-detail-note">
-          Stage 1 discounts five years of explicit unlevered free cash flow (FY2026 - FY2030) from the linked three-statement forecast. Stage 2 normalises the terminal-year flow to steady state — the final-year working-capital inflow is replaced by its perpetuity-rate equivalent — then capitalizes into perpetuity with the Gordon formula <code>TV = FCF*<sub>FY2030</sub>; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding today's net cash, then divided by diluted shares.
+          ${hasFade
+            ? `Stage 1 discounts the explicit unlevered free cash flow (${methodStages.firstPeriod}–${methodStages.explicitLastPeriod}) from the linked three-statement forecast. Stage 2 models the fade glide (${methodStages.fadeFirstPeriod}–${methodStages.terminalYear}) where subscriber growth and operating margins converge toward steady-state levels. Stage 3 normalises the terminal-year flow to steady state — the final-year working-capital inflow is replaced by its perpetuity-rate equivalent — then capitalizes into perpetuity with the Gordon formula <code>TV = FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding the net cash at the effective valuation date, then divided by diluted shares.`
+            : `Stage 1 discounts the explicit unlevered free cash flow (${methodStages.firstPeriod}–${methodStages.terminalYear}) from the linked three-statement forecast. Stage 2 normalises the terminal-year flow to steady state — the final-year working-capital inflow is replaced by its perpetuity-rate equivalent — then capitalizes into perpetuity with the Gordon formula <code>TV = FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding the net cash at the effective valuation date, then divided by diluted shares. No fade stage exists at this horizon.`
+          }
+          ${fadeUndisclosed ? `<br /><strong>Disclosure:</strong> ${methodStages.disclosure}` : ''}
         </p>
         <table class="defense-table font-mono">
           <thead>
             <tr><th>DCF Component</th><th class="align-right">Value ($ in thousands)</th><th>Derivation</th></tr>
           </thead>
           <tbody>
-            <tr><td>PV of Explicit Forecast (5 Years)</td><td class="align-right">${usd(fcff.pvExplicit ?? currentDcf?.pvExplicit, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code>, t = 1..5</td></tr>
-            <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(fcff.pvTerminal ?? currentDcf?.pvTerminal, { decimals: 2 })}</td><td><code>[FCF*<sub>FY2030</sub>; (1 + g) / (WACC − g)] / (1 + WACC)<sup>5</sup>, steady-state normalised</code></td></tr>
-            <tr class="table-row-highlight"><td><strong>Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>PV Explicit + PV Terminal</code></td></tr>
-            <tr><td>(+) Net Cash Today</td><td class="align-right">${usd(fcff.netCashToday ?? currentDcf?.netCash, { decimals: 2 })}</td><td>Cash + STI + LTI − Funded Debt (D = $0)</td></tr>
+            ${hasFade ? `
+            <tr><td>PV of Explicit Forecast (${methodStages.firstPeriod}–${methodStages.explicitLastPeriod})</td><td class="align-right">${usd(pvExplicitVal, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code></td></tr>
+            <tr><td>PV of Fade Glide (${methodStages.fadeFirstPeriod}–${methodStages.terminalYear})</td><td class="align-right">${usd(pvFadeVal, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code></td></tr>
+            <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(currentDcf?.pvTerminal ?? fcff.pvTerminal, { decimals: 2 })}</td><td><code>[FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)] / (1 + WACC)<sup>${terminalT}</sup>, steady-state normalised</code></td></tr>
+            ` : `
+            <tr><td>PV of Explicit Forecast (${methodStages.firstPeriod}–${methodStages.terminalYear}, ${methodStages.explicitPeriods} period(s))</td><td class="align-right">${usd(currentDcf?.pvExplicit ?? fcff.pvExplicit, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code></td></tr>
+            <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(currentDcf?.pvTerminal ?? fcff.pvTerminal, { decimals: 2 })}</td><td><code>[FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)] / (1 + WACC)<sup>${terminalT}</sup>, steady-state normalised</code></td></tr>
+            `}
+            <tr class="table-row-highlight"><td><strong>Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>${hasFade ? 'PV Explicit + PV Fade + PV Terminal' : 'PV Explicit + PV Terminal'}</code></td></tr>
+            <tr><td>(+) Net Cash ${currentDcf?.valuationBasis === 'dated_seam' ? 'at Valuation Date' : 'Today'}</td><td class="align-right">${usd(currentDcf?.netCash ?? fcff.netCashToday, { decimals: 2 })}</td><td>Cash + STI + LTI − Funded Debt (D = $0)</td></tr>
             <tr class="table-row-highlight"><td><strong>Equity Value</strong></td><td class="align-right font-bold">${usd(m.impliedEquityValue, { decimals: 2 })}</td><td><code>EV + Net Cash</code></td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Equity Value; 1000 / Diluted Shares</code></td></tr>
+            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Equity Value &times; 1000 / Diluted Shares</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -1856,7 +2347,7 @@ export function renderValuation({
       <div class="method-detail-block">
         <div class="method-detail-block-label">Methodology; Per-User / Per-Subscriber (Native KPI Bases, Unblended)</div>
         <p class="method-detail-note">
-          Each peer is scaled on its own natively-reported user KPI: Spotify on MAU, Roblox on DAU, Netflix on paid memberships. Each peer's capitalized enterprise value per user is applied to Duolingo's matching KPI from the cited corpus, producing three independent implied per-share values. The method's single vote is the median of the three; the bases are never blended or averaged. ARPU context is disclosed per basis so monetization differences stay visible.
+          Each peer is scaled on its own natively-reported user KPI: Spotify on MAU, Roblox on DAU, Netflix on paid memberships. Each peer's capitalized enterprise value per user is applied to Duolingo's matching KPI from the cited corpus, producing three constituent implied per-share values. The method's single vote is the median of the three; the bases are never blended or averaged. ARPU context is disclosed per basis so monetization differences stay visible.
         </p>
         <table class="defense-table font-mono">
           <thead>
@@ -1869,7 +2360,7 @@ export function renderValuation({
               <td></td>
               <td class="text-muted">${m.medianBasis || ''}</td>
               <td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td>
-              <td>Span ${usd(m.rangePerShare?.min, { decimals: 2 })}; ${usd(m.rangePerShare?.max, { decimals: 2 })}</td>
+              <td>Span ${usd(m.rangePerShare?.min, { decimals: 2 })} – ${usd(m.rangePerShare?.max, { decimals: 2 })}</td>
             </tr>
           </tbody>
         </table>
@@ -1889,11 +2380,17 @@ export function renderValuation({
     const leaseDisclosureHtml = renderLeaseConventionDisclosure();
     const defenseHtml = renderThesisDefensePanel();
     const waccHtml = renderWaccBuildTable();
+    const fadeWalkthroughHtml = renderFadeWalkthrough();
     const betaDerivationHtml = renderBetaDerivation();
+    const scheduleWacc = percent(currentDcf?.wacc ?? currentWacc?.wacc?.value, { decimals: 2 });
+    const betaDriverVal = currentAssumptions?.get
+      ? (currentAssumptions.get('beta')?.value ?? (currentAssumptions.getValue ? currentAssumptions.getValue('beta') : null))
+      : (currentAssumptions?.beta?.value ?? currentWacc?.beta?.value);
+    const scheduleBeta = Number.isFinite(Number(betaDriverVal)) ? Number(betaDriverVal).toFixed(2) : ' — ';
     const dcfScheduleHtml = `
       <div class="valuation-card dcf-card">
         <div class="statement-card-header">
-          5-Year Explicit Forecast Free Cash Flow Schedule &amp; Present Value (FCFF Basis, $ in thousands)
+          Explicit Forecast (FY2026–FY2030) — CAPM &amp; DCF at Base WACC ${scheduleWacc} (β ${scheduleBeta}) — FCFF Basis
         </div>
         <div class="tabulator-grid-container financial-table" data-statement="dcfSchedule"></div>
       </div>
@@ -1916,6 +2413,7 @@ export function renderValuation({
         ${leaseDisclosureHtml}
         ${defenseHtml}
         ${waccHtml}
+        ${fadeWalkthroughHtml}
         ${betaDerivationHtml}
         ${dcfScheduleHtml}
         ${bridgeHtml}
@@ -1999,7 +2497,7 @@ export function renderValuation({
   render();
 
   return {
-    update(newWacc, newDcf, newAssumptions = null, newPrices = null, newMarketPrice = undefined, newMethods = null, newVerdict = null) {
+    update(newWacc, newDcf, newAssumptions = null, newPrices = null, newMarketPrice = undefined, newMethods = null, newVerdict = null, options = {}) {
       currentWacc = newWacc;
       currentDcf = newDcf;
       currentAssumptions = newAssumptions || currentAssumptions;
@@ -2007,6 +2505,13 @@ export function renderValuation({
       if (newMarketPrice !== undefined) currentMarketPrice = newMarketPrice;
       if (newMethods !== null) currentMethods = newMethods;
       if (newVerdict !== null) currentVerdict = newVerdict;
+      if (options && typeof options === 'object') {
+        if (options.forecast !== undefined) currentForecast = options.forecast;
+        if (options.dcf5 !== undefined) currentDcf5 = options.dcf5;
+        if (options.dcf5Disclosure !== undefined) currentDcf5Disclosure = options.dcf5Disclosure;
+        if (options.labelStability !== undefined) currentLabelStability = options.labelStability;
+        if (options.threeStatement !== undefined) currentThreeStatement = options.threeStatement;
+      }
       render();
     },
     dispose() {
@@ -2031,6 +2536,11 @@ export function renderValuation({
       currentPrices = null;
       currentMethods = null;
       currentVerdict = null;
+      currentForecast = null;
+      currentDcf5 = null;
+      currentDcf5Disclosure = null;
+      currentLabelStability = null;
+      currentThreeStatement = null;
       if (container && typeof container.innerHTML === 'string') {
         container.innerHTML = '';
       }

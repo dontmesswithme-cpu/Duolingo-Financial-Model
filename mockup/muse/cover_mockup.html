@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DUOL — Cover Mockup · Bloomberg Terminal</title>
+<style>
+  :root { --bg:#000; --panel:#0A0A0A; --line:#2A2A2A; --amber:#FFA500; --green:#00E676; --red:#FF5252; --cyan:#40C4FF; --txt:#E8E8E8; --dim:#8A8A8A; --mono: "Consolas","SFMono-Regular",Menlo,monospace; }
+  * { box-sizing:border-box; border-radius:0 !important; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family:var(--mono); font-size:12.5px; line-height:1.45; }
+  .bar { background:#1A1A1A; border-bottom:1px solid var(--line); padding:8px 14px; display:flex; justify-content:space-between; font-size:12px; }
+  .bar b { color:var(--amber); }
+  .wrap { max-width:1240px; margin:0 auto; padding:14px; display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .row { background:var(--panel); padding:12px 14px; }
+  .cols3 { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:1px; background:var(--line); padding:0; }
+  .cols3 > div { background:var(--panel); padding:12px 14px; }
+  .cols2 { display:grid; grid-template-columns:1.5fr 1fr; gap:1px; background:var(--line); padding:0; }
+  .cols2 > div { background:var(--panel); padding:12px 14px; }
+  @media(max-width:1000px){.cols3,.cols2{grid-template-columns:1fr}}
+  h2 { font-size:12px; letter-spacing:.12em; color:var(--amber); margin:0 0 8px; font-weight:700; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .big { font-size:26px; font-weight:700; }
+  .g { color:var(--green); } .r { color:var(--red); } .a { color:var(--amber); } .dim { color:var(--dim); }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th { text-align:left; color:var(--dim); font-weight:700; font-size:10.5px; letter-spacing:.08em; border-bottom:1px solid var(--line); padding:5px 6px; }
+  td { border-bottom:1px dotted #222; padding:5px 6px; }
+  td.n, th.n { text-align:right; }
+  ul { margin:6px 0 0 16px; padding:0; }
+  li { margin-bottom:5px; }
+  .flag { display:inline-block; border:1px solid var(--amber); color:var(--amber); padding:1px 8px; font-size:11px; letter-spacing:.08em; }
+  footer { max-width:1240px; margin:8px auto 20px; padding:0 4px; color:var(--dim); font-size:11px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  img.owl { width:26px; height:26px; background:#fff; padding:2px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div class="bar"><span><img class="owl" src="assets/branding/duolingo-owl.svg" alt="" /> <b>DUOL US EQUITY</b> &nbsp; Duolingo FM — COVER <span class="flag">MOCKUP · DUMMY ###</span></span><span class="dim">VAL ###, 2026 · vX.X-dummy · &lt;16ms</span></div>
+
+<div class="wrap">
+  <div class="row">DUOL NASDAQ ###.## MKT &nbsp;|&nbsp; FAIR ###.## EST &nbsp;|&nbsp; <span class="g">UNDERVALUED +##.#%</span> &nbsp;|&nbsp; WACC ##.##% &nbsp;|&nbsp; g #.##% &nbsp;|&nbsp; FY26-30</div>
+
+  <div class="cols3">
+    <div>
+      <h2>01 VERDICT</h2>
+      <div class="big">MKT $###.## <span class="dim" style="font-size:13px">→ FAIR $###.##</span></div>
+      <div class="g" style="font-size:15px; font-weight:700">+##.#% UPSIDE — UNDERVALUED</div>
+      <svg viewBox="0 0 560 64" width="100%" height="56"><line x1="10" y1="26" x2="550" y2="26" stroke="#333" stroke-width="3"/><line x1="110" y1="26" x2="440" y2="26" stroke="#FFA500" stroke-width="3"/><rect x="105" y="19" width="10" height="14" fill="#8A8A8A"/><rect x="295" y="17" width="12" height="18" fill="#00E676"/><rect x="435" y="19" width="10" height="14" fill="#40C4FF"/><rect x="205" y="20" width="6" height="12" fill="#fff"/><text x="110" y="52" fill="#8A8A8A" font-size="10" text-anchor="middle">BEAR $###</text><text x="301" y="52" fill="#00E676" font-size="11" text-anchor="middle">BASE $###</text><text x="440" y="52" fill="#8A8A8A" font-size="10" text-anchor="middle">BULL $###</text><text x="208" y="14" fill="#fff" font-size="9" text-anchor="middle">MKT</text></svg>
+      <div class="dim">BEAR $### / BASE $### / BULL $### · spread $###–$###</div>
+    </div>
+    <div>
+      <h2>02 THESIS — WHY OWN IT</h2>
+      <ul>
+        <li><span class="g">1.</span> ### subs compound ##% — low-cost funnel.</li>
+        <li><span class="g">2.</span> ### Max/AI tiers → ARPU $###.</li>
+        <li><span class="g">3.</span> ### debt-free, FCF margin ##%.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>03 SNAPSHOT — TTM ###</h2>
+      <table><tr><th>KPI</th><th class="n">VAL</th><th class="n">YOY</th></tr>
+      <tr><td>DAU</td><td class="n">##.#M</td><td class="n g">+##%</td></tr>
+      <tr><td>MAU</td><td class="n">###M</td><td class="n g">+##%</td></tr>
+      <tr><td>PAID</td><td class="n">#.#M</td><td class="n g">+##%</td></tr>
+      <tr><td>REV</td><td class="n">$#,###M</td><td class="n g">+##%</td></tr></table>
+      <svg viewBox="0 0 300 28" width="100%" height="24"><polyline points="0,22 50,20 100,17 150,14 200,10 250,8 300,4" fill="none" stroke="#FFA500" stroke-width="2"/></svg>
+    </div>
+  </div>
+
+  <div class="cols2">
+    <div>
+      <h2>04 VALUATION — 6 METHODS ###</h2>
+      <table><tr><th>METHOD</th><th>BASIS</th><th class="n">FAIR</th><th class="n">UP</th><th>SIG</th></tr>
+      <tr><td>FCFF DCF</td><td class="dim">FY26-30+Gordon</td><td class="n">$###</td><td class="n g">+##%</td><td class="g">UNDER</td></tr>
+      <tr><td>COMPS</td><td class="dim">EV/Rev</td><td class="n">$###</td><td class="n g">+##%</td><td class="g">UNDER</td></tr>
+      <tr><td>EV/EBITDAR</td><td class="dim">peer med</td><td class="n">$###</td><td class="n">+##%</td><td>FAIR</td></tr>
+      <tr><td>P/FCF</td><td class="dim">peer med</td><td class="n">$###</td><td class="n r">-##%</td><td>FAIR</td></tr>
+      <tr><td>SOTP</td><td class="dim">Core+DET</td><td class="n">$###</td><td class="n g">+##%</td><td class="g">UNDER</td></tr>
+      <tr><td>PER-USER</td><td class="dim">EV/MAU</td><td class="n">$###</td><td class="n g">+##%</td><td class="r">OVER</td></tr></table>
+      <div class="dim" style="margin-top:6px">EV $### + NET CASH $### = EQ $### → $###/sh ###</div>
+    </div>
+    <div>
+      <h2>05 KEY GUESSES — BASE ###</h2>
+      <table>
+      <tr><td>WACC</td><td class="n">##.##%</td></tr><tr><td>g</td><td class="n">#.##%</td></tr>
+      <tr><td>Sales CAGR 26-30</td><td class="n">##.#%</td></tr><tr><td>EBIT mgn 30</td><td class="n">##.#%</td></tr>
+      <tr><td>FCF mgn 30</td><td class="n">##.#%</td></tr><tr><td>Tax</td><td class="n">##.#%</td></tr>
+      <tr><td>Shares dil</td><td class="n">##.##M</td></tr><tr><td>Net debt</td><td class="n">### debt-free</td></tr></table>
+    </div>
+  </div>
+
+  <div class="row"><h2>06 WHAT COULD GO WRONG ###</h2>
+  <span class="r">RISK 1 ### subs slowdown → growth slider → $###</span> &nbsp;|&nbsp;
+  <span class="r">RISK 2 ### AI costs → margin slider → $###</span> &nbsp;|&nbsp;
+  <span class="r">RISK 3 ### mult compression → WACC slider → $###</span></div>
+
+  <div class="row dim">02 ASSUMPTIONS ### → &nbsp; 03 FINANCIALS ### → &nbsp; 04 VALUATION ### → &nbsp; 05 SENSITIVITY ### &nbsp;|&nbsp; Blue ### = input · Black = calc · Green = link · Past = SEC ###</div>
+</div>
+<footer><span>DUOL FM · bloomberg-style mockup · dummy ### · SEC EDGAR ###</span><span>BAL ### · &lt;16ms · NOT ADVICE</span></footer>
+</body>
+</html>

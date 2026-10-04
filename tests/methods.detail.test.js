@@ -24,6 +24,12 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { renderValuation } from '../src/ui/valuationTab.js';
+import { validateLeaseInputs } from '../src/data/leaseGate.js';
+import duolLeaseArtifact from '../src/data/historical/duolLeaseInputs.json' with { type: 'json' };
+
+// P10.4 F2: read the lease cost from the cited layer rather than restating the
+// engine literal, so the assertion can no longer agree with the code by copying it.
+const LEASE_COST = validateLeaseInputs(duolLeaseArtifact).leaseCost.value;
 import { createApp } from '../src/app.js';
 import * as dataLayer from '../src/data/loader.js';
 import schedulesEngine from '../src/engine/schedules.js';
@@ -69,7 +75,7 @@ async function getDatasets() {
   const detRevenue = isP0.revenue.segments.duolingo_english_test.value;
   const da = cfP0.operating_activities.depreciation_and_amortization.value;
   const opInc = isP0.operating_income.value;
-  const rent = (12.071 * 1e3);
+  const rent = (LEASE_COST * 1e3);
   const forwardEbitdar = opInc + da + rent;
   const leaseLiab = (86.136 * 1e3);
   const netCashCapitalized = dcfOut.fcff.netCashToday - leaseLiab;

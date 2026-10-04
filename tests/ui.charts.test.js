@@ -190,28 +190,32 @@ describe('P5.6  -  Enterprise Value Bridge Waterfall: createWaterfall', () => {
     assert.match(svg, /viewBox="0 0 800 380"/);
     assert.match(svg, /class="[^"]*svg-waterfall"/);
 
-    // Step 1: Explicit PV ($1,586,881)
+    // Lane A (horizon 5, no dated seam — this file's getDatasets passes neither).
+    // Measured off the live engine:
+    //   pvExplicit 1,583,127.39 | pvTerminal 3,694,206.57 | EV 5,277,333.97
+    //   netCash 1,416,559.00 | equity 6,693,892.97 | perShare 117.58
+    // Step 1: Explicit PV
     assert.match(svg, /PV of Explicit FCFs/);
-    assert.match(svg, /\$1,586,881/);
+    assert.match(svg, /\$1,583,127/);
 
-    // Step 2: Terminal PV ($3,745,289 — EP.3 normalised terminal)
+    // Step 2: Terminal PV
     assert.match(svg, /PV of Terminal Value/);
-    assert.match(svg, /\$3,745,289/);
+    assert.match(svg, /\$3,694,207/);
 
-    // Step 3: Enterprise Value ($5,332,169)
+    // Step 3: Enterprise Value
     assert.match(svg, /Implied Enterprise Value/);
-    assert.match(svg, /\$5,332,169/);
+    assert.match(svg, /\$5,277,334/);
 
-    // Step 4: Net Cash ($1,416,559)
+    // Step 4: Net Cash
     assert.match(svg, /\(\+\) Net Cash Bridge/);
     assert.match(svg, /\$1,416,559/);
 
-    // Step 5: Equity Value ($6,748,728)
+    // Step 5: Equity Value
     assert.match(svg, /Implied Equity Value/);
-    assert.match(svg, /\$6,748,728/);
+    assert.match(svg, /\$6,693,893/);
 
-  // Target price pill ($118.60, EP.3 normalised terminal)
-  assert.match(svg, /\$118\.60 \/ share/);
+    // Target price pill
+    assert.match(svg, /\$117\.58 \/ share/);
 
     chart.dispose();
   });
@@ -298,7 +302,7 @@ describe('P5.6  -  Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$118\.60/);
+    assert.match(container.innerHTML, /\$117\.58/);
 
     view.dispose();
   });
@@ -321,7 +325,7 @@ describe('P5.6  -  Live Tab Mount Integration: Charts reachable in Product UI', 
 
     assert.ok(view);
     assert.match(container.innerHTML, /class="[^"]*svg-waterfall"/);
-    assert.match(container.innerHTML, /\$118\.60/);
+    assert.match(container.innerHTML, /\$117\.58/);
 
     view.dispose();
   });

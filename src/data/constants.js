@@ -223,6 +223,13 @@ export const ASSUMPTIONS_PATH = 'src/data/assumptions.json';
 export const DAYS_IN_YEAR = 365;
 
 /**
+ * Milliseconds in one UTC calendar day. Named so day arithmetic never carries
+ * a bare millisecond literal.
+ * @type {number}
+ */
+export const MILLISECONDS_PER_DAY = 86400000;
+
+/**
  * Supported scenario delta keys for assumption drivers.
  * @type {ReadonlyArray<string>}
  */
@@ -265,10 +272,127 @@ export const FORECAST_HORIZON_MAX = 10;
 export const FORECAST_HORIZON_DEFAULT = 5;
 
 /**
+ * Phase 10 Canonical Horizon & Dated Valuation Seam Constants.
+ * Production canonical horizon is 10 periods (FY2026-FY2035).
+ * 5-year model is an explicitly labeled legacy comparison only.
+ */
+/**
+ * Named default for the live-price lifecycle (P10.3), so the price client
+ * carries no bare timing or size literals.
+ */
+export const PRICE_REQUEST_TIMEOUT_MS = 10000;
+
+/** Hard cap on a live price response body, in bytes. */
+export const PRICE_MAX_BODY_BYTES = 65536;
+
+/** Pinned instrument symbol for the price endpoint. */
+export const PRICE_SYMBOL = 'DUOL';
+
+/** Pinned market-data provider for the price endpoint. */
+export const PRICE_PROVIDER = 'stockanalysis.com';
+
+export const CANONICAL_HORIZON = 10;
+
+/**
+ * Horizon of the disclosed legacy comparison model (FY2026-FY2030).
+ *
+ * Kept only so the legacy lane is named rather than written as a bare literal.
+ * It never controls production output: production is always CANONICAL_HORIZON.
+ * @type {number}
+ */
+export const LEGACY_FIVE_YEAR_HORIZON = 5;
+
+export const EFFECTIVE_VALUATION_DATE = '2026-09-02';
+export const REPORTING_CUTOFF_DATE = '2026-06-30';
+export const FY2026_START_DATE = '2026-01-01';
+export const FY2026_END_DATE = '2026-12-31';
+
+/**
+ * FY2026 calendar decomposition:
+ * H1 actuals: 2026-01-01 to 2026-06-30 (181 days).
+ * H2 total: 2026-06-30 to 2026-12-31 (184 days).
+ * Pre-valuation roll-forward stub: 2026-06-30 to 2026-09-02 (64 days).
+ * Post-valuation discounted period: 2026-09-02 to 2026-12-31 (120 days).
+ * Partition: 64 + 120 = 184 days (gap = 0, overlap = 0).
+ */
+export const H1_DAYS_TOTAL = 181;
+export const H2_DAYS_TOTAL = 184;
+export const PRE_VALUATION_STUB_DAYS = 64;
+export const POST_VALUATION_STUB_DAYS = 120;
+export const PRE_VALUATION_STUB_FRACTION = 64 / 184;
+export const POST_VALUATION_STUB_FRACTION = 120 / 184;
+
+/**
+ * Period end dates in ISO YYYY-MM-DD UTC format.
+ * @type {Readonly<Record<string, string>>}
+ */
+export const PERIOD_END_DATES = Object.freeze({
+  FY2021: '2021-12-31',
+  FY2022: '2022-12-31',
+  FY2023: '2023-12-31',
+  FY2024: '2024-12-31',
+  FY2025: '2025-12-31',
+  'Q2 FY2026': '2026-06-30',
+  FY2026: '2026-12-31',
+  FY2027: '2027-12-31',
+  FY2028: '2028-12-31',
+  FY2029: '2029-12-31',
+  FY2030: '2030-12-31',
+  FY2031: '2031-12-31',
+  FY2032: '2032-12-31',
+  FY2033: '2033-12-31',
+  FY2034: '2034-12-31',
+  FY2035: '2035-12-31',
+});
+
+/**
+ * Calculates date-based fractional discount exponent from declared dates.
+ *
+ * @param {string} valuationDate ISO YYYY-MM-DD
+ * @param {string} periodEndDate ISO YYYY-MM-DD
+ * @param {number} [basis=DAYS_IN_YEAR] 365-day basis
+ * @returns {number}
+ */
+export function calculateDiscountExponent(valuationDate, periodEndDate, basis = DAYS_IN_YEAR) {
+  const dVal = new Date(`${valuationDate}T00:00:00Z`);
+  const dEnd = new Date(`${periodEndDate}T00:00:00Z`);
+  const msDiff = dEnd.getTime() - dVal.getTime();
+  return msDiff / (MILLISECONDS_PER_DAY * basis);
+}
+
+/**
  * Prefix used to build forecast period keys (`FY` + year).
  * @type {string}
  */
 export const FORECAST_PERIOD_PREFIX = 'FY';
+
+/**
+ * Three-stage valuation constants (Phase 9 / FP.1).
+ * Explicit stage: FY2026-FY2030 (5 years, indices 0-4).
+ * Fade stage: FY2031-FY2035 (5 years, indices 5-9).
+ */
+export const FADE_STAGE_LENGTH = 5;
+export const FADE_START_INDEX = 5;
+
+/**
+ * Stage metadata for explicit and fade glide stages.
+ */
+export const FORECAST_STAGES = Object.freeze({
+  explicit: Object.freeze({
+    name: 'explicit',
+    label: 'Explicit Forecast',
+    startYear: 2026,
+    endYear: 2030,
+    length: 5,
+  }),
+  fade: Object.freeze({
+    name: 'fade',
+    label: 'Fade Glide',
+    startYear: 2031,
+    endYear: 2035,
+    length: 5,
+  }),
+});
 
 /**
  * Number of half-year segments in a fiscal year. Drives the hybrid FY2026

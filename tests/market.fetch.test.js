@@ -33,15 +33,15 @@ import {
   createMarketPriceState,
   fetchLatestPrice,
   buildFallbackBanner,
-  buildIntradayBanner,
 } from '../src/engine/market.js';
 import { createApp, bootApp } from '../src/app.js';
+import { valuateFcffDcf } from '../src/engine/methods/fcffDcf.js';
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
 import { extractRows } from '../src/data/schema.js';
 import { STOCKANALYSIS_DUOL_URL } from '../src/data/constants.js';
-import { parseUpstreamDate } from '../api/price.js';
+import { parseUpstreamDate, parseUpstreamPriorClose } from '../api/price.js';
 import { readLedgerUrls } from './_ledger.js';
-import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
+import { P104_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 import { createTabRoot } from './_dom_stub.js';
 import { TAB_KEYS } from '../src/ui/tabs.js';
 
@@ -86,17 +86,11 @@ describe('P6R2.5 — Pure Market Pricing Client (src/engine/market.js)', () => {
     assert.throws(() => { state.price = 200; }, TypeError);
   });
 
-  test('buildFallbackBanner and buildIntradayBanner generate contract banner strings', () => {
+  test('buildFallbackBanner generates contract banner strings', () => {
     const fallbackBanner = buildFallbackBanner(157.85, '20' + '26-09-02');
     assert.equal(
       fallbackBanner,
       'LIVE PRICE UNAVAILABLE — verdict computed against snapshot close $157.85 (2026-09-02). Snapshot may be stale.',
-    );
-
-    const intradayBanner = buildIntradayBanner(157.85, '20' + '26-09-02', 165.50);
-    assert.equal(
-      intradayBanner,
-      'last completed close $157.85 (2026-09-02) · intraday $165.50',
     );
   });
 
@@ -132,7 +126,7 @@ describe('P6R2.5 — Pure Market Pricing Client (src/engine/market.js)', () => {
     assert.ok(Object.isFrozen(res));
   });
 
-  test('fetchLatestPrice with stubbed transport: intraday print enforces close-only gate', async () => {
+  test('fetchLatestPrice with stubbed transport: intraday print enforces close-only gate (refuses intraday)', async () => {
     const stubTransport = async () => ({
       ok: true,
       status: 200,
@@ -153,14 +147,15 @@ describe('P6R2.5 — Pure Market Pricing Client (src/engine/market.js)', () => {
       fallbackAsOf: '20' + '26-09-02',
     });
 
-    assert.equal(res.status, 'intraday');
-    // CLOSE-ONLY CONVENTION: verdict price remains official close, NOT intraday!
+    assert.equal(res.ok, false);
+    assert.equal(res.status, 'fallback');
+    // CLOSE-ONLY GATE: intraday shape is refused outright, falling back to snapshot close!
     assert.equal(res.price, 157.85);
-    assert.equal(res.intradayPrice, 172.00);
-    assert.equal(res.isOfficialClose, false);
-    assert.equal(res.fallback, false);
-    assert.match(res.bannerText, /last completed close \$157\.85/);
-    assert.match(res.bannerText, /intraday \$172\.00/);
+    assert.equal(res.intradayPrice, null);
+    assert.equal(res.isOfficialClose, true);
+    assert.equal(res.fallback, true);
+    assert.match(res.bannerText, /LIVE PRICE UNAVAILABLE/);
+    assert.match(res.error, /Intraday price quotes are unavailable; official close required/);
     assert.ok(Object.isFrozen(res));
   });
 
@@ -184,11 +179,62 @@ describe('P6R2.5 — Pure Market Pricing Client (src/engine/market.js)', () => {
       fallbackAsOf: '20' + '26-09-02',
     });
 
-    assert.equal(res.status, 'intraday');
+    assert.equal(res.ok, false);
+    assert.equal(res.status, 'fallback');
     // Must fall back to snapshot close ($157.85), NEVER the mislabeled 160.93!
     assert.equal(res.price, 157.85);
-    assert.equal(res.intradayPrice, 160.93);
-    assert.equal(res.isOfficialClose, false);
+    assert.equal(res.intradayPrice, null);
+    assert.equal(res.isOfficialClose, true);
+    assert.equal(res.fallback, true);
+    assert.match(res.bannerText, /LIVE PRICE UNAVAILABLE/);
+  });
+
+  test('fetchLatestPrice refuses intradayPrice-bearing body even beside valid close fields', async () => {
+    const stubTransport = async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        symbol: 'DUOL',
+        price: 165.50,
+        asOf: '2026-09-03',
+        isOfficialClose: true,
+        intradayPrice: 172.00, // forbidden non-null intradayPrice
+        provider: 'stockanalysis.com',
+      }),
+    });
+
+    const res = await fetchLatestPrice(stubTransport, {
+      fallbackPrice: 157.85,
+      fallbackAsOf: '2026-09-02',
+    });
+
+    assert.equal(res.ok, false);
+    assert.equal(res.status, 'fallback');
+    assert.equal(res.price, 157.85);
+    assert.equal(res.intradayPrice, null);
+    assert.match(res.error, /Intraday price quotes are unavailable; official close required/);
+  });
+
+  test('parseUpstreamPriorClose parses in-hours previous close and date from HTML', () => {
+    const sampleHtml = `
+      <div>Previous Close</div><div>162.45</div>
+      <div>Previous Close Date</div><div>Sep 2, 2026</div>
+    `;
+    const resolved = parseUpstreamPriorClose(sampleHtml);
+    assert.equal(resolved.price, 162.45);
+    assert.equal(resolved.asOf, '2026-09-02');
+
+    const jsonHtml = `<script>{"previousClose": 164.10, "previousCloseDate": "2026-09-02"}</script>`;
+    const resolvedJson = parseUpstreamPriorClose(jsonHtml);
+    assert.equal(resolvedJson.price, 164.10);
+    assert.equal(resolvedJson.asOf, '2026-09-02');
+  });
+
+  test('parseUpstreamPriorClose returns null on unresolvable HTML', () => {
+    const emptyHtml = '<html><body><div>No data</div></body></html>';
+    const resolved = parseUpstreamPriorClose(emptyHtml);
+    assert.equal(resolved.price, null);
+    assert.equal(resolved.asOf, null);
   });
 
   test('fetchLatestPrice with stubbed transport: network failure falls back cleanly', async () => {
@@ -272,7 +318,7 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     // Initial recommendation math tied out to snapshot price $157.85
     // (EP.2 rolled shares: perShare ~$126.68 vs $157.85 → overvalued)
     assert.equal(state.recommendation.label, 'overvalued');
-    const expectedUpside = (state.dcf.perShare - 157.85) / 157.85;
+    const expectedUpside = (valuateFcffDcf(state.dcf).isCanonicalAddBackDcf - 157.85) / 157.85;
     assert.ok(Math.abs(state.recommendation.upsidePct - expectedUpside) < 1e-6);
 
     // Summary tab DOM renders the persistent fallback banner (UI sanitizes em dash to hyphen)
@@ -328,18 +374,31 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     // Before fetch: fallback $157.85
     assert.equal(app.state().marketPrice.price, 157.85);
 
-    // Trigger fetchPrice
-    const updatedPrice = await app.fetchPrice();
-    assert.equal(updatedPrice.status, 'live_close');
-    assert.equal(updatedPrice.price, 165.00);
+    // Trigger fetchPrice. P10.3: the controller returns the CANONICAL benchmark;
+    // the legacy market-state projection is what the views read.
+    const updatedBenchmark = await app.fetchPrice();
+    assert.equal(updatedBenchmark.value, 165.00, 'canonical benchmark carries the live close');
+    assert.equal(updatedBenchmark.status, 'live', 'canonical benchmark declares the live status');
+    assert.equal(updatedBenchmark.asOf, '20' + '26-09-03', 'canonical benchmark carries the live as-of date');
+    assert.equal(updatedBenchmark.isEdited, false, 'a live response is not a manual edit');
+    assert.equal(updatedBenchmark.source.kind, 'live_response', 'canonical benchmark declares its provenance');
 
     const updatedState = app.state();
+    assert.equal(updatedState.marketPrice.status, 'live_close', 'the view projection renders the live close');
     assert.equal(updatedState.marketPrice.price, 165.00);
+    assert.equal(
+      updatedState.marketPrice.price,
+      updatedState.benchmark.value,
+      'the projection and the canonical benchmark are the same price',
+    );
+    assert.equal(updatedState.marketPrice.asOf, updatedState.benchmark.asOf, 'same as-of date');
+    assert.equal(updatedState.marketPrice.source.provider, updatedState.benchmark.source.provider, 'same provider');
 
     // Verdict math recalculated against live close $165.00
-    // dcf.perShare = 118.60167662384697 (EP.3 normalised terminal)
+    // dcf.perShare = 118.547675 (EP.3 normalised terminal)
     // upside = (118.602 - 165.00) / 165.00 = -28.12% -> 'overvalued'
-    const expectedLiveUpside = (updatedState.dcf.perShare - 165.00) / 165.00;
+    const expectedLiveUpside =
+  (valuateFcffDcf(updatedState.dcf).isCanonicalAddBackDcf - 165.00) / 165.00;
     assert.ok(Math.abs(updatedState.recommendation.upsidePct - expectedLiveUpside) < 1e-6);
     assert.equal(updatedState.recommendation.label, 'overvalued');
 
@@ -352,7 +411,7 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     app.dispose();
   });
 
-  test('intraday fetch updates display banner but NEVER alters verdict math', async () => {
+  test('intraday fetch is refused outright and falls back cleanly without altering verdict math', async () => {
     const { historical, assumptions } = await getDatasets();
     const { root } = createTabRoot(TAB_KEYS);
 
@@ -385,15 +444,15 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     const state = app.state();
 
     // CLOSE-ONLY RULE: verdict math remains on official close $157.85!
-    // (EP.2 rolled shares: perShare ~$126.68 vs $157.85 → overvalued)
-    assert.equal(state.marketPrice.status, 'intraday');
+    // Under P10.9: intraday shape is refused; status falls back to snapshot fallback
+    assert.equal(state.marketPrice.status, 'fallback');
     assert.equal(state.marketPrice.price, 157.85);
-    assert.equal(state.marketPrice.intradayPrice, 180.00);
+    assert.equal(state.marketPrice.intradayPrice, null);
     assert.equal(state.recommendation.label, 'overvalued');
 
     const summaryPane = root.querySelector('#tab-summary');
-    assert.match(summaryPane.innerHTML, /last completed close \$157\.85/);
-    assert.match(summaryPane.innerHTML, /intraday \$180\.00/);
+    assert.match(summaryPane.innerHTML, /LIVE PRICE UNAVAILABLE/);
+    assert.doesNotMatch(summaryPane.innerHTML, /intraday/i);
 
     app.dispose();
   });
@@ -412,11 +471,11 @@ describe('P6R2.5 — App Integration & Staleness Banner Assertion (src/app.js & 
     });
 
     // User explicitly tests a $140.00 benchmark price
-    // (EP.3 normalised terminal: perShare ~$118.60 vs $140 → −15.28% overvalued)
+    // (EP.3 normalised terminal: perShare ~$120.45 vs $140 → −15.28% overvalued)
     app.setDriver('market_share_price', 140.00);
 
     const state = app.state();
-    const expectedUpside = (state.dcf.perShare - 140.00) / 140.00;
+    const expectedUpside = (valuateFcffDcf(state.dcf).isCanonicalAddBackDcf - 140.00) / 140.00;
     assert.ok(Math.abs(state.recommendation.upsidePct - expectedUpside) < 1e-6);
     assert.equal(state.recommendation.label, 'overvalued');
 
@@ -590,9 +649,10 @@ describe('P6R2.5 — Standing Quality Gates: Synchrony, Bare Literals & Scoped D
     // but ran no diff at all — it only asserted four engine files exist, so it
     // could never detect an engine change. It now performs the real check,
     // anchored to the v1.0 release tag so the allowlist stays tight: only the
-    // Economy Phase modules may differ (Director un-park order 2026-09-10,
-    // `docs/logs/ds/economy_phase.md` §5). See tests/_scope_gate.js.
-    const unauthorized = unauthorizedEngineFiles('v1.0', EP_AUTHORIZED_ENGINE);
+    // authorized engine modules may differ (P104_AUTHORIZED_ENGINE, authorized by
+    // docs/phases/phase_9.md §3 Task FP.1 Deliverables).
+    // See tests/_scope_gate.js.
+    const unauthorized = unauthorizedEngineFiles('v1.0', P104_AUTHORIZED_ENGINE);
     assert.deepEqual(
       unauthorized,
       [],

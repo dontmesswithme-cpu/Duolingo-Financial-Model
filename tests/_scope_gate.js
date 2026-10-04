@@ -35,6 +35,73 @@ export const EP_AUTHORIZED_ENGINE = Object.freeze([
   'src/engine/shares.js',
 ]);
 
+/**
+ * Redesign Phase 10 engine set: the Economy Phase set plus the one new module
+ * RP10 introduces (`src/engine/ratios.js`, the historical ratio engine). The
+ * addition is deliberately a single named path rather than a widened pattern, so
+ * the gate still reports any other engine drift, tracked or untracked.
+ *
+ * Authorized by the RP10 artifact contract (`docs/phases/redesign_phase_10.md`
+ * §3 Task RP10.1 deliverable files).
+ * @type {ReadonlyArray<string>}
+ */
+export const RP10_AUTHORIZED_ENGINE = Object.freeze([
+  ...EP_AUTHORIZED_ENGINE,
+  'src/engine/ratios.js',
+]);
+
+/**
+ * Phase 9 (FP) engine set: the RP10 engine set plus the 4 engine modules modified
+ * for the Three-Stage Fade Horizon Extension (`src/engine/forecast.js`,
+ * `src/engine/schedules.js`, `src/engine/threeStatement.js`, and `src/engine/scenarios.js`).
+ *
+ * Authorized by the Phase 9 artifact contract (`docs/phases/phase_9.md`
+ * §3 Task FP.1 Deliverables).
+ * @type {ReadonlyArray<string>}
+ */
+export const FP_AUTHORIZED_ENGINE = Object.freeze([
+  ...RP10_AUTHORIZED_ENGINE,
+  'src/engine/forecast.js',
+  'src/engine/schedules.js',
+  'src/engine/threeStatement.js',
+  'src/engine/scenarios.js',
+]);
+
+/**
+ * Phase 10 (P10) engine set: the FP engine set plus the modules P10.2 and P10.3
+ * are contracted to touch — the live-price lifecycle (`src/engine/market.js`)
+ * and the new canonical benchmark engine (`src/engine/benchmark.js`).
+ *
+ * Authorized by the Phase 10 artifact contract, §P10.2 and §P10.3 "Files"
+ * (which name `src/engine/market.js` and `New src/engine/benchmark.js`).
+ * The addition is two named paths, not a widened pattern, so the gate still
+ * reports any other engine drift, tracked or untracked.
+ * @type {ReadonlyArray<string>}
+ */
+export const P10_AUTHORIZED_ENGINE = Object.freeze([
+  ...FP_AUTHORIZED_ENGINE,
+  'src/engine/market.js',
+  'src/engine/benchmark.js',
+]);
+
+/**
+ * P10.4 engine set: the P10 engine set plus the point-in-time fully diluted
+ * share schedule builder (`src/engine/fullyDiluted.js`), which the P10.4
+ * artifact contract owns ("this sub-phase OWNS the FD schedule build P10.2
+ * deferred"). `src/engine/methods/` is excluded from this gate entirely and is
+ * gated by its own suites, so the six relative/aggregate method modules P10.4
+ * rewrites need no entry here.
+ *
+ * Authorized by the Phase 10 artifact contract, §P10.4 "Common Share
+ * Denominator". The addition is one named path, not a widened pattern, so the
+ * gate still reports any other engine drift, tracked or untracked.
+ * @type {ReadonlyArray<string>}
+ */
+export const P104_AUTHORIZED_ENGINE = Object.freeze([
+  ...P10_AUTHORIZED_ENGINE,
+  'src/engine/fullyDiluted.js',
+]);
+
 /** Baseline tags must be plain ref names (no shell metacharacters). */
 const TAG_PATTERN = /^[A-Za-z0-9._-]+$/;
 

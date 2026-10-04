@@ -18,6 +18,10 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { valuatePerUser } from '../src/engine/methods/perUser.js';
+import { buildFullyDilutedSchedule } from '../src/engine/fullyDiluted.js';
+import duolFullyDiluted from '../src/data/historical/duolFullyDiluted.json' with { type: 'json' };
+
+const FD_SCHEDULE = buildFullyDilutedSchedule(duolFullyDiluted);
 import { EngineError } from '../src/data/errors.js';
 
 const PEERS_PATH = fileURLToPath(new URL('../src/data/historical/peers.json', import.meta.url));
@@ -37,7 +41,8 @@ describe('P8.2  -  Per-User Valuation: Three Native Bases & Median Vote', () => 
         paidSubscribers: 12.7e6 // 12,700,000 (Q2 FY2026 Form 10-Q)
       },
       netCashCapitalized: 1330423.0, // $k
-      sharesOutstanding: 50031 * 1e3,
+      // P10.4 F3: the production denominator, not the EPS weighted average.
+      sharesOutstanding: FD_SCHEDULE.denominator,
       arpuContext: {
         subscriptionArpu: '$6.71 / month ($80.50 / year driver-basis)',
         bookingsPerDau: '$21.98 / year ($1,158,425k FY2025 bookings ÷ 52.7M DAU)'
@@ -57,7 +62,11 @@ describe('P8.2  -  Per-User Valuation: Three Native Bases & Median Vote', () => 
     assert.equal(spotBasis.peerKpiValue, corpus.peers.SPOT.kpis.mau.value);
     const expectedSpotEvPerUser = (corpus.peers.SPOT.capitalizedEnterpriseValue * 1e6) / corpus.peers.SPOT.kpis.mau.value;
     assert.ok(Math.abs(spotBasis.evPerUser - expectedSpotEvPerUser) < 1e-4);
-    assert.ok(Math.abs(spotBasis.impliedPerShare - 483.70) < 0.1);
+    // P10.7 F2 (ENTAILED, disclosed): SPOT short-term investments corrected from
+    // EUR 1,047M to the filed EUR 3,450M, cutting SPOT capitalized EV by 2,739.42.
+    // The Spotify EV/MAU basis therefore falls 394.63 -> 385.26. NFLX and RBLX are
+    // unmoved, so the MEDIAN basis (Netflix) and the method vote at 347.91 stand.
+    assert.ok(Math.abs(spotBasis.impliedPerShare - 385.26) < 0.1);
     assert.equal(spotBasis.arpuContext.peerArpu, corpus.peers.SPOT.kpis.arpu.display);
     assert.equal(spotBasis.arpuContext.duolArpu, duolInputs.arpuContext.subscriptionArpu);
 
@@ -66,9 +75,14 @@ describe('P8.2  -  Per-User Valuation: Three Native Bases & Median Vote', () => 
     assert.equal(rblxBasis.peer, 'RBLX');
     assert.equal(rblxBasis.kpiMetric, 'dau');
     assert.equal(rblxBasis.peerKpiValue, corpus.peers.RBLX.kpis.dau.value);
+    // P10.4 F3: measured on the production fully diluted schedule.
+    // P10.4 F3: on the production fully diluted schedule.
     const expectedRblxEvPerUser = (corpus.peers.RBLX.capitalizedEnterpriseValue * 1e6) / corpus.peers.RBLX.kpis.dau.value;
     assert.ok(Math.abs(rblxBasis.evPerUser - expectedRblxEvPerUser) < 1e-4);
-    assert.ok(Math.abs(rblxBasis.impliedPerShare - 443.68) < 0.1);
+    // RBLX is on its own disclosed fully diluted count (752m per the Q2 FY2026
+    // 10-Q, accession 0001628280-26-051082) rather than 714.38m, which raises
+    // the peer capitalised EV and therefore Duolingo's implied per-user value.
+    assert.ok(Math.abs(rblxBasis.impliedPerShare - 310.77) < 0.1);
     assert.equal(rblxBasis.arpuContext.peerArpu, corpus.peers.RBLX.kpis.abpu.display);
     assert.equal(rblxBasis.arpuContext.duolArpu, duolInputs.arpuContext.bookingsPerDau);
 
@@ -79,14 +93,14 @@ describe('P8.2  -  Per-User Valuation: Three Native Bases & Median Vote', () => 
     assert.equal(nflxBasis.peerKpiValue, corpus.peers.NFLX.kpis.paidMemberships.value);
     const expectedNflxEvPerUser = (corpus.peers.NFLX.capitalizedEnterpriseValue * 1e6) / corpus.peers.NFLX.kpis.paidMemberships.value;
     assert.ok(Math.abs(nflxBasis.evPerUser - expectedNflxEvPerUser) < 1e-4);
-    assert.ok(Math.abs(nflxBasis.impliedPerShare - 348.12) < 0.1);
+    assert.ok(Math.abs(nflxBasis.impliedPerShare - 347.91) < 0.1);
     assert.equal(nflxBasis.arpuContext.peerArpu, corpus.peers.NFLX.kpis.arm.display);
     assert.equal(nflxBasis.arpuContext.duolArpu, duolInputs.arpuContext.subscriptionArpu);
 
     // 4. Method vote = median of the three bases
-    assert.equal(res.medianBasis, 'roblox_dau');
-    assert.ok(Math.abs(res.impliedPerShare - rblxBasis.impliedPerShare) < 1e-6);
-    assert.ok(Math.abs(res.rangePerShare.min - nflxBasis.impliedPerShare) < 1e-6);
+    assert.equal(res.medianBasis, 'netflix_paid_subs');
+    assert.ok(Math.abs(res.impliedPerShare - nflxBasis.impliedPerShare) < 1e-6);
+    assert.ok(Math.abs(res.rangePerShare.min - rblxBasis.impliedPerShare) < 1e-6);
     assert.ok(Math.abs(res.rangePerShare.max - spotBasis.impliedPerShare) < 1e-6);
   });
 
@@ -145,7 +159,8 @@ describe('P8.2  -  Per-User Valuation: Three Native Bases & Median Vote', () => 
         paidSubscribers: 12.7e6
       },
       netCashCapitalized: 1330423.0,
-      sharesOutstanding: 50031 * 1e3,
+      // P10.4 F3: the production denominator, not the EPS weighted average.
+      sharesOutstanding: FD_SCHEDULE.denominator,
       arpuContext: {
         subscriptionArpu: '$6.71 / month ($80.50 / year driver-basis)',
         bookingsPerDau: '$21.98 / year ($1,158,425k FY2025 bookings ÷ 52.7M DAU)'
@@ -172,7 +187,8 @@ describe('P8.2  -  Per-User Valuation: Fail-Closed & Purity', () => {
         paidSubscribers: 12.7e6
       },
       netCashCapitalized: 1330423.0,
-      sharesOutstanding: 50031 * 1e3,
+      // P10.4 F3: the production denominator, not the EPS weighted average.
+      sharesOutstanding: FD_SCHEDULE.denominator,
       arpuContext: {
         subscriptionArpu: '$6.71 / month ($80.50 / year driver-basis)',
         bookingsPerDau: '$21.98 / year ($1,158,425k FY2025 bookings ÷ 52.7M DAU)'
@@ -202,7 +218,8 @@ describe('P8.2  -  Per-User Valuation: Fail-Closed & Purity', () => {
         paidSubscribers: 12.7e6
       },
       netCashCapitalized: 1330423.0,
-      sharesOutstanding: 50031 * 1e3,
+      // P10.4 F3: the production denominator, not the EPS weighted average.
+      sharesOutstanding: FD_SCHEDULE.denominator,
       arpuContext: {
         subscriptionArpu: '$6.71 / month ($80.50 / year driver-basis)',
         bookingsPerDau: '$21.98 / year ($1,158,425k FY2025 bookings ÷ 52.7M DAU)'

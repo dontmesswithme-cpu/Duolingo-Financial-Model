@@ -17,7 +17,13 @@
  */
 
 import { extractRows } from '../data/schema.js';
+import { describeStageStructure } from '../engine/methods/fcffDcf.js';
 import { usd, percent, estSuffix, mktBadge } from './format.js';
+import {
+  RATIO_DEFS,
+  computeHistoricalRatios,
+  formatRatioById,
+} from '../engine/ratios.js';
 
 /**
  * Escapes XML/HTML characters for safe SVG text embedding.
@@ -80,7 +86,14 @@ function extractHistoricalSeries(historical) {
  */
 function extractForecastSeries(forecast, threeStatement = null) {
   const result = [];
-  const periods = ['FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030'];
+  const allForecastPeriods = [
+    'FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030',
+    'FY2031', 'FY2032', 'FY2033', 'FY2034', 'FY2035',
+  ];
+  const activePeriods = allForecastPeriods.filter((p) =>
+    forecast?.byPeriod?.[p] || threeStatement?.incomeStatement?.byPeriod?.[p]
+  );
+  const periods = activePeriods.length > 0 ? activePeriods : allForecastPeriods.slice(0, 5);
 
   for (const period of periods) {
     let revVal = 0;
@@ -164,7 +177,7 @@ export function createRevenueFcfChart({
       const label = usd(tick, { decimals: 0 });
       return `
         <line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
-        <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" font-family="monospace" fill="#64748b">${label}</text>
+        <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" font-family="var(--font-mono)" fill="#64748b">${label}</text>
       `;
     })
     .join('');
@@ -176,8 +189,8 @@ export function createRevenueFcfChart({
   // Vertical transition line
   const transitionGuide = `
     <line x1="${transitionX}" y1="${padTop}" x2="${transitionX}" y2="${padTop + chartH}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
-    <text x="${transitionX - 8}" y="${padTop + 14}" text-anchor="end" font-size="10" font-weight="bold" fill="#47556a">HISTORICAL (ACT)</text>
-    <text x="${transitionX + 8}" y="${padTop + 14}" text-anchor="start" font-size="10" font-weight="bold" fill="#2563eb">FORECAST (EST)</text>
+    <text x="${transitionX - 8}" y="${padTop + 14}" text-anchor="end" font-size="11" font-weight="700" fill="#47556a">HISTORICAL (ACT)</text>
+    <text x="${transitionX + 8}" y="${padTop + 14}" text-anchor="start" font-size="11" font-weight="700" fill="#2563eb">FORECAST (EST)</text>
   `;
 
   // X-axis ticks & labels
@@ -187,10 +200,10 @@ export function createRevenueFcfChart({
       const isEst = pt.isEstimate;
       return `
         <line x1="${x}" y1="${padTop + chartH}" x2="${x}" y2="${padTop + chartH + 6}" stroke="#94a3b8" stroke-width="1" />
-        <text x="${x}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-family="monospace" font-weight="${isEst ? 'bold' : 'normal'}" fill="${isEst ? '#2563eb' : '#1e293b'}">
+        <text x="${x}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-family="var(--font-mono)" font-weight="${isEst ? '700' : 'normal'}" fill="${isEst ? '#2563eb' : '#1e293b'}">
           ${escapeXml(pt.displayPeriod)}
         </text>
-        <text x="${x}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="9" font-weight="600" fill="${isEst ? '#3b82f6' : '#64748b'}">
+        <text x="${x}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="11" font-weight="600" fill="${isEst ? '#3b82f6' : '#64748b'}">
           ${isEst ? 'EST' : 'ACT'}
         </text>
       `;
@@ -253,7 +266,7 @@ export function createRevenueFcfChart({
       <g class="chart-dots">${dots}</g>
 
       <!-- Chart Header & Legends -->
-      <text x="${padLeft}" y="24" font-size="13" font-weight="bold" fill="#0f172a">Revenue &amp; Unlevered Free Cash Flow ($ in thousands)</text>
+      <text x="${padLeft}" y="24" font-size="13" font-weight="700" fill="#0f172a">Revenue &amp; Unlevered Free Cash Flow ($ in thousands)</text>
       
       <g class="chart-legend" transform="translate(${width - 320}, 14)">
         <line x1="0" y1="8" x2="20" y2="8" stroke="#1d4ed8" stroke-width="2.5" />
@@ -265,7 +278,7 @@ export function createRevenueFcfChart({
         <text x="121" y="11" font-size="11" fill="#1e293b">Free Cash Flow</text>
 
         <line x1="210" y1="8" x2="230" y2="8" stroke="#64748b" stroke-width="2" stroke-dasharray="4,3" />
-        <text x="236" y="11" font-size="10" fill="#64748b">Forecast (EST)</text>
+        <text x="236" y="11" font-size="11" fill="#64748b">Forecast (EST)</text>
       </g>
     </svg>
   `.trim();
@@ -300,14 +313,23 @@ export function createMarginChart({
   const fc = forecast || data?.forecast || null;
   const ts = threeStatement || data?.threeStatement || null;
 
-  const periods = ['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025', 'FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030'];
+  const histPeriods = ['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025'];
+  const allForecastPeriods = [
+    'FY2026', 'FY2027', 'FY2028', 'FY2029', 'FY2030',
+    'FY2031', 'FY2032', 'FY2033', 'FY2034', 'FY2035',
+  ];
+  const activeFcPeriods = allForecastPeriods.filter((p) =>
+    fc?.byPeriod?.[p] || ts?.incomeStatement?.byPeriod?.[p]
+  );
+  const fcPeriods = activeFcPeriods.length > 0 ? activeFcPeriods : allForecastPeriods.slice(0, 5);
+  const periods = [...histPeriods, ...fcPeriods];
   const series = [];
 
   const histInc = hist?.income ? extractRows(hist.income) : [];
 
   for (let i = 0; i < periods.length; i++) {
     const period = periods[i];
-    const isEst = i >= 5;
+    const isEst = i >= histPeriods.length;
     let grossMargin = 0;
     let opMargin = 0;
 
@@ -356,7 +378,7 @@ export function createMarginChart({
       const isZero = tick === 0;
       return `
         <line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="${isZero ? '#64748b' : '#e2e8f0'}" stroke-width="${isZero ? '1.5' : '1'}" stroke-dasharray="${isZero ? '0' : '3,3'}" />
-        <text x="${padLeft - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-family="monospace" fill="${isZero ? '#0f172a' : '#64748b'}">${percent(tick, { decimals: 0 })}</text>
+        <text x="${padLeft - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-family="var(--font-mono)" fill="${isZero ? '#0f172a' : '#64748b'}">${percent(tick, { decimals: 0 })}</text>
       `;
     })
     .join('');
@@ -366,8 +388,8 @@ export function createMarginChart({
 
   const transitionGuide = `
     <line x1="${transitionX}" y1="${padTop}" x2="${transitionX}" y2="${padTop + chartH}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
-    <text x="${transitionX - 8}" y="${padTop + 14}" text-anchor="end" font-size="10" font-weight="bold" fill="#47556a">HISTORICAL (ACT)</text>
-    <text x="${transitionX + 8}" y="${padTop + 14}" text-anchor="start" font-size="10" font-weight="bold" fill="#7c3aed">FORECAST (EST)</text>
+    <text x="${transitionX - 8}" y="${padTop + 14}" text-anchor="end" font-size="11" font-weight="700" fill="#47556a">HISTORICAL (ACT)</text>
+    <text x="${transitionX + 8}" y="${padTop + 14}" text-anchor="start" font-size="11" font-weight="700" fill="#7c3aed">FORECAST (EST)</text>
   `;
 
   const xLabels = series
@@ -376,10 +398,10 @@ export function createMarginChart({
       const isEst = pt.isEstimate;
       return `
         <line x1="${x}" y1="${padTop + chartH}" x2="${x}" y2="${padTop + chartH + 6}" stroke="#94a3b8" stroke-width="1" />
-        <text x="${x}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-family="monospace" font-weight="${isEst ? 'bold' : 'normal'}" fill="${isEst ? '#7c3aed' : '#1e293b'}">
+        <text x="${x}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-family="var(--font-mono)" font-weight="${isEst ? '700' : 'normal'}" fill="${isEst ? '#7c3aed' : '#1e293b'}">
           ${escapeXml(pt.displayPeriod)}
         </text>
-        <text x="${x}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="9" font-weight="600" fill="${isEst ? '#3b82f6' : '#64748b'}">
+        <text x="${x}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="11" font-weight="600" fill="${isEst ? '#3b82f6' : '#64748b'}">
           ${isEst ? 'EST' : 'ACT'}
         </text>
       `;
@@ -436,7 +458,7 @@ export function createMarginChart({
 
       <g class="chart-dots">${dots}</g>
 
-      <text x="${padLeft}" y="24" font-size="13" font-weight="bold" fill="#0f172a">Operating Profitability &amp; Margin Expansion (% of Revenue)</text>
+      <text x="${padLeft}" y="24" font-size="13" font-weight="700" fill="#0f172a">Operating Profitability &amp; Margin Expansion (% of Revenue)</text>
       
       <g class="chart-legend" transform="translate(${width - 340}, 14)">
         <line x1="0" y1="8" x2="20" y2="8" stroke="#6d28d9" stroke-width="2.5" />
@@ -448,7 +470,7 @@ export function createMarginChart({
         <text x="136" y="11" font-size="11" fill="#1e293b">Operating Margin</text>
 
         <line x1="240" y1="8" x2="260" y2="8" stroke="#64748b" stroke-width="2" stroke-dasharray="4,3" />
-        <text x="266" y="11" font-size="10" fill="#64748b">Forecast (EST)</text>
+        <text x="266" y="11" font-size="11" fill="#64748b">Forecast (EST)</text>
       </g>
     </svg>
   `.trim();
@@ -469,9 +491,17 @@ export function createMarginChart({
  * @returns {{ svg: string, dispose: () => void }}
  */
 export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) {
-  const pvExplicit = dcf?.pvExplicit ?? 0;
-  const pvTerminal = dcf?.pvTerminal ?? 0;
-  const ev = dcf?.enterpriseValue ?? (pvExplicit + pvTerminal);
+  // Stage composition comes from the engine disclosure, so a fade bar is drawn
+  // only when the fade stage is disclosed. Hardcoded period ranges become the
+  // engine's own declared stage boundaries.
+  const stages = describeStageStructure(dcf || {});
+  const hasFade = stages.fadePresent;
+  const pvExplicit = hasFade ? dcf.pvByStage.explicit : (dcf?.pvExplicit ?? 0);
+  const pvFade = hasFade ? dcf.pvByStage.fade : 0;
+  const pvTerminal = hasFade ? dcf.pvByStage.terminal : (dcf?.pvTerminal ?? 0);
+  const explicitRange = `${stages.firstPeriod ?? 'n/a'}-${stages.explicitLastPeriod ?? stages.terminalYear ?? 'n/a'}`;
+  const fadeRange = `${stages.fadeFirstPeriod ?? 'n/a'}-${stages.terminalYear ?? 'n/a'}`;
+  const ev = dcf?.enterpriseValue ?? (pvExplicit + pvFade + pvTerminal);
   const netCash = dcf?.netCash ?? 0;
   const equityValue = dcf?.equityValue ?? (ev + netCash);
   const perShare = dcf?.perShare ?? 0;
@@ -483,58 +513,121 @@ export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) 
   const chartW = Math.max(100, width - padLeft - padRight);
   const chartH = Math.max(100, height - padTop - padBottom);
 
-  const bars = [
-    {
-      id: 'explicit',
-      label: 'PV of Explicit FCFs',
-      sub: 'FY2026-FY2030 (EST)',
-      val: pvExplicit,
-      start: 0,
-      end: pvExplicit,
-      isTotal: false,
-      color: '#3b82f6',
-    },
-    {
-      id: 'terminal',
-      label: 'PV of Terminal Value',
-      sub: 'Gordon Growth (EST)',
-      val: pvTerminal,
-      start: pvExplicit,
-      end: pvExplicit + pvTerminal,
-      isTotal: false,
-      color: '#2563eb',
-    },
-    {
-      id: 'ev',
-      label: 'Implied Enterprise Value',
-      sub: 'PV(Explicit) + PV(Term)',
-      val: ev,
-      start: 0,
-      end: ev,
-      isTotal: true,
-      color: '#1e3a8a',
-    },
-    {
-      id: 'netCash',
-      label: '(+) Net Cash Bridge',
-      sub: 'Cash Sweep (ACT/MKT)',
-      val: netCash,
-      start: ev,
-      end: ev + netCash,
-      isTotal: false,
-      color: '#10b981',
-    },
-    {
-      id: 'equity',
-      label: 'Implied Equity Value',
-      sub: `Target: ${usd(perShare, { decimals: 2 })}/sh`,
-      val: equityValue,
-      start: 0,
-      end: equityValue,
-      isTotal: true,
-      color: '#047857',
-    },
-  ];
+  const bars = hasFade
+    ? [
+        {
+          id: 'explicit',
+          label: 'PV of Explicit FCFs',
+          sub: `${explicitRange} (EST)`,
+          val: pvExplicit,
+          start: 0,
+          end: pvExplicit,
+          isTotal: false,
+          color: '#3b82f6',
+        },
+        {
+          id: 'fade',
+          label: 'PV of Fade Glide',
+          sub: `${fadeRange} (EST)`,
+          val: pvFade,
+          start: pvExplicit,
+          end: pvExplicit + pvFade,
+          isTotal: false,
+          color: '#6366f1',
+        },
+        {
+          id: 'terminal',
+          label: 'PV of Terminal Value',
+          sub: 'Gordon Growth (EST)',
+          val: pvTerminal,
+          start: pvExplicit + pvFade,
+          end: pvExplicit + pvFade + pvTerminal,
+          isTotal: false,
+          color: '#2563eb',
+        },
+        {
+          id: 'ev',
+          label: 'Implied Enterprise Value',
+          sub: 'PV Explicit+Fade+Term',
+          val: ev,
+          start: 0,
+          end: ev,
+          isTotal: true,
+          color: '#1e3a8a',
+        },
+        {
+          id: 'netCash',
+          label: '(+) Net Cash Bridge',
+          sub: 'Cash Sweep (ACT/MKT)',
+          val: netCash,
+          start: ev,
+          end: ev + netCash,
+          isTotal: false,
+          color: '#10b981',
+        },
+        {
+          id: 'equity',
+          label: 'Implied Equity Value',
+          sub: `Target: ${usd(perShare, { decimals: 2 })}/sh`,
+          val: equityValue,
+          start: 0,
+          end: equityValue,
+          isTotal: true,
+          color: '#047857',
+        },
+      ]
+    : [
+        {
+          id: 'explicit',
+          label: 'PV of Explicit FCFs',
+          sub: `${explicitRange} (EST)`,
+          val: pvExplicit,
+          start: 0,
+          end: pvExplicit,
+          isTotal: false,
+          color: '#3b82f6',
+        },
+        {
+          id: 'terminal',
+          label: 'PV of Terminal Value',
+          sub: 'Gordon Growth (EST)',
+          val: pvTerminal,
+          start: pvExplicit,
+          end: pvExplicit + pvTerminal,
+          isTotal: false,
+          color: '#2563eb',
+        },
+        {
+          id: 'ev',
+          label: 'Implied Enterprise Value',
+          sub: 'PV(Explicit) + PV(Term)',
+          val: ev,
+          start: 0,
+          end: ev,
+          isTotal: true,
+          color: '#1e3a8a',
+        },
+        {
+          id: 'netCash',
+          label: '(+) Net Cash Bridge',
+          sub: 'Cash Sweep (ACT/MKT)',
+          val: netCash,
+          start: ev,
+          end: ev + netCash,
+          isTotal: false,
+          color: '#10b981',
+        },
+        {
+          id: 'equity',
+          label: 'Implied Equity Value',
+          sub: `Target: ${usd(perShare, { decimals: 2 })}/sh`,
+          val: equityValue,
+          start: 0,
+          end: equityValue,
+          isTotal: true,
+          color: '#047857',
+        },
+      ];
 
   const maxVal = Math.max(equityValue, ev, 100);
   const yCeil = Math.ceil(maxVal / 500) * 500;
@@ -550,7 +643,7 @@ export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) 
       const y = getY(tick);
       return `
         <line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3" />
-        <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" font-family="monospace" fill="#64748b">${usd(tick, { decimals: 0 })}</text>
+        <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" font-family="var(--font-mono)" fill="#64748b">${usd(tick, { decimals: 0 })}</text>
       `;
     })
     .join('');
@@ -577,13 +670,13 @@ export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) 
           <rect x="${x}" y="${yTop}" width="${barW}" height="${bHeight}" fill="${b.color}" rx="3" opacity="${b.isTotal ? '1.0' : '0.9'}">
             <title>${escapeXml(b.label)}: ${usd(b.val, { decimals: 2 })}</title>
           </rect>
-          <text x="${x + barW / 2}" y="${yTop - 6}" text-anchor="middle" font-size="11" font-family="monospace" font-weight="bold" fill="#0f172a">
+          <text x="${x + barW / 2}" y="${yTop - 6}" text-anchor="middle" font-size="11" font-family="var(--font-mono)" font-weight="700" fill="#0f172a">
             ${valLabel}
           </text>
-          <text x="${x + barW / 2}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">
+          <text x="${x + barW / 2}" y="${padTop + chartH + 20}" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">
             ${escapeXml(b.label)}
           </text>
-          <text x="${x + barW / 2}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="9" fill="#64748b">
+          <text x="${x + barW / 2}" y="${padTop + chartH + 34}" text-anchor="middle" font-size="11" fill="#64748b">
             ${escapeXml(b.sub)}
           </text>
         </g>
@@ -597,11 +690,11 @@ export function createWaterfall({ dcf = null, width = 800, height = 380 } = {}) 
       <g class="chart-grid">${gridLines}</g>
       <g class="chart-bars">${barElements}</g>
 
-      <text x="${padLeft}" y="24" font-size="13" font-weight="bold" fill="#0f172a">Enterprise Value to Equity Value Bridge ($ in thousands)</text>
+      <text x="${padLeft}" y="24" font-size="13" font-weight="700" fill="#0f172a">Enterprise Value to Equity Value Bridge ($ in thousands)</text>
       
       <g transform="translate(${width - 240}, 12)">
         <rect x="0" y="0" width="200" height="26" fill="#f0fdf4" stroke="#86efac" rx="4" />
-        <text x="100" y="17" text-anchor="middle" font-size="11" font-weight="bold" fill="#15803d">
+        <text x="100" y="17" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">
           Target Price: ${usd(perShare, { decimals: 2 })} / share
         </text>
       </g>
@@ -680,6 +773,99 @@ export const TREND_EXPLORER_METRICS = Object.freeze({
   }),
 });
 
+/**
+ * Axis suffix per ratio kind (Redesign Phase 10.3).
+ * @type {Readonly<Record<string, string>>}
+ */
+const RATIO_KIND_AXIS = Object.freeze({ percent: '%', multiple: 'x', days: 'd' });
+
+/**
+ * Unit caption per ratio kind.
+ * @type {Readonly<Record<string, string>>}
+ */
+const RATIO_KIND_UNIT = Object.freeze({
+  percent: 'Percent (%)',
+  multiple: 'Multiple (x)',
+  days: 'Days (d)',
+});
+
+/**
+ * Trendable ratio metrics for the Trend Explorer's ratio pill row (Task RP10.3).
+ *
+ * A complete projection of the frozen ratio catalogue: every one of the 20
+ * Director-approved ratios is trendable, and each entry's chart metadata is
+ * derived from the catalogue's own `label` / `kind` / `decimals`. Nothing is
+ * curated by hand, so the pill row can never drift from the engine, and the
+ * three axis families (%/x/d) are all reachable by construction.
+ *
+ * Additive by design: `TREND_EXPLORER_METRICS` stays frozen at exactly 6.
+ *
+ * @type {Readonly<Record<string, object>>}
+ */
+export const RATIO_TREND_METRICS = Object.freeze(
+  Object.fromEntries(
+    RATIO_DEFS.map((def) => [
+      def.id,
+      Object.freeze({
+        id: def.id,
+        name: def.label,
+        title: `${def.label} (Annual)`,
+        unit: RATIO_KIND_UNIT[def.kind],
+        ratioId: def.id,
+        kind: def.kind,
+        decimals: def.decimals,
+        statement: def.statement,
+      }),
+    ]),
+  ),
+);
+
+/**
+ * Y-axis step ladder for level (non-ratio) metrics, in display units.
+ * @param {number} range
+ * @returns {number}
+ */
+function pickLevelStep(range) {
+  if (range <= 15) return 2;
+  if (range <= 30) return 5;
+  if (range <= 75) return 10;
+  if (range <= 150) return 25;
+  if (range <= 300) return 50;
+  if (range <= 600) return 100;
+  if (range <= 1.5e3) return 200;
+  return 500;
+}
+
+/**
+ * Y-axis step ladder for ratio metrics. Multiples need fractional steps (a
+ * 0.25x grid reads a 2.6x-to-5.2x liquidity range; an integer grid would
+ * collapse it to two lines), while percent and day ratios step in whole units.
+ *
+ * @param {number} range
+ * @param {'percent'|'multiple'|'days'} kind
+ * @returns {number}
+ */
+function pickRatioStep(range, kind) {
+  if (kind === 'percent') {
+    if (range <= 10) return 2;
+    if (range <= 25) return 5;
+    if (range <= 60) return 10;
+    if (range <= 150) return 25;
+    return 50;
+  }
+  if (kind === 'multiple') {
+    if (range <= 1) return 0.25;
+    if (range <= 3) return 0.5;
+    if (range <= 8) return 1;
+    if (range <= 20) return 2;
+    return 5;
+  }
+  if (range <= 20) return 5;
+  if (range <= 60) return 10;
+  if (range <= 150) return 25;
+  return 50;
+}
+
 export const REVENUE_SEGMENT_COLORS = Object.freeze([
   '#2563eb', // Subscription: Blue
   '#ec4899', // Advertising: Pink/Coral
@@ -751,22 +937,58 @@ export function createTrendBarChart({
   width = 620,
   height = 300,
 } = {}) {
-  let activeMetricKey = metric in TREND_EXPLORER_METRICS ? metric : 'revenue';
+  let activeMetricKey = (metric in TREND_EXPLORER_METRICS || metric in RATIO_TREND_METRICS)
+    ? metric
+    : 'revenue';
   let currentHistorical = historical;
   let currentSelectedYear = selectedYear || 'FY2025';
   let currentWidth = width;
   let disposed = false;
 
-  function renderSvg() {
+  /**
+   * Resolves the active metric into one uniform chart descriptor, so the drawing
+   * code below is byte-identical for level metrics and computed ratios.
+   *
+   * @returns {object}
+   */
+  function describeMetric() {
+    const periods = ['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025'];
+    const ratioConfig = RATIO_TREND_METRICS[activeMetricKey];
+
+    if (ratioConfig) {
+      const ratios = computeHistoricalRatios(currentHistorical);
+      const values = ratios.ratios[ratioConfig.id].values;
+      const series = periods.map((period) => {
+        const raw = Number.isFinite(values[period]) ? values[period] : null;
+        // Percent ratios plot in percentage points so the axis reads 72.2, not 0.722.
+        const scaled = raw === null ? null : (ratioConfig.kind === 'percent' ? raw * 100 : raw);
+        return {
+          period,
+          displayPeriod: period,
+          rawValue: raw,
+          displayVal: scaled === null ? 0 : scaled,
+          formatted: formatRatioById(ratioConfig.id, raw),
+          isNull: scaled === null,
+        };
+      });
+      return {
+        name: ratioConfig.name,
+        title: ratioConfig.title,
+        unit: ratioConfig.unit,
+        axisSuffix: RATIO_KIND_AXIS[ratioConfig.kind] || '',
+        series,
+        isRatio: true,
+        stepFor: (range) => pickRatioStep(range, ratioConfig.kind),
+      };
+    }
+
     const config = TREND_EXPLORER_METRICS[activeMetricKey] || TREND_EXPLORER_METRICS.revenue;
     const stmtRows = extractRows(currentHistorical?.[config.statement]) || [];
-    const periods = ['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025'];
-
     const series = periods.map((period) => {
       const row = stmtRows.find((r) => r.metric === config.metricKey && r.period === period);
       const raw = row && Number.isFinite(row.value) ? row.value : null;
       let displayVal = 0;
-      let formatted = ' — ';
+      let formatted = ' - ';
       if (raw !== null) {
         displayVal = raw / config.divisor;
         formatted = displayVal.toLocaleString('en-US', {
@@ -780,8 +1002,23 @@ export function createTrendBarChart({
         rawValue: raw,
         displayVal,
         formatted,
+        isNull: raw === null,
       };
     });
+    return {
+      name: config.name,
+      title: config.title,
+      unit: config.unit,
+      axisSuffix: '',
+      series,
+      isRatio: false,
+      stepFor: (range) => pickLevelStep(range),
+    };
+  }
+
+  function renderSvg() {
+    const desc = describeMetric();
+    const series = desc.series;
 
     const padLeft = 60;
     const padRight = 30;
@@ -792,18 +1029,13 @@ export function createTrendBarChart({
 
     const values = series.map((s) => s.displayVal);
     const minVal = Math.min(0, ...values);
-    const maxVal = Math.max(10, ...values);
+    // Level metrics keep the historical 10-unit floor; a ratio axis must scale to
+    // its own magnitude (a 5.20x ceiling on a 10 floor would flatten the bars).
+    const maxVal = Math.max(desc.isRatio ? 0 : 10, ...values);
 
     const range = maxVal - minVal;
-    let step = 200;
-    if (range <= 15) step = 2;
-    else if (range <= 30) step = 5;
-    else if (range <= 75) step = 10;
-    else if (range <= 150) step = 25;
-    else if (range <= 300) step = 50;
-    else if (range <= 600) step = 100;
-    else if (range <= 1.5e3) step = 200;
-    else step = 500;
+    const step = desc.stepFor(range);
+    const tickLabel = (tick) => `${tick.toLocaleString('en-US')}${desc.axisSuffix}`;
 
     const yMin = Math.floor(minVal / step) * step;
     const yMax = Math.ceil((maxVal * 1.15) / step) * step;
@@ -826,7 +1058,7 @@ export function createTrendBarChart({
         const strokeWidth = isZero ? '1.5' : '1';
         return `
           <line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${(padLeft + chartW).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${lineStroke}" stroke-width="${strokeWidth}" ${lineDash} />
-          <text x="${(padLeft - 10).toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" font-family="monospace" fill="#64748b">${tick.toLocaleString('en-US')}</text>
+          <text x="${(padLeft - 10).toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" font-family="var(--font-mono)" fill="#64748b">${tickLabel(tick)}</text>
         `;
       })
       .join('');
@@ -839,13 +1071,16 @@ export function createTrendBarChart({
       .map((s, idx) => {
         const x = padLeft + idx * slotW + (slotW - barW) / 2;
         const val = s.displayVal;
-        const isNegative = val < 0;
+        const isNull = s.isNull === true;
+        const isNegative = !isNull && val < 0;
         const yVal = getY(val);
 
-        const yTop = isNegative ? yZero : yVal;
-        const bHeight = Math.max(2, Math.abs(yVal - yZero));
+        // A null ratio (not meaningful, or absent) renders a zero-height bar with
+        // the shared dash label. It never becomes a fabricated zero-valued bar.
+        const yTop = isNull ? yZero : (isNegative ? yZero : yVal);
+        const bHeight = isNull ? 0 : Math.max(2, Math.abs(yVal - yZero));
         const barColor = isNegative ? '#ef4444' : '#2563eb';
-        const labelY = isNegative ? (yVal + 14) : (yVal - 6);
+        const labelY = isNull ? (yZero - 6) : (isNegative ? (yVal + 14) : (yVal - 6));
         const isSelected = s.period === currentSelectedYear;
         const selectedClass = isSelected ? ' selected' : '';
         const strokeAttr = isSelected ? ' stroke="#0f172a" stroke-width="2.5"' : '';
@@ -853,9 +1088,9 @@ export function createTrendBarChart({
         return `
           <g class="trend-bar-item" data-period="${s.period}">
             <rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${bHeight.toFixed(1)}" fill="${barColor}" rx="3" class="trend-bar-rect${selectedClass}"${strokeAttr} data-period="${s.period}">
-              <title>${escapeXml(config.name)} ${s.period}: ${s.formatted} (${escapeXml(config.unit)})</title>
+              <title>${escapeXml(desc.name)} ${s.period}: ${s.formatted} (${escapeXml(desc.unit)})</title>
             </rect>
-            <text x="${(x + barW / 2).toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="11" font-family="monospace" font-weight="${isSelected ? '900' : 'bold'}" fill="#0f172a">
+            <text x="${(x + barW / 2).toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="11" font-family="var(--font-mono)" font-weight="${isSelected ? '700' : '700'}" fill="#0f172a">
               ${s.formatted}
             </text>
             <text x="${(x + barW / 2).toFixed(1)}" y="${(padTop + chartH + 18).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="${isSelected ? '700' : '600'}" fill="${isSelected ? '#0f172a' : '#64748b'}">
@@ -867,11 +1102,11 @@ export function createTrendBarChart({
       .join('');
 
     return `
-      <svg viewBox="0 0 ${currentWidth} ${height}" class="chart-svg financial-chart trend-bar-chart" width="100%" height="100%" role="img" aria-label="${escapeXml(config.title)}">
+      <svg viewBox="0 0 ${currentWidth} ${height}" class="chart-svg financial-chart trend-bar-chart" width="100%" height="100%" role="img" aria-label="${escapeXml(desc.title)}">
         <rect x="0" y="0" width="${currentWidth}" height="${height}" fill="#ffffff" rx="6" />
         <g class="chart-header">
-          <text x="${padLeft}" y="24" font-size="13" font-weight="bold" fill="#0f172a">${escapeXml(config.title)}</text>
-          <text x="${padLeft}" y="40" font-size="11" fill="#64748b">${escapeXml(config.unit)}</text>
+          <text x="${padLeft}" y="24" font-size="13" font-weight="700" fill="#0f172a">${escapeXml(desc.title)}</text>
+          <text x="${padLeft}" y="40" font-size="11" fill="#64748b">${escapeXml(desc.unit)}</text>
         </g>
         <g class="chart-grid">${gridLines}</g>
         <g class="chart-bars">${barElements}</g>
@@ -901,7 +1136,7 @@ export function createTrendBarChart({
 
   function update(newMetric = null, newHistorical = null, newYear = null, newWidth = null) {
     if (disposed) return;
-    if (newMetric && newMetric in TREND_EXPLORER_METRICS) {
+    if (newMetric && (newMetric in TREND_EXPLORER_METRICS || newMetric in RATIO_TREND_METRICS)) {
       activeMetricKey = newMetric;
     }
     if (newHistorical) {
@@ -1041,7 +1276,7 @@ export function createRevenueDonutChart({
         <g class="donut-legend-entry${isDimmed(seg.name) ? ' donut-dimmed' : ''}" data-segment="${escapeXml(seg.name)}" transform="translate(${lx}, ${y})" role="button" tabindex="0" aria-pressed="${pressed}" aria-label="Isolate ${escapeXml(seg.name)} segment">
           <rect x="0" y="2" width="10" height="10" rx="2" fill="${seg.color}" />
           <text x="16" y="11" font-size="11" fill="#1e293b">${escapeXml(seg.name)}</text>
-          <text x="195" y="11" text-anchor="end" font-size="11" font-family="monospace" font-weight="bold" fill="#0f172a">${seg.percentStr}</text>
+          <text x="195" y="11" text-anchor="end" font-size="11" font-family="var(--font-mono)" font-weight="700" fill="#0f172a">${seg.percentStr}</text>
         </g>
       `;
     }).join('');
@@ -1049,14 +1284,14 @@ export function createRevenueDonutChart({
     return `
       <svg viewBox="0 0 ${width} ${height}" class="chart-svg financial-chart revenue-donut-chart" width="100%" height="100%" role="img" aria-label="Revenue Composition (${escapeXml(year)}) Donut Chart">
         <rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff" rx="6" />
-        <text x="24" y="24" font-size="13" font-weight="bold" fill="#0f172a">Revenue Composition (${escapeXml(year)})</text>
+        <text x="24" y="24" font-size="13" font-weight="700" fill="#0f172a">Revenue Composition (${escapeXml(year)})</text>
         <text x="24" y="40" font-size="11" fill="#64748b">Breakdown by reporting stream ($M)</text>
 
         <g class="donut-slices">${pathElements}</g>
 
         <!-- Center cutout hole text -->
         <g class="donut-center-label">
-          <text x="${cx}" y="${cy - 3}" text-anchor="middle" font-size="15" font-weight="bold" fill="#0f172a">${totalDisplay}</text>
+          <text x="${cx}" y="${cy - 3}" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">${totalDisplay}</text>
           <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="11" fill="#64748b">Total</text>
         </g>
 
@@ -1204,5 +1439,6 @@ export default Object.freeze({
   createTrendBarChart,
   createRevenueDonutChart,
   TREND_EXPLORER_METRICS,
+  RATIO_TREND_METRICS,
   computeExactPercentages,
 });

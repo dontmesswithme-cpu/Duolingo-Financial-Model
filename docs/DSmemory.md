@@ -1,17 +1,24 @@
-# DS Memory — Operational State & Protocol Tracking (EP-FIX1 PASS, HALTED)
+# DS Memory — Operational State & Protocol Tracking (PHASE 10 — O2 COMPLETE / HALTED)
 
 ## Active State & Role
 - **Agent**: Worker `DS`
-- **Current Milestone**: **EP-FIX1 — Gate-layer hardening — 🟢 Done (Gate Passed 2026-09-10)**
-- **Active Sub-Phase**: none (program complete; awaiting Director release orders)
-- **Status**: **COMPLETED 2026-09-10 — `REVIEW: EP-FIX1 [PASS ✅]` (first-review) — HALT per §3.7**
-- **Review state**: consecutive_fails 0. EP-FIX1 PASS first-review (0 FAILs). EP overall: 1 FAIL total (EP.4 cycle 1).
-
-## EP-FIX1 Delivery Record
-- `tests/_scope_gate.js` (new): EP_AUTHORIZED_ENGINE + union tracked/untracked scope + fail-closed baseline.
-- Repaired F1/F2/F3 gates (erp.monthly, p6r2_3, p6r.accuracy_fixes, p6r2.centered_grid, market.fetch) + negative controls.
-- F4 deploy.yml `fetch-depth: 0`. F5 status.md Next refreshed to EP gate truth.
-- Suite 940/940 ×271. No engine/data/corpus/UI/pins moved. Log: `docs/logs/ds/economy_phase.md`.
-
-## Next Action
-- HALT. Do not arm watcher. Do NOT commit/tag — release authority sits with the Director. Next signal is Director release orders (release sign-off / push / tag / URL).
+- **Sub-Phase**: `O2` — P10.8 Re-gating on 1.49 Beta Basis.
+- **Status**: `COMPLETED / HALTED` (Gate Pass / Final Sign-off received in `docs/inbox_ds.md`).
+- **Position**: Full Phase 10 release-integrity reconciliation complete on 1.49 beta basis. O1 (Financial Reality) passed and re-signed; O2 (Release Candidate) passed cycle 2 under Director amendment waiving clean-tree check for uncommitted phase dirt.
+- **Signals**:
+  - `docs/status_ds.json`: `seq: 49`, `state: "completed"`, `phase: "P10"`, `subphase: "O2"`.
+  - `docs/status_op.json`: `seq: 31`, `state: "idle"`, `phase: "P10"`, `subphase: "O2"`.
+- **Circuit Breaker**: `consecutive_fails = 0`. Warnings #3–#6 ACTIVE.
+- **Final Verification Evidence (OP Verified Working)**:
+  - 1,286 / 1,286 tests PASS across 357 suites.
+  - 22 / 22 Playwright browser tests PASS in Chromium with 0 console errors.
+  - `node tools/verify_js.mjs`: `VERIFY_JS PASS: 150 file(s) syntax-checked, 0 failures`.
+  - Pin Check: `PINS IN SYNC` (`95972b149e0b837fd1b8d291b5902db3fb73dcff045e68a3c897fc01d58e0756`, 0 replacements).
+  - Manifest Check: `tests/manifest.json` exact 83 files (82 Node + 1 browser spec; 0 missing, 0 extra).
+  - Pages Artifact Check: 72 allowlisted files, 0 forbidden.
+  - Audit Check: 0 vulnerabilities.
+  - Fingerprints: Recomputed in `docs/p10_baseline/fingerprints.json` (source `c7e606c1...`, model `a9cfa0de...`, artifact `8094dd3c...`).
+  - DCF Leg Footing: dated EV $6,181,615.23 exact, residual $0.00; integer EV $6,050,147.96 exact, residual $0.00.
+  - O1 Non-Invalidation: bundle hash `271d84f7...` and model hash `2e875ed8...` preserved intact post-signing.
+- **Protocol State**: Per `docs/howtowork.md` §3 step 7 on `state === "completed"`, DS has logged phase completion to `docs/logs/ds/phase_10.md`, updated `DSmemory.md`, and **HALTED**. Watcher is NOT armed.
+- **Awaiting**: Director release instructions (commit, tag, push, archive, and/or countersignature).

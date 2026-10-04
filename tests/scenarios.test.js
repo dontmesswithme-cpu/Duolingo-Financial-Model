@@ -110,6 +110,10 @@ describe('P3.3 Scenario Delta Application & Clamping', () => {
       assert.strictEqual(applied.scenario, scenario);
 
       for (const d of base.drivers) {
+        if (typeof d.value !== 'number') {
+          assert.strictEqual(applied.getValue(d.name), d.value, `Categorical driver ${d.name} must remain unmutated`);
+          continue;
+        }
         const delta = d.scenarioDeltas?.[scenario] ?? 0;
         const expectedRaw = d.value + delta;
         const expectedClamped = Math.min(Math.max(expectedRaw, d.min), d.max);

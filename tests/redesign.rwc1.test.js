@@ -111,9 +111,9 @@ describe('RWC.1b — Derived scenario narratives (Tab 08)', () => {
     assert.ok(!html.includes('33.9%') && !html.includes('38.0%'), 'Scenario descs must carry zero hardcoded margin literals');
     assert.ok(!html.includes('—'), 'Scenario descs must carry zero em dashes (house style)');
     // P6R3 scenario pins undisturbed (EP.3 normalised terminal)
-    assert.ok(Math.abs(scenarios.base.perShare - 118.60) < 0.5, 'Base pin ~118.60');
-    assert.ok(Math.abs(scenarios.bear.perShare - 72.38) < 0.5, 'Bear pin ~72.38');
-    assert.ok(Math.abs(scenarios.bull.perShare - 217.98) < 0.5, 'Bull pin ~217.98');
+    assert.ok(Math.abs(scenarios.base.perShare - 117.57506995016278) < 0.01, 'Base pin ~117.58 (Lane A: no horizon, no dated seam)');
+    assert.ok(Math.abs(scenarios.bear.perShare - 71.9188395) < 0.01, 'Bear pin ~71.92 (Lane A)');
+    assert.ok(Math.abs(scenarios.bull.perShare - 215.4862672511) < 0.01, 'Bull pin ~215.49 (Lane A)');
     view.dispose();
     const src = await readText(fileURLToPath(new URL('../src/ui/sensitivityTab.js', import.meta.url)));
     assert.ok(!src.includes('33.9%') && !src.includes('38.0%'), 'sensitivityTab.js must carry zero hardcoded desc margins');
@@ -140,14 +140,17 @@ describe('RWC.1c — Canonical units capsule smoke (Tab 05)', () => {
 });
 
 describe('RWC.1d — Beta cross-check relabel + reframe (Tab 06)', () => {
-  test('1.47 anchors, 0.89 reads transparency-only with CI + verbatim footnote', async () => {
+  // The footnote states the PEER MEAN (the live beta basis), not the retired median.
+  // The mock below supplies 1.47 so this also proves the copy is DERIVED from the
+  // peer corpus rather than from the wacc mock: the rendered figure must be 1.49.
+  test('peer-MEAN beta anchors, 0.89 cross-check reads transparency-only with CI + verbatim footnote', async () => {
     const container = stubContainer();
     const mockWacc = {
       beta: { value: 1.47, asOf: '2026-08-31', source: { provider: 'stockanalysis.com / SEC EDGAR', url: 'https://stockanalysis.com/stocks/spot/statistics/' } },
       riskFreeRate: { value: 0.0479, asOf: '2026-09-01', source: { provider: 'FRED' } },
       erp: { value: 0.0425, asOf: '2026-09-01', source: { provider: 'Damodaran' } },
-      costOfEquity: { value: 0.110375 },
-      wacc: { value: 0.110375 },
+      costOfEquity: { value: 0.111225 },
+      wacc: { value: 0.111225 },
       sharesOutstanding: { value: 50.031, asOf: '2026-06-30' },
     };
     const mockDcf = { schedule: [], perShare: 144.08, perShareValue: 144.08, enterpriseValue: 5792014.07 };
@@ -164,8 +167,8 @@ describe('RWC.1d — Beta cross-check relabel + reframe (Tab 06)', () => {
     const expLo = (reg.beta - tCrit * reg.stderr).toFixed(2);
     const expHi = (reg.beta + tCrit * reg.stderr).toFixed(2);
     assert.ok(html.includes(`${expLo} to ${expHi}`), `Footnote CI must equal reg recomputation (${expLo} to ${expHi})`);
-    assert.ok(html.includes('Valuation uses the 1.47 bottom-up peer median (Spotify / Roblox / Netflix, Hamada-unlevered).'), 'Must carry verbatim Director footnote');
-    assert.ok(html.includes('1.47'), '1.47 peer median must still anchor');
+    assert.ok(html.includes('Valuation uses the 1.49 bottom-up peer mean (Spotify / Roblox / Netflix, Hamada-unlevered).'), 'Footnote must name the PEER MEAN (1.49) from the live corpus, not the mock wacc beta');
+    assert.ok(html.includes('1.49'), 'Peer mean 1.49 must anchor the derivation block');
     view.dispose();
   });
 });

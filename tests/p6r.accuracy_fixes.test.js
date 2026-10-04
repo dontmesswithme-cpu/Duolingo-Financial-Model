@@ -18,7 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 
-import { EP_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
+import { P104_AUTHORIZED_ENGINE, unauthorizedEngineFiles } from './_scope_gate.js';
 
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
 import { createApp } from '../src/app.js';
@@ -85,30 +85,31 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
       },
       historical,
       assumptions,
+      horizon: 5,
     });
 
     const s = app.state();
     assert.equal(s.scenario, 'base');
-    assert.ok(Math.abs(s.dcf.perShare - 118.60167662384697) < 1e-6, 'Base active perShare must match pin');
-    assert.ok(Math.abs(s.wacc.wacc.value - 0.110375) < 1e-6, 'Base active WACC must match pin');
+    assert.ok(Math.abs(s.dcf.perShare - 120.44780046765) < 1e-6, 'Base active perShare must match pin');
+    assert.ok(Math.abs(s.wacc.wacc.value - 0.111225) < 1e-6, 'Base active WACC must match pin');
 
     const sc = s.scenarios;
     assert.ok(sc, 'Scenarios object must be present');
 
-    // Bear pin: $84.39, WACC 12.985%, g 2.0%
+    // Bear pin: $84.39, WACC 13.08%, g 2.0%
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
-    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4, `Bear target price must be ~$72.38, got ${bearPerShare}`);
-    assert.ok(Math.abs((sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value) - 0.129850) < 1e-4);
+    assert.ok(Math.abs(bearPerShare - 72.09994528805) < 1e-4, `Bear target price must be ~$72.10, got ${bearPerShare}`);
+    assert.ok(Math.abs((sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value) - 0.1308) < 1e-4);
 
-    // Base pin: $144.08, WACC 11.0375%, g 2.5%
+    // Base pin: $144.08, WACC 11.1225%, g 2.5%
     const basePerShare = sc.base?.perShare ?? sc.base?.dcf?.perShare;
-    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-4, `Base target price must be ~$118.60, got ${basePerShare}`);
-    assert.ok(Math.abs((sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value) - 0.110375) < 1e-4);
+    assert.ok(Math.abs(basePerShare - 120.44780046765) < 1e-4, `Base target price must be ~$120.45, got ${basePerShare}`);
+    assert.ok(Math.abs((sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value) - 0.111225) < 1e-4);
 
-    // Bull pin: $277.84, WACC 9.24%, g 3.0%
+    // Bull pin: $223.22, WACC 9.315%, g 3.0%
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
-    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4, `Bull target price must be ~$217.98, got ${bullPerShare}`);
-    assert.ok(Math.abs((sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value) - 0.092400) < 1e-4);
+    assert.ok(Math.abs(bullPerShare - 223.21634421221) < 1e-4, `Bull target price must be ~$223.22, got ${bullPerShare}`);
+    assert.ok(Math.abs((sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value) - 0.09315) < 1e-4);
 
     // Strict ordering
     assert.ok(bearPerShare < basePerShare && basePerShare < bullPerShare, 'Bear < Base < Bull must hold');
@@ -132,13 +133,14 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
       },
       historical,
       assumptions,
+      horizon: 5,
     });
 
     app.setScenario('bear');
     const s = app.state();
     assert.equal(s.scenario, 'bear');
-    assert.ok(Math.abs(s.dcf.perShare - 72.38359613050305) < 1e-4, 'Active DCF perShare must be Bear');
-    assert.ok(Math.abs(s.wacc.wacc.value - 0.129850) < 1e-4, 'Active WACC must be Bear WACC');
+    assert.ok(Math.abs(s.dcf.perShare - 72.09994528805) < 1e-4, 'Active DCF perShare must be Bear');
+    assert.ok(Math.abs(s.wacc.wacc.value - 0.1308) < 1e-4, 'Active WACC must be Bear WACC');
 
     const sc = s.scenarios;
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
@@ -146,14 +148,14 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
 
     // Critical anti-double-delta assertions: Base must NOT mutate to Bear, Bull must NOT mutate to Base
-    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4, 'Bear row in comparison must be 72.38');
-    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-4, `Base row in comparison must remain 118.60, got ${basePerShare}`);
-    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4, `Bull row in comparison must remain 217.98, got ${bullPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 72.09994528805) < 1e-4, 'Bear row in comparison must be 72.10');
+    assert.ok(Math.abs(basePerShare - 120.44780046765) < 1e-4, `Base row in comparison must remain 120.45, got ${basePerShare}`);
+    assert.ok(Math.abs(bullPerShare - 223.21634421221) < 1e-4, `Bull row in comparison must remain 223.22, got ${bullPerShare}`);
 
     const baseWacc = sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value;
     const bullWacc = sc.bull.wacc?.wacc?.value ?? sc.bull.wacc?.value;
-    assert.ok(Math.abs(baseWacc - 0.110375) < 1e-4, `Base WACC in comparison must be 11.04%, got ${baseWacc}`);
-    assert.ok(Math.abs(bullWacc - 0.092400) < 1e-4, `Bull WACC in comparison must be 9.24%, got ${bullWacc}`);
+    assert.ok(Math.abs(baseWacc - 0.111225) < 1e-4, `Base WACC in comparison must be 11.12%, got ${baseWacc}`);
+    assert.ok(Math.abs(bullWacc - 0.09315) < 1e-4, `Bull WACC in comparison must be 9.315%, got ${bullWacc}`);
 
     // No row equals another row's WACC or growth
     assert.notEqual(sc.bear.wacc, sc.base.wacc);
@@ -178,13 +180,14 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
       },
       historical,
       assumptions,
+      horizon: 5,
     });
 
     app.setScenario('bull');
     const s = app.state();
     assert.equal(s.scenario, 'bull');
-    assert.ok(Math.abs(s.dcf.perShare - 217.98387088789931) < 1e-4, 'Active DCF perShare must be Bull');
-    assert.ok(Math.abs(s.wacc.wacc.value - 0.092400) < 1e-4, 'Active WACC must be Bull WACC');
+    assert.ok(Math.abs(s.dcf.perShare - 223.21634421221) < 1e-4, 'Active DCF perShare must be Bull');
+    assert.ok(Math.abs(s.wacc.wacc.value - 0.09315) < 1e-4, 'Active WACC must be Bull WACC');
 
     const sc = s.scenarios;
     const bearPerShare = sc.bear?.perShare ?? sc.bear?.dcf?.perShare;
@@ -192,14 +195,14 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
     const bullPerShare = sc.bull?.perShare ?? sc.bull?.dcf?.perShare;
 
     // Critical anti-double-delta assertions: Bear must NOT shift to Base, Bull must NOT double-delta to 1373
-    assert.ok(Math.abs(bearPerShare - 72.38359613050305) < 1e-4, `Bear row in comparison must remain 72.38, got ${bearPerShare}`);
-    assert.ok(Math.abs(basePerShare - 118.60167662384697) < 1e-4, `Base row in comparison must remain 118.60, got ${basePerShare}`);
-    assert.ok(Math.abs(bullPerShare - 217.98387088789931) < 1e-4, `Bull row in comparison must remain 217.98, got ${bullPerShare}`);
+    assert.ok(Math.abs(bearPerShare - 72.09994528805) < 1e-4, `Bear row in comparison must remain 72.10, got ${bearPerShare}`);
+    assert.ok(Math.abs(basePerShare - 120.44780046765) < 1e-4, `Base row in comparison must remain 120.45, got ${basePerShare}`);
+    assert.ok(Math.abs(bullPerShare - 223.21634421221) < 1e-4, `Bull row in comparison must remain 223.22, got ${bullPerShare}`);
 
     const bearWacc = sc.bear.wacc?.wacc?.value ?? sc.bear.wacc?.value;
     const baseWacc = sc.base.wacc?.wacc?.value ?? sc.base.wacc?.value;
-    assert.ok(Math.abs(bearWacc - 0.129850) < 1e-4, `Bear WACC in comparison must be 12.98%, got ${bearWacc}`);
-    assert.ok(Math.abs(baseWacc - 0.110375) < 1e-4, `Base WACC in comparison must be 11.04%, got ${baseWacc}`);
+    assert.ok(Math.abs(bearWacc - 0.1308) < 1e-4, `Bear WACC in comparison must be 13.08%, got ${bearWacc}`);
+    assert.ok(Math.abs(baseWacc - 0.111225) < 1e-4, `Base WACC in comparison must be 11.12%, got ${baseWacc}`);
     app.dispose();
   });
 
@@ -220,6 +223,7 @@ describe('P6R.1  -  Scenario-State Integrity Across All Interactive States (Anti
       },
       historical,
       assumptions,
+      horizon: 5,
     });
 
     // Edit a neutral driver: effective_tax_rate to 0.15
@@ -352,8 +356,8 @@ describe('P6R.1  -  Quality Gates: Frozen Engine, Zero UI Literals & Zero style=
     // Authorized drift from the P6R baseline: the P6R2 model-rigor revision
     // (threeStatement.js), the P6R2.3/P6R3 cost-of-capital files (market.js,
     // beta.js), the P8 method modules (excluded by the helper, gated by their
-    // own suites), and the Economy Phase set. EP authorization: Director
-    // un-park order 2026-09-10, `docs/logs/ds/economy_phase.md` §5.
+    // own suites), the Economy Phase set, RP10 ratios, and the Phase 9
+    // engine modules (P104_AUTHORIZED_ENGINE, docs/phases/phase_10.md §3 Task FP.1).
     //
     // Structural repair (EP-FIX1, F2): the assertion used to sit INSIDE the
     // `try` block, so its AssertionError was caught by the `catch` and replaced
@@ -363,7 +367,7 @@ describe('P6R.1  -  Quality Gates: Frozen Engine, Zero UI Literals & Zero style=
       'src/engine/beta.js',
       'src/engine/market.js',
       'src/engine/threeStatement.js',
-      ...EP_AUTHORIZED_ENGINE,
+      ...P104_AUTHORIZED_ENGINE,
     ];
     const unauthorized = unauthorizedEngineFiles('v1.0-P6R-base', authorized);
     assert.deepEqual(
@@ -499,6 +503,7 @@ describe('P6R.2  -  Cover/TOC Protocol Removal & Product Disclaimer', () => {
       },
       historical,
       assumptions,
+      horizon: 5,
     });
 
     const s = app.state();
@@ -647,6 +652,7 @@ describe('P6R.3  -  Assumptions Tab: Scenario Naming, Percent Display & Slider S
       },
       historical,
       assumptions,
+      horizon: 5,
     });
 
     const s = app.state();

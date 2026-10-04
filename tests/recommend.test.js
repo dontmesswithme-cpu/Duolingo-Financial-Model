@@ -295,7 +295,7 @@ describe('P4.3  -  Full Valuation Pipeline & Scenario Ranges', () => {
     );
 
     // Assert Base per-share matches pinned value (EP.3 normalised terminal)
-    pinned(baseVal.perShare, 118.60167662384697, 'Base per-share pin');
+    pinned(baseVal.perShare, 117.57506995016278, 'Base per-share pin');
     assert.equal(baseVal.recommendation.label, 'overvalued');
 
     // Benchmark price invariance: marketPrice remains 157.85 across all scenarios
@@ -303,9 +303,9 @@ describe('P4.3  -  Full Valuation Pipeline & Scenario Ranges', () => {
     assert.equal(baseVal.marketPrice, 157.85);
     assert.equal(bullVal.marketPrice, 157.85);
 
-    // Scenario recommendations (EP.3 normalised terminal: base −24.86%, bear −54.14%, bull +38.10%)
+    // Scenario recommendations (EP.3 normalised terminal: base −23.07%, bear −54.14%, bull +38.10%)
     assert.equal(bearVal.recommendation.label, 'overvalued', 'Bear upside is ~ -54.14% (<= -15% overvalued band)');
-    assert.equal(baseVal.recommendation.label, 'overvalued', 'Base upside is ~ -24.86% (<= -15% overvalued band)');
+    assert.equal(baseVal.recommendation.label, 'overvalued', 'Base upside is ~ -23.07% (<= -15% overvalued band)');
     assert.equal(bullVal.recommendation.label, 'undervalued', 'Bull upside is ~ +38.10% (>= +15% undervalued band)');
   });
 

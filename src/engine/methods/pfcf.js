@@ -109,7 +109,7 @@ export function valuatePfcf(peersCorpus, duolingoInputs) {
 
   return Object.freeze({
     method: 'pfcf',
-    label: 'P/FCF & FCF Yield',
+    label: 'P/Levered FCF & FCF Yield',
     basis: 'TTM',
     peerMultiples: Object.freeze({ ...peerPfcf }),
     peerFcfYields: Object.freeze({ ...peerFcfYield }),

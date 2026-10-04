@@ -99,7 +99,13 @@ describe('P8.1  -  Comps Valuation: Peer Multiples & 3-Name Median', () => {
 
     const expectedPerShare = (expectedEquity * 1e3) / sharesOutstanding;
     assert.ok(Math.abs(res.impliedPerShare - expectedPerShare) < 1e-4);
-    assert.ok(Math.abs(res.impliedPerShare - 141.59) < 0.1, `Expected ~$141.59, got ${res.impliedPerShare}`);
+    // P10.7 F2 (ENTAILED, disclosed): SPOT short-term investments corrected from
+    // EUR 1,047M to the filed EUR 3,450M (Q2 2026 interim balance sheet, Note 19),
+    // lifting cash.total 7,962.90 -> 10,702.32 and cutting SPOT capitalized EV by
+    // 2,739.42 (107,561.57 -> 104,822.15). SPOT's EV/FwdRev drops 4.8191x -> 4.6963x,
+    // and SPOT remains the 3-name median, so the median multiple and this per-share
+    // pin both fall. Derived from the live engine, not hand-typed.
+    assert.ok(Math.abs(res.impliedPerShare - 138.66) < 0.1, `Expected ~$138.66, got ${res.impliedPerShare}`);
 
     // Verify min and max span
     const expectedMinPerShare = ((forwardRevenue * res.multipleRange.min + netCashCapitalized) * 1e3) / sharesOutstanding;

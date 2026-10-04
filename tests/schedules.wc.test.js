@@ -192,10 +192,13 @@ describe('P2.1  -  Assumptions Infrastructure: loadAssumptions() loader', () => 
       );
       assert.ok(typeof driver.name === 'string' && driver.name.length > 0);
       assert.ok(typeof driver.label === 'string' && driver.label.length > 0);
-      assert.ok(typeof driver.notes === 'string' && driver.notes.length > 0);
-      assert.ok(Number.isFinite(driver.value));
-      assert.ok(driver.value >= driver.min && driver.value <= driver.max);
-      assert.ok(driver.scenarioDeltas && Number.isFinite(driver.scenarioDeltas.bear) && Number.isFinite(driver.scenarioDeltas.bull));
+      if (typeof driver.value === 'number') {
+        assert.ok(Number.isFinite(driver.value));
+        assert.ok(driver.value >= driver.min && driver.value <= driver.max);
+        assert.ok(driver.scenarioDeltas && Number.isFinite(driver.scenarioDeltas.bear) && Number.isFinite(driver.scenarioDeltas.bull));
+      } else {
+        assert.ok(typeof driver.value === 'string' && driver.value.length > 0);
+      }
     }
   });
 

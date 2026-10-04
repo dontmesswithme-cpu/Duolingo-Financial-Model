@@ -7,6 +7,7 @@ import { regress } from '../src/engine/beta.js';
 import { loadHistorical, loadAssumptions } from '../src/data/loader.js';
 import { renderValuation } from '../src/ui/valuationTab.js';
 import { renderSensitivity } from '../src/ui/sensitivityTab.js';
+import { apply as applyScenario } from '../src/engine/scenarios.js';
 import peersDataset from '../src/data/historical/peers_beta.json' with { type: 'json' };
 
 const P3_CORPUS_RECORD_COUNT = 706;
@@ -127,14 +128,14 @@ describe('P6R3.2  -  Beta Math: OLS Regression & Hamada Unlevering', () => {
     assert.strictEqual(roundedSpan, 0.13, `Span must equal 0.13, got ${roundedSpan}`);
   });
 
-  test('driver re-anchor consistency gate: assumptions.json beta value === 1.47', async () => {
+  test('driver re-anchor consistency gate: assumptions.json beta value === 1.49 (peer MEAN basis)', async () => {
     const assumptions = await getAssumptions();
     const betaDriver = assumptions.get('beta');
     assert.ok(betaDriver, 'beta driver must exist');
-    assert.strictEqual(betaDriver.value, 1.47, `Driver value must be 1.47, got ${betaDriver.value}`);
+    assert.strictEqual(betaDriver.value, 1.49, `Driver value must be 1.49 (peer mean basis), got ${betaDriver.value}`);
     assert.strictEqual(betaDriver.marking, 'MKT');
     assert.strictEqual(betaDriver.asOf, '2026-08-31');
-    assert.ok(betaDriver.notes.includes('1.47'));
+    assert.ok(betaDriver.notes.includes('1.49'));
     assert.ok(betaDriver.notes.includes('Spotify'));
     assert.ok(betaDriver.notes.includes('Roblox'));
     assert.ok(betaDriver.notes.includes('Netflix'));
@@ -165,13 +166,13 @@ describe('P6R3.2  -  UI Presentation: Peer Derivation & Range Readout', () => {
       },
       riskFreeRate: { value: 0.0479, asOf: '2026-09-01', source: { provider: 'FRED' } },
       erp: { value: 0.0425, asOf: '2026-09-01', source: { provider: 'Damodaran' } },
-      costOfEquity: { value: 0.110375 },
-      wacc: { value: 0.110375 },
+      costOfEquity: { value: 0.111225 },
+      wacc: { value: 0.111225 },
       sharesOutstanding: { value: 50.031, asOf: '2026-06-30' },
     };
     const mockDcf = {
       schedule: [],
-      pvExplicit: 1586880.58,
+      pvExplicit: 1583127.39,
       pvTerminal: 4205133.49,
       terminalValue: 7097871.98,
       terminalGrowthRate: 0.025,
@@ -215,26 +216,63 @@ describe('P6R3.2  -  UI Presentation: Peer Derivation & Range Readout', () => {
 
     const container = createHtmlContainer();
     const mockGrid = {
-      base: { wacc: 0.110375, growth: 0.025 },
-      waccValues: [0.090375, 0.110375, 0.130375],
+      base: { wacc: 0.111225, growth: 0.025 },
+      waccValues: [0.090375, 0.111225, 0.130375],
       growthValues: [0.01, 0.02, 0.025, 0.03],
       matrix: {
-        0.110375: { 0.025: { perShare: 144.08 } }
+        0.111225: { 0.025: { perShare: 144.08 } }
       }
+    };
+
+    // The beta sentence is DERIVED from the live driver, so the view needs real
+    // per-scenario assumption sets. Building them from the real driver (rather
+    // than passing only the base set) is what makes this an anti-tautology check:
+    // if the UI ever re-hardcoded a beta literal, it would drift from these.
+    const scen = (deltaKey) => ({
+      assumptions: applyScenario(assumptions, deltaKey),
+      wacc: { wacc: { value: 0.111225 } },
+      dcf: { perShare: 144.08 },
+      perShare: 144.08,
+    });
+    const scenarios = {
+      bear: scen('bear'),
+      base: scen('base'),
+      bull: scen('bull'),
     };
 
     const view = renderSensitivity({
       container,
       sensitivityGrid: mockGrid,
+      scenarios,
+      dcf: { perShare: 144.08 },
       TabulatorConstructor: null,
     });
 
     const html = container.innerHTML;
     assert.ok(html.includes('beta range'), 'Must mention beta range');
-    assert.ok(html.includes(`Bear β = ${bearBeta}`) || html.includes(`${bearBeta}`), `Must disclose Bear beta ${bearBeta}`);
-    assert.ok(html.includes(`Base β = ${baseBeta}`) || html.includes(`${baseBeta}`), `Must disclose Base beta ${baseBeta}`);
-    assert.ok(html.includes(`Bull β = ${bullBeta}`) || html.includes(`${bullBeta}`), `Must disclose Bull beta ${bullBeta}`);
+    assert.ok(html.includes(`Bear β = ${bearBeta}`), `Must disclose Bear beta ${bearBeta}`);
+    assert.ok(html.includes(`Base β = ${baseBeta}`), `Must disclose Base beta ${baseBeta}`);
+    assert.ok(html.includes(`Bull β = ${bullBeta}`), `Must disclose Bull beta ${bullBeta}`);
+
+    // Anti-regression: the disclosed values must track the driver, so a re-anchor
+    // of the beta driver (e.g. median 1.47 -> mean 1.49) cannot leave the prose
+    // quoting a stale figure. These are the CURRENT driver-derived values; if the
+    // driver moves again, this test must be re-read, not this source re-pinned.
+    assert.ok(!html.includes('Base β = 1.47'), 'Prose must not quote the retired median beta');
 
     view.dispose();
+  });
+
+  // Regression cover for the P10.8 beta re-anchor. These two prose strings in
+  // valuationTab.js named the PEER MEDIAN while the driver is the peer MEAN, so they
+  // went stale silently: the suite stayed green because nothing asserted their
+  // content. They are now derived from peerStats. This gate fails if either
+  // reverts to a hardcoded median anchor.
+  test('derivation prose names the peer MEAN, not the retired median', () => {
+    const src = fs.readFileSync(fileURLToPath(new URL('../src/ui/valuationTab.js', import.meta.url)), 'utf8');
+    assert.ok(!/contains the 1\.47 peer-median beta/.test(src), 'cross-check prose must not hardcode the retired median beta');
+    assert.ok(!/re-anchored to peer median/.test(src), 'active-driver provenance must not claim a median re-anchor');
+    assert.match(src, /re-anchored to peer mean \$\{peerStats/, 'active-driver provenance must derive the peer mean from peerStats');
+    assert.match(src, /contains the \$\{peerStats/, 'cross-check prose must derive the peer mean from peerStats');
   });
 });

@@ -8,7 +8,7 @@
  *
  * Gross-issuance-at-spot convention (Director ruling R2, locked 2026-09-10):
  *
- *   shares_DCF = shares_BOP + Σ (SBC_t ÷ market_share_price), t = FY2026..FY2030
+ *   shares_DCF = shares_BOP + Σ (SBC_t ÷ market_share_price), t = FY2026..FY2035
  *
  *  - `shares_BOP` is the MKT diluted-shares driver with as-of date (grants
  *    already made); the roll adds FUTURE grants only.
@@ -35,6 +35,18 @@
 import { EngineError } from '../data/errors.js';
 import { UNITS } from '../data/constants.js';
 import { extractRows } from '../data/schema.js';
+import { buildFullyDilutedSchedule } from './fullyDiluted.js';
+import duolFullyDilutedArtifact from '../data/historical/duolFullyDiluted.json' with { type: 'json' };
+
+/**
+ * P10.5: the point-in-time fully diluted schedule that issuance rolls from and
+ * that the relative methods divide by. One denominator, built once, so the DCF
+ * roll and the relative methods cannot drift apart.
+ * @returns {Readonly<Object>}
+ */
+export function fullyDilutedSchedule() {
+  return buildFullyDilutedSchedule(duolFullyDilutedArtifact);
+}
 
 /** Derived / judgment marking. */
 const EST = 'EST';
@@ -43,6 +55,22 @@ const EST = 'EST';
 const MKT = 'MKT';
 
 /** Corpus metric key for the cited H1 SBC row. */
+/**
+ * P10.5: default perpetual post-terminal dilution rate. The contract fixes the
+ * default at 1.0% with a 0%-2% sensitivity range; the caller may override it,
+ * and both positivity rules are enforced regardless.
+ * @type {number}
+ */
+const DEFAULT_D_PERM = 0.01;
+
+/**
+ * @param {ReadonlyArray<string>} periods
+ * @returns {string}
+ */
+function terminalPeriodKeyLabel(periods) {
+  return periods.length ? periods[periods.length - 1] : 'the horizon';
+}
+
 const H1_SBC_METRIC = 'cf_stock_based_compensation';
 
 /** Corpus period label for the cited H1 SBC row (mirrors the engine anchor). */
@@ -152,7 +180,10 @@ function toFlatRows(corpus) {
  * @returns {object} Frozen SharesSchedule with per-period rolls plus the terminal count.
  * @throws {EngineError} On missing drivers, lines, or the cited H1 row (fail-closed).
  */
-export function projectShares(assumptions, threeStatement, corpus) {
+export function projectShares(assumptions, threeStatement, corpus, options = {}) {
+  // P10.5: `options.fullyDilutedSchedule` carries the P10.4 point-in-time
+  // denominator; `options.dilutionRatePerpetual` carries the post-terminal
+  // dilution rate. Neither is inferred from a market driver.
   if (!assumptions || typeof assumptions !== 'object') {
     throw new EngineError(
       'missing_input',
@@ -188,21 +219,43 @@ export function projectShares(assumptions, threeStatement, corpus) {
   }
 
   const sharesDriver = requireDriverRecord(assumptions, 'shares_outstanding');
-  const priceDriver = requireDriverRecord(assumptions, 'market_share_price');
-  const bopShares = sharesDriver.value;
-  const marketPrice = priceDriver.value;
-  if (!(bopShares > 0)) {
+  // P10.3 contract: share issuance is driven by the FROZEN `sbc_issuance_price`
+  // driver, never by the benchmark. The benchmark (`market_share_price`) is a
+  // benchmark-only input and must not move issuance, terminal dilution, or the
+  // intrinsic DCF per-share value (P10.0 ruling #1).
+  const priceDriver = requireDriverRecord(assumptions, 'sbc_issuance_price');
+  // P10.5: the roll starts from the CURRENT FULLY DILUTED schedule. The
+  // `shares_outstanding` driver is the Q2 weighted-average diluted count and
+  // remains an EPS diagnostic only; it is no longer the roll base.
+  // Default to the P10.4 schedule when the caller does not supply one, so every
+  // existing lane rolls from the same point-in-time denominator rather than the
+  // weighted-average count. An EXPLICIT schedule is still validated strictly.
+  const suppliedSchedule = options.fullyDilutedSchedule;
+  const fdSchedule = suppliedSchedule === undefined || suppliedSchedule === null
+    ? fullyDilutedSchedule()
+    : suppliedSchedule;
+  if (!fdSchedule || typeof fdSchedule !== 'object' || !Number.isFinite(fdSchedule.denominator)) {
     throw new EngineError(
-      'missing_driver',
-      `shares_outstanding must be a positive finite number (received ${bopShares}).`,
-      'shares_outstanding',
+      'missing_fully_diluted_schedule',
+      'P10.5 requires the point-in-time fully diluted schedule (P10.4) as the issuance base.',
+      'fullyDilutedSchedule',
     );
   }
+  if (!(fdSchedule.denominator > 0)) {
+    throw new EngineError(
+      'invalid_fully_diluted_schedule',
+      'The fully diluted denominator must be positive.',
+      'fullyDilutedSchedule.denominator',
+    );
+  }
+  const bopShares = fdSchedule.denominator;
+  const weightedAverageDiagnostic = sharesDriver.value;
+  const marketPrice = priceDriver.value;
   if (!(marketPrice > 0)) {
     throw new EngineError(
       'missing_driver',
-      `market_share_price must be a positive finite number (received ${marketPrice}).`,
-      'market_share_price',
+      `sbc_issuance_price must be a positive finite number (received ${marketPrice}).`,
+      'sbc_issuance_price',
     );
   }
   const scale = requireFiniteNumber(
@@ -291,16 +344,101 @@ export function projectShares(assumptions, threeStatement, corpus) {
     });
   }
 
+
+  // P10.5: perpetual post-terminal dilution.
+  //
+  // The explicit roll above stops at the forecast horizon, so on its own it is
+  // NOT a complete terminal policy: it silently assumes the enterprise stops
+  // issuing while the terminal value keeps accruing. `d_perm` carries that
+  // dilution explicitly. The two positivity rules are the contract's and are
+  // enforced fail-closed rather than clamped, because clamping a negative rate
+  // would report a share count the model never validated.
+  const dPermRaw = options.dilutionRatePerpetual;
+  const dPerm = dPermRaw === undefined || dPermRaw === null ? DEFAULT_D_PERM : dPermRaw;
+  if (typeof dPerm !== 'number' || !Number.isFinite(dPerm)) {
+    throw new EngineError(
+      'invalid_dilution_rate',
+      `dilutionRatePerpetual must be a finite number (received ${dPerm}).`,
+      'dilutionRatePerpetual',
+    );
+  }
+
+  // Positivity rule 1: the terminal divisor must stay positive.
+  if (!(1 + dPerm > 0)) {
+    throw new EngineError(
+      'non_positive_terminal_divisor',
+      `(1 + d_perm) must be > 0 (received d_perm = ${dPerm}).`,
+      'dilutionRatePerpetual',
+    );
+  }
+
+  // Positivity rule 2: the perpetuity must stay finite, i.e. ke must exceed
+  // the perpetual growth/dilution rate. Supplied by the caller because the
+  // cost of equity is computed in wacc.js, not here.
+  const costOfEquity = options.costOfEquity;
+  if (typeof costOfEquity === 'number' && Number.isFinite(costOfEquity)) {
+    if (!(costOfEquity - dPerm > 0)) {
+      throw new EngineError(
+        'perpetuity_not_finite',
+        `(ke - d_perm) must be > 0 (received ke = ${costOfEquity}, d_perm = ${dPerm}).`,
+        'dilutionRatePerpetual',
+      );
+    }
+  }
+
+  const terminalDivisor = runningShares * (1 + dPerm);
+  if (!Number.isFinite(terminalDivisor) || !(terminalDivisor > 0)) {
+    throw new EngineError(
+      'non_positive_terminal_divisor',
+      `The terminal diluted divisor must be a positive finite number (received ${terminalDivisor}).`,
+      'terminalDivisor',
+    );
+  }
   const terminalPeriod = periods[periods.length - 1];
   return deepFreeze({
     periods: Object.freeze(periods.slice()),
     byPeriod: Object.freeze(byPeriod),
     bopShares,
+    /**
+     * `bopShares` is the P10.4 point-in-time fully diluted denominator
+     * (basic period-end + incremental options + RSUs/awards + met founder
+     * awards at 2026-06-30), NOT the Q2 weighted-average diluted count.
+     * The weighted average is retained separately as an EPS diagnostic and
+     * never acts as a roll base or a valuation denominator.
+     * therefore exposes no `currentShares` / `fullyDilutedShares` alias.
+     */
+    bopSharesDisclosure: Object.freeze({
+      role: 'beginning_of_period_roll_input',
+      rulingStatus: 'wa_diluted_eps_diagnostic_only',
+      fullyDilutedScheduleOwner: 'P10.4',
+      note: 'Not a fully diluted count. Do not use as a relative-method denominator.',
+    }),
     price: marketPrice,
     scale,
     totalIssuance,
     terminalPeriod,
     sharesDcf: runningShares,
+    // P10.5: the perpetual terminal policy, reported separately from the finite
+    // roll so the two are never conflated.
+    dilutionRatePerpetual: dPerm,
+    terminalDivisorPerpetual: terminalDivisor,
+    sharesFiniteTerminal: runningShares,
+    terminalPolicy: Object.freeze({
+      kind: 'finite_roll_plus_perpetual_dilution',
+      finiteRollAloneIsComplete: false,
+      note:
+        `The explicit roll covers ${periods.length} period(s) and ends at ${terminalPeriodKeyLabel(periods)}. ` +
+        'A finite issuance roll cannot be described as a complete terminal policy: it assumes issuing stops at the horizon while terminal value keeps accruing. ' +
+        `Perpetual post-terminal dilution of ${(dPerm * 100).toFixed(4)}% is therefore applied separately, giving terminal divisor ${terminalDivisor}.`,
+      rules: Object.freeze({
+        divisorPositivity: '(1 + d_perm) > 0',
+        perpetuityFiniteness: '(ke - d_perm) > 0',
+        enforcement: 'fail_closed',
+      }),
+      costOfEquityUsed: typeof costOfEquity === 'number' ? costOfEquity : null,
+    }),
+    // P10.5: the WA count is retained as a disclosed diagnostic only.
+    weightedAverageDilutedDiagnostic: weightedAverageDiagnostic,
     marking: EST,
     isComputed: true,
     derivedFrom: Object.freeze([
@@ -327,4 +465,4 @@ export function projectShares(assumptions, threeStatement, corpus) {
   });
 }
 
-export default Object.freeze({ projectShares });
+export default Object.freeze({ projectShares, fullyDilutedSchedule });

@@ -154,14 +154,26 @@ const ASSUMPTION_DRIVER_FIELDS = Object.freeze({
   name: { type: 'string', required: true, nonEmpty: true },
   label: { type: 'string', required: true, nonEmpty: true },
   group: { type: 'string', required: true, nonEmpty: true },
-  value: { type: 'number', required: true, finite: true },
-  min: { type: 'number', required: true, finite: true },
-  max: { type: 'number', required: true, finite: true },
-  step: { type: 'number', required: true, positive: true },
+  value: { types: ['number', 'string'], required: true },
+  min: {
+    type: 'number',
+    requiredWhen: (rec) => typeof rec.value === 'number',
+    finite: true,
+  },
+  max: {
+    type: 'number',
+    requiredWhen: (rec) => typeof rec.value === 'number',
+    finite: true,
+  },
+  step: {
+    type: 'number',
+    requiredWhen: (rec) => typeof rec.value === 'number',
+    positive: true,
+  },
   units: { type: 'string', required: true, nonEmpty: true },
   scenarioDeltas: {
     type: 'object',
-    required: true,
+    requiredWhen: (rec) => typeof rec.value === 'number',
     fields: SCENARIO_DELTAS_FIELDS,
   },
   notes: { type: 'string', required: true, nonEmpty: true },
@@ -225,6 +237,43 @@ Object.defineProperty(schemasTarget, 'assumptionDriver', {
   configurable: false,
 });
 
+/**
+ * Phase 10 Valuation Context schema fields.
+ * Validates immutable valuation context artifacts.
+ */
+export const VALUATION_CONTEXT_FIELDS = Object.freeze({
+  canonical: { type: 'boolean', required: true },
+  effective_valuation_date: {
+    type: 'string',
+    required: true,
+    pattern: ISO_DATE_PATTERN,
+    patternHint: 'a calendar date (YYYY-MM-DD)',
+  },
+  reporting_cutoff: {
+    type: 'string',
+    required: true,
+    pattern: ISO_DATE_PATTERN,
+    patternHint: 'a calendar date (YYYY-MM-DD)',
+  },
+  terminal_period: { type: 'string', required: true, nonEmpty: true },
+  forecast_periods: { type: 'object', required: true },
+  dcf_periods: { type: 'object', required: true },
+  shares: { type: 'object', required: true },
+  share_issuance_policy: { type: 'object', required: true },
+  benchmark_price: { type: 'object', required: true },
+  evidence_clusters: { type: 'object', required: true },
+});
+
+Object.defineProperty(schemasTarget, 'valuationContext', {
+  value: Object.freeze({
+    name: 'valuationContext',
+    fields: VALUATION_CONTEXT_FIELDS,
+  }),
+  enumerable: false,
+  writable: false,
+  configurable: false,
+});
+
 export const SCHEMAS = Object.freeze(schemasTarget);
 
 
@@ -259,6 +308,11 @@ function describeRequirement(rule) {
 function validateValue(value, rule, field, errors, origin) {
   const actual = typeOf(value);
 
+  if (rule.types && !rule.types.includes(actual)) {
+    errors.push(makeError(field, `must be one of types: ${rule.types.join(', ')} (received ${actual}).`, origin));
+    return;
+  }
+
   if (rule.type && actual !== rule.type) {
     errors.push(makeError(field, `must be a ${rule.type} (received ${actual}).`, origin));
     return;
@@ -275,7 +329,7 @@ function validateValue(value, rule, field, errors, origin) {
     );
   }
 
-  if (rule.finite && !Number.isFinite(value)) {
+  if (rule.finite && (typeof value !== 'number' || !Number.isFinite(value))) {
     errors.push(makeError(field, `must be a finite number (received ${value}).`, origin));
   }
 

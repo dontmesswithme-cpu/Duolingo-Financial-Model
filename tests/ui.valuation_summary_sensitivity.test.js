@@ -133,9 +133,11 @@ describe('P5.5  -  Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
     // WACC Build Table assertions
     assert.match(html, /Weighted Average Cost of Capital \(WACC\)/);
     assert.match(html, /4\.79%/); // Risk-Free Rate
-    assert.match(html, /1\.47/); // Beta
+    assert.match(html, /1\.49/); // Beta
     assert.match(html, /4\.25%/); // ERP
-    assert.match(html, /11\.0375%/); // Cost of Equity / WACC
+    // Cost of equity moved 11.0375% -> 11.1225% with the beta re-anchor
+    // (1.47 median -> 1.49 mean): Re = 4.79% + 1.49 x 4.25%.
+    assert.match(html, /11\.1225%/); // Cost of Equity / WACC
     assert.match(html, /\$7,897,393,350/); // Market Cap
     assert.match(html, /Normalized effective corporate income tax rate/);
     assert.match(html, /13\.42%/); // Engine wacc.taxRate
@@ -143,13 +145,19 @@ describe('P5.5  -  Valuation Tab: CAPM WACC Build & DCF Waterfall', () => {
     assert.doesNotMatch(html, /Bloomberg/); // No Bloomberg text
     assert.doesNotMatch(html, /21\.00%/); // No 21% statutory tax text
 
-    // Bridge Waterfall assertions (EP.3 normalised terminal)
-    assert.match(html, /\$1,586,880\.58/); // PV Explicit
-    assert.match(html, /\$3,745,288\.74/); // PV Terminal
-    assert.match(html, /\$5,332,169\.32/); // EV
+    // Bridge Waterfall assertions.
+    // Lane A: this file's getDatasets() calls valuateDcf with NO horizon and NO
+    // datedSeam, so the engine takes FORECAST_HORIZON_DEFAULT (5) on the
+    // integer-period basis. Measured off the live engine, not copied from
+    // another test file:
+    //   pvExplicit 1,583,127.39 | pvTerminal 3,694,206.57 | EV 5,277,333.97
+    //   netCash 1,416,559.00 | equity 6,693,892.97 | perShare 117.58
+    assert.match(html, /\$1,583,127\.39/); // PV Explicit
+    assert.match(html, /\$3,694,206\.57/); // PV Terminal
+    assert.match(html, /\$5,277,333\.97/); // EV
     assert.match(html, /\$1,416,559\.00/); // Net Cash
-    assert.match(html, /\$6,748,728\.32/); // Equity Value
-    assert.match(html, /\$118\.60/); // DCF Target Price (EP.3 normalised terminal)
+    assert.match(html, /\$6,693,892\.97/); // Equity Value
+    assert.match(html, /\$117\.58/); // DCF per share (Lane A)
 
     // DCF schedule Terminal column has valid terminal FCF in Finding E termFcf row
     const termFcfRow = dcfCall.config.data.find((r) => r.id === 'termFcf');
@@ -178,11 +186,17 @@ describe('P5.5  -  Summary Tab: Mechanical Recommendation & KPI Dashboard', () =
     assert.ok(view);
     const html = container.innerHTML;
 
-    // Recommendation card assertions (EP.3 normalised terminal: overvalued −24.86%)
+    // Recommendation card assertions.
+    // The summary states the CANONICAL perShare (after modeled future dilution,
+    // 116.41), NOT the finite-roll intermediate (117.58) that the matrix cells and
+    // the valuation bridge show. That split is deliberate — see
+    // canonicalDcfPerShare() in src/engine/methods/fcffDcf.js and the basis note on
+    // the matrix card — so the two figures are expected to differ by the modeled
+    // future dilution, and each is pinned on its own basis.
     assert.match(html, /OVERVALUED/);
-    assert.match(html, /\$118\.60/); // DCF Target Price (EP.3 normalised terminal)
+    assert.match(html, /\$116\.41/); // DCF fair value (canonical basis)
     assert.match(html, /\$157\.85/); // Market Price
-    assert.match(html, /-24\.86%/); // Implied Upside
+    assert.match(html, /-25\.51%/); // Implied Upside vs $157.85
 
     // Operating KPIs derived from corpus and engine
     const kpiRows = extractRows(historical.kpis);
@@ -264,18 +278,24 @@ describe('P5.5  -  Sensitivity Tab: 9×5 WACC × g Matrix & Scenario Bands', () 
       }
     }
 
-    // Active center cell carries .active-cell with the Base pin
+    // Active center cell carries .active-cell with the Base pin.
+    // Lane A, same basis as the bridge above: 117.58.
     const activeCells = [...html.matchAll(/<td class="heatmap-cell heatmap-tier-\d+ active-cell"[^>]*>([^<]+)<\/td>/g)];
     assert.equal(activeCells.length, 1, 'Exactly one active cell');
-    assert.equal(activeCells[0][1], '$118.60');
+    assert.equal(activeCells[0][1], '$117.58');
 
     // Scenario Comparison table assertions (P6R.3 display labels: Downside, Base, Upside)
     assert.match(html, /Downside Case/);
-    assert.match(html, /\$72\.38/);
     assert.match(html, /Base Case/);
-    assert.match(html, /\$118\.60/);
     assert.match(html, /Upside Case/);
-    assert.match(html, /\$217\.98/);
+    // Scenario band is stated on the CANONICAL basis (after modeled future
+    // dilution), while the matrix cells above are the finite-roll intermediate.
+    // The two differ by the modeled future dilution by design, so each is pinned
+    // on its own basis. Measured off the live engine, Lane A (h5, no seam):
+    //   canonical     bear 71.21 < base 116.41 < bull 213.35
+    //   intermediate  bear 71.92 < base 117.58 < bull 215.49
+    assert.match(html, /\$71\.21/);
+    assert.match(html, /\$213\.35/);
 
     // Hybrid FY2026 Invariance Footnote with OCF $239,031
     assert.match(html, /Hybrid FY2026 Invariance Invariant/);

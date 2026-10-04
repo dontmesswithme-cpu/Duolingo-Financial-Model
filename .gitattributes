@@ -1,0 +1,22 @@
+# Normalise line endings so tools that pattern-match source text behave the
+# same on every platform.
+#
+# Why this exists (F-1, 2026-10-02): `tools/regen_pins.mjs` locates the
+# PIN-GENESIS-STAMP block by pattern. `core.autocrlf=true` on Windows turned the
+# checked-out file into CRLF, the pattern failed to match, and the pin-genesis
+# gate reported `PIN DRIFT: 0 pin(s) differ` while exiting non-zero — a false
+# alarm that made the suite red on substance that was in perfect sync.
+#
+# `eol=lf` makes the working tree match the repository (which stores LF), so a
+# gate cannot pass or fail based on whose operating system checked it out.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending translated.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary

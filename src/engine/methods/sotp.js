@@ -14,6 +14,7 @@
  */
 
 import { EngineError } from '../../data/errors.js';
+import { forwardBasisLabel } from './forwardBasis.js';
 
 /**
  * Calculates median and min/max span for an array of numbers.
@@ -37,10 +38,10 @@ function computeStats(values) {
  *
  * @param {Object} peersCorpus - The peers object from peers.json
  * @param {Object} duolingoInputs - Duolingo forward figures and segment breakdowns
- * @param {number} [duolingoInputs.forwardRevenue] - FY+1 explicit forecast total revenue in $k
- * @param {number} [duolingoInputs.subscriptionsRevenue] - FY+1 subscriptions (incl. ads) revenue in $k
- * @param {number} duolingoInputs.detRevenue - FY+1 Duolingo English Test revenue in $k
- * @param {number} duolingoInputs.forwardEbitdar - FY+1 explicit forward EBITDAR in $k
+ * @param {number} [duolingoInputs.forwardRevenue] - the corpus forward estimate period (FY2026E) explicit forecast total revenue in $k
+ * @param {number} [duolingoInputs.subscriptionsRevenue] - the corpus forward estimate period (FY2026E) subscriptions (incl. ads) revenue in $k
+ * @param {number} duolingoInputs.detRevenue - the corpus forward estimate period (FY2026E) Duolingo English Test revenue in $k
+ * @param {number} duolingoInputs.forwardEbitdar - the corpus forward estimate period (FY2026E) explicit forward EBITDAR in $k
  * @param {number} duolingoInputs.netCashCapitalized - Capitalized net cash in $k
  * @param {number} duolingoInputs.sharesOutstanding - Diluted common shares count (e.g. 50,031,000)
  * @returns {Readonly<Object>} Frozen method contract
@@ -49,6 +50,7 @@ export function valuateSotp(peersCorpus, duolingoInputs) {
   if (!peersCorpus || typeof peersCorpus !== 'object') {
     throw new EngineError('missing_peers_corpus', 'peersCorpus is required');
   }
+
   const peers = peersCorpus.peers || peersCorpus;
   const symbols = ['SPOT', 'RBLX', 'NFLX'];
 
@@ -56,7 +58,13 @@ export function valuateSotp(peersCorpus, duolingoInputs) {
     if (!peers[sym]) {
       throw new EngineError('missing_peer', `Missing required peer ${sym} in peer corpus`, sym);
     }
+
   }
+
+  // P10.4 F1: derived from the corpus AFTER the peer-presence checks, so a
+  // missing peer still reports the specific defect, and fail-closed if the peers
+  // disagree on the estimate period or the label is an offset such as FY+1.
+  const forwardBasis = forwardBasisLabel(peersCorpus);
 
   if (!duolingoInputs || typeof duolingoInputs !== 'object') {
     throw new EngineError('missing_duolingo_inputs', 'duolingoInputs is required');
@@ -204,7 +212,10 @@ export function valuateSotp(peersCorpus, duolingoInputs) {
   return Object.freeze({
     method: 'sotp',
     label: 'Sum-of-the-Parts (SOTP)',
-    basis: 'FY+1',
+    // P10.4 F1: the label is read from the peer corpus, never typed here.
+    // 'FY+1' was an offset rather than a period and disagreed with the
+    // corpus, while rendering user-visibly.
+    basis: forwardBasis,
     segments,
     segmentCount: 2,
     primaryMultiple: 'ev_forward_revenue',

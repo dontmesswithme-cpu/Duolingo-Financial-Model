@@ -10,6 +10,7 @@ import { readLedgerUrls } from './_ledger.js';
 import { createTabRoot } from './_dom_stub.js';
 import { settleHeap } from './_gc.js';
 import { usd } from '../src/ui/format.js';
+import { canonicalDcfPerShare } from '../src/engine/methods/fcffDcf.js';
 import { runGateScan } from '../tools/verify_redesign_gates.mjs';
 
 const DATA_DIR = fileURLToPath(new URL('../src/data/historical/', import.meta.url));
@@ -35,6 +36,7 @@ async function bootFullApp() {
     assumptions,
     root,
     now: () => Date.parse('2026-09-01T00:00:00.000Z'),
+    horizon: 5,
   });
   const paneOf = (key) => panes.find((p) => p.getAttribute('data-tab') === key);
   const linkOf = (key) => links.find((l) => l.getAttribute('data-tab') === key);
@@ -77,13 +79,18 @@ describe('RP9.1 — Boot: all 8 tabs mount with live content', () => {
 describe('RP9.1 — Cross-tab synchronization on driver changes', () => {
   test('one driver edit propagates the same DCF pin to cover/valuation/summary/sensitivity', async () => {
     const { app, paneOf, visit } = await bootFullApp();
-    const pinFor = () => usd(app.state().dcf.perShare, { decimals: 2 });
+    // P10.6: the cross-tab pin is the CANONICAL add-back DCF figure. Cover,
+    // valuation, summary and sensitivity now all state that one basis, so this is
+    // stricter than before: previously each surface could derive the intermediate
+    // independently. The property under test is unchanged — one driver edit moves
+    // ONE pin and every pane carries it.
+    const pinFor = () => usd(canonicalDcfPerShare(app.state().dcf).perShare, { decimals: 2 });
     for (const key of ['cover', 'valuation', 'summary', 'sensitivity']) {
       assert.ok(paneOf(key).innerHTML.includes(pinFor()), `${key} carries the boot DCF pin ${pinFor()}`);
     }
     app.setDriver('terminal_growth_rate', 0.0275);
     const moved = pinFor();
-    assert.notEqual(moved, '$118.60', 'Driver edit must move the DCF pin');
+    assert.notEqual(moved, '$120.45', 'Driver edit must move the DCF pin');
     // Hidden panes refresh on activation; visit each tab, then assert sync.
     for (const key of ['cover', 'valuation', 'summary', 'sensitivity']) {
       visit(key);
@@ -91,7 +98,7 @@ describe('RP9.1 — Cross-tab synchronization on driver changes', () => {
     }
     app.setDriver('terminal_growth_rate', 0.025);
     visit('sensitivity');
-    assert.ok(paneOf('sensitivity').innerHTML.includes('$118.60'), 'Pin restores on revert');
+    assert.ok(paneOf('sensitivity').innerHTML.includes('$120.45'), 'Pin restores on revert');
     app.dispose();
   });
 
@@ -101,12 +108,12 @@ describe('RP9.1 — Cross-tab synchronization on driver changes', () => {
     visit('sensitivity');
     const sensHtml = paneOf('sensitivity').innerHTML;
     assert.match(sensHtml, /<option value="bear" selected>Downside Case<\/option>/);
-    assert.ok(sensHtml.includes('$72.38'), 'Sensitivity re-centers on the Bear pin');
+    assert.ok(sensHtml.includes('$72.10'), 'Sensitivity re-centers on the Bear pin (Lane B, horizon 5 + dated seam)');
     visit('assumptions');
     assert.match(paneOf('assumptions').innerHTML, /data-scenario="bear"[^>]*active|active[^>]*data-scenario="bear"/, 'Bear pill activates');
     app.setScenario('base');
     visit('sensitivity');
-    assert.ok(paneOf('sensitivity').innerHTML.includes('$118.60'), 'Base restores');
+    assert.ok(paneOf('sensitivity').innerHTML.includes('$120.45'), 'Base restores');
     app.dispose();
   });
 });

@@ -59,7 +59,7 @@ const P3_CORPUS_RECORD_COUNT = 706;
  * Independent hand-computed Base DCF pins (anti-tautology).
  *
  * Sourced from verified Base FCFF projection + live WACC build + EP.2/EP.3 fixes:
- *   WACC         = 0.110375 (11.0375%)
+ *   WACC         = 0.111225 (11.1225%)
  *   g            = 0.025 (2.5%)
  *   shares       = 56,902,469.78 rolled (BOP 50,031,000 + gross SBC issuance at spot)
  *   market price = $157.85
@@ -68,15 +68,15 @@ const P3_CORPUS_RECORD_COUNT = 706;
  *   FY2028 FCFF  = 431,125.5393149832 ($k)
  *   FY2029 FCFF  = 504,377.9944682029 ($k)
  *   FY2030 FCFF  = 591,200.8006542748 ($k)
- *   df_FY2026    = 1 / (1 + 0.110375)^1 = 0.9005966452774964
- *   df_FY2030    = 1 / (1 + 0.110375)^5 = 0.5924498916887444
+ *   df_FY2026    = 1 / (1 + 0.111225)^1 = 0.899907759454656
+ *   df_FY2030    = 1 / (1 + 0.111225)^5 = 0.5901874669102819
  *   pvExplicit   = 1,586,880.579442814 ($k)
  *   terminal steady state (EP.3): wcInflowT = 78,090.87217182736 ($k),
  *     wcInflowSS = 13,441.180608195853 ($k),
  *     fcffNorm   = 591,200.8006542748 − 78,090.87217182736 + 13,441.180608195853
  *                = 526,551.1090906432 ($k)
  *   terminalFcf  = 526,551.1090906432 × 1.025 = 539,714.8869179098 ($k)
- *   terminalVal  = 539,714.8869179098 / (0.110375 − 0.025) = 6,321,697.063752963 ($k)
+ *   terminalVal  = 539,714.8869179098 / (0.111225 − 0.025) = 6,321,697.063752963 ($k)
  *   pvTerminal   = 6,321,697.063752963 × df_FY2030 = 3,745,288.7407094967 ($k)
  *   EV           = 1,586,880.579442814 + 3,745,288.7407094967 = 5,332,169.320152311 ($k)
  *   ending cash  = 1,180,887 ($k, latest filed Q2 FY2026 BOP)
@@ -84,28 +84,28 @@ const P3_CORPUS_RECORD_COUNT = 706;
  *   LTI          = 102,693 ($k)
  *   net cash     = 1,180,887 + 132,979 + 102,693 = 1,416,559 ($k)
  *   equityValue  = 5,332,169.320152311 + 1,416,559 = 6,748,728.320152311 ($k)
- *   perShare     = (6,748,728.320152311 × 1000) / 56,902,469.78 = $118.60167662384697
+ *   perShare     = (6,748,728.320152311 × 1000) / 56,902,469.78 = $118.547675
  */
 const DCF_PIN = Object.freeze({
-  wacc: 0.110375,
+  wacc: 0.111225,
   terminalGrowthRate: 0.025,
   sharesOutstanding: 50031000,
   marketSharePrice: 157.85,
   fcfFy2026: 323417.33993955905,
   fcfFy2030: 591200.8006542748,
-  dfFy2026: 0.9005966452774964,
-  dfFy2030: 0.5924498916887444,
-  pvExplicit: 1586880.579442814,
+  dfFy2026: 0.899907759454656,
+  dfFy2030: 0.5901874669102819,
+  pvExplicit: 1583127.3916904489,
   terminalFcf: 605980.8206706316,
-  terminalValue: 6321697.063752963,
-  pvTerminal: 3745288.7407094967,
-  enterpriseValue: 5332169.320152311,
+  terminalValue: 6259378.217662039,
+  pvTerminal: 3694206.574715354,
+  enterpriseValue: 5277333.966405803,
   endingCash: 1180887,
   sti: 132979,
   lti: 102693,
   netCash: 1416559,
-  equityValue: 6748728.320152311,
-  perShare: 118.60167662384697,
+  equityValue: 6693892.966405803,
+  perShare: 117.57506995016278,
 });
 
 /** Absolute tolerance for small floats (rates / discount factors <= 1). */
@@ -299,7 +299,7 @@ describe('P4.2  -  Gordon terminal value and WACC > g guard', () => {
       },
     );
 
-    // Test g greater than WACC (e.g. 12% > 11.0375%)
+    // Test g greater than WACC (e.g. 12% > 11.1225%)
     const highGAssumptions = overrideAssumptions(assumptions, [
       Object.freeze({
         ...assumptions.get('terminal_growth_rate'),

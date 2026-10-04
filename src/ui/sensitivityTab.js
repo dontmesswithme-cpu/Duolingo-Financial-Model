@@ -22,6 +22,7 @@
 import { EngineError } from '../data/errors.js';
 import { SCENARIO_NAMES } from '../data/constants.js';
 import { usd, percent, estSuffix, SCENARIO_DISPLAY_NAMES } from './format.js';
+import { canonicalDcfPerShare } from '../engine/methods/fcffDcf.js';
 
 /** Number of discrete heatmap tiers on the sensitivity matrix color ramp. */
 const HEATMAP_TIERS = 9;
@@ -133,7 +134,10 @@ export function renderSensitivityMatrix(model) {
     return `<tr${trClass}><th class="matrix-wacc-label" scope="row">${row.label}${badge}</th>${cells}</tr>`;
   }).join('');
 
-  return `<div class="matrix-table-scroll"><table class="sensitivity-matrix-table"><thead><tr><th class="matrix-corner" scope="col">WACC (Discount Rate)</th>${growthHeaders}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
+  // F-UI-5: visible horizontal-scroll affordance, keyboard-focusable scroll
+  // region, and sticky first column (CSS) so the full 9x5 matrix stays usable
+  // on narrow viewports without document-level overflow.
+  return `<div class="matrix-scroll-hint" role="note">Scroll horizontally to see all g columns (1.5% through 3.5%) &rarr;</div><div class="matrix-table-scroll" tabindex="0" role="region" aria-label="WACC by terminal growth sensitivity matrix: scroll horizontally to see all terminal growth columns"><table class="sensitivity-matrix-table"><thead><tr><th class="matrix-corner" scope="col">WACC (Discount Rate)</th>${growthHeaders}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
 }
 
 /**
@@ -190,6 +194,32 @@ export function renderSensitivity({
     return m !== null ? `${percent(m, { decimals: 1 })} terminal FCF margin` : 'terminal FCF margin -';
   }
 
+  function scenarioBetaSentence() {
+    // Beta disclosure is DERIVED from the live driver, never a prose literal. It
+    // used to be a hardcoded sentence ("Base β = 1.47"), which silently went stale
+    // the moment the driver was re-anchored to the peer mean (1.49), leaving the UI
+    // quoting a beta the model no longer used. Reads each scenario's own driver and
+    // falls back to the base driver plus its scenario deltas, so all three move
+    // together. Fail-closed: with no live driver it says so rather than inventing.
+    const base = currentScenarios?.[SCENARIO_NAMES[1]];
+    const baseDriver = base?.assumptions?.get ? base?.assumptions?.get('beta') : null;
+    const read = (key) => {
+      const v = currentScenarios?.[key]?.assumptions?.get?.('beta')?.value;
+      return Number.isFinite(v) ? Number(v.toFixed(2)) : null;
+    };
+    const fromDeltas = (deltaKey) => (Number.isFinite(baseDriver?.value)
+      ? Number((baseDriver.value + (baseDriver.scenarioDeltas?.[deltaKey] ?? 0)).toFixed(2))
+      : null);
+    // Scenario keys come from SCENARIO_NAMES (constants.js), never literals here —
+    // this file is under the no-config-literals gate. Index 0 = downside, 2 = upside.
+    const bear = read(SCENARIO_NAMES[0]) ?? fromDeltas(SCENARIO_NAMES[0]);
+    const baseV = read(SCENARIO_NAMES[1]) ?? (Number.isFinite(baseDriver?.value) ? Number(baseDriver.value.toFixed(2)) : null);
+    const bull = read(SCENARIO_NAMES[2]) ?? fromDeltas(SCENARIO_NAMES[2]);
+    return (bear !== null && baseV !== null && bull !== null)
+      ? `(${SCENARIO_DISPLAY_NAMES[SCENARIO_NAMES[0]] || 'Downside'} / Bear β = ${bear}, Base β = ${baseV}, ${SCENARIO_DISPLAY_NAMES[SCENARIO_NAMES[2]] || 'Upside'} / Bull β = ${bull})`
+      : '(scenario beta range unavailable — no live driver)';
+  }
+
   function renderScenarioSelect() {
     const current = (typeof currentActiveScenario === 'string' && SCENARIO_NAMES.includes(currentActiveScenario))
       ? currentActiveScenario
@@ -214,7 +244,14 @@ export function renderSensitivity({
 
     const bearWacc = bear?.wacc?.wacc?.value ?? bear?.wacc?.value ?? null;
     const bearG = bear?.assumptions?.getValue ? bear?.assumptions?.getValue('terminal_growth_rate') : bear?.assumptions?.get?.('terminal_growth_rate')?.value;
-    const bearPrice = bear?.perShare ?? bear?.dcf?.perShare ?? null;
+    // P10.6: these read the engine scenario object, which carries the finite-roll
+    // intermediate. The basis difference is disclosed by the basis note on the matrix
+    // card rather than silently re-based here, because the matrix active-cell anchor
+    // is derived from the same engine grid.
+    // P10.6: the scenario table states the CANONICAL basis, matching the
+    // valuation headline, the recommendation, the cover tile and the summary cards.
+    const bearPrice = canonicalDcfPerShare(bear?.dcf ?? (bear?.perShare ? bear : null)).perShare
+      ?? bear?.perShare ?? null;
     const bearUpside = bear?.upsidePct ?? bear?.recommendation?.upsidePct ?? null;
     // C3 disposition: recommendation/verdict labels render fail-closed dashes
     // when absent - no invented 'fair'/'undervalued' stand-ins.
@@ -224,7 +261,9 @@ export function renderSensitivity({
 
     const baseWacc = base?.wacc?.wacc?.value ?? base?.wacc?.value ?? currentGrid?.base?.wacc ?? null;
     const baseG = (base?.assumptions?.getValue ? base?.assumptions?.getValue('terminal_growth_rate') : base?.assumptions?.get?.('terminal_growth_rate')?.value) ?? currentGrid?.base?.growth ?? null;
-    const basePrice = base?.perShare ?? base?.dcf?.perShare ?? currentDcf?.perShare ?? null;
+    const basePrice = canonicalDcfPerShare(base?.dcf ?? (base?.perShare ? base : null)).perShare
+      ?? canonicalDcfPerShare(currentDcf).perShare
+      ?? base?.perShare ?? currentDcf?.perShare ?? null;
     const baseUpside = base?.upsidePct ?? base?.recommendation?.upsidePct ?? currentScenarios?.base?.upsidePct ?? null;
     const baseRec = base?.recommendation?.label ?? null;
     const baseVerdictRaw = base?.verdict?.verdict ?? base?.verdict ?? null;
@@ -232,7 +271,8 @@ export function renderSensitivity({
 
     const bullWacc = bull?.wacc?.wacc?.value ?? bull?.wacc?.value ?? null;
     const bullG = bull?.assumptions?.getValue ? bull?.assumptions?.getValue('terminal_growth_rate') : bull?.assumptions?.get?.('terminal_growth_rate')?.value;
-    const bullPrice = bull?.perShare ?? bull?.dcf?.perShare ?? null;
+    const bullPrice = canonicalDcfPerShare(bull?.dcf ?? (bull?.perShare ? bull : null)).perShare
+      ?? bull?.perShare ?? null;
     const bullUpside = bull?.upsidePct ?? bull?.recommendation?.upsidePct ?? null;
     const bullRec = bull?.recommendation?.label ?? null;
     const bullVerdictRaw = bull?.verdict?.verdict ?? bull?.verdict ?? null;
@@ -295,7 +335,7 @@ export function renderSensitivity({
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
             Full-path end-to-end valuation runs parameterized across three macroeconomic and operating scenarios (preserving <code>Downside &lt; Base &lt; Upside</code> intrinsic value ordering).
-            <span class="scenario-benchmark-caption">${benchmarkCaption} All scenario comparison upsides evaluate versus this neutral benchmark. Multi-Method Verdict reflects unweighted agreement across all six valuation methods.</span>
+            <span class="scenario-benchmark-caption">${benchmarkCaption} All scenario comparison upsides evaluate versus this neutral benchmark. Multi-Method Verdict reflects majority agreement across three evidence clusters, where each cluster collapses to one observation and breadth counts clusters rather than methods.</span>
           </p>
           <div class="spectrum-table-scroll">
           <table class="financial-summary-table scenario-spectrum-table">
@@ -352,7 +392,19 @@ export function renderSensitivity({
         </div>
         <div class="sensitivity-card-body">
           <p class="valuation-section-desc">
-            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Evaluates valuation sensitivity across the active systematic risk beta range (Bear β = 1.62, Base β = 1.47, Bull β = 1.32; peer unlevered asset beta range: 1.44 to 1.57). Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
+            Two-variable 9×5 matrix evaluating implied equity value per share across WACC (&plusmn;200 bps) and Gordon Growth rates (&plusmn;100 bps), with both axes tracking the active scenario. Evaluates valuation sensitivity across the active systematic risk beta range ${scenarioBetaSentence()}. Strict monotonicity holds across all cells (<code>&part;Price/&part;WACC &lt; 0</code>, <code>&part;Price/&part;g &gt; 0</code>). Matrix center tracks active scenario WACC and terminal growth at the exact matrix center; highlighted cell denotes Active Case valuation.
+          </p>
+          <p class="matrix-basis-note" data-inspector-lever="sensitivity-basis">
+            <!-- P10.6 basis disclosure. The scenario figures above are stated on the
+                 canonical after-future-dilution basis, but each matrix cell is an
+                 engine-computed DCF on the finite-roll INTERMEDIATE basis. Rather
+                 than let a reader assume the whole surface shares one basis, the
+                 difference is named here. Re-deriving 45 cells on the perpetual
+                 basis is a modelling change and is deliberately not done here. -->
+            Basis: each cell below is the engine DCF after explicit and fade dilution (the finite-roll
+            intermediate). The scenario values above are after modeled future dilution, which is the
+            canonical and recommendable basis. The two differ by the modelled future dilution, so a
+            cell reads slightly above its scenario counterpart.
           </p>
           ${renderSensitivityMatrix(model)}
           <p class="matrix-axis-note">Darker green shades denote higher implied intrinsic value; the blue cell marks the active-scenario center valuation.</p>

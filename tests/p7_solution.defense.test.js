@@ -201,10 +201,30 @@ describe('P8.0 - Thesis Defense: Derivation Guard & Flip-Map Geometry', () => {
 
     // Lever 6: Diluted Shares (renumbered from 7) — EP.2 rolled count (BOP 50.031M + gross issuance)
     const sharesM = (dcfOut.sharesOutstanding / 1e6).toFixed(3) + 'M';
-    assert.equal(sharesM, '56.902M', 'Diluted shares derivation must be 56.902M (rolled)');
+    assert.equal(sharesM, '56.933M', 'Diluted shares derivation must be 56.933M (rolled)');
     assert.ok(html.includes(sharesM), `Lever 6 must render shares: ${sharesM}`);
-    assert.ok(html.includes('50,031,000'), 'Lever 6 must cite full diluted share count');
-    assert.ok(html.includes('46,786,269'), 'Lever 6 must cite basic shares count');
+    // P10.5: the lever renders the ROLLED count (the FD schedule plus modelled
+    // issuance) as its headline, and states the FD schedule build underneath.
+    // Both must be present, and the rolled headline must exceed the schedule
+    // base, which is the whole point of the roll.
+    assert.ok(
+      html.includes('Fully diluted shares outstanding (56.933M)') ||
+        html.includes('Fully diluted shares outstanding (56,932,927'),
+      'Lever 6 must render the rolled count',
+    );
+    assert.ok(
+      html.includes('point-in-time schedule at 2026-06-30'),
+      'Lever 6 must date the point-in-time schedule it rolls from',
+    );
+    assert.ok(html.includes('46,724,000'), 'Lever 6 must cite the basic period-end count');
+    assert.ok(html.includes('40,325,000'), 'Lever 6 must cite Class A outstanding');
+    assert.ok(html.includes('6,399,000'), 'Lever 6 must cite Class B outstanding');
+    assert.ok(html.includes('520,458'), 'Lever 6 must cite incremental options');
+    assert.ok(html.includes('2,817,000'), 'Lever 6 must cite RSUs and other awards');
+    assert.ok(
+      dcfOut.sharesOutstanding > 50061458,
+      'the rolled count must exceed the FD schedule base it starts from',
+    );
 
     // Lever 7: Peer Set Selection (renumbered from 8)
     assert.ok(html.includes('Lever 7: Peer Set Selection'), 'Lever 7 peer-set row must exist');
@@ -221,12 +241,15 @@ describe('P8.0 - Thesis Defense: Derivation Guard & Flip-Map Geometry', () => {
     const html = container.innerHTML;
 
     assert.match(html, /Parity \(perShare == \$157\.85\)/, 'Must render Parity coordinate');
-    assert.match(html, /2\.35%|-244\.\d+ bps/, 'Must render rf parity coordinate (EP.3 normalised terminal)');
+    // rf parity is engine-derived; at beta 1.49 it resolves to 2.26% (-253.23 bps
+    // from the 11.1225% Base WACC). These are recomputed by the flip-map from the
+    // live model, so the pin tracks the WACC rather than a retired literal.
+    assert.match(html, /2\.26%|-253\.\d+ bps/, 'Must render rf parity coordinate');
     assert.match(html, /Overvalued Flip/, 'Must render Overvalued flip');
     assert.match(html, /Undervalued Flip/, 'Must render Undervalued flip');
 
     assert.doesNotMatch(html, />3\.62%</, 'Terminal g parity 3.62% is gone (EP.2: parity unreachable)');
-    assert.match(html, /&lt; 3\.93%/, 'Terminal g overvalued flip must be < 3.93% (EP.3)');
+    assert.match(html, /&gt; 3\.53%/, 'Terminal g overvalued flip must be > 3.53% (engine-derived at beta 1.49)');
     assert.match(html, /Unreachable within driver bounds \[0, 4%\]/, 'Terminal g undervalued flip must declare unreachable');
     assert.match(html, /within its stated bounds.*terminal growth cannot rescue this thesis; only the discount rate or the flows can/, 'Ratified reachability defense sentence must be present');
 
@@ -244,7 +267,9 @@ describe('P8.0 - Prose Data-Content Gate in All 4 Interactive States', () => {
 
     // 1. Default state
     let html = container.innerHTML;
-    assert.match(html, /11\.04%|11\.0375%/, 'Default state shows baseline WACC');
+    // Base WACC at beta 1.49 = 4.79% + 1.49 x 4.25% = 11.1225%. The prose
+    // rounds to 2dp, so the rendered form is 11.12%.
+    assert.match(html, /11\.12%|11\.1225%/, 'Default state shows the baseline WACC');
 
     // 2. Bear state
     const bearVal = runFullValuation(historical, assumptions, 'bear');
@@ -283,8 +308,10 @@ describe('P8.0 - Exhibit A Remediation & Full-Prose Class Sweep', () => {
     // F1: terminal_growth_rate
     const gDriver = drivers.find((d) => d.name === 'terminal_growth_rate');
     const gNote = gDriver?.notes || '';
-    assert.ok(gNote.includes('11.0375%') && gNote.includes('Base WACC'), 'F1 remediated: cites live 11.0375% Base WACC');
-    assert.ok(gNote.includes('853.75bps'), 'F1 remediated: cites live 853.75bps headroom');
+    assert.ok(gNote.includes('11.1225%') && gNote.includes('Base WACC'), 'F1 remediated: cites live 11.1225% Base WACC');
+    // Headroom is (WACC - g) in bps: 11.1225% - 2.50% = 862.25bps. The prior
+    // 853.75bps was the median-beta (11.0375%) headroom and is retired.
+    assert.ok(gNote.includes('862.25bps'), 'F1 remediated: cites live 862.25bps Gordon headroom');
     assert.ok(!gNote.includes('8.6638%'), 'F1 stale WACC 8.6638% must be purged');
     assert.ok(!gNote.includes('616bps'), 'F1 stale headroom 616bps must be purged');
 
@@ -300,11 +327,11 @@ describe('P8.0 - Exhibit A Remediation & Full-Prose Class Sweep', () => {
   test('full-prose class sweep: all numerals in driver notes derive from live records or sanctioned sources', async () => {
     const content = await fs.promises.readFile(ASSUMPTIONS_PATH, 'utf8');
     const drivers = JSON.parse(content);
-    const liveWacc = 0.110375;
+    const liveWacc = 0.111225;
 
     const SANCTIONED_PRECISE_FIGURES = new Set([
       // F1 live WACC and headroom
-      11.0375, 853.75,
+      11.1225, 862.25,
       // F2 official Sep-2 OHLCV
       156.24, 158.47, 154.30, 157.85, 1294851,
       // 6R3 locked peer betas & regression stats
@@ -404,10 +431,16 @@ describe('P8.0 - Quality Gates: Purity, Anti-Literal & DOM Integrity', () => {
     rawContent = rawContent.replace(/\b(\d{1,3}(?:,\d{3})+)\b/g, (m) => m.replace(/,/g, ''));
 
     // 4. Explicit reviewed allowlist of sanctioned numerals > 999
+    //
+    // P10.5 replaced the P10.0 share approximation (50,031,000 weighted average /
+    // 46,786,269 basic from Class A *issued*) with the ruled P10.4 point-in-time
+    // schedule: 50,061,458 total, 46,724,000 basic period-end, and the three
+    // incremental legs. The superseded figures are removed from the allowlist so
+    // a regression back to them fails this gate rather than passing quietly.
     const SANCTIONED_ALLOWLIST = new Set([
       1000, 1280, 1900, 2000, 10000,
       2026, 2025, 2024, 2022, 2021, 2030,
-      50031000, 46786269, 40387012, 6399257,
+      50061458, 46724000, 40325000, 6399000, 520458, 2817000,
       1294851,
       231655, 182410, 13732, 102306,
     ]);

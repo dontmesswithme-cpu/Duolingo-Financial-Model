@@ -188,7 +188,7 @@ describe('RP0.2 — App Shell & Duolingo Brand Header', () => {
 
   test('header contains metadata cluster with Valuation Date, Model Version, and Prepared By', () => {
     assert.match(html, /Valuation Date/i, 'metadata block must contain Valuation Date');
-    assert.match(html, /Sep 1,\s*2026/i, 'Valuation Date must match Sep 1, 2026');
+    assert.match(html, /Sep 2,\s*2026/i, 'Valuation Date must match Sep 2, 2026');
     assert.match(html, /Model Version/i, 'metadata block must contain Model Version');
     assert.match(html, /v1\.0-P4/i, 'Model Version must match v1.0-P4');
     assert.match(html, /Prepared By/i, 'metadata block must contain Prepared By');

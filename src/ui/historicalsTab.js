@@ -18,7 +18,15 @@
 
 import { EngineError } from '../data/errors.js';
 import { extractRows } from '../data/schema.js';
-import { usd, estSuffix, formatTabularNumber, percent, compact } from './format.js';
+import {
+  usd,
+  estSuffix,
+  formatTabularNumber,
+  percent,
+  compact,
+  escapeText,
+  safeUrl,
+} from './format.js';
 import { compute as computeTtm, deriveDiscreteQuarters } from '../engine/ttm.js';
 import { TabulatorFull as DefaultTabulator } from './tabulator.js';
 import { AUDIT_FILINGS } from '../data/constants.js';
@@ -26,9 +34,26 @@ import {
   createTrendBarChart,
   createRevenueDonutChart,
   TREND_EXPLORER_METRICS,
+  RATIO_TREND_METRICS,
 } from './charts.js';
+import {
+  RATIO_DEFS,
+  RATIOS_BY_STATEMENT,
+  computeHistoricalRatios,
+  isRatioQuarterlyCapable,
+  formatRatioById,
+  formatRatioChange,
+} from '../engine/ratios.js';
 
 export { AUDIT_FILINGS, TREND_EXPLORER_METRICS };
+
+/**
+ * Prefix that marks a statement-row metric key as a computed ratio rather than a
+ * filed line item (`ratio:gross_margin`). One prefix, one parsing rule, so a
+ * ratio key can never collide with a corpus metric key.
+ * @type {string}
+ */
+export const RATIO_METRIC_PREFIX = 'ratio:';
 export const ANNUAL_PERIODS = Object.freeze(['FY2021', 'FY2022', 'FY2023', 'FY2024', 'FY2025']);
 export const QUARTERLY_PERIODS = Object.freeze(['Q3 FY2025', 'Q4 FY2025', 'Q1 FY2026', 'Q2 FY2026']);
 export const ALL_PERIOD_COLUMNS = Object.freeze([...ANNUAL_PERIODS, ...QUARTERLY_PERIODS]);
@@ -386,6 +411,262 @@ export function computeHistoricalKpis(dataset = {}) {
   ];
 }
 
+const RATIO_DEF_BY_ID = new Map(RATIO_DEFS.map((def) => [def.id, def]));
+
+/**
+ * Groups one statement's ratio ids by catalogue category, preserving the frozen
+ * catalogue order. The grouping is a projection of `RATIOS_BY_STATEMENT`, so the
+ * footer can never drift from the engine's own attribution.
+ *
+ * @param {string} statementKey
+ * @returns {Array<{ category: string, ids: Array<string> }>}
+ */
+export function groupRatioIds(statementKey) {
+  const groups = [];
+  for (const id of RATIOS_BY_STATEMENT[statementKey] || []) {
+    const def = RATIO_DEF_BY_ID.get(id);
+    if (!def) continue;
+    let group = groups.find((candidate) => candidate.category === def.category);
+    if (!group) {
+      group = { category: def.category, ids: [] };
+      groups.push(group);
+    }
+    group.ids.push(id);
+  }
+  return groups;
+}
+
+/**
+ * Emits the hidden-aware period cells for one ratio row.
+ *
+ * @param {string} ratioId
+ * @param {Record<string, number|null>} values
+ * @param {'annual'|'quarterly'} periodMode
+ * @returns {string}
+ */
+function buildRatioPeriodCells(ratioId, values, periodMode) {
+  const annualTds = ANNUAL_PERIODS.map((period) => {
+    const hidden = periodMode === 'quarterly' ? ' hidden' : '';
+    return `<td class="td-period td-annual${hidden}" data-col-period="${period}">${formatRatioById(ratioId, values[period])}</td>`;
+  }).join('');
+
+  const quarterlyTds = QUARTERLY_PERIODS.map((period) => {
+    const hidden = periodMode === 'annual' ? ' hidden' : '';
+    return `<td class="td-period td-quarterly${hidden}" data-col-period="${period}">${formatRatioById(ratioId, values[period])}</td>`;
+  }).join('');
+
+  return `${annualTds}${quarterlyTds}`;
+}
+
+/**
+ * Builds one category divider row. The label sits in the pinned metric cell and
+ * every period cell is emitted (empty) so column alignment and the freeze-pane
+ * `:first-child` pinning behave exactly as they do for filed rows.
+ *
+ * @param {string} category
+ * @param {'annual'|'quarterly'} periodMode
+ * @returns {string}
+ */
+function buildRatioDividerRow(category, periodMode) {
+  const annualTds = ANNUAL_PERIODS.map((period) => {
+    const hidden = periodMode === 'quarterly' ? ' hidden' : '';
+    return `<td class="td-period td-annual${hidden}" data-col-period="${period}"></td>`;
+  }).join('');
+
+  const quarterlyTds = QUARTERLY_PERIODS.map((period) => {
+    const hidden = periodMode === 'annual' ? ' hidden' : '';
+    return `<td class="td-period td-quarterly${hidden}" data-col-period="${period}"></td>`;
+  }).join('');
+
+  return `
+        <tr class="ratio-divider-row" role="row">
+          <td class="td-metric ratio-divider-label">${category}</td>
+          ${annualTds}
+          ${quarterlyTds}
+        </tr>
+      `;
+}
+
+/**
+ * Builds the computed ratio footer rows for one statement: one divider row per
+ * category, then that category's ratio rows. Rows carry `data-metric="ratio:<id>"`
+ * and `data-ratio="<id>"` so the workspace click handler can route them to the
+ * ratio inspector without colliding with corpus metric keys.
+ *
+ * @param {string} statementKey
+ * @param {object} ratioMatrix Output of `computeHistoricalRatios`.
+ * @param {'annual'|'quarterly'} [periodMode='annual']
+ * @returns {string}
+ */
+export function buildStatementRatioRows(statementKey, ratioMatrix, periodMode = 'annual') {
+  if (!ratioMatrix || !ratioMatrix.ratios) return '';
+
+  return groupRatioIds(statementKey).map((group) => {
+    const rows = group.ids.map((id) => {
+      const entry = ratioMatrix.ratios[id];
+      if (!entry) return '';
+      return `
+        <tr class="statement-row row-ratio" data-metric="${RATIO_METRIC_PREFIX}${id}" data-ratio="${id}" tabindex="0" role="row">
+          <td class="td-metric">${entry.def.label} ${estSuffix('', 'computed')}</td>
+          ${buildRatioPeriodCells(id, entry.values, periodMode)}
+        </tr>
+      `;
+    }).join('');
+    // A group with no resolvable entries emits nothing: an orphan divider would
+    // label an empty block, so the divider is only ever emitted with its rows.
+    if (rows === '') return '';
+    return `${buildRatioDividerRow(group.category, periodMode)}${rows}`;
+  }).join('');
+}
+
+/**
+ * Builds the `(computed)` ratio rows appended to a statement CSV export. Values
+ * are exported in their canonical display form (`72.2%` / `2.61x` / `57d`): a
+ * unitless ratio column sitting beside dollar-thousands filed rows is ambiguous
+ * as a raw decimal, and the display form is already the ratio's canonical render.
+ *
+ * @param {string} statementKey
+ * @param {object} dataset
+ * @param {ReadonlyArray<string>} periods
+ * @returns {Array<string>}
+ */
+export function buildRatioCsvLines(statementKey, dataset, periods) {
+  const ratioMatrix = computeHistoricalRatios(dataset);
+  const lines = [];
+  for (const group of groupRatioIds(statementKey)) {
+    for (const id of group.ids) {
+      const entry = ratioMatrix.ratios[id];
+      if (!entry) continue;
+      const label = `"${entry.def.label.replace(/"/g, '""')} (computed)"`;
+      const values = periods.map((period) => `"${formatRatioById(id, entry.values[period])}"`);
+      lines.push([label, ...values].join(','));
+    }
+  }
+  return lines;
+}
+
+/**
+ * Builds the Ratio Inspector drawer content (Task RP10.2). Content mapping only:
+ * the standing drawer components carry a FY2021 / FY2025 / Change strip, a
+ * definition plus formula block, the annual series mini-table, and a computed
+ * provenance note. No filing link is fabricated: the ratio is engine-derived, and
+ * the constituent line items carry their own citations in the statement above.
+ *
+ * @param {object} params
+ * @param {string} params.ratioId
+ * @param {object} [params.ratioMatrix] Output of `computeHistoricalRatios`.
+ * @returns {string}
+ */
+export function buildRatioDrawerMarkup({ ratioId, ratioMatrix } = {}) {
+  const def = RATIO_DEF_BY_ID.get(ratioId);
+  if (!def) {
+    return '<div class="drawer-empty">No ratio selected.</div>';
+  }
+
+  const entry = ratioMatrix && ratioMatrix.ratios ? ratioMatrix.ratios[ratioId] : null;
+  const values = entry && entry.values ? entry.values : {};
+
+  const earliest = Number.isFinite(values['FY2021']) ? values['FY2021'] : null;
+  const latest = Number.isFinite(values['FY2025']) ? values['FY2025'] : null;
+
+  const miniRows = ANNUAL_PERIODS.map((period) => {
+    const value = values[period];
+    const isAvailable = value !== null && value !== undefined && Number.isFinite(value);
+    return `
+        <tr>
+          <td class="drawer-mini-td-period">${period}</td>
+          <td class="drawer-mini-td-val${isAvailable ? '' : ' text-empty'}">${formatRatioById(ratioId, value)}</td>
+        </tr>
+      `;
+  }).join('');
+
+  const quarterlyNote = isRatioQuarterlyCapable(ratioId)
+    ? 'Derived from filed discrete quarters'
+    : 'Annual columns only';
+
+  return `
+    <div class="drawer-header">
+      <div class="drawer-title-area">
+        <h3 class="drawer-metric-title" id="drawer-metric-title">${def.label}</h3>
+        <span class="drawer-metric-tag" id="drawer-metric-tag">${def.category} &bull; ${RATIO_METRIC_PREFIX}${def.id}</span>
+      </div>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close ratio inspector">&times;</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-stat-strip">
+        <div class="drawer-stat-box">
+          <div class="drawer-stat-label">FY2021</div>
+          <div class="drawer-stat-val">${formatRatioById(ratioId, earliest)}</div>
+        </div>
+        <div class="drawer-stat-box">
+          <div class="drawer-stat-label">FY2025</div>
+          <div class="drawer-stat-val">${formatRatioById(ratioId, latest)}</div>
+        </div>
+        <div class="drawer-stat-box">
+          <div class="drawer-stat-label">Change</div>
+          <div class="drawer-stat-val">${formatRatioChange(ratioId, earliest, latest)}</div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">Definition &amp; Formula</div>
+        <div class="drawer-provenance-card">
+          <p class="ratio-def-text">${def.definition}</p>
+          <div class="provenance-meta-row">
+            <span class="provenance-label">Formula:</span>
+            <span class="provenance-val font-mono">${def.formula}</span>
+          </div>
+          <div class="provenance-meta-row">
+            <span class="provenance-label">Basis:</span>
+            <span class="provenance-val">${def.basis}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">Annual Series</div>
+        <div class="drawer-mini-table-wrapper">
+          <table class="drawer-mini-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${miniRows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">Computed Provenance</div>
+        <div class="drawer-provenance-card">
+          <div class="provenance-meta-row">
+            <span class="provenance-label">Category:</span>
+            <span class="provenance-val">${def.category}</span>
+          </div>
+          <div class="provenance-meta-row">
+            <span class="provenance-label">Statement:</span>
+            <span class="provenance-val">${STATEMENT_TITLES[def.statement] || def.statement}</span>
+          </div>
+          <div class="provenance-meta-row">
+            <span class="provenance-label">Quarterly:</span>
+            <span class="provenance-val">${quarterlyNote}</span>
+          </div>
+          <div class="provenance-meta-row">
+            <span class="provenance-label">Source:</span>
+            <span class="provenance-val">Computed</span>
+          </div>
+        </div>
+        <p class="ratio-provenance-note">This ratio is computed by the engine from the statement line items named in the formula. No SEC filing reports it directly, so it carries no citation of its own; each constituent line item carries its own citation in the statement table above.</p>
+      </div>
+    </div>
+  `;
+}
+
 /**
  * Builds HTML string for all statement tables and controls in the workspace.
  *
@@ -395,6 +676,8 @@ export function computeHistoricalKpis(dataset = {}) {
  * @returns {string}
  */
 export function buildWorkspaceMarkup(dataset = {}, currentStatement = 'income', currentPeriodMode = 'annual') {
+  const ratioMatrix = computeHistoricalRatios(dataset);
+
   const tablesHtml = STATEMENT_ORDER.map((stmtKey) => {
     const isFlow = stmtKey === 'income' || stmtKey === 'cashflow';
     const raw = dataset[stmtKey];
@@ -437,6 +720,8 @@ export function buildWorkspaceMarkup(dataset = {}, currentStatement = 'income', 
       `;
     }).join('');
 
+    const ratioRows = buildStatementRatioRows(stmtKey, ratioMatrix, currentPeriodMode);
+
     return `
       <div class="statement-table-wrapper${stmtKey === currentStatement ? '' : ' hidden'}" data-statement-wrapper="${stmtKey}">
         <table class="statement-table" data-workspace-statement="${stmtKey}" role="grid" aria-label="${STATEMENT_TITLES[stmtKey]}">
@@ -445,6 +730,7 @@ export function buildWorkspaceMarkup(dataset = {}, currentStatement = 'income', 
           </thead>
           <tbody>
             ${bodyRows}
+            ${ratioRows}
           </tbody>
         </table>
       </div>
@@ -623,18 +909,171 @@ export function buildOperatingKpisMarkup(dataset = {}) {
 }
 
 /**
- * Builds HTML markup for the Trend Explorer card containing metric pills and chart containers.
+ * Trend Explorer views (Task RP10.3). `charts` is the RP3.3 surface: the six
+ * level-metric pills plus the computed-ratio pill row, over the bar chart and
+ * the revenue donut. `ratio` is the grouped ratio analysis table. One switcher
+ * drives both, and the panel set is a projection of this list.
+ * @type {ReadonlyArray<{ key: string, label: string }>}
+ */
+export const TREND_VIEWS = Object.freeze([
+  Object.freeze({ key: 'charts', label: 'Charts' }),
+  Object.freeze({ key: 'ratio', label: 'Ratio Analysis' }),
+]);
+
+const TREND_VIEW_KEYS = new Set(TREND_VIEWS.map((entry) => entry.key));
+
+/**
+ * Groups the whole frozen catalogue by category, preserving catalogue order.
+ * Unlike `groupRatioIds` (one statement), this spans all three statements, so
+ * the Ratio Analysis table is a projection of `RATIO_DEFS` and can never drift
+ * from the engine's own attribution or ordering.
  *
- * @param {string} [activeMetric='revenue']
+ * @returns {Array<{ category: string, ids: Array<string> }>}
+ */
+function groupAllRatioIds() {
+  const groups = [];
+  for (const def of RATIO_DEFS) {
+    let group = groups.find((candidate) => candidate.category === def.category);
+    if (!group) {
+      group = { category: def.category, ids: [] };
+      groups.push(group);
+    }
+    group.ids.push(def.id);
+  }
+  return groups;
+}
+
+/**
+ * Builds one category band for the Ratio Analysis table. Presentational only:
+ * no metric key and no tabindex, so it can never be mistaken for a ratio row.
+ * The band reuses the RP10.2 `.ratio-divider-row` freeze-pane pattern (the
+ * ref_03 band treatment, not the title-block treatment) and emits every column
+ * empty so the grid keeps its column count.
+ *
+ * @param {string} category
  * @returns {string}
  */
-export function buildTrendExplorerMarkup(activeMetric = 'revenue') {
-  const pillButtonsHtml = Object.entries(TREND_EXPLORER_METRICS).map(([key, meta]) => {
+function buildAnalysisDividerRow(category) {
+  const periodTds = ANNUAL_PERIODS
+    .map((period) => `<td class="td-period" data-col-period="${period}"></td>`)
+    .join('');
+  return `
+        <tr class="ratio-divider-row" role="row">
+          <td class="td-metric ratio-divider-label">${category}</td>
+          ${periodTds}
+          <td class="td-period td-change" data-col-period="change"></td>
+        </tr>
+      `;
+}
+
+/**
+ * Builds the Ratio Analysis table (Task RP10.3): the frozen 20-ratio catalogue
+ * grouped by category across all three statements, with FY2021-FY2025 annual
+ * values and a Change FY21-25 column. Values render through the same engine
+ * formatters as every other ratio surface, so the table cannot disagree with the
+ * statement footers or the drawer. Change reuses `formatRatioChange` (the
+ * approved signed-delta-in-ratio-unit convention), never a second convention.
+ *
+ * @param {object} [dataset={}]
+ * @returns {string}
+ */
+export function buildRatioAnalysisMarkup(dataset = {}) {
+  const ratioMatrix = computeHistoricalRatios(dataset);
+
+  const headerThs = [
+    '<th class="th-metric">Ratio</th>',
+    ...ANNUAL_PERIODS.map((period) => `<th class="th-period" data-col-period="${period}">${period}</th>`),
+    '<th class="th-period th-change" data-col-period="change">Change FY21-25</th>',
+  ].join('');
+
+  const bodyRows = groupAllRatioIds().map((group) => {
+    const rows = group.ids.map((id) => {
+      const entry = ratioMatrix.ratios[id];
+      if (!entry) return '';
+      const values = entry.values || {};
+      const earliest = Number.isFinite(values['FY2021']) ? values['FY2021'] : null;
+      const latest = Number.isFinite(values['FY2025']) ? values['FY2025'] : null;
+      const periodTds = ANNUAL_PERIODS
+        .map((period) => `<td class="td-period" data-col-period="${period}">${formatRatioById(id, values[period])}</td>`)
+        .join('');
+      return `
+        <tr class="statement-row row-ratio ratio-analysis-row" data-metric="${RATIO_METRIC_PREFIX}${id}" data-ratio="${id}" tabindex="0" role="row">
+          <td class="td-metric">${entry.def.label} ${estSuffix('', 'computed')}</td>
+          ${periodTds}
+          <td class="td-period td-change" data-col-period="change">${formatRatioChange(id, earliest, latest)}</td>
+        </tr>
+      `;
+    }).join('');
+    // Same fail-closed rule as the statement footers: a band is only ever
+    // emitted alongside the rows it labels.
+    if (rows === '') return '';
+    return `${buildAnalysisDividerRow(group.category)}${rows}`;
+  }).join('');
+
+  return `
+    <div class="ratio-analysis-title-block">
+      <h3 class="ratio-analysis-main-title">Ratio Analysis</h3>
+      <p class="ratio-analysis-subtitle">Five-year progression of the computed ratio catalogue, grouped by category</p>
+    </div>
+    <div class="statement-table-wrapper">
+      <table class="statement-table ratio-analysis-table" role="grid" aria-label="Ratio Analysis">
+        <thead>
+          <tr>${headerThs}</tr>
+        </thead>
+        <tbody>
+          ${bodyRows}
+        </tbody>
+      </table>
+    </div>
+    <div class="statement-footnote">
+      Note: Ratios are computed by the engine from the statement line items named in each definition. Change is the FY2021 to FY2025 delta in the ratio's own unit (percentage points, multiples, or days). Select any ratio for its definition, formula, and basis.
+    </div>
+  `;
+}
+
+/**
+ * Builds HTML markup for the Trend Explorer card: the `[Charts | Ratio Analysis]`
+ * view switcher, the Charts panel (level-metric pills plus the computed-ratio
+ * pill row, then the bar chart and the revenue donut), and the Ratio Analysis
+ * panel.
+ *
+ * The Charts panel keeps the exact RP3.3 structure, so the frozen trend suite's
+ * container contracts (`#trend-charts-grid`, `#trend-bar-container`,
+ * `#revenue-donut-card`, `.single-chart`) are untouched. Both panels are
+ * emitted and the inactive one carries `.hidden`, which keeps the mounted chart
+ * alive across a view switch instead of re-instantiating it.
+ *
+ * @param {string} [activeMetric='revenue']
+ * @param {string} [activeView='charts']
+ * @param {object} [dataset={}]
+ * @returns {string}
+ */
+export function buildTrendExplorerMarkup(activeMetric = 'revenue', activeView = 'charts', dataset = {}) {
+  const view = TREND_VIEW_KEYS.has(activeView) ? activeView : 'charts';
+  const isRatioView = view === 'ratio';
+
+  const levelPillsHtml = Object.entries(TREND_EXPLORER_METRICS).map(([key, meta]) => {
     const isActive = key === activeMetric;
     return `
       <button type="button" class="trend-pill-btn${isActive ? ' active' : ''}" data-trend-metric="${key}" role="tab" aria-selected="${isActive ? 'true' : 'false'}">
         ${meta.name}
       </button>
+    `;
+  }).join('');
+
+  const ratioPillsHtml = Object.entries(RATIO_TREND_METRICS).map(([key, meta]) => {
+    const isActive = key === activeMetric;
+    return `
+      <button type="button" class="trend-pill-btn trend-pill-btn-ratio${isActive ? ' active' : ''}" data-trend-metric="${key}" role="tab" aria-selected="${isActive ? 'true' : 'false'}">
+        ${meta.name}
+      </button>
+    `;
+  }).join('');
+
+  const viewTabsHtml = TREND_VIEWS.map((entry) => {
+    const isActive = entry.key === view;
+    return `
+        <button type="button" class="statement-pill-btn trend-view-btn${isActive ? ' active' : ''}" data-trend-view="${entry.key}" role="tab" aria-selected="${isActive ? 'true' : 'false'}">${entry.label}</button>
     `;
   }).join('');
 
@@ -647,18 +1086,31 @@ export function buildTrendExplorerMarkup(activeMetric = 'revenue') {
           <h3 class="trend-main-title">Trend Explorer</h3>
           <p class="trend-subtitle">Interactive 5-year progression across primary operational and financial metrics</p>
         </div>
-        <div class="trend-switcher-group pill-group" role="tablist" aria-label="Trend Explorer Metric Switcher">
-          ${pillButtonsHtml}
+        <div class="trend-header-controls">
+          <div class="trend-view-switcher statement-switcher-group pill-group" role="tablist" aria-label="Trend Explorer View Switcher">
+            ${viewTabsHtml}
+          </div>
+          <div class="trend-switcher-group pill-group" role="tablist" aria-label="Trend Explorer Metric Switcher">
+            ${levelPillsHtml}
+          </div>
         </div>
       </div>
-      <div class="trend-charts-grid${!isRevenue ? ' single-chart' : ''}" id="trend-charts-grid">
-        <div class="trend-bar-chart-card">
-          <div class="chart-container-inner" id="trend-bar-container"></div>
+      <div class="trend-view-panel${isRatioView ? ' hidden' : ''}" data-trend-view-panel="charts">
+        <div class="trend-ratio-pill-row pill-group" role="tablist" aria-label="Trend Explorer Ratio Switcher">
+          ${ratioPillsHtml}
         </div>
-        ${isRevenue ? `
-        <div class="revenue-donut-card" id="revenue-donut-card">
-          <div class="chart-container-inner" id="revenue-donut-container"></div>
-        </div>` : ''}
+        <div class="trend-charts-grid${!isRevenue ? ' single-chart' : ''}" id="trend-charts-grid">
+          <div class="trend-bar-chart-card">
+            <div class="chart-container-inner" id="trend-bar-container"></div>
+          </div>
+          ${isRevenue ? `
+          <div class="revenue-donut-card" id="revenue-donut-card">
+            <div class="chart-container-inner" id="revenue-donut-container"></div>
+          </div>` : ''}
+        </div>
+      </div>
+      <div class="trend-view-panel${isRatioView ? '' : ' hidden'}" data-trend-view-panel="ratio">
+        ${buildRatioAnalysisMarkup(dataset)}
       </div>
     </div>
   `.trim();
@@ -855,9 +1307,9 @@ export function buildAuditCenterMarkup(filings = AUDIT_FILINGS) {
             <p class="filing-notes-text">${f.notes}</p>
           </div>
           <div class="filing-action-row">
-            <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="btn-sec-link">
-              Open SEC EDGAR Filing &rarr;
-            </a>
+            ${safeUrl(f.url)
+              ? `<a href="${escapeText(safeUrl(f.url))}" target="_blank" rel="noopener noreferrer" class="btn-sec-link">Open SEC EDGAR Filing &rarr;</a>`
+              : '<span class="btn-sec-link is-disabled">Open SEC EDGAR Filing &rarr; (link blocked)</span>'}
           </div>
         </div>
       </details>
@@ -1018,9 +1470,9 @@ export function buildDrawerMarkup({ metricKey, metricData, stmtKey = 'income', d
           <span class="provenance-val">${sourceStatement}</span>
         </div>
         <div class="provenance-link-row">
-          <a href="${filing.url}" target="_blank" rel="noopener noreferrer" class="btn-sec-link">
-            View SEC EDGAR Source &rarr;
-          </a>
+          ${safeUrl(filing.url)
+            ? `<a href="${escapeText(safeUrl(filing.url))}" target="_blank" rel="noopener noreferrer" class="btn-sec-link">View SEC EDGAR Source &rarr;</a>`
+            : '<span class="btn-sec-link is-disabled">View SEC EDGAR Source &rarr; (link blocked)</span>'}
         </div>
       </div>
     </div>
@@ -1183,12 +1635,17 @@ export function renderHistoricalsWorkspace({
     for (const row of rows) {
       const metricKey = row.getAttribute ? row.getAttribute('data-metric') : null;
       const handler = () => {
-        if (typeof onRowClick === 'function') {
-          const stmtRows = getStatementRows(currentStatement);
-          const isFlow = currentStatement === 'income' || currentStatement === 'cashflow';
-          const metricMap = pivotRowsByMetric(stmtRows, isFlow);
-          onRowClick(metricKey, metricMap[metricKey], currentStatement);
+        if (typeof onRowClick !== 'function') return;
+        // Computed ratio rows carry no corpus row, so they route straight to the
+        // ratio inspector; filed rows keep the exact pivot-and-dispatch path.
+        if (typeof metricKey === 'string' && metricKey.startsWith(RATIO_METRIC_PREFIX)) {
+          onRowClick(metricKey, null, currentStatement);
+          return;
         }
+        const stmtRows = getStatementRows(currentStatement);
+        const isFlow = currentStatement === 'income' || currentStatement === 'cashflow';
+        const metricMap = pivotRowsByMetric(stmtRows, isFlow);
+        onRowClick(metricKey, metricMap[metricKey], currentStatement);
       };
       if (typeof row.addEventListener === 'function') {
         row.addEventListener('click', handler);
@@ -1303,7 +1760,7 @@ export function renderHistoricalsWorkspace({
       return [escapedLabel, ...values].join(',');
     });
 
-    const csvContent = [headers, ...dataLines].join('\n');
+    const csvContent = [headers, ...dataLines, ...buildRatioCsvLines(currentStatement, currentDataset, periods)].join('\n');
 
     if (typeof globalThis.document !== 'undefined' && typeof globalThis.Blob !== 'undefined') {
       try {
@@ -1401,6 +1858,7 @@ export function renderHistoricals({
   let activeDrawerStatement = 'income';
   let lastFocusedElement = null;
   let activeTrendMetric = 'revenue';
+  let activeTrendView = 'charts';
   let selectedTrendYear = 'FY2025';
   let trendBarChart = null;
   let revenueDonutChart = null;
@@ -1422,7 +1880,13 @@ export function renderHistoricals({
     }
     const citationId = citationRegistry[existingIndex].id;
     const excClass = isException ? ' citation-exception' : '';
-    const supHtml = `<sup><a href="${source.url}" target="_blank" rel="noopener noreferrer" class="citation-sup${excClass}" data-citation-id="${citationId}" title="${source.filing || 'Filing'} (${source.period || ''})">[${citationId}]</a></sup>`;
+    const supHref = safeUrl(source.url);
+    // P10.6 Rendering Security: the citation URL is resolved through safeUrl()
+    // before it becomes an href, so a javascript: or lookalike-host source in the
+    // citation registry renders as inert text instead of a live link.
+    const supHtml = supHref
+      ? `<sup><a href="${escapeText(supHref)}" target="_blank" rel="noopener noreferrer" class="citation-sup${excClass}" data-citation-id="${escapeText(citationId)}" title="${escapeText(`${source.filing || 'Filing'} (${source.period || ''})`)}">[${escapeText(citationId)}]</a></sup>`
+      : `<sup><span class="citation-link is-disabled" title="${escapeText(`${source.filing || 'Filing'} (${source.period || ''})`)}">[${escapeText(citationId)}]</span></sup>`;
     return { id: citationId, html: supHtml };
   }
 
@@ -1633,7 +2097,7 @@ export function renderHistoricals({
         </div>
 
         <div class="trend-explorer-section" id="trend-explorer-section">
-          ${buildTrendExplorerMarkup(activeTrendMetric)}
+          ${buildTrendExplorerMarkup(activeTrendMetric, activeTrendView, currentHistorical)}
         </div>
 
         <div class="operating-kpis-section" id="operating-kpis-section">
@@ -1798,6 +2262,46 @@ export function renderHistoricals({
       }
     }
 
+    // Wire the [Charts | Ratio Analysis] view switcher
+    const trendViewBtns = typeof container.querySelectorAll === 'function'
+      ? container.querySelectorAll('.trend-view-btn')
+      : [];
+    for (const btn of trendViewBtns) {
+      if (typeof btn.addEventListener === 'function') {
+        btn.addEventListener('click', () => {
+          const viewKey = btn.getAttribute ? btn.getAttribute('data-trend-view') : btn.dataset?.trendView;
+          if (viewKey) {
+            setTrendView(viewKey);
+          }
+        });
+      }
+    }
+
+    // Wire the Ratio Analysis rows to the ratio inspector. These rows live in the
+    // Trend Explorer card, which is a sibling of the statement workspace container,
+    // so the workspace's own `.statement-row` binding never reaches them. Without
+    // this they would be a dead skeleton: focusable, styled as clickable, and
+    // inert. The catalogue owns the statement, so the metric key alone is enough.
+    const analysisRows = typeof container.querySelectorAll === 'function'
+      ? container.querySelectorAll('.ratio-analysis-row')
+      : [];
+    for (const row of analysisRows) {
+      const metricKey = row.getAttribute ? row.getAttribute('data-metric') : null;
+      if (!metricKey) continue;
+      const handler = () => { openDrawer(metricKey); };
+      if (typeof row.addEventListener === 'function') {
+        row.addEventListener('click', handler);
+
+        const keyHandler = (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            if (typeof e.preventDefault === 'function') e.preventDefault();
+            handler();
+          }
+        };
+        row.addEventListener('keydown', keyHandler);
+      }
+    }
+
     // Instantiate Tabulator constructor strictly scoped to .tabulator-cards-wrapper
     if (typeof TabulatorConstructor === 'function' && typeof container.querySelector === 'function') {
       for (const config of tabulatorConfigs) {
@@ -1825,23 +2329,37 @@ export function renderHistoricals({
     }
 
     activeDrawerMetric = metricKey;
-    activeDrawerStatement = actualStmtKey || 'income';
     isDrawerOpen = true;
 
-    let data = actualRowData;
-    if (!data && currentHistorical) {
-      const stmtRows = extractRows(currentHistorical[activeDrawerStatement]) || [];
-      const isFlow = activeDrawerStatement === 'income' || activeDrawerStatement === 'cashflow';
-      const metricMap = pivotRowsByMetric(stmtRows, isFlow);
-      data = metricMap[metricKey];
-    }
+    let drawerContent;
+    if (typeof metricKey === 'string' && metricKey.startsWith(RATIO_METRIC_PREFIX)) {
+      // Computed ratio: the owning statement comes from the catalogue, which is
+      // authoritative, rather than from the caller's active-statement default.
+      const ratioId = metricKey.slice(RATIO_METRIC_PREFIX.length);
+      const ratioDef = RATIO_DEF_BY_ID.get(ratioId);
+      activeDrawerStatement = ratioDef ? ratioDef.statement : (actualStmtKey || 'income');
+      drawerContent = buildRatioDrawerMarkup({
+        ratioId,
+        ratioMatrix: computeHistoricalRatios(currentHistorical),
+      });
+    } else {
+      activeDrawerStatement = actualStmtKey || 'income';
 
-    const drawerContent = buildDrawerMarkup({
-      metricKey,
-      metricData: data,
-      stmtKey: activeDrawerStatement,
-      dataset: currentHistorical,
-    });
+      let data = actualRowData;
+      if (!data && currentHistorical) {
+        const stmtRows = extractRows(currentHistorical[activeDrawerStatement]) || [];
+        const isFlow = activeDrawerStatement === 'income' || activeDrawerStatement === 'cashflow';
+        const metricMap = pivotRowsByMetric(stmtRows, isFlow);
+        data = metricMap[metricKey];
+      }
+
+      drawerContent = buildDrawerMarkup({
+        metricKey,
+        metricData: data,
+        stmtKey: activeDrawerStatement,
+        dataset: currentHistorical,
+      });
+    }
 
     drawerEl.innerHTML = drawerContent;
 
@@ -1908,8 +2426,45 @@ export function renderHistoricals({
     container.addEventListener('keydown', keydownHandler);
   }
 
+  /**
+   * Switches the Trend Explorer between the `charts` and `ratio` views. Purely a
+   * panel-visibility toggle: the mounted bar chart and donut are left alone, so
+   * view switching can never disturb the RP3.3 donut mount discipline (which
+   * stays keyed on the metric, not on the view).
+   *
+   * @param {string} viewKey
+   */
+  function setTrendView(viewKey) {
+    if (!viewKey || !TREND_VIEW_KEYS.has(viewKey)) return;
+    activeTrendView = viewKey;
+
+    const viewBtns = typeof container.querySelectorAll === 'function'
+      ? container.querySelectorAll('.trend-view-btn')
+      : [];
+    for (const btn of viewBtns) {
+      const k = btn.getAttribute ? btn.getAttribute('data-trend-view') : btn.dataset?.trendView;
+      const isMatch = k === viewKey;
+      if (btn.classList && typeof btn.classList.toggle === 'function') {
+        btn.classList.toggle('active', isMatch);
+      }
+      if (typeof btn.setAttribute === 'function') {
+        btn.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+      }
+    }
+
+    const panels = typeof container.querySelectorAll === 'function'
+      ? container.querySelectorAll('.trend-view-panel')
+      : [];
+    for (const panel of panels) {
+      const k = panel.getAttribute ? panel.getAttribute('data-trend-view-panel') : panel.dataset?.trendViewPanel;
+      if (panel.classList && typeof panel.classList.toggle === 'function') {
+        panel.classList.toggle('hidden', k !== viewKey);
+      }
+    }
+  }
+
   function setTrendMetric(metricKey) {
-    if (!metricKey || !(metricKey in TREND_EXPLORER_METRICS)) return;
+    if (!metricKey || !(metricKey in TREND_EXPLORER_METRICS || metricKey in RATIO_TREND_METRICS)) return;
     activeTrendMetric = metricKey;
     const btns = typeof container.querySelectorAll === 'function'
       ? container.querySelectorAll('.trend-pill-btn')
@@ -2015,10 +2570,14 @@ export function renderHistoricals({
     getTrendMetric() {
       return activeTrendMetric;
     },
+    getTrendView() {
+      return activeTrendView;
+    },
     getSelectedTrendYear() {
       return selectedTrendYear;
     },
     setTrendMetric,
+    setTrendView,
     get trendBarChart() {
       return trendBarChart;
     },

@@ -252,9 +252,12 @@ let cachedModel = null;
  *
  * @returns {Promise<object>} Frozen pipeline outputs for EIG checks.
  */
-export async function buildFullModel() {
-  if (cachedModel) {
-    return cachedModel;
+const modelCache = new Map();
+
+export async function buildFullModel(overrides = {}) {
+  const cacheKey = JSON.stringify(overrides);
+  if (modelCache.has(cacheKey)) {
+    return modelCache.get(cacheKey);
   }
   const readText = (location) => fs.promises.readFile(location, 'utf8');
   const ledger = readLedgerUrls();
@@ -267,23 +270,41 @@ export async function buildFullModel() {
     ledger,
   });
   const assumptions = await loadAssumptions({ location: assumptionsPath, readText });
+  const horizon = typeof overrides.horizon === 'number' ? overrides.horizon : undefined;
+  // P10.2 / F-2: the e2e docstring is now struck on the PRODUCTION lane —
+  // CANONICAL_HORIZON plus the dated valuation seam — so any gate that ties the
+  // docstring to live engine output must build the same lane. Without this the
+  // pin-sync gate compares canonical pins against a legacy 5-period model.
+  const datedSeam = overrides.datedSeam === true ? { datedSeam: true } : {};
+
   const schedules = schedulesEngine.build(historical, assumptions);
-  const forecast = forecastEngine.project({ historical, assumptions });
+  const forecast = forecastEngine.project({
+    historical,
+    assumptions,
+    ...(typeof horizon === 'number' ? { horizon } : {}),
+  });
   const threeStatement = threeStatementEngine.project(schedules, assumptions, forecast);
   const wacc = buildWacc({ assumptions, debtSchedule: schedules.debt });
-  const dcf = valuateDcf(threeStatement, wacc, { assumptions, corpus: historical });
+  const dcf = valuateDcf(threeStatement, wacc, {
+    assumptions,
+    corpus: historical,
+    ...(typeof horizon === 'number' ? { horizon } : {}),
+    ...datedSeam,
+  });
   const marketPrice = assumptions.get('market_share_price').value;
   const recommendation = evaluateRec(dcf.perShare, marketPrice);
+  const scenarioOptions =
+    typeof horizon === 'number' ? { horizon, ...datedSeam } : { ...datedSeam };
   const scenarios = {
-    bear: runFullValuation(historical, assumptions, 'bear'),
+    bear: runFullValuation(historical, assumptions, 'bear', scenarioOptions),
     base: {
       dcf,
       perShare: dcf.perShare,
       recommendation,
     },
-    bull: runFullValuation(historical, assumptions, 'bull'),
+    bull: runFullValuation(historical, assumptions, 'bull', scenarioOptions),
   };
-  cachedModel = Object.freeze({
+  const built = Object.freeze({
     historical,
     assumptions,
     schedules,
@@ -294,7 +315,8 @@ export async function buildFullModel() {
     recommendation,
     scenarios,
   });
-  return cachedModel;
+  modelCache.set(cacheKey, built);
+  return built;
 }
 
 /**

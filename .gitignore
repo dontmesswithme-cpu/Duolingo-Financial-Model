@@ -30,3 +30,6 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
+
+# P10.6: regenerable GitHub Pages build output (tools/build_pages_artifact.mjs)
+_pages/

@@ -102,9 +102,11 @@ Instead of consuming LLM context tokens in polling loops, agents execute lightwe
 > **CRITICAL EXECUTION REQUIREMENT — FOREGROUND-BLOCKING ONLY**:
 > - **LLM Turn-Driven Wakeup**: LLM agents do not possess persistent OS listener threads. Control returns to an agent **only** when an active tool call returns stdout/exit into its context.
 > - **NEVER Detach / Background**: Never use `Start-Process`, `&`, or background daemon commands. A backgrounded process returns immediately to the LLM turn, leaving the agent dormant and unable to wake when the partner agent submits.
+> - **Always Arm in the Foreground**: Watchers must **always** be armed in the foreground as a synchronous, blocking tool call that holds the turn open until a signal triggers `exit 0`.
+> - **Harness Premature Timeout / Force-Close Recovery**: If the agent harness force-closes the watcher or times it out before the prescribed timeout (`WORKFLOW_WATCHER_TIMEOUT_MS`, default: 2 hours), the agent must immediately **rearm in the foreground and keep rearming until the prescribed timeout is reached** (or until a signal is received).
 > - **Synchronous Blocking**: The watcher command must hold the tool execution open in the foreground until `seq > baselineSeq` triggers `exit 0`, which immediately delivers output to the agent context and wakes the agent to perform the audit or next phase.
 
-> **Timeout Policy**: Watchers exit with code 1 after `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2 hours). On timeout, agents execute the recovery procedure in `howtowork.md` §4.2 (signal reconciliation ➔ partner liveness check ➔ Director escalation).
+> **Timeout Policy**: Watchers exit with code 1 after the prescribed timeout (`WORKFLOW_WATCHER_TIMEOUT_MS`, default: 2 hours without receiving a signal). Premature termination or timeouts by the harness are NOT deadlocks — agents must rearm in the foreground until the full prescribed timeout is reached. Only when the full prescribed timeout is reached without a signal do agents execute the recovery procedure in `howtowork.md` §4.2 (signal reconciliation ➔ partner liveness check ➔ Director escalation).
 
 ---
 

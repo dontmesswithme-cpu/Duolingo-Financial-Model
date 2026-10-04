@@ -79,8 +79,9 @@ When executing subtask `PX.Y`:
    - Overwrite `docs/DSmemory.md` with active state.
 6. **Execute Watcher & Wait (Foreground-Blocking)**:
    - Execute directly in foreground: `node tools/watch_ds_inbox.mjs` (blocks synchronously until `status_ds.json.seq > baselineSeq`).
-   - **MANDATORY**: Must execute in the foreground to hold the LLM turn open. **NEVER** use `Start-Process`, `&`, or detached background execution; an LLM agent only wakes when the synchronous tool call completes upon receiving signal exit 0.
-   - If the watcher exits with code 1 (timeout), immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
+   - **MANDATORY — Always Foreground**: The watcher must **always** be armed in the foreground to hold the LLM turn open. **NEVER** use `Start-Process`, `&`, or detached background execution; an LLM agent only wakes when the synchronous tool call completes upon receiving signal exit 0.
+   - **Harness Premature Timeout / Force-Close Recovery**: If the agent harness force-closes the watcher or times it out before the prescribed timeout (`WORKFLOW_WATCHER_TIMEOUT_MS`, default: 2 hours), immediately **rearm in the foreground**. Keep rearming until the prescribed timeout is reached or a signal is received.
+   - If the watcher genuinely reaches and exits with code 1 after the full prescribed timeout, immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
 7. **Handle Review Signal on Wake-Up**:
    - **Immediate Step (Guarded Reset)**: Read `docs/status_op.json`. If `state === "review_pending"`, reset it to `"state": "idle"` (do **NOT** bump `seq`). If `state` is anything else, leave the file untouched.
    - Check `status_ds.json.state`:
@@ -104,8 +105,9 @@ Execute watcher directly in the foreground tool execution (holding turn open):
 ```bash
 node tools/watch_op_inbox.mjs
 ```
-- **MANDATORY**: Must run foreground-blocking. **NEVER** background or detach the process via `Start-Process`. LLM agents are turn-based and wake *only* when the synchronous tool call finishes on `seq > baselineSeq` (exit 0).
-- If the watcher exits with code 1 (timeout), immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
+- **MANDATORY — Always Foreground**: The watcher must **always** be armed in the foreground. **NEVER** background or detach the process via `Start-Process`. LLM agents are turn-based and wake *only* when the synchronous tool call finishes on `seq > baselineSeq` (exit 0).
+- **Harness Premature Timeout / Force-Close Recovery**: If the agent harness force-closes the watcher or times it out before the prescribed timeout (`WORKFLOW_WATCHER_TIMEOUT_MS`, default: 2 hours), immediately **rearm in the foreground**. Keep rearming until the prescribed timeout is reached or a signal is received.
+- If the watcher genuinely reaches and exits with code 1 after the full prescribed timeout, immediately execute **§4.2 Watcher Timeout & Deadlock Recovery Protocol**.
 
 ### Step 2: Deep Audit & Verification — External Truth, Not Just Internal Consistency
 Upon wake-up (`status_op.json.seq > baselineSeq`):
@@ -123,7 +125,7 @@ Every message written to `inbox_ds.md` **MUST** end with `[END_OF_MESSAGE]`.
   4. **If `PX.Y` is NOT final subtask**:
      - Overwrite `docs/status_ds.json` (`state: "worker_active"`, `seq++`).
      - Overwrite `docs/OPmemory.md`.
-     - Re-arm watcher: `node tools/watch_op_inbox.mjs`.
+     - Re-arm watcher in foreground: `node tools/watch_op_inbox.mjs` (if harness force-closes or times out early, rearm until prescribed timeout is reached).
   5. **If `PX.Y` IS final subtask of Phase X (Gate Pass)**:
      - Append `### [YYYY-MM-DD HH:MM] GATE PASS: Phase X [PASS ✅] ... [END_OF_MESSAGE]` to `docs/inbox_ds.md` and `docs/logs/op/phase_X.md`.
      - Update `docs/status.md` (Phase X ➔ 🟢 Done, Phase X+1 ➔ 🟡 Active).
@@ -138,7 +140,7 @@ Every message written to `inbox_ds.md` **MUST** end with `[END_OF_MESSAGE]`.
   3. Append failure log to `docs/logs/op/phase_X.md`.
   4. Overwrite `docs/status_ds.json` (`state: "worker_active"`, `seq++`).
   5. Overwrite `docs/OPmemory.md`.
-  6. Re-arm watcher: `node tools/watch_op_inbox.mjs`.
+  6. Re-arm watcher in foreground: `node tools/watch_op_inbox.mjs` (if harness force-closes or times out early, rearm until prescribed timeout is reached).
 
 - **If 3rd Consecutive FAIL 🔴 (Circuit Breaker Tripped)**:
   1. Set internal `consecutive_fails = 3` in `OPmemory.md`.
@@ -157,7 +159,13 @@ When a milestone is blocked:
 4. DS resumes implementation of `PX.Y`.
 
 ### 4.2 Watcher Timeout & Deadlock Recovery Protocol (Exit Code 1)
-When a watcher exits with code 1 after `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2 hours without receiving a signal):
+> [!IMPORTANT]
+> **Prescribed Timeout vs. Harness Premature Termination**:
+> Watchers must always be armed in the foreground. If the agent harness force-closes the watcher or times it out before the prescribed timeout (`WORKFLOW_WATCHER_TIMEOUT_MS`, default: 2 hours), this is **NOT** a §4.2 deadlock. The agent must immediately **rearm in the foreground and keep rearming until the prescribed timeout is reached** (or until a signal is received).
+>
+> §4.2 applies **ONLY** after the watcher has run for the full prescribed timeout without receiving a signal.
+
+When a watcher exits with code 1 after the full prescribed `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2 hours without receiving a signal):
 1. **Reconcile Signal & Inbox (§2.1)**:
    - Read incoming inbox and count complete `[END_OF_MESSAGE]` blocks vs sender's `seq` in `status_*.json`.
    - If an un-signaled message exists (partner agent crashed after writing to inbox but before flipping JSON latch), process it immediately as normal.
@@ -179,11 +187,11 @@ When a watcher exits with code 1 after `WORKFLOW_WATCHER_TIMEOUT_MS` (default: 2
 3. **Assert Delimiter on Wake**: Receiving agents must assert that incoming messages terminate with `[END_OF_MESSAGE]`.
 4. **Reconcile `seq` on Cold-Start**: Detect un-signaled messages by comparing complete message blocks against `seq`.
 5. **Clean Resource Management**: Symmetrical initialization and disposal on all created resources.
-6. **Arm the Watcher Last — Always in the Foreground — Never a Gimmick, No Workarounds**: The watcher (`node tools/watch_*.mjs`) is armed **only at the very end of the turn**, after **all** other tasks are fully complete — processing review feedback, applying fixes, resubmitting, writing log and inbox entries, updating memory, and flipping signal latches. It must **always** execute as a synchronous, foreground-blocking tool call that holds the LLM turn open until it exits; exit 0 (signal received) is what wakes the agent for audit/continuation. **Never** replace it with a token gesture: a short nominal block (e.g., a 15-second sleep or capped timeout run just so the step can be marked "done") is a **protocol violation**, not compliance — the watcher must genuinely block until the partner's `seq` advances or the §4.2 timeout fires. Always invoke it with an explicit tool timeout equal to the watcher's configured `WORKFLOW_WATCHER_TIMEOUT_MS` (per §4.2, default: 2 hours — pass the matching milliseconds to the shell tool's timeout parameter); **never** run it under the shell tool's default timeout (120s), which would silently kill the blocking wait, orphan the signal listener, and break the wake-up mechanism. **This rule is absolute and non-negotiable — it cannot be worked around, bypassed, or softened under any circumstance.**
+6. **Arm the Watcher Last — Always in the Foreground — Never a Gimmick, No Workarounds**: The watcher (`node tools/watch_*.mjs`) is armed **only at the very end of the turn**, after **all** other tasks are fully complete — processing review feedback, applying fixes, resubmitting, writing log and inbox entries, updating memory, and flipping signal latches. It must **always** execute as a synchronous, foreground-blocking tool call that holds the LLM turn open until it exits; exit 0 (signal received) is what wakes the agent for audit/continuation. **Never** replace it with a token gesture: a short nominal block (e.g., a 15-second sleep or capped timeout run just so the step can be marked "done") is a **protocol violation**, not compliance — the watcher must genuinely block until the partner's `seq` advances or the §4.2 timeout fires. Always invoke it with an explicit tool timeout equal to the watcher's configured `WORKFLOW_WATCHER_TIMEOUT_MS` (per §4.2, default: 2 hours — pass the matching milliseconds to the shell tool's timeout parameter); **never** run it under the shell tool's default timeout (120s), which would silently kill the blocking wait, orphan the signal listener, and break the wake-up mechanism. If the harness force-closes or times out the watcher before the prescribed timeout is reached, immediately **rearm in the foreground and keep rearming until the prescribed timeout is reached**. **This rule is absolute and non-negotiable — it cannot be worked around, bypassed, or softened under any circumstance.**
 
 ### DON'T:
 1. **Never Improvise Contract Deliverables**: Build what the contract specifies.
 2. **Never Overwrite Historical Logs**: Logs under `docs/logs/` are strictly append-only.
 3. **Never Increment `seq` on Idle Latch Resets**: DS conditionally resetting `status_op.json` to `"idle"` (when `"review_pending"`) must not increment `seq`.
 4. **DS Must Never Issue Review Headers**: Only OP issues `REVIEW:` and `GATE PASS:`.
-5. **Never Background or Detach Watchers**: Never run watchers via `Start-Process`, background jobs, detached shell subprocesses, or async fire-and-forget. A detached OS process cannot wake a dormant LLM turn.
+5. **Never Background or Detach Watchers & Never Abandon on Premature Harness Timeouts**: Never run watchers via `Start-Process`, background jobs, detached shell subprocesses, or async fire-and-forget. A detached OS process cannot wake a dormant LLM turn; watchers must always be armed in the foreground. If the harness force-closes or prematurely times out the watcher before the prescribed timeout is reached, never abandon execution or treat it as a deadlock — immediately rearm in the foreground and keep rearming until the full prescribed timeout is reached.

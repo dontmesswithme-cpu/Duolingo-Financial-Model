@@ -25,6 +25,8 @@ import {
   usd,
   percent,
   SCENARIO_DISPLAY_NAMES,
+  escapeText,
+  safeUrl,
 } from './format.js';
 
 export { SCENARIO_DISPLAY_NAMES };
@@ -177,9 +179,15 @@ function snapDriverValue(val, driver) {
  */
 function renderDriverRow(driver) {
   const isMkt = driver.marking === 'MKT';
+  // P10.6 Rendering Security. A driver is external-facing data: its name, label,
+  // notes, source URL and provider all reach innerHTML through this row. Each is
+  // passed through the centralized helpers, so a hostile label renders as text
+  // and a hostile source URL is refused rather than linked.
+  const sourceUrl = safeUrl(driver.source?.url);
+  const providerLabel = escapeText(driver.source?.provider);
   const badgeMarkup = isMkt
-    ? (driver.source?.url
-        ? `<a class="mkt-source-link" href="${driver.source.url}" target="_blank" rel="noopener noreferrer">${mktBadge({ asOf: driver.asOf, provider: driver.source?.provider })}</a>`
+    ? (sourceUrl
+        ? `<a class="mkt-source-link" href="${escapeText(sourceUrl)}" target="_blank" rel="noopener noreferrer">${mktBadge({ asOf: driver.asOf, provider: driver.source?.provider })}</a>`
         : mktBadge({ asOf: driver.asOf, provider: driver.source?.provider }))
     : estSuffix('', 'EST');
 
@@ -187,14 +195,16 @@ function renderDriverRow(driver) {
   const maxVal = typeof driver.max === 'number' ? driver.max : 1;
   const stepVal = typeof driver.step === 'number' ? driver.step : 0.01;
   const noteText = driver.notes || driver.label || driver.name || '';
-  const tooltipAttr = formatDisplayText(noteText);
+  const tooltipAttr = escapeText(formatDisplayText(noteText));
+  const driverName = escapeText(driver.name);
+  const driverLabel = escapeText(driver.label || driver.name);
 
   return `
-    <div class="driver-row" data-driver-name="${driver.name}">
+    <div class="driver-row" data-driver-name="${driverName}">
       <div class="driver-info">
         <div class="driver-label-row">
-          <span class="driver-label">${driver.label || driver.name}</span>
-          <button type="button" class="tooltip-btn" aria-label="${tooltipAttr}" title="${tooltipAttr}">&#x24D8;</button>
+          <span class="driver-label">${driverLabel}</span>
+          <button type="button" class="tooltip-btn" aria-label="${tooltipAttr}" title="${tooltipAttr}"><img src="assets/icons/ui/info-circle.svg" alt="Info" width="13" height="13" /></button>
           ${badgeMarkup}
         </div>
         <div class="driver-notes">${tooltipAttr}</div>
@@ -835,6 +845,29 @@ function renderForecastMatrixTable(assumptions, context = {}) {
  * @param {'sliders'|'table'} [options.mode='sliders'] Initial presentation mode
  * @returns {{ update: (assumptions: object) => void, dispose: () => void, setCategory: (cat: string) => void, setMode: (m: string) => void }}
  */
+/**
+ * Builds the visible field-error banner for a rejected driver edit.
+ *
+ * Rendered as a live region with `role="alert"` so the failure is announced,
+ * and it names the offending field and the reason. Absent when there is no
+ * error, so a recovered model shows no error chrome at all.
+ *
+ * @param {{field: string, message: string, code?: string}|null} error
+ * @returns {string} HTML fragment (empty string when there is no error).
+ */
+function renderFieldErrorHtml(error) {
+  if (!error || typeof error.message !== 'string' || error.message.length === 0) {
+    return '';
+  }
+  const field = String(error.field || 'driver');
+  const code = typeof error.code === 'string' && error.code.length > 0 ? ` (${error.code})` : '';
+  return `<div class="field-error-banner" data-field-error="${field}" role="alert" aria-live="assertive">`
+    + `<span class="field-error-label">Rejected edit</span>`
+    + `<span class="field-error-field font-mono">${field}</span>`
+    + `<span class="field-error-message">${error.message}${code}</span>`
+    + `</div>`;
+}
+
 export function renderAssumptions({
   container,
   assumptions,
@@ -845,6 +878,7 @@ export function renderAssumptions({
   onDriverChange,
   onScenarioChange,
   mode = 'sliders',
+  fieldError = null,
 } = {}) {
   if (!container) {
     throw new EngineError('invalid_dependency', 'renderAssumptions requires a container element.', 'container');
@@ -854,9 +888,11 @@ export function renderAssumptions({
   let disposed = false;
   let currentAssumptions = assumptions;
   let currentHistorical = historical;
-  let currentThreeStatement = threeStatement;
-  let currentSchedules = schedules;
-  let currentMode = mode === 'table' ? 'table' : 'sliders';
+let currentThreeStatement = threeStatement;
+let currentSchedules = schedules;
+let currentMode = mode === 'table' ? 'table' : 'sliders';
+/** Visible field error for the most recent rejected driver edit (P10.3). */
+let currentFieldError = fieldError && typeof fieldError === 'object' ? fieldError : null;
   let currentCategory = 'all';
   const driverElementMap = new Map();
 
@@ -962,6 +998,7 @@ export function renderAssumptions({
 
     container.innerHTML = `
       <div class="assumptions-view-wrapper assumptions-container">
+        ${renderFieldErrorHtml(currentFieldError)}
         <!-- Top Title & Controls Strip -->
         <div class="assumptions-header-row">
           <div class="assumptions-title-block">
@@ -1071,6 +1108,54 @@ export function renderAssumptions({
         }
         entry.numInput = numInput;
       }
+/**
+ * Marks a driver field as holding an unusable value and shows an inline message.
+ *
+ * P10.6: this is the view-layer response to invalid input. The field is marked with
+ * `aria-invalid` (not only a class) so the state is observable and testable, and the
+ * message lives in an assertive live region so a screen reader announces the refusal
+ * rather than the edit failing silently.
+ *
+ * @param {object} input The offending field.
+ * @param {object} driver The driver the field edits.
+ * @param {string} message Human-readable explanation.
+ */
+function showFieldError(input, driver, message) {
+  if (!input || typeof input.setAttribute !== 'function') return;
+  input.setAttribute('aria-invalid', 'true');
+  if (input.classList && typeof input.classList.add === 'function') input.classList.add('is-invalid');
+  const row = typeof input.closest === 'function' ? input.closest('.driver-row') : null;
+  const host = row || input.parentElement;
+  if (!host || typeof host.querySelector !== 'function') return;
+  let msg = host.querySelector('[data-field-error]');
+  if (!msg) {
+    if (typeof document === 'undefined' || typeof document.createElement !== 'function') return;
+    msg = document.createElement('span');
+    msg.className = 'driver-field-error';
+    msg.setAttribute('data-field-error', '');
+    msg.setAttribute('role', 'alert');
+    msg.setAttribute('aria-live', 'assertive');
+    host.appendChild(msg);
+  }
+  msg.textContent = message;
+}
+
+/**
+ * Clears any inline refusal left on a driver field.
+ *
+ * @param {object} input The field to clear.
+ */
+function clearFieldError(input) {
+  if (!input || typeof input.removeAttribute !== 'function') return;
+  input.removeAttribute('aria-invalid');
+  if (input.classList && typeof input.classList.remove === 'function') input.classList.remove('is-invalid');
+  const row = typeof input.closest === 'function' ? input.closest('.driver-row') : null;
+  const host = row || input.parentElement;
+  if (!host || typeof host.querySelector !== 'function') return;
+  const msg = host.querySelector('[data-field-error]');
+  if (msg && typeof msg.remove === 'function') msg.remove();
+}
+
       const changeHandler = () => {
         const driver = currentAssumptions?.get
           ? currentAssumptions.get(driverName)
@@ -1101,6 +1186,27 @@ export function renderAssumptions({
             if (snappedVal !== driver.value) {
               dispatchChange(driverName, snappedVal);
             }
+            clearFieldError(numInput);
+          } else {
+            // P10.6: an unparseable typed value previously fell out of this branch
+            // with NO dispatch, NO error and NO restore, so a real browser met
+            // garbage input with silence: the field kept the bad text, the model was
+            // untouched, and the controller banner never fired because `setDriver`
+            // was never called. That fails the contract's "invalid edit shows an
+            // error" at the VIEW layer. The value is now refused visibly: the field
+            // is marked invalid, an assertive live region names the problem, focus
+            // moves to it, and the last good value is restored so the control never
+            // displays text the model does not hold.
+            showFieldError(numInput, driver, `Enter a number for ${driver.label || driver.name}.`);
+            numInput.value = formatDriverDisplay(driver.value, driver.units);
+            const sliderForRestore = (driverElementMap.get(driverName) || {}).slider
+              || (container.querySelector
+                ? container.querySelector(`[data-driver-slider="${driverName}"]`)
+                : null);
+            if (sliderForRestore) {
+              sliderForRestore.value = String(snapDriverValue(clamp(driver.value, driver.min, driver.max), driver));
+            }
+            if (typeof numInput.focus === 'function') numInput.focus();
           }
         }
       };
@@ -1304,6 +1410,32 @@ export function renderAssumptions({
   render();
 
   return {
+    /**
+     * Displays or clears the visible field error for a rejected driver edit
+     * (P10.3 "display a visible field error"). The controller owns the value;
+     * this view only renders it, so the DOM can never disagree with the model.
+     *
+     * @param {{field: string, message: string, code?: string}|null} error
+     * @returns {void}
+     */
+    setFieldError(error) {
+      currentFieldError = error && typeof error === 'object' && typeof error.message === 'string'
+        ? Object.freeze({ field: String(error.field || 'driver'), message: error.message, code: error.code || null })
+        : null;
+      const host = container && typeof container.querySelector === 'function'
+        ? container.querySelector('.assumptions-view-wrapper')
+        : null;
+      if (!host) {
+        render();
+        return;
+      }
+      const existing = container.querySelector('[data-field-error]');
+      if (existing && typeof existing.remove === 'function') existing.remove();
+      if (currentFieldError) {
+        host.insertAdjacentHTML('afterbegin', renderFieldErrorHtml(currentFieldError));
+      }
+    },
+
     update(newAssumptions, context = {}) {
       currentAssumptions = newAssumptions;
       if (context?.historical) currentHistorical = context.historical;

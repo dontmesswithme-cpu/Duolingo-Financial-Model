@@ -13,9 +13,9 @@
  *     - Filed H1 actuals (REV 590,421, OI 78,472, NI 76,618, OCF 239,031) + forecasted H2 = FY2026 1,193,853.52 total.
  *     - Invariance of filed H1 actuals across driver shifts.
  *  4. Full Authoritative Valuation Pin Set
- *     - WACC / CAPM Build (rf 4.79%, beta 1.47, ERP 4.25% -> Re 11.0375%, debt-free theorem WACC = 11.0375%).
- *     - DCF Explicit & Terminal Values (pvExplicit 1,586,880.58, Gordon TV 6,321,697.06, EV 5,332,169.32, Net Cash 1,416,559.00, Equity 6,748,728.32, perShare $118.60167662384697, -24.86% Overvalued).
- *     - Scenario Range: Bear $72.38 (overvalued) < Base $118.60 < Bull $217.98 (undervalued).
+ *     - WACC / CAPM Build (rf 4.79%, beta 1.49, ERP 4.25% -> Re 11.1225%, debt-free theorem WACC = 11.1225%).
+ *     - DCF Explicit & Terminal Values (pvExplicit 3,109,718.43, Gordon TV 8,221,173.53, EV 6,181,615.23, Net Cash 1,435,448.73, Equity 7,617,063.96, perShare $113.86877399587779, -27.86% Overvalued).
+ *     - Scenario Range: Bear $62.08 (overvalued) < Base $113.87 < Bull $240.45 (undervalued).
  *     - Sensitivity 9x5 Matrix: 45 cells, WACC > g guard, monotonicity across rows and columns.
  *  5. KPI Truths & Golden Metrics
  *     - DAU 58.7M, MAU 133.1M, Subscribers 12.7M, Total Bookings $1,158,425, Rule of 40 47.4%.
@@ -26,7 +26,7 @@
  */
 
 /* PIN-GENESIS-STAMP-BEGIN
-{"hash":"398097191b2ee12f889e2bf2b51f46e758d3e0f19d9f1db7c1963032b0d64588","generatedFrom":["src/data/assumptions.json","src/engine/beta.js","src/engine/dcf.js","src/engine/forecast.js","src/engine/invariants.js","src/engine/market.js","src/engine/methods/aggregate.js","src/engine/methods/comps.js","src/engine/methods/evMultiples.js","src/engine/methods/fcffDcf.js","src/engine/methods/perUser.js","src/engine/methods/pfcf.js","src/engine/methods/sotp.js","src/engine/recommend.js","src/engine/scenarios.js","src/engine/schedules.js","src/engine/shares.js","src/engine/threeStatement.js","src/engine/ttm.js","src/engine/wacc.js"],"createdAt":"2026-09-10T18:01:22.437Z","files":{"src/data/assumptions.json":"e4a32541b1ad7b0a290b08b6fcc750480d5caadac990d8527ec6532aab40c250","src/engine/beta.js":"932ea72c8cff71fb11905674481735a0a59175a3ef704e574a0fea83215b6f6b","src/engine/dcf.js":"2a487298d06e4fd4c56895028228b627bf9ae1d34e87cb02df500b3ee4d4d49d","src/engine/forecast.js":"7d9d5537bc69852186d05025813abe97a5f6f83eba22615cbf501a91def3eeb3","src/engine/invariants.js":"47ba9b1c2e992b578fb3fbc9ba5315028053e30adfe0ae3b31612eb42cc76c8f","src/engine/market.js":"873940c0a4b6db91949c45d09819bff0bf1cf9f697fff65629645993ceb8c3c5","src/engine/methods/aggregate.js":"af1f416333833ede5124863f0b7ed57c247dd0badb2e9d50ad58f035252b1623","src/engine/methods/comps.js":"fe5a63d3cb0572eef5a56f327a0709265fcfaedf9c6324db2bb6286ffdf4a02f","src/engine/methods/evMultiples.js":"7c6611d38ab38c98173a194df4688c986db31af98e7b244693bfb8e6053b6b7d","src/engine/methods/fcffDcf.js":"5cb7274f63bddb5e5dc1ae1838589f8301b9768b30f91491c2e24918823684bd","src/engine/methods/perUser.js":"2116853d2b2e2451d01ed1c4917a04cf8a964dc14991a8bc2b17e7e1bdfeb925","src/engine/methods/pfcf.js":"b30abf50732692ba64eadf30f80552a1af9ab5cf35fb786fc6d4333be15b7808","src/engine/methods/sotp.js":"bcb8f1f72c566394ec99a924fbaf8cd869b66e572c518ab4ba6cdb15a4f939d4","src/engine/recommend.js":"c86b5b68f6389ff7dddb320f1c25daeb85a1de8f1a58a9ddc13d278ee779527c","src/engine/scenarios.js":"b6043b3e2e73420f4cc47eb3d4a03388763f09d2e41b6a4bc0431217f0d4d80d","src/engine/schedules.js":"7e9d903d2139753e7c73243e15c0e2bc834f65ffaa7dd64adc5ecbd12b747f77","src/engine/shares.js":"0fd089cb5fcd53225f9919659a94fde2ab81770e11bfe0ffebc7c5f505586c20","src/engine/threeStatement.js":"80922814761c6d3ff7604eadd93ff551a63ee2d628b94e462fe6141fd050f8ed","src/engine/ttm.js":"5b2ec60292b4fcc83f8a11b6a3a947e6683d60eb6db99cf924b48dd57be408c4","src/engine/wacc.js":"c77bc38094ba9a15d12712e1e13970d6555861e2242e3ad785db839bbbdb89f6"}}
+{"hash":"95972b149e0b837fd1b8d291b5902db3fb73dcff045e68a3c897fc01d58e0756","generatedFrom":["src/data/assumptions.json","src/engine/benchmark.js","src/engine/beta.js","src/engine/dcf.js","src/engine/forecast.js","src/engine/fullyDiluted.js","src/engine/invariants.js","src/engine/market.js","src/engine/methods/aggregate.js","src/engine/methods/comps.js","src/engine/methods/dcfOutputs.js","src/engine/methods/evMultiples.js","src/engine/methods/fcffDcf.js","src/engine/methods/forwardBasis.js","src/engine/methods/perUser.js","src/engine/methods/pfcf.js","src/engine/methods/sotp.js","src/engine/ratios.js","src/engine/recommend.js","src/engine/scenarios.js","src/engine/schedules.js","src/engine/shares.js","src/engine/threeStatement.js","src/engine/ttm.js","src/engine/wacc.js"],"createdAt":"2026-10-04T03:07:17.428Z","files":{"src/data/assumptions.json":"b89d710791e6544e0bc463bd9eaea781453429a01e5cb8a540364e705096527e","src/engine/benchmark.js":"6a975d29d03e85a92da75448df9703c6ca275e2caa24920995f584655f80be3a","src/engine/beta.js":"932ea72c8cff71fb11905674481735a0a59175a3ef704e574a0fea83215b6f6b","src/engine/dcf.js":"668d9665b59d5f21f5059f9d966b3e75f895cefe5ff4878a072979d6bdc25408","src/engine/forecast.js":"d742bff655a9b1d6493685bd34c6b08e77a290005ba271b750ebe097108ad443","src/engine/fullyDiluted.js":"0041b53fecdf0f7716e108a4d15013ec23cd56e9b934f31130ae558d9333c839","src/engine/invariants.js":"47ba9b1c2e992b578fb3fbc9ba5315028053e30adfe0ae3b31612eb42cc76c8f","src/engine/market.js":"9e117391b8116bfc1981f84d9018556002a7bca74d85e7d3daf28002aa94ceba","src/engine/methods/aggregate.js":"b8e552aa765ee4f0caa080022d569ff42045e2ee89b121b301673402eaa6519d","src/engine/methods/comps.js":"7957478db118944cbeb37872d6d5373697113036d11a73e03547097bdf57b855","src/engine/methods/dcfOutputs.js":"e9c0fe09f0bf9907899b5d5ebf1be6eb03a48fa6d2719b95e0f606d13157d620","src/engine/methods/evMultiples.js":"0dfae74357de0f9d565e56a5065af786443d17963254dda4e306669bdc238798","src/engine/methods/fcffDcf.js":"b8fc7d4816b2941248fb471c6ab3cfa016df69868499a3f4b026f2e085b02387","src/engine/methods/forwardBasis.js":"03d241567507050b74d38f3218a890838b4fc70a4c6d245b1871b8fc91b15875","src/engine/methods/perUser.js":"2116853d2b2e2451d01ed1c4917a04cf8a964dc14991a8bc2b17e7e1bdfeb925","src/engine/methods/pfcf.js":"e74a9a32b6ecf743b77eedeb7991a4fb43dc2173f09b52f5512791d76f432380","src/engine/methods/sotp.js":"bbdad9519c39713915eeef22b55862b7d8eb45418b2034e9d41ce34200c97c86","src/engine/ratios.js":"d41a39c1d99fa8bc82b8a1dce55176c17bdfe7b6979c1cfaec54f43739841fe7","src/engine/recommend.js":"e3313f40f5d7c048fb9e412477129bf595e12a997cd111ae9927b0d9aa6ade80","src/engine/scenarios.js":"dfc7fefc87286d191c9fb47f526471f115d83553b0760a8919aea3bb1aacfc96","src/engine/schedules.js":"7a20edea251e2120a076271520a1011f3a558743b5aaf3324588638ddaf9150d","src/engine/shares.js":"e1cd39479b1bfa5822305830a3f7ed5cbad52f657d9b2db92210d9ff507ceae0","src/engine/threeStatement.js":"96b25d799e2a3aebd84721071fbb9ac7a20979f3396aee2834c3f990a5114470","src/engine/ttm.js":"5b2ec60292b4fcc83f8a11b6a3a947e6683d60eb6db99cf924b48dd57be408c4","src/engine/wacc.js":"c77bc38094ba9a15d12712e1e13970d6555861e2242e3ad785db839bbbdb89f6"}}
 PIN-GENESIS-STAMP-END */
 
 
@@ -47,6 +47,7 @@ import threeStatementEngine from '../src/engine/threeStatement.js';
 import { build as buildWacc } from '../src/engine/wacc.js';
 import { valuate as valuateDcf } from '../src/engine/dcf.js';
 import { evaluate as evaluateRec, buildSensitivityGrid, runFullValuation } from '../src/engine/recommend.js';
+import { CANONICAL_HORIZON } from '../src/data/constants.js';
 import { readLedgerUrls } from './_ledger.js';
 import { StubElement, createTabRoot } from './_dom_stub.js';
 
@@ -58,21 +59,34 @@ const readText = (location) => fs.promises.readFile(location, 'utf8');
 const LEDGER = readLedgerUrls();
 const CORPUS_RECORD_COUNT = 706;
 
+// P10.2 / F-2: the authoritative pin set must be struck on the PRODUCTION
+// basis. These two knobs previously defaulted, which selected the retired
+// five-year lane (FORECAST_HORIZON_DEFAULT = 5) on the integer-index path
+// while the app ran CANONICAL_HORIZON (10) on the dated valuation seam — so
+// the "Full Authoritative Valuation Pin Set" certified a build the product
+// never showed, against docs/phases/phase_10.md §2 ruling 10. They are now
+// explicit and identical to tools/regen_pins.mjs's bundle, so the two cannot
+// drift apart.
+const PIN_HORIZON = CANONICAL_HORIZON;
+const PIN_DATED_SEAM = true;
+
 async function getFullModel() {
   const historical = await loadHistorical({ dir: DATA_DIR, readText, requireLedger: true, ledger: LEDGER });
   const assumptions = await loadAssumptions({ location: ASSUMPTIONS_PATH, readText });
   const sched = schedulesEngine.build(historical, assumptions);
-  const fc = forecastEngine.project({ historical, assumptions });
+  const fc = forecastEngine.project({ historical, assumptions, horizon: PIN_HORIZON });
   const ts = threeStatementEngine.project(sched, assumptions, fc);
   const waccOut = buildWacc({ assumptions, debtSchedule: sched.debt });
-  const dcfOut = valuateDcf(ts, waccOut, { assumptions, corpus: historical });
+  const dcfOut = valuateDcf(ts, waccOut, {
+    assumptions, corpus: historical, horizon: PIN_HORIZON, datedSeam: PIN_DATED_SEAM,
+  });
   const marketPrice = assumptions.get('market_share_price').value;
   const recOut = evaluateRec(dcfOut.perShare, marketPrice);
-  const sensGrid = buildSensitivityGrid({ threeStatement: ts, assumptions, wacc: waccOut, corpus: historical });
+  const sensGrid = buildSensitivityGrid({ threeStatement: ts, assumptions, wacc: waccOut, corpus: historical, horizon: PIN_HORIZON });
   const scenarios = {
-    bear: runFullValuation(historical, assumptions, 'bear'),
+    bear: runFullValuation(historical, assumptions, 'bear', { horizon: PIN_HORIZON, datedSeam: PIN_DATED_SEAM }),
     base: { wacc: waccOut, dcf: dcfOut, recommendation: recOut, assumptions, perShare: dcfOut.perShare, upsidePct: recOut.upsidePct },
-    bull: runFullValuation(historical, assumptions, 'bull'),
+    bull: runFullValuation(historical, assumptions, 'bull', { horizon: PIN_HORIZON, datedSeam: PIN_DATED_SEAM }),
   };
   return {
     historical,
@@ -239,15 +253,15 @@ describe('P6.1  -  Full Authoritative Valuation Pin Set', () => {
     const { wacc, assumptions } = await getFullModel();
 
     assert.equal(assumptions.get('risk_free_rate').value, 0.0479, 'Risk-free rate = 4.79%');
-    assert.equal(assumptions.get('beta').value, 1.47, 'Beta = 1.47');
+    assert.equal(assumptions.get('beta').value, 1.49, 'Beta = 1.47');
     assert.equal(assumptions.get('equity_risk_premium').value, 0.0425, 'ERP = 4.25%');
     assert.equal(assumptions.get('effective_tax_rate').value, 0.134225, 'Tax rate = 13.4225%');
     assert.equal(assumptions.get('shares_outstanding').value, 50031000, 'Diluted shares = 50,031,000');
     assert.equal(assumptions.get('market_share_price').value, 157.85, 'Market share price = $157.85');
 
     // Cost of Equity & WACC
-    assert.equal(Math.round(wacc.costOfEquity.value * 1000000) / 1000000, 0.110375, 'Cost of Equity Re = 0.110375');
-    assert.equal(Math.round(wacc.wacc.value * 1000000) / 1000000, 0.110375, 'Debt-free WACC = 0.110375');
+    assert.equal(Math.round(wacc.costOfEquity.value * 1000000) / 1000000, 0.111225, 'Cost of Equity Re = 0.110375');
+    assert.equal(Math.round(wacc.wacc.value * 1000000) / 1000000, 0.111225, 'Debt-free WACC = 0.110375');
     assert.equal(wacc.debtFree, true, 'debtFree is true');
     assert.equal(wacc.costOfDebt.value, null, 'costOfDebt.value is null for debt-free structure');
     assert.equal(wacc.debtWeight.value, 0, 'debtWeight is 0');
@@ -258,39 +272,39 @@ describe('P6.1  -  Full Authoritative Valuation Pin Set', () => {
     const { dcf, recommendation } = await getFullModel();
 
     // Discount Factors
-    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.9005966452774964) < 1e-6, 'df FY2026 matches pin');
-    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.5924498916887444) < 1e-6, 'df FY2030 matches pin');
+    assert.ok(Math.abs(dcf.schedule[0].discountFactor - 0.9659214424962412) < 1e-6, 'df FY2026 matches pin');
+    assert.ok(Math.abs(dcf.schedule[4].discountFactor - 0.6332982796687557) < 1e-6, 'df FY2030 matches pin');
 
     // Present Value of Explicit Period FCFs
-    assert.ok(Math.abs(dcf.pvExplicit - 1586880.58) < 1.0, 'pvExplicit matches pin 1,586,880.58');
+    assert.ok(Math.abs(dcf.pvExplicit - 3109718.43) < 1.0, 'pvExplicit matches pin 1,586,880.58');
 
     // Terminal Year FCF & Gordon TV
     const terminalFcf = dcf.schedule[4].fcf * (1 + dcf.terminalGrowthRate);
     assert.ok(Math.abs(terminalFcf - 605980.82) < 1.0, 'terminal FCF matches pin 605,980.82');
-    assert.ok(Math.abs(dcf.terminalValue - 6321697.06) < 10.0, 'Gordon TV matches pin 6,321,697.06');
-    assert.ok(Math.abs(dcf.pvTerminal - 3745288.74) < 10.0, 'pvTerminal matches pin 3,745,288.74');
+    assert.ok(Math.abs(dcf.terminalValue - 8221173.53) < 10.0, 'Gordon TV matches pin 8,221,173.53');
+    assert.ok(Math.abs(dcf.pvTerminal - 3071896.80) < 10.0, 'pvTerminal matches pin 3,071,896.80');
 
     // EV, Net Cash, Equity Value, Per Share Value
-    assert.ok(Math.abs(dcf.enterpriseValue - 5332169.32) < 10.0, 'EV matches pin 5,332,169.32');
-    assert.ok(Math.abs(dcf.netCash - 1416559.00) < 1.0, 'Net Cash matches pin 1,416,559.00');
-    assert.ok(Math.abs(dcf.equityValue - 6748728.32) < 10.0, 'Equity Value matches pin 6,748,728.32');
+    assert.ok(Math.abs(dcf.enterpriseValue - 6181615.23) < 10.0, 'EV matches pin 6,181,615.23');
+    assert.ok(Math.abs(dcf.netCash - 1435448.73) < 1.0, 'Net Cash matches pin 1,416,559.00');
+    assert.ok(Math.abs(dcf.equityValue - 7617063.96) < 10.0, 'Equity Value matches pin 7,617,063.96');
 
     // Per Share Value & Recommendation (EP.2: rolled-share denominator, 56.90m)
-    assert.ok(Math.abs(dcf.perShare - 118.60167662384697) < 1e-4, 'perShare matches exact pin 118.60167662384697');
+    assert.ok(Math.abs(dcf.perShare - 113.86877399587779) < 1e-4, 'perShare matches exact pin 113.86877399587779');
     assert.equal(recommendation.label, 'overvalued', 'Recommendation label is overvalued');
-    assert.ok(Math.abs(recommendation.upsidePct - (-0.248643)) < 1e-3, 'Upside % matches -24.86%');
+    assert.ok(Math.abs(recommendation.upsidePct - (-0.278627)) < 1e-3, 'Upside % matches -27.86%');
   });
 
-  test('Scenario Range satisfies strict ordering: Bear ($72.38) < Base ($118.60) < Bull ($217.98)', async () => {
+  test('Scenario Range satisfies strict ordering: Bear ($62.08) < Base ($113.87) < Bull ($240.45)', async () => {
     const { scenarios } = await getFullModel();
 
     const bearPrice = scenarios.bear.dcf.perShare;
     const basePrice = scenarios.base.dcf.perShare;
     const bullPrice = scenarios.bull.dcf.perShare;
 
-    assert.ok(Math.abs(bearPrice - 72.38) < 0.5, `Bear price ${bearPrice} matches ~72.38`);
-    assert.ok(Math.abs(basePrice - 118.60) < 0.5, `Base price ${basePrice} matches ~118.60`);
-    assert.ok(Math.abs(bullPrice - 217.98) < 0.5, `Bull price ${bullPrice} matches ~217.98`);
+    assert.ok(Math.abs(bearPrice - 62.08) < 0.5, `Bear price ${bearPrice} matches ~62.08`);
+    assert.ok(Math.abs(basePrice - 113.87) < 0.5, `Base price ${basePrice} matches ~113.87`);
+    assert.ok(Math.abs(bullPrice - 240.45) < 0.5, `Bull price ${bullPrice} matches ~240.45`);
 
     assert.ok(bearPrice < basePrice, 'Bear price < Base price');
     assert.ok(basePrice < bullPrice, 'Base price < Bull price');

@@ -208,7 +208,7 @@ describe('RP2.1  -  View Controller (src/ui/assumptionsTab.js) & Component Tests
     );
   });
 
-  test('renders all 38 schema drivers with .cell-input and bounded controls', async () => {
+  test('renders all 42 schema drivers with .cell-input and bounded controls', async () => {
     const assumptions = await loadTestAssumptions();
     const container = createInteractiveContainer();
 
@@ -217,8 +217,11 @@ describe('RP2.1  -  View Controller (src/ui/assumptionsTab.js) & Component Tests
 
     const html = container.innerHTML;
 
-    // Verify all 38 drivers are present with input and slider attributes
-    assert.equal(assumptions.drivers.length, 38, 'Assumptions dataset must have exactly 38 drivers');
+    // Verify all drivers are present with input and slider attributes
+    // 42 = the 41 P10.2 drivers plus the frozen `sbc_issuance_price` driver
+    // added by P10.3 (canonical benchmark contract: issuance is not driven by
+    // the benchmark). Every driver must still render a bounded control.
+    assert.equal(assumptions.drivers.length, 42, 'Assumptions dataset must have 42 drivers');
     for (const d of assumptions.drivers) {
       assert.ok(html.includes(`data-driver-input="${d.name}"`), `Must contain data-driver-input for ${d.name}`);
       assert.ok(html.includes(`data-driver-slider="${d.name}"`), `Must contain data-driver-slider for ${d.name}`);
@@ -315,12 +318,12 @@ describe('RP2.1  -  View Controller (src/ui/assumptionsTab.js) & Component Tests
 
     const pill = container.querySelector('[data-driver-input="beta"]');
     assert.ok(pill, 'Beta pill must be found');
-    // Re-enter the currently displayed value verbatim (on-step 1.47)
+    // Re-enter the currently displayed value verbatim (on-step 1.49, the peer-MEAN driver)
     pill.value = String(pill.value);
     pill.dispatch('change');
 
     assert.equal(changes.length, 0, 'Same-value edit must not dispatch (B1 no-op path)');
-    assert.equal(pill.value, '1.47', 'Display stays on the engine-held value');
+    assert.equal(pill.value, '1.49', 'Display stays on the engine-held value (beta driver is the peer mean 1.49)');
 
     view.dispose();
   });
@@ -342,16 +345,18 @@ describe('RP2.1  -  View Controller (src/ui/assumptionsTab.js) & Component Tests
     assert.ok(pill, 'Beta pill must be found');
 
     // Off-step input snaps to the step grid and dispatches exactly once
-    pill.value = '1.476';
+    // 1.486 is off the 0.01 step grid and snaps to 1.50, which is a genuine change
+    // away from the held 1.49 (1.496 would snap back to 1.49 and no-op).
+    pill.value = '1.506';
     pill.dispatch('change');
 
     assert.equal(changes.length, 1, 'Off-step edit must dispatch exactly once');
     assert.equal(changes[0].name, 'beta');
-    assert.equal(changes[0].val, 1.48, 'Dispatched value is step-snapped (engine-held)');
-    assert.equal(pill.value, '1.48', 'Display re-syncs to the snapped value');
+    assert.equal(changes[0].val, 1.51, 'Dispatched value is step-snapped (1.506 -> 1.51)');
+    assert.equal(pill.value, '1.51', 'Display re-syncs to the snapped value');
 
     // Simulate the app recalc refresh, then re-enter the snapped value: no-op.
-    const drivers2 = assumptions.drivers.map((d) => (d.name === 'beta' ? { ...d, value: 1.48 } : d));
+    const drivers2 = assumptions.drivers.map((d) => (d.name === 'beta' ? { ...d, value: 1.51 } : d));
     const byName2 = Object.fromEntries(drivers2.map((d) => [d.name, d]));
     view.update({ scenario: 'base', drivers: drivers2, get: (n) => byName2[n] ?? null });
     pill.dispatch('change');

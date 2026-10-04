@@ -36,6 +36,7 @@ import {
   runFullValuation,
 } from '../src/engine/recommend.js';
 import { compute as computeTtm } from '../src/engine/ttm.js';
+import { CANONICAL_HORIZON } from '../src/data/constants.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const E2E_REL = 'tests/e2e.accuracy.test.js';
@@ -43,6 +44,22 @@ const E2E_REL = 'tests/e2e.accuracy.test.js';
 /** Stamp block markers (single-line JSON payload between them). */
 export const STAMP_BEGIN = '/* PIN-GENESIS-STAMP-BEGIN';
 export const STAMP_END = 'PIN-GENESIS-STAMP-END */';
+
+/**
+ * The single source of truth for locating the stamp block in the e2e source.
+ *
+ * Tolerates CRLF and LF. A bare `\n` here was a portability bug: with no
+ * `.gitattributes` and `core.autocrlf=true`, a Windows checkout stores `\r\n`,
+ * so `BEGIN\n` never matches, `readStamp()` returned null, and `--check` reported
+ * `PIN DRIFT: 0 pin(s) differ` while exiting 1 — naming the wrong culprit for a
+ * regex defect. Every read and every replace MUST use this one pattern; a
+ * read/replace asymmetry is worse than the original bug, because it turns real
+ * drift into a false `PINS IN SYNC`.
+ *
+ * @type {RegExp}
+ */
+export const STAMP_BLOCK_PATTERN =
+  /\/\* PIN-GENESIS-STAMP-BEGIN\r?\n([\s\S]*?)\r?\nPIN-GENESIS-STAMP-END \*\//;
 
 /**
  * Recursively key-sorts a JSON value for deterministic hashing.
@@ -139,6 +156,17 @@ function formatMoney2(value) {
 /**
  * Builds the live pin bundle from one full machine pass.
  *
+ * P10.2/F-2: the bundle must be struck on the PRODUCTION basis, not the legacy
+ * five-year lane. This function used to pass no horizon and no `datedSeam`, so
+ * `FORECAST_HORIZON_DEFAULT` (5) silently selected the retired lane while the
+ * production app ran `CANONICAL_HORIZON` (10) on the P10.2 dated valuation
+ * seam. The tool whose purpose is to eliminate pin drift therefore guaranteed
+ * production pin drift, against `docs/phases/phase_10.md` §2 ruling 10
+ * ("the five-year model ... cannot control production relative values").
+ *
+ * Both knobs are now explicit and sourced from the same constant the app uses,
+ * so the two cannot drift apart again.
+ *
  * @param {string} rootDir Repo root directory.
  * @returns {Promise<object>} Frozen live values keyed for the pin map.
  */
@@ -149,17 +177,19 @@ async function buildLiveBundle(rootDir) {
   const assumptionsPath = path.join(rootDir, 'src', 'data', 'assumptions.json');
   const historical = await loadHistorical({ dir: dataDir, readText, requireLedger: true, ledger });
   const assumptions = await loadAssumptions({ location: assumptionsPath, readText });
+  const horizon = CANONICAL_HORIZON;
+  const datedSeam = true;
   const schedules = schedulesEngine.build(historical, assumptions);
-  const forecast = forecastEngine.project({ historical, assumptions });
+  const forecast = forecastEngine.project({ historical, assumptions, horizon });
   const threeStatement = threeStatementEngine.project(schedules, assumptions, forecast);
   const wacc = buildWacc({ assumptions, debtSchedule: schedules.debt });
-  const dcf = valuateDcf(threeStatement, wacc, { assumptions, corpus: historical });
+  const dcf = valuateDcf(threeStatement, wacc, { assumptions, corpus: historical, horizon, datedSeam });
   const marketPrice = assumptions.get('market_share_price').value;
   const recommendation = evaluateRec(dcf.perShare, marketPrice);
-  const sensGrid = buildSensitivityGrid({ threeStatement, assumptions, wacc, corpus: historical });
+  const sensGrid = buildSensitivityGrid({ threeStatement, assumptions, wacc, corpus: historical, horizon });
   const scenarios = {
-    bear: runFullValuation(historical, assumptions, 'bear'),
-    bull: runFullValuation(historical, assumptions, 'bull'),
+    bear: runFullValuation(historical, assumptions, 'bear', { horizon, datedSeam }),
+    bull: runFullValuation(historical, assumptions, 'bull', { horizon, datedSeam }),
   };
   const ttm = computeTtm(historical);
   const rows = [
@@ -376,7 +406,7 @@ export function applyPinMap(source, live) {
  * @returns {object|null} Parsed stamp or null when absent.
  */
 export function readStamp(source) {
-  const match = source.match(/\/\* PIN-GENESIS-STAMP-BEGIN\n([\s\S]*?)\nPIN-GENESIS-STAMP-END \*\//);
+  const match = source.match(STAMP_BLOCK_PATTERN);
   if (!match) {
     return null;
   }
@@ -394,6 +424,32 @@ export function renderStamp(stamp) {
 }
 
 /**
+ * P10.8 gate: pins move ONLY after P10.7 passes. The approval is the
+ * reviewer-signed financial-reality report (reviewer_id + reviewed_at +
+ * pass verdict); without it this tool fails closed and moves nothing.
+ *
+ * @param {string} rootDir Repo root directory.
+ */
+function requireP107Approval(rootDir) {
+  const reportPath = path.join(rootDir, 'docs', 'financial_reality', 'phase_10_report.json');
+  let report;
+  try {
+    report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  } catch {
+    throw new Error('PIN REGEN REFUSED: P10.7 approval absent (cannot read docs/financial_reality/phase_10_report.json).');
+  }
+  const approved =
+    report &&
+    report.reviewer_id === 'OP' &&
+    typeof report.reviewed_at === 'string' &&
+    report.reviewed_at.length > 0 &&
+    report.verdict === 'pass';
+  if (!approved) {
+    throw new Error('PIN REGEN REFUSED: P10.7 approval absent (reviewer-signed pass report required before pins move).');
+  }
+}
+
+/**
  * Regenerates pins, docstring header numbers, and the hash stamp.
  *
  * @param {object} [options]
@@ -404,6 +460,7 @@ export function renderStamp(stamp) {
 export async function regenPins(options) {
   const opts = options && typeof options === 'object' ? options : {};
   const rootDir = typeof opts.rootDir === 'string' ? opts.rootDir : ROOT;
+  requireP107Approval(rootDir);
   const e2ePath = path.join(rootDir, E2E_REL);
   const live = await buildLiveBundle(rootDir);
   const sources = listStampSources(rootDir);
@@ -418,35 +475,57 @@ export async function regenPins(options) {
 
   const createdAt = new Date().toISOString();
   const stamp = { hash, generatedFrom: sources, createdAt, files };
-  const rendered = renderStamp(stamp);
+  // Match the file's dominant line ending so a write never leaves the block
+  // with mixed endings inside an otherwise CRLF file.
+  const eol = text.includes('\r\n') ? '\r\n' : '\n';
+  const rendered = renderStamp(stamp).replace(/\n/g, eol);
   const stored = readStamp(text);
   let stampChanged = true;
   if (stored && stored.hash === hash) {
     stampChanged = false;
-    text = text.replace(
-      /\/\* PIN-GENESIS-STAMP-BEGIN\n[\s\S]*?\nPIN-GENESIS-STAMP-END \*\//,
+    const rewritten = text.replace(
+      STAMP_BLOCK_PATTERN,
       rendered.replace(createdAt, stored.createdAt),
     );
+    if (rewritten === text && !STAMP_BLOCK_PATTERN.test(text)) {
+      throw new Error(
+        'PIN REGEN REFUSED: stamp is readable but its block cannot be located for replacement.',
+      );
+    }
+    text = rewritten;
   } else if (stored) {
-    text = text.replace(
-      /\/\* PIN-GENESIS-STAMP-BEGIN\n[\s\S]*?\nPIN-GENESIS-STAMP-END \*\//,
-      rendered,
-    );
+    const rewritten = text.replace(STAMP_BLOCK_PATTERN, rendered);
+    if (rewritten === text && !STAMP_BLOCK_PATTERN.test(text)) {
+      throw new Error(
+        'PIN REGEN REFUSED: stamp is readable but its block cannot be located for replacement.',
+      );
+    }
+    text = rewritten;
   } else {
     const headerEnd = text.indexOf('*/');
     if (headerEnd === -1) {
       throw new Error(`Cannot locate the header docstring in ${E2E_REL}.`);
     }
-    text = `${text.slice(0, headerEnd + 2)}\n\n${rendered}\n${text.slice(headerEnd + 2)}`;
+    text = `${text.slice(0, headerEnd + 2)}${eol}${eol}${rendered}${eol}${text.slice(headerEnd + 2)}`;
   }
 
   const original = fs.readFileSync(e2ePath, 'utf8');
-  const changed = replaced.length > 0 || stampChanged || text !== original;
   const fullyChanged = text !== original;
   if (!opts.check && fullyChanged) {
     fs.writeFileSync(e2ePath, text, 'utf8');
   }
-  return { changed: fullyChanged, replaced, missing, hash };
+  return {
+    changed: fullyChanged,
+    replaced,
+    missing,
+    hash,
+    // Diagnostics so a non-zero exit can name the layer that actually failed
+    // instead of blaming the pins (the F-1 misdiagnosis).
+    stampPresent: stored !== null,
+    storedHash: stored ? stored.hash : null,
+    hashMatches: stored ? stored.hash === hash : false,
+    lineEndings: eol === '\r\n' ? 'crlf' : 'lf',
+  };
 }
 
 const invokedDirectly =
@@ -460,14 +539,40 @@ if (invokedDirectly) {
   regenPins({ check })
     .then((result) => {
       if (result.changed) {
-        console.log(
-          check
-            ? `PIN DRIFT: ${result.replaced.length} pin(s) differ from live engine output (hash ${result.hash}).`
-            : `PINS REGENERATED: ${result.replaced.length} pin replacement(s) applied (hash ${result.hash}).`,
-        );
-        process.exit(check ? 1 : 0);
+        if (!check) {
+          console.log(
+            `PINS REGENERATED: ${result.replaced.length} pin replacement(s) applied (hash ${result.hash}).`,
+          );
+          process.exit(0);
+        }
+        // Name the layer that actually failed. A stamp that cannot be read, or
+        // a hash that has moved, are both "the pins did not drift" situations;
+        // reporting them as PIN DRIFT sent the last audit hunting for a
+        // valuation regression that did not exist (F-1).
+        if (!result.stampPresent) {
+          console.error(
+            `PIN STAMP UNREADABLE: no stamp block located in ${E2E_REL} ` +
+              `(line endings: ${result.lineEndings}). ${result.replaced.length} pin(s) differ from live engine output (hash ${result.hash}). ` +
+              'This is a stamp-locating defect, NOT pin drift. Run a writing regen to re-stamp, or check .gitattributes line-ending normalisation.',
+          );
+        } else if (!result.hashMatches) {
+          console.error(
+            `PIN STAMP HASH MOVED: stored ${result.storedHash} != live ${result.hash}. ` +
+              `${result.replaced.length} pin(s) differ from live engine output. ` +
+              'A hashed source (assumptions.json or src/engine/**) changed without a regen. Run a writing regen.',
+          );
+        } else {
+          console.error(
+            `PIN DRIFT: ${result.replaced.length} pin(s) differ from live engine output ` +
+              `(stamp hash ${result.hash} is in sync; line endings: ${result.lineEndings}).`,
+          );
+        }
+        process.exit(1);
       }
-      console.log(`PINS IN SYNC: e2e pins match live engine output (hash ${result.hash}).`);
+      console.log(
+        `PINS IN SYNC: e2e pins match live engine output (hash ${result.hash}, ` +
+          `stamp ${result.stampPresent ? 'read' : 'absent'}, line endings: ${result.lineEndings}).`,
+      );
       process.exit(0);
     })
     .catch((err) => {
