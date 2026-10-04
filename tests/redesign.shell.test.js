@@ -188,9 +188,9 @@ describe('RP0.2 — App Shell & Duolingo Brand Header', () => {
 
   test('header contains metadata cluster with Valuation Date, Model Version, and Prepared By', () => {
     assert.match(html, /Valuation Date/i, 'metadata block must contain Valuation Date');
-    assert.match(html, /Sep 2,\s*2026/i, 'Valuation Date must match Sep 2, 2026');
+    assert.match(html, /Oct 4,\s*2026/i, 'Valuation Date must match Oct 4, 2026 (Director display order; engine date unchanged)');
     assert.match(html, /Model Version/i, 'metadata block must contain Model Version');
-    assert.match(html, /v1\.0-P4/i, 'Model Version must match v1.0-P4');
+    assert.match(html, /v1\.0(?!-P4)/i, 'Model Version must match v1.0');
     assert.match(html, /Prepared By/i, 'metadata block must contain Prepared By');
     assert.match(html, /Independent Analysis/i, 'Prepared By must state Independent Analysis');
   });
@@ -334,6 +334,6 @@ describe('RP0.2 — Institutional Footer & Disclaimers', () => {
     assert.match(html, /not investment advice/i);
     assert.match(html, /strictly for educational, informational, and analytical research purposes/i);
     assert.match(html, /does not constitute a solicitation to buy or sell securities/i);
-    assert.match(html, /v1\.0-P4/i, 'footer must carry model version tag');
+    assert.match(html, /v1\.0(?!-P4)/i, 'footer must carry model version tag v1.0');
   });
 });

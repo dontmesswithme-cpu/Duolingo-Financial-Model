@@ -1070,7 +1070,14 @@ function applyDriverOverrides(assumptions, overrides) {
       ? root.querySelector('[data-header-meta="valuation-date"]')
       : null;
     if (el) {
-      el.textContent = formatHeaderValuationDate(EFFECTIVE_VALUATION_DATE);
+      // Director-ordered display (2026-10-04): the header shows the viewer's
+      // current calendar date, derived at runtime so the stamp never goes
+      // stale and carries no hardcoded numerics. Engine truth is unchanged —
+      // EFFECTIVE_VALUATION_DATE (2026-09-02) still drives every computation;
+      // market asOf likewise kept.
+      const now = new Date();
+      const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      el.textContent = formatHeaderValuationDate(iso);
     }
   }
 

@@ -6,7 +6,7 @@
  *  - U1: 3-cluster / 5-voting-row synthesis wording; banned-language sweeps
  *  - U2: Valuation detail/bridge prefers production dated seam currentDcf over fcff
  *  - U3: Projections 2030E KPI sublabels are 'Explicit-horizon (2030E)'
- *  - U4: App shell and header dynamic date synchronization (Sep 2, 2026; fallback is '-')
+ *  - U4: App shell and header dynamic date synchronization (Oct 4, 2026 display stamp per Director order; engine date unchanged; fallback is '-')
  *  - U5: Share denominator diagnostic labeling
  *  - U6: Divisor basis intermediate labeling
  *  - U7: Separator (en-dash '–'), units notation ($M), and scenario vocabulary captioning
@@ -188,10 +188,10 @@ describe('P10.10: U3 — Explicit-Horizon (2030E) KPI Labeling', () => {
 });
 
 describe('P10.10: U4 — App Shell & Header Dynamic Date Synchronization', () => {
-  test('index.html static shell carries Sep 2, 2026 header and footer', () => {
+  test('index.html static shell carries Oct 4, 2026 header and footer (Director display order)', () => {
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-    assert.match(html, /<span class="meta-value" data-header-meta="valuation-date">Sep 2, 2026<\/span>/);
-    assert.match(html, /<span>Sep 2, 2026<\/span>/);
+    assert.match(html, /<span class="meta-value" data-header-meta="valuation-date">Oct 4, 2026<\/span>/);
+    assert.match(html, /<span>Oct 4, 2026<\/span>/);
     assert.doesNotMatch(html, /data-header-meta="valuation-date">Sep 1, 2026/);
   });
 

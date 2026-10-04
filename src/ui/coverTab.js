@@ -290,7 +290,7 @@ export function renderCover({
             </p>
             <div class="stat-pill-row">
               <div class="stat-pill">
-                <span class="stat-pill-label">Valuation Date</span>
+                <span class="stat-pill-label">Benchmark Close</span>
                 <span class="stat-pill-value" id="cover-stat-asof">${asOfDate}</span>
               </div>
               <div class="stat-pill">
@@ -299,7 +299,7 @@ export function renderCover({
               </div>
               <div class="stat-pill">
                 <span class="stat-pill-label">Model Version</span>
-                <span class="stat-pill-value" id="cover-stat-version">v1.0-P4</span>
+                <span class="stat-pill-value" id="cover-stat-version">v1.0</span>
               </div>
               <div class="stat-pill">
                 <span class="stat-pill-label">Model Type</span>
