@@ -3971,6 +3971,26 @@
       background: var(--color-card-bg);
     }
 
+    /* Mobile (<=600px): shrink the frozen metric column so data columns
+       stay visible beside it; metric names wrap instead of forcing nowrap. */
+    @media (max-width: 600px) {
+      .statement-table thead th:first-child,
+      .statement-table tbody td:first-child,
+      .statement-table tr.ratio-divider-row td:first-child,
+      .statement-table tr.row-ratio td:first-child {
+        min-width: 0;
+        width: 148px;
+        white-space: normal;
+      }
+      .statement-table thead th,
+      .statement-table tbody td {
+        padding: 6px 8px;
+      }
+      .statement-table-wrapper {
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
     /* RP10.2 — Ratio inspector content typography, inside the standing drawer components. */
     .ratio-def-text {
       font-size: var(--text-sm);
