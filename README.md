@@ -133,9 +133,9 @@ flowchart TD
 
 | Cover & Table of Contents | Historical Financials & Citations |
 |:---:|:---:|
-| ![Cover Tab](docs/screenshots/phase_5/v1/cover_1280.png) | ![Historicals Tab](docs/screenshots/phase_5/v1/historicals_1280.png) |
+| ![Cover Tab](assets/screenshots/cover_1280.png) | ![Historicals Tab](assets/screenshots/historicals_1280.png) |
 | **DCF Valuation & Waterfall** | **9×5 Sensitivity Matrix** |
-| ![Valuation Tab](docs/screenshots/phase_5/v1/valuation_1280.png) | ![Sensitivity Tab](docs/screenshots/phase_5/v1/sensitivity_1280.png) |
+| ![Valuation Tab](assets/screenshots/valuation_1280.png) | ![Sensitivity Tab](assets/screenshots/sensitivity_1280.png) |
 
 ---
 

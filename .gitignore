@@ -37,5 +37,8 @@ _pages/
 # Knowledge-graph analysis output (regenerable via graphify skill)
 graphify-out/
 
+# Design reference dumps (unreferenced; local only)
+ssdesign/
+
 # Project docs (specs, phases, evidence, logs — local only per Director order)
 docs/
