@@ -1,0 +1,3389 @@
+[
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 180698,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 38501,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 24658,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 6836,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 79,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 250772,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 69186,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 181586,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 103833,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 59170,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 78590,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 241593,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -60007,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income",
+    "label": "Other income",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 318,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_expense",
+    "label": "Other expense",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -288,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 30,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -59977,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 19,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -59958,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 177,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -60135,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 273507,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 44731,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 32718,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 17914,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 625,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 369495,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 99431,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 270064,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 150444,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 66967,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 117848,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 335259,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -65195,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income",
+    "label": "Other income",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 131,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_expense",
+    "label": "Other expense",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -807,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -676,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -65871,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 7235,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -58636,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 938,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -59574,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 404684,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 49858,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 41212,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 34673,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 682,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 531109,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 142105,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 389004,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 194352,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 75788,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 132123,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 402263,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -13259,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income",
+    "label": "Other income",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 590,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_expense",
+    "label": "Other expense",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -645,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -55,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -13314,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 31091,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 17777,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 1710,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 16067,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 607531,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 54907,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 45640,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 38653,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 1293,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 748024,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 203645,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 544379,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 235298,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 90494,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 155992,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 481784,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 62595,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income",
+    "label": "Other income",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 1267,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_expense",
+    "label": "Other expense",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -4253,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -2986,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 59609,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 42697,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 102306,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 13732,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 88574,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 873442,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 79725,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 42006,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 40479,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 1937,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 1037589,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 288132,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 749457,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 306323,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 125677,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 181887,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 613887,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 135570,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income",
+    "label": "Other income",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 3382,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_expense",
+    "label": "Other expense",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -1773,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 1609,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 137179,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 45231,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 182410,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -231655,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 414065,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 229491,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 21019,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 9649,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 11096,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 458,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 271713,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 74802,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 196911,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 82707,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 35081,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 43964,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 161752,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 35159,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": -503,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 34656,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 11793,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 46449,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": -245746,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 292195,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 250908,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 20614,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 11317,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 8446,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 682,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 291967,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 78871,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 213096,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 82974,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 39249,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 46346,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 168569,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 44527,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": -786,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 43741,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 11811,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 55552,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 12092,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 43460,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 258035,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 21052,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 10109,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 8002,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 1256,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 298454,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 81714,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 216740,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 92195,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 40007,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 50593,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 182795,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 33945,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": -410,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 33535,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 11831,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 45366,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 12208,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 33158,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_subscription",
+    "label": "Subscription revenue",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 631156,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_advertising",
+    "label": "Advertising revenue",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 59504,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_duolingo_english_test",
+    "label": "Duolingo English Test revenue",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 31723,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_in_app_purchases",
+    "label": "In-App Purchases revenue",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 30928,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "revenue_other",
+    "label": "Other revenue",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 1410,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+
+  {
+    "metric": "revenue_total",
+    "label": "Total revenues",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 754721,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Disaggregation of Revenue",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cost_of_revenue",
+    "label": "Cost of revenues",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 211133,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "gross_profit",
+    "label": "Gross profit",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 543588,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_research_and_development",
+    "label": "Research and development",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 226767,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_sales_and_marketing",
+    "label": "Sales and marketing",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 91306,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_general_and_administrative",
+    "label": "General and administrative",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 133399,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "opex_total",
+    "label": "Total operating expenses",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 451472,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "operating_income",
+    "label": "Income (loss) from operations",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 92116,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "other_income_net",
+    "label": "Other income (expense), net",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 2158,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_before_interest_and_taxes",
+    "label": "Income (loss) before interest income and income taxes",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 94274,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "interest_income",
+    "label": "Interest income",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 33635,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "pretax_income",
+    "label": "Income (loss) before income taxes",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 127909,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "income_tax",
+    "label": "(Benefit from) provision for income taxes",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -244202,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_income",
+    "label": "Net income (loss) and comprehensive income (loss)",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 372111,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Operations and Comprehensive Income",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 693,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Notes to Consolidated Financial Statements  -  Capitalized Software",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 1752,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Notes to Consolidated Financial Statements  -  Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 2995,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 5889,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 9196,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Notes to Consolidated Financial Statements  -  Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 5720,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements  -  Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "amortization_expense_total",
+    "label": "Amortization expense",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 2885,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended June 30, 2026",
+      "statement": "Notes to Unaudited Condensed Consolidated Financial Statements  -  Intangible Assets, Net",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  }
+]
+
+

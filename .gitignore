@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Exploratory scratch files & probes
+scratch/
+
+# Agent working memory (not part of the shipped project)
+.workbuddy-ai/
+
+# Watcher signal output & locks
+docs/.ds_watch_result.txt
+docs/.op_watch_result.txt
+
+# Logs & test artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+.nyc_output/
+
+# Operating System & IDE artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# P10.6: regenerable GitHub Pages build output (tools/build_pages_artifact.mjs)
+_pages/
+
+# Knowledge-graph analysis output (regenerable via graphify skill)
+graphify-out/
+
+# Project docs (specs, phases, evidence, logs — local only per Director order)
+docs/

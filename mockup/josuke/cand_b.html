@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duolingo, Inc. — Initiation of Coverage</title>
+<style>
+:root{
+  --ink:#15181c;
+  --ink-2:#454d55;
+  --ink-3:#79818a;
+  --rule:#c6ccd2;
+  --rule-2:#e3e7ea;
+  --accent:#4c8c2b;
+  --accent-2:#2f6b1f;
+  --paper:#fdfdfc;
+  --tint:#f3f7ef;
+  /* display serif: Palatino / Iowan Old Style leaning stack (system only) */
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua","URW Palladio L",Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --fig:ui-monospace,"SFMono-Regular","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  /* one modular grid */
+  --rail:140px;
+  --gutter:28px;
+  --measure:33rem;          /* single prose measure */
+  --pad:clamp(18px,5vw,56px);
+  --s1:6px; --s2:11px; --s3:18px; --s4:26px; --s5:36px;
+}
+*{box-sizing:border-box;border-radius:0}
+html{
+  -webkit-text-size-adjust:100%;
+  scroll-behavior:smooth;
+  scroll-padding-top:6rem;   /* clear the sticky verdict on in-page jumps */
+}
+body{
+  margin:0;
+  background:#e8eaec;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:15px;
+  line-height:1.6;
+  overflow-wrap:break-word;
+  font-variant-numeric:tabular-nums lining-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+  -webkit-font-smoothing:antialiased;
+}
+.page{
+  max-width:900px;
+  margin:0 auto;
+  background:var(--paper);
+  border-left:1px solid var(--rule);
+  border-right:1px solid var(--rule);
+  padding:0 var(--pad) var(--s5);
+}
+
+/* ---------- interactive states ---------- */
+a{
+  color:inherit;text-decoration:none;
+  border-bottom:1px solid var(--rule);
+  transition:color .15s ease,border-color .15s ease,background-color .15s ease;
+}
+a:hover{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+a:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;border-bottom-color:var(--accent-2)}
+a:active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ---------- running head ---------- */
+.runhead{
+  display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+  gap:8px 18px;
+  padding:15px 0 10px;
+  border-bottom:1.5px solid var(--ink);
+  font-family:var(--sans);
+  font-size:11px;letter-spacing:.13em;color:var(--ink-2);
+}
+.runhead__l,.runhead__c{white-space:nowrap;text-transform:uppercase}
+.runhead__c{color:var(--ink-3)}
+/* NOTE: no text-transform on the container — the tag must render exactly as authored */
+.tag{
+  font-family:var(--sans);font-size:11px;letter-spacing:.06em;
+  color:var(--ink);border:1px solid var(--ink-3);padding:3px 8px 2px;white-space:nowrap;
+}
+
+/* ---------- section blocks: one spine ---------- */
+.block{
+  display:grid;grid-template-columns:var(--rail) minmax(0,1fr);
+  column-gap:var(--gutter);
+  padding:var(--s4) 0 0;
+  border-top:1px solid var(--rule);
+}
+.block:first-of-type{border-top:0;padding-top:var(--s3)}
+.block__label{
+  margin:0;font-weight:400;
+  font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-2);line-height:1.5;
+}
+.block__num{
+  display:block;font-family:var(--fig);font-size:19px;font-weight:600;line-height:1;
+  letter-spacing:.01em;color:var(--ink);margin-bottom:7px;
+}
+.block__body{min-width:0;padding-bottom:var(--s4)}
+
+/* :target — the destination section visibly lights up on an in-page jump */
+section:target{
+  background:var(--tint);
+  margin-inline:calc(-1 * var(--pad));
+  padding-inline:var(--pad);
+}
+.block:target{border-top-color:var(--accent)}
+.block:target .block__label{color:var(--accent-2)}
+
+/* ---------- masthead ---------- */
+.masthead{
+  display:grid;grid-template-columns:minmax(0,1fr) 196px;
+  gap:24px 32px;align-items:end;
+  padding:0 0 var(--s3);
+}
+.masthead__id{display:flex;gap:16px;align-items:flex-start;min-width:0}
+.owl{width:48px;height:43px;flex:0 0 auto;display:block}
+.masthead__txt{min-width:0}
+.kicker{
+  font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin:2px 0 7px;
+}
+h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(26px,4.6vw,40px);line-height:1.05;letter-spacing:-.018em;
+  margin:0;overflow-wrap:break-word;text-indent:-.015em;
+}
+.subtitle{
+  font-family:var(--serif);font-size:13.5px;font-style:italic;color:var(--ink-2);
+  margin:7px 0 0;max-width:var(--measure);
+  hanging-punctuation:first last;
+}
+.spark{border-top:1px solid var(--ink);padding-top:7px;min-width:0}
+.spark__lab{
+  font-family:var(--sans);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 5px;
+}
+.spark svg{display:block;width:100%;max-width:340px;height:auto}
+.spark__foot{
+  display:flex;justify-content:space-between;font-family:var(--sans);font-size:11px;
+  color:var(--ink-3);margin-top:5px;letter-spacing:.05em;
+  font-variant-numeric:tabular-nums lining-nums;
+}
+
+/* ---------- ruled price band ---------- */
+.band{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+}
+.band__cell{padding:13px 18px 14px;border-left:1px solid var(--rule);min-width:0}
+.band__cell:first-child{border-left:0;padding-left:0}
+.band__k{
+  display:block;font-family:var(--sans);font-size:11px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;
+}
+.band__v{
+  display:block;font-family:var(--sans);font-weight:700;
+  font-variant-numeric:tabular-nums lining-nums;
+  font-size:clamp(17px,2.8vw,24px);line-height:1.1;letter-spacing:-.012em;
+}
+.band__n{
+  display:block;font-family:var(--sans);font-size:11px;color:var(--ink-3);margin-top:5px;
+  letter-spacing:.04em;font-variant-numeric:tabular-nums lining-nums;
+}
+
+/* ---------- 02 · sticky verdict — direct child of main, so it stays put ---------- */
+.verdict{
+  position:sticky;top:0;z-index:20;
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 22px;
+  margin-inline:calc(-1 * var(--pad));
+  padding:10px var(--pad) 11px;
+  background:var(--paper);
+  border-top:1.5px solid var(--ink);
+  border-bottom:1.5px solid var(--ink);
+}
+.verdict__h{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 16px;
+  margin:0;font-weight:400;min-width:0;
+}
+.verdict__num{
+  font-family:var(--fig);font-size:11px;letter-spacing:.1em;color:var(--ink-3);
+}
+.verdict__rating{
+  font-family:var(--sans);font-weight:700;
+  font-size:clamp(19px,4.6vw,30px);letter-spacing:.1em;line-height:1;color:var(--ink);
+}
+.verdict__val{
+  font-family:var(--serif);letter-spacing:.05em;
+  font-size:clamp(12.5px,2.4vw,16px);line-height:1.2;color:var(--ink);
+}
+.verdict__val strong{
+  font-family:var(--sans);font-weight:700;letter-spacing:0;
+  font-variant-numeric:tabular-nums lining-nums;
+}
+.jump{
+  display:flex;flex-wrap:wrap;gap:6px 16px;margin-left:auto;
+  font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+}
+.jump a{color:var(--ink-2);border-bottom:1px solid transparent;padding-bottom:1px}
+.jump a:hover{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+.jump a:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.jump a:active{color:var(--accent)}
+
+/* ---------- what's in the model strip ---------- */
+.strip{margin-top:var(--s3);border-top:1.5px solid var(--ink);border-bottom:1px solid var(--ink)}
+.strip__head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:9px 0 8px;
+  border-bottom:1px solid var(--rule-2);
+  font-family:var(--sans);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-2);
+}
+.strip__head .ico{width:13px;height:13px;flex:0 0 auto}
+.strip__note{
+  margin-left:auto;font-family:var(--sans);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.strip__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.strip__cell{padding:11px 16px 12px;border-left:1px solid var(--rule-2);min-width:0}
+.strip__cell:first-child{border-left:0;padding-left:0}
+.strip__k{
+  display:block;font-family:var(--sans);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;
+}
+.strip__v{
+  display:block;font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:-.005em;
+  font-variant-numeric:tabular-nums lining-nums;
+}
+
+/* ---------- prose ---------- */
+.lede{
+  font-family:var(--serif);font-size:16.5px;line-height:1.62;color:var(--ink);
+  margin:0;max-width:var(--measure);text-indent:-.02em;
+  hanging-punctuation:first last;
+}
+
+/* ---------- tables ---------- */
+.tblwrap{overflow-x:auto;min-width:0}
+table.tbl{
+  width:100%;border-collapse:separate;border-spacing:0;
+  font-family:var(--sans);font-size:12px;
+}
+.tbl thead th{
+  border-top:1.5px solid var(--ink);border-bottom:1px solid var(--ink);
+  padding:7px 0 7px 14px;text-align:right;
+  font-size:11px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-2);vertical-align:bottom;white-space:nowrap;
+}
+.tbl thead th:first-child{text-align:left;padding-left:0}
+.thq{
+  display:block;font-weight:400;font-size:11px;letter-spacing:.06em;
+  color:var(--ink-3);margin-top:2px;text-transform:none;
+}
+.tbl tbody th{
+  text-align:left;font-weight:400;color:var(--ink);
+  padding:8px 14px 8px 0;vertical-align:top;
+}
+.tbl tbody td{
+  text-align:right;padding:8px 0 8px 14px;vertical-align:top;color:var(--ink);
+  font-family:var(--fig);font-weight:600;font-size:13px;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums lining-nums;
+}
+.tbl tbody tr:not(:last-child) th,.tbl tbody tr:not(:last-child) td{border-bottom:1px solid var(--rule-2)}
+.tbl tbody tr:last-child th,.tbl tbody tr:last-child td{border-bottom:1px solid var(--ink)}
+.tbl tfoot th,.tbl tfoot td{
+  border-top:1px solid var(--ink);padding:10px 0 8px 14px;
+  font-family:var(--fig);font-size:13px;font-weight:600;color:var(--ink);text-align:right;
+  font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.01em;
+}
+.tbl tfoot th{text-align:left;padding-left:0;font-family:var(--sans);font-size:12.5px;letter-spacing:0}
+.tbl--val tbody tr:last-child th,.tbl--val tbody tr:last-child td{border-bottom:0}
+.tbl--val tfoot th,.tbl--val tfoot td{border-top:0}
+.tbl--val thead th:nth-child(2),.tbl--val tbody td:nth-child(2){text-align:left}
+.tbl--val tbody td:nth-child(2){
+  font-family:var(--sans);font-weight:400;font-size:12px;letter-spacing:0;
+}
+.tbl--val tfoot td:nth-child(2){
+  text-align:left;font-family:var(--sans);font-weight:400;color:var(--ink-2);
+  font-size:12px;letter-spacing:0;
+}
+/* per-cell labels: hidden while the real column headers are visible */
+.cellk{display:none}
+
+.src{
+  margin:var(--s2) 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.62;
+  color:var(--ink-3);letter-spacing:.005em;max-width:var(--measure);
+}
+.fnref{font-size:11px;vertical-align:super;line-height:0;letter-spacing:.05em;color:var(--ink-2)}
+
+/* ---------- figure ---------- */
+.fig{margin-top:var(--s4);border-top:1px solid var(--rule);padding-top:12px}
+.fig__hd{
+  margin:0 0 var(--s2);
+  font-family:var(--sans);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:400;color:var(--ink-2);
+}
+.chart__scroll{overflow-x:auto;min-width:0}
+.chart__scroll svg{display:block;width:100%;max-width:440px;height:auto}
+.ch{font-family:var(--sans)}
+.ch-lbl{font-size:14px;letter-spacing:.09em;fill:#454d55}
+.ch-val{font-size:15px;fill:#15181c;font-weight:600;font-family:var(--fig)}
+.ch-ax{font-size:12px;letter-spacing:.07em;fill:#79818a}
+.ch-lg{font-size:12px;letter-spacing:.06em;fill:#454d55}
+
+/* ---------- key guesses ---------- */
+.guesses{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));column-gap:18px;
+  border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+  padding:13px 0 12px;
+}
+.guess{min-width:0}
+.guess__k{
+  display:block;font-family:var(--sans);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;
+}
+.guess__v{
+  display:block;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums lining-nums;
+}
+
+/* ---------- risks ---------- */
+.risks{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+}
+.risk{padding:14px 18px 16px;border-left:1px solid var(--rule-2);min-width:0}
+.risk:first-child{border-left:0;padding-left:0}
+.risk__hd{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px}
+.risk__txt{min-width:0}
+.risk__ico{width:15px;height:15px;flex:0 0 auto;margin-top:3px}
+.risk__n{
+  font-family:var(--sans);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);display:block;margin-bottom:2px;
+}
+.risk__t{font-family:var(--serif);font-size:14.5px;line-height:1.28;font-weight:400;margin:0}
+.risk__d{
+  font-family:var(--sans);font-size:12px;line-height:1.58;color:var(--ink-2);
+  margin:0 0 13px;
+}
+.risk__ctl{min-width:0}
+.risk__ctlrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:1px}
+.risk__lab{
+  font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);white-space:nowrap;
+}
+.risk__out{
+  font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ink);
+  font-variant-numeric:tabular-nums lining-nums;
+}
+
+input[type=range]{
+  -webkit-appearance:none;appearance:none;background:transparent;
+  width:100%;min-width:0;height:22px;margin:0;padding:0;display:block;cursor:pointer;
+  border:0;
+}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--rule);border-radius:0}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:15px;height:15px;margin-top:-6px;
+  background:var(--ink);border:0;border-radius:0;transition:background .15s ease;
+}
+input[type=range]::-moz-range-track{height:3px;background:var(--rule);border-radius:0}
+input[type=range]::-moz-range-thumb{
+  width:15px;height:15px;background:var(--ink);border:0;border-radius:0;
+  transition:background .15s ease;
+}
+input[type=range]:hover::-webkit-slider-thumb{background:var(--accent-2)}
+input[type=range]:hover::-moz-range-thumb{background:var(--accent-2)}
+input[type=range]:focus-visible{outline:2px solid var(--accent-2);outline-offset:3px}
+input[type=range]:focus-visible::-webkit-slider-thumb{background:var(--accent-2)}
+input[type=range]:focus-visible::-moz-range-thumb{background:var(--accent-2)}
+input[type=range]:active::-webkit-slider-thumb{background:var(--accent)}
+input[type=range]:active::-moz-range-thumb{background:var(--accent)}
+
+/* ---------- directory ---------- */
+.dir{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule-2)}
+.dir__row{
+  display:flex;align-items:baseline;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--rule-2);min-width:0;
+}
+.dir__n{
+  flex:0 0 auto;width:24px;font-family:var(--fig);font-size:11px;
+  letter-spacing:.08em;color:var(--ink-3);
+}
+.dir__link{
+  flex:1 1 auto;display:flex;align-items:baseline;gap:10px;min-width:0;
+  border-bottom:1px solid transparent;padding-bottom:1px;
+}
+.dir__link:hover{border-bottom-color:transparent}
+.dir__t{flex:0 1 auto;min-width:0;font-family:var(--sans);font-size:12.5px;color:var(--ink)}
+.dir__link:hover .dir__t{color:var(--accent-2)}
+.dir__ld{flex:1 1 auto;min-width:14px;border-bottom:1px dotted var(--rule)}
+.dir__arw{
+  flex:0 0 auto;font-family:var(--fig);font-size:12px;color:var(--ink-3);
+  transition:color .15s ease,transform .15s ease;
+}
+.dir__link:hover .dir__arw{color:var(--accent-2)}
+
+/* ---------- notes (native details element) / disclaimer ---------- */
+.notes{margin-top:var(--s4)}
+.notes__sum{
+  list-style:none;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  padding:0 0 7px;border-bottom:1px solid var(--rule-2);
+  font-family:var(--sans);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-2);
+}
+.notes__sum::-webkit-details-marker{display:none}
+.notes__sum::marker{content:""}
+.notes__sum::before{content:"+";font-family:var(--fig);font-size:13px;color:var(--accent-2)}
+.notes[open] .notes__sum::before{content:"\2013"}
+.notes__sum:hover{color:var(--accent-2)}
+.notes__sum:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.notes__h{margin:0;font:inherit;letter-spacing:inherit;color:inherit;font-weight:400}
+.fn{list-style:none;margin:8px 0 0;padding:0;font-family:var(--sans);font-size:11.5px;line-height:1.62;color:var(--ink-2);max-width:var(--measure)}
+.fn li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:6px;padding:3px 0}
+.fn__n{color:var(--ink-3);letter-spacing:.05em;font-family:var(--fig)}
+
+.disc{margin-top:var(--s4);border-top:1.5px solid var(--ink);padding-top:12px}
+.disc__p{
+  font-family:var(--sans);font-size:11.5px;line-height:1.68;color:var(--ink-3);
+  margin:0 0 10px;max-width:var(--measure);
+}
+.disc__src{
+  font-family:var(--sans);font-size:11.5px;line-height:1.6;color:var(--ink-2);
+  margin:0 0 10px;padding-bottom:10px;border-bottom:1px solid var(--rule-2);
+  max-width:var(--measure);
+}
+.ico{width:12px;height:12px;vertical-align:-1px;margin-right:5px;flex:0 0 auto}
+.disc__row{
+  display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between;
+  font-family:var(--sans);font-size:11px;color:var(--ink-3);
+}
+/* NOTE: uppercase lives on the meta span, never on the row that holds the tag */
+.disc__meta{letter-spacing:.11em;text-transform:uppercase}
+.disc__tag{letter-spacing:.03em;border:1px solid var(--ink-3);padding:2px 7px 1px}
+
+/* ---------- responsive: narrow ---------- */
+@media (max-width:760px){
+  .masthead{grid-template-columns:minmax(0,1fr);gap:22px}
+  .risks{grid-template-columns:minmax(0,1fr)}
+  .risk{border-left:0;padding:14px 0 16px;border-top:1px solid var(--rule-2)}
+  .risk:first-child{border-top:0;padding-top:14px}
+  .jump{display:none}
+
+  /* --- valuation: one method per row, the implied value is the hero figure --- */
+  .tbl--val thead{display:none}
+  .tbl--val,.tbl--val tbody,.tbl--val tfoot{display:block;width:100%}
+  .tbl--val tbody tr,.tbl--val tfoot tr{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    column-gap:14px;align-items:baseline;
+    padding:12px 0;border-bottom:1px solid var(--rule-2);
+  }
+  .tbl--val tbody tr:last-child{border-bottom:1px solid var(--ink)}
+  .tbl--val tfoot tr{border-top:1.5px solid var(--ink);border-bottom:0;padding-top:12px}
+  .tbl--val tbody th,.tbl--val tfoot th{
+    grid-column:1;grid-row:1;padding:0;border:0;text-align:left;
+    font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);
+  }
+  .tbl--val .v-val{
+    grid-column:2;grid-row:1;padding:0;border:0;text-align:right;
+    font-size:17px;color:var(--ink);
+  }
+  .tbl--val .v-asm{
+    grid-column:1;grid-row:2;padding:3px 0 0;border:0;text-align:left;
+    font-family:var(--sans);font-size:11.5px;font-weight:400;color:var(--ink-2);
+  }
+  .tbl--val .v-wt{
+    grid-column:2;grid-row:2;padding:3px 0 0;border:0;text-align:right;
+    font-family:var(--sans);font-size:11.5px;font-weight:400;color:var(--ink-3);
+  }
+  .cellk{
+    display:block;font-family:var(--sans);font-size:11px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-3);margin-bottom:2px;
+  }
+
+  /* --- snapshot: metric on its own line, then a four-up value grid --- */
+  .tbl--snap thead{display:none}
+  .tbl--snap,.tbl--snap tbody{display:block;width:100%}
+  .tbl--snap tbody tr{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    column-gap:10px;padding:12px 0;border-bottom:1px solid var(--rule-2);
+  }
+  .tbl--snap tbody tr:last-child{border-bottom:1px solid var(--ink)}
+  .tbl--snap tbody th{
+    grid-column:1/-1;padding:0 0 8px;border:0;text-align:left;
+    font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);
+  }
+  .tbl--snap tbody td{padding:0;border:0;text-align:left;font-size:13px}
+
+  /* stacked rows carry their own rules — neutralise the wide-table row borders */
+  .tbl--snap tbody tr:not(:last-child) th,.tbl--snap tbody tr:not(:last-child) td,
+  .tbl--snap tbody tr:last-child th,.tbl--snap tbody tr:last-child td,
+  .tbl--val tbody tr:not(:last-child) th,.tbl--val tbody tr:not(:last-child) td,
+  .tbl--val tbody tr:last-child th,.tbl--val tbody tr:last-child td,
+  .tbl--val tfoot th,.tbl--val tfoot td{border:0}
+}
+@media (max-width:640px){
+  html{scroll-padding-top:6.5rem}
+  .runhead{flex-direction:column;align-items:flex-start;gap:7px}
+  .runhead__c{display:none}
+  .band{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .band__cell{padding:12px 14px 13px}
+  .band__cell:nth-child(odd){border-left:0;padding-left:0}
+  .band__cell:nth-child(n+3){border-top:1px solid var(--rule-2)}
+  .strip__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip__cell:nth-child(odd){border-left:0;padding-left:0}
+  .strip__cell:nth-child(n+3){border-top:1px solid var(--rule-2)}
+  .strip__note{display:none}
+  .block{grid-template-columns:minmax(0,1fr)}
+  .block__label{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+  .block__num{font-size:16px;margin:0}
+  .guesses{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:12px}
+  .lede{font-size:15.5px}
+}
+
+/* ---------- motion preferences ---------- */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="runhead">
+    <span class="runhead__l">Duolingo, Inc. (NASDAQ: DUOL)</span>
+    <span class="runhead__c">Initiation of Coverage &middot; Consumer Discretionary</span>
+    <span class="tag">MOCKUP — dummy data</span>
+  </header>
+
+  <main>
+
+  <!-- ===== 01 · COVERAGE — masthead title + target + market + date ===== -->
+  <section class="block" id="coverage">
+    <h2 class="block__label"><span class="block__num">01</span>Coverage</h2>
+    <div class="block__body">
+
+      <div class="masthead">
+        <div class="masthead__id">
+          <img class="owl" src="../../assets/branding/duolingo-owl.svg" alt="">
+          <div class="masthead__txt">
+            <p class="kicker">Consumer Discretionary &middot; Education Technology</p>
+            <h1>Duolingo, Inc.</h1>
+            <p class="subtitle">Initiation of coverage &mdash; a six-method valuation framework, three scenarios and a documented risk register.</p>
+          </div>
+        </div>
+        <div class="spark">
+          <p class="spark__lab">Share price, trailing ## months</p>
+          <svg viewBox="0 0 210 46" role="img" aria-label="Illustrative share price trend">
+            <path d="M2 36 L18 32 L34 35 L50 28 L66 30 L82 23 L98 26 L114 19 L130 22 L146 15 L162 18 L178 10 L196 13 L208 7 L208 44 L2 44 Z" fill="#4c8c2b" opacity="0.08"/>
+            <path d="M2 36 L18 32 L34 35 L50 28 L66 30 L82 23 L98 26 L114 19 L130 22 L146 15 L162 18 L178 10 L196 13 L208 7" fill="none" stroke="#4c8c2b" stroke-width="1.4"/>
+            <line x1="0" y1="44" x2="210" y2="44" stroke="#c6ccd2" stroke-width="1"/>
+            <circle cx="208" cy="7" r="2.1" fill="#15181c"/>
+          </svg>
+          <div class="spark__foot"><span>LOW $###.##</span><span>HIGH $###.##</span></div>
+        </div>
+      </div>
+
+      <div class="band">
+        <div class="band__cell">
+          <span class="band__k">Target price</span>
+          <span class="band__v">$###.##</span>
+          <span class="band__n">12-month horizon</span>
+        </div>
+        <div class="band__cell">
+          <span class="band__k">Market price</span>
+          <span class="band__v">$###.##</span>
+          <span class="band__n">Close, ##/##/####</span>
+        </div>
+        <div class="band__cell">
+          <span class="band__k">Implied upside</span>
+          <span class="band__v">+##.#%</span>
+          <span class="band__n">To target, base case</span>
+        </div>
+        <div class="band__cell">
+          <span class="band__k">Date</span>
+          <span class="band__v">##/##/####</span>
+          <span class="band__n">Estimates as of cut-off</span>
+        </div>
+      </div>
+
+      <div class="strip">
+        <div class="strip__head">
+          <img class="ico" src="../../assets/icons/ui/check-circle.svg" alt="">
+          What&rsquo;s in the model
+          <span class="strip__note">Initiation &middot; first publication</span>
+        </div>
+        <div class="strip__grid">
+          <div class="strip__cell">
+            <span class="strip__k">Valuation</span>
+            <span class="strip__v">Six methods, blended</span>
+          </div>
+          <div class="strip__cell">
+            <span class="strip__k">Scenarios</span>
+            <span class="strip__v">Bear &middot; Base &middot; Bull</span>
+          </div>
+          <div class="strip__cell">
+            <span class="strip__k">Forecast horizon</span>
+            <span class="strip__v">FY##A &ndash; FY##E</span>
+          </div>
+          <div class="strip__cell">
+            <span class="strip__k">Cut-off</span>
+            <span class="strip__v">##/##/####</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== 02 · RECOMMENDATION — OVERWEIGHT / UNDERVALUED. Sticky for the whole page. ===== -->
+  <section class="verdict" id="recommendation">
+    <h2 class="verdict__h">
+      <span class="verdict__num" aria-hidden="true">02</span>
+      <span class="verdict__rating">OVERWEIGHT</span>
+      <span class="verdict__val">UNDERVALUED <strong>+##.#%</strong></span>
+    </h2>
+    <nav class="jump" aria-label="Jump to section">
+      <a href="#thesis">Thesis</a>
+      <a href="#snapshot">Snapshot</a>
+      <a href="#valuation">Valuation</a>
+      <a href="#guesses">Guesses</a>
+      <a href="#risks">Risks</a>
+      <a href="#directory">Contents</a>
+    </nav>
+  </section>
+
+  <!-- ===== 03 · THESIS — three sentences ===== -->
+  <section class="block" id="thesis">
+    <h2 class="block__label"><span class="block__num">03</span>Thesis</h2>
+    <div class="block__body">
+      <p class="lede">The franchise rests on a habit loop that converts casual learners into paying subscribers at a rate the market still discounts, and the operating model behind it scales with almost no marginal content cost. We therefore see the shares as undervalued against a base case built on modest user growth, steady conversion and a durable mix shift toward higher-priced tiers. The principal risk is not demand but the sustainability of engagement as the product matures, which we treat as a scenario input rather than a forecast.</p>
+    </div>
+  </section>
+
+  <!-- ===== 04 · BUSINESS SNAPSHOT — DAU / MAU / paid / revenue ===== -->
+  <section class="block" id="snapshot">
+    <h2 class="block__label"><span class="block__num">04</span>Business snapshot</h2>
+    <div class="block__body">
+      <div class="tblwrap">
+        <table class="tbl tbl--snap">
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              <th scope="col">FY##A</th>
+              <th scope="col">FY##E<span class="thq">Near</span></th>
+              <th scope="col">FY##E<span class="thq">Out</span></th>
+              <th scope="col">CAGR FY##A&ndash;##E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Daily active users</th>
+              <td><span class="cellk">FY##A</span>##.#M</td>
+              <td><span class="cellk">FY##E near</span>##.#M</td>
+              <td><span class="cellk">FY##E out</span>##.#M</td>
+              <td><span class="cellk">CAGR</span>##.#%</td>
+            </tr>
+            <tr>
+              <th scope="row">Monthly active users</th>
+              <td><span class="cellk">FY##A</span>##.#M</td>
+              <td><span class="cellk">FY##E near</span>##.#M</td>
+              <td><span class="cellk">FY##E out</span>##.#M</td>
+              <td><span class="cellk">CAGR</span>##.#%</td>
+            </tr>
+            <tr>
+              <th scope="row">Paid subscribers</th>
+              <td><span class="cellk">FY##A</span>##.#M</td>
+              <td><span class="cellk">FY##E near</span>##.#M</td>
+              <td><span class="cellk">FY##E out</span>##.#M</td>
+              <td><span class="cellk">CAGR</span>##.#%</td>
+            </tr>
+            <tr>
+              <th scope="row">Total revenue</th>
+              <td><span class="cellk">FY##A</span>##.#M</td>
+              <td><span class="cellk">FY##E near</span>##.#M</td>
+              <td><span class="cellk">FY##E out</span>##.#M</td>
+              <td><span class="cellk">CAGR</span>##.#%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">Source: Company filings<sup class="fnref">1</sup>; desk estimates<sup class="fnref">2</sup>. FY##A denotes the last reported year; FY##E denotes a desk estimate. User counts are stated in millions; revenue is stated in millions of US dollars.</p>
+    </div>
+  </section>
+
+  <!-- ===== 05 · VALUATION — six methods ===== -->
+  <section class="block" id="valuation">
+    <h2 class="block__label"><span class="block__num">05</span>Valuation</h2>
+    <div class="block__body">
+      <div class="tblwrap">
+        <table class="tbl tbl--val">
+          <thead>
+            <tr>
+              <th scope="col">Method</th>
+              <th scope="col">Key assumption</th>
+              <th scope="col">Implied value / share</th>
+              <th scope="col">Weight</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">FCFF DCF</th>
+              <td class="v-asm">WACC ##.#%; terminal g ##.#%</td>
+              <td class="v-val"><span class="cellk">Implied value / share</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+            <tr>
+              <th scope="row">Trading comps</th>
+              <td class="v-asm">##.#x EV/EBITDAR, peer median</td>
+              <td class="v-val"><span class="cellk">Implied value / share</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+            <tr>
+              <th scope="row">EV/EBITDAR</th>
+              <td class="v-asm">##.#x FY##E EBITDAR</td>
+              <td class="v-val"><span class="cellk">Implied value / share</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+            <tr>
+              <th scope="row">P/FCF</th>
+              <td class="v-asm">##.#x FY##E free cash flow</td>
+              <td class="v-val"><span class="cellk">Implied value / share</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+            <tr>
+              <th scope="row">SOTP</th>
+              <td class="v-asm">##.#x subscription; ##.#x other</td>
+              <td class="v-val"><span class="cellk">Implied value / share</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+            <tr>
+              <th scope="row">Per-user</th>
+              <td class="v-asm">$##.## per paying user</td>
+              <td class="v-val"><span class="cellk">Implied value / share</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">Weighted average &mdash; price target</th>
+              <td class="v-asm">Blended, confidence-weighted</td>
+              <td class="v-val"><span class="cellk">Price target</span>$###.##</td>
+              <td class="v-wt"><span class="cellk">Weight</span>##%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p class="src"><img class="ico" src="../../assets/icons/ui/info-circle.svg" alt="">Methodology: implied values are rounded to the nearest cent and weighted by the desk&rsquo;s confidence in each approach; weights are re-based after every estimate revision.<sup class="fnref">2</sup> Source: Desk estimates; market data as of ##/##/####.<sup class="fnref">3</sup></p>
+
+      <div class="fig">
+        <h3 class="fig__hd">Exhibit 1 &mdash; scenario valuation range</h3>
+        <div class="chart__scroll">
+          <svg viewBox="0 0 340 250" role="img" aria-label="Illustrative valuation range across bear, base and bull scenarios against the market price">
+            <line x1="0" y1="10" x2="26" y2="10" stroke="#79818a" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text class="ch ch-lg" x="32" y="14">MARKET PRICE</text>
+            <line x1="150" y1="10" x2="176" y2="10" stroke="#4c8c2b" stroke-width="2.5"/>
+            <text class="ch ch-lg" x="182" y="14">SCENARIO RANGE</text>
+
+            <line x1="0" y1="200" x2="340" y2="200" stroke="#c6ccd2" stroke-width="1"/>
+            <line x1="170" y1="32" x2="170" y2="200" stroke="#79818a" stroke-width="1" stroke-dasharray="4 3"/>
+
+            <text class="ch ch-lbl" x="46" y="72" text-anchor="end">BEAR</text>
+            <line x1="66" y1="68" x2="116" y2="68" stroke="#79818a" stroke-width="2.5"/>
+            <line x1="66" y1="58" x2="66" y2="78" stroke="#79818a" stroke-width="2.5"/>
+            <line x1="116" y1="58" x2="116" y2="78" stroke="#79818a" stroke-width="2.5"/>
+            <text class="ch ch-val" x="252" y="72">$###.##</text>
+
+            <text class="ch ch-lbl" x="46" y="128" text-anchor="end">BASE</text>
+            <line x1="94" y1="124" x2="190" y2="124" stroke="#4c8c2b" stroke-width="2.5"/>
+            <line x1="94" y1="114" x2="94" y2="134" stroke="#4c8c2b" stroke-width="2.5"/>
+            <line x1="190" y1="114" x2="190" y2="134" stroke="#4c8c2b" stroke-width="2.5"/>
+            <text class="ch ch-val" x="252" y="128">$###.##</text>
+
+            <text class="ch ch-lbl" x="46" y="184" text-anchor="end">BULL</text>
+            <line x1="132" y1="180" x2="236" y2="180" stroke="#2f6b1f" stroke-width="2.5"/>
+            <line x1="132" y1="170" x2="132" y2="190" stroke="#2f6b1f" stroke-width="2.5"/>
+            <line x1="236" y1="170" x2="236" y2="190" stroke="#2f6b1f" stroke-width="2.5"/>
+            <text class="ch ch-val" x="252" y="184">$###.##</text>
+
+            <text class="ch ch-ax" x="0" y="232">IMPLIED VALUE PER SHARE, USD</text>
+          </svg>
+        </div>
+        <p class="src">Exhibit 1: bear, base and bull cases as defined in the scenario framework.<sup class="fnref">2</sup> Source: Desk estimates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 06 · KEY GUESSES — WACC / g / CAGR / margins / tax / shares / debt ===== -->
+  <section class="block" id="guesses">
+    <h2 class="block__label"><span class="block__num">06</span>Key guesses</h2>
+    <div class="block__body">
+      <div class="guesses">
+        <div class="guess"><span class="guess__k">WACC</span><span class="guess__v">##.#%</span></div>
+        <div class="guess"><span class="guess__k">Terminal g</span><span class="guess__v">##.#%</span></div>
+        <div class="guess"><span class="guess__k">CAGR</span><span class="guess__v">##.#%</span></div>
+        <div class="guess"><span class="guess__k">EBITDA margin</span><span class="guess__v">##.#%</span></div>
+        <div class="guess"><span class="guess__k">Tax rate</span><span class="guess__v">##.#%</span></div>
+        <div class="guess"><span class="guess__k">Shares</span><span class="guess__v">##.#M</span></div>
+        <div class="guess"><span class="guess__k">Net debt</span><span class="guess__v">##.#M</span></div>
+      </div>
+      <p class="src">Inputs are illustrative placeholders and are not derived from any published figure. Sensitivities to each guess are tabulated in the scenario framework.<sup class="fnref">2</sup></p>
+    </div>
+  </section>
+
+  <!-- ===== 07 · KEY RISKS — three, each with a range input ===== -->
+  <section class="block" id="risks">
+    <h2 class="block__label"><span class="block__num">07</span>Key risks</h2>
+    <div class="block__body">
+      <div class="risks">
+        <div class="risk">
+          <div class="risk__hd">
+            <img class="risk__ico" src="../../assets/icons/ui/alert-triangle.svg" alt="">
+            <div class="risk__txt">
+              <span class="risk__n">Risk 01</span>
+              <h3 class="risk__t">Engagement durability</h3>
+            </div>
+          </div>
+          <p class="risk__d">Daily habit formation may plateau as the core cohort matures, compressing the conversion funnel the base case assumes.</p>
+          <div class="risk__ctl">
+            <div class="risk__ctlrow">
+              <label class="risk__lab" for="rk1">Scenario weight</label>
+              <span class="risk__out">##%</span>
+            </div>
+            <input type="range" id="rk1" min="0" max="100" value="34">
+          </div>
+        </div>
+        <div class="risk">
+          <div class="risk__hd">
+            <img class="risk__ico" src="../../assets/icons/ui/alert-triangle.svg" alt="">
+            <div class="risk__txt">
+              <span class="risk__n">Risk 02</span>
+              <h3 class="risk__t">Monetisation pace</h3>
+            </div>
+          </div>
+          <p class="risk__d">Pricing and tier mix could advance more slowly than modelled if competitive intensity in language learning increases.</p>
+          <div class="risk__ctl">
+            <div class="risk__ctlrow">
+              <label class="risk__lab" for="rk2">Scenario weight</label>
+              <span class="risk__out">##%</span>
+            </div>
+            <input type="range" id="rk2" min="0" max="100" value="52">
+          </div>
+        </div>
+        <div class="risk">
+          <div class="risk__hd">
+            <img class="risk__ico" src="../../assets/icons/ui/alert-triangle.svg" alt="">
+            <div class="risk__txt">
+              <span class="risk__n">Risk 03</span>
+              <h3 class="risk__t">Platform dependence</h3>
+            </div>
+          </div>
+          <p class="risk__d">Distribution through mobile app stores, and evolving rules on minors&rsquo; data, expose the model to costs outside management&rsquo;s control.</p>
+          <div class="risk__ctl">
+            <div class="risk__ctlrow">
+              <label class="risk__lab" for="rk3">Scenario weight</label>
+              <span class="risk__out">##%</span>
+            </div>
+            <input type="range" id="rk3" min="0" max="100" value="21">
+          </div>
+        </div>
+      </div>
+      <p class="src">Each risk is carried as a weighting input to the scenario framework; slider positions are illustrative only and carry no analytical meaning in this mockup.<sup class="fnref">2</sup></p>
+    </div>
+  </section>
+
+  <!-- ===== 08 · INSIDE THIS MODEL — directory + disclaimer ===== -->
+  <section class="block" id="directory">
+    <h2 class="block__label"><span class="block__num">08</span>Inside this model</h2>
+    <div class="block__body">
+      <nav aria-label="Inside this model">
+        <ol class="dir">
+          <li class="dir__row"><span class="dir__n">01</span><a class="dir__link" href="#coverage"><span class="dir__t">Coverage and price band</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">02</span><a class="dir__link" href="#recommendation"><span class="dir__t">Recommendation</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">03</span><a class="dir__link" href="#thesis"><span class="dir__t">Thesis</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">04</span><a class="dir__link" href="#snapshot"><span class="dir__t">Business snapshot</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">05</span><a class="dir__link" href="#valuation"><span class="dir__t">Valuation and scenario range</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">06</span><a class="dir__link" href="#guesses"><span class="dir__t">Key guesses</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">07</span><a class="dir__link" href="#risks"><span class="dir__t">Risk register and sensitivities</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+          <li class="dir__row"><span class="dir__n">08</span><a class="dir__link" href="#directory"><span class="dir__t">Contents and disclaimer</span><span class="dir__ld" aria-hidden="true"></span><span class="dir__arw" aria-hidden="true">&#8594;</span></a></li>
+        </ol>
+      </nav>
+
+      <details class="notes" id="notes">
+        <summary class="notes__sum"><h2 class="notes__h">Notes &amp; sources</h2></summary>
+        <ol class="fn">
+          <li><span class="fn__n">1</span><span>Company filings, FY##A&ndash;FY##E; user counts in millions, revenue in millions of US dollars, per-share data in US dollars.</span></li>
+          <li><span class="fn__n">2</span><span>Desk estimates. Weights are normalised to ##% and rounding may cause totals not to sum exactly.</span></li>
+          <li><span class="fn__n">3</span><span>Market data as of ##/##/####; all prices in US dollars.</span></li>
+        </ol>
+      </details>
+
+      <footer class="disc">
+        <p class="disc__p">This page is a design mockup prepared for portfolio purposes only. It is not investment research, an offer or a solicitation, and every figure shown is an illustrative placeholder rather than a real or estimated value. Nothing here is investment advice, and it must not be relied upon for any investment decision. The issuer name and mark appear solely to demonstrate layout and typographic treatment.</p>
+        <p class="disc__src"><img class="ico" src="../../assets/icons/ui/external-link.svg" alt="">Source documents: company filings, investor presentations and desk models. Retrieval date ##/##/####.</p>
+        <div class="disc__row">
+          <span class="disc__meta">Prepared by the desk &middot; Page ## of ##</span>
+          <span class="disc__tag">MOCKUP — dummy data</span>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  </main>
+
+</div>
+</body>
+</html>

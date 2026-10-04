@@ -1,0 +1,1042 @@
+[
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 996268,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 1158425,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 305878,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, transaction costs related to acquisitions, acquisition earn-out costs and impairment of capitalized software. Beginning in the third quarter of 2025, we updated our definition of Adjusted EBITDA to include integration costs related to acquisitions. We did not incur integration costs in periods prior to 2025. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 52700000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended December 31, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 133100000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. The measurement period for MAUs is the three months ended December 31, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 12200000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "Q4 FY2025",
+    "periodType": "quarter",
+    "value": 52700000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended December 31, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Three Months Ended December 31, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "Q4 FY2025",
+    "periodType": "quarter",
+    "value": 133100000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. The measurement period for MAUs is the three months ended December 31, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Three Months Ended December 31, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "Q4 FY2025",
+    "periodType": "quarter",
+    "value": 12200000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Three Months Ended December 31, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 730737,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 870601,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 191942,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, transaction costs related to acquisitions, acquisition earn-out costs and impairment of capitalized software. Beginning in the third quarter of 2025, we updated our definition of Adjusted EBITDA to include integration costs related to acquisitions. We did not incur integration costs in periods prior to 2025. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 40500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended December 31, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 116700000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. The measurement period for MAUs is the three months ended December 31, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 9500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 495497,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, which is generally from one to twelve months.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 622181,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, which is generally from one to twelve months.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 93678,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income (loss) excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, IPO and public company costs, transaction costs related to an acquisition, acquisition earn-out costs, gain on sale of capitalized software and loss on disposal of leasehold improvements. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 26900000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended December 31, 2023 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 88400000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. The measurement period for MAUs is the three months ended December 31, 2023 and the same period in the prior year where applicable, and the analysis of results is based on those periods. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 6600000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 331803,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, which is generally from one to twelve months.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 428647,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, which is generally from one to twelve months.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 15457,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income (loss) excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, IPO and public company costs, transaction costs related to an acquisition, acquisition earn-out costs, gain on sale of capitalized software and loss on disposal of leasehold improvements. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 16300000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended December 31, 2023 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 60700000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. The measurement period for MAUs is the three months ended December 31, 2023 and the same period in the prior year where applicable, and the analysis of results is based on those periods. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 4200000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 224520,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from purchases of a subscription to Duolingo Plus. Total bookings represent the amounts we receive from purchases of a subscription to Duolingo Plus, a registration for a Duolingo English Test, an in-app purchase for a virtual good and from advertising networks for advertisements served to our users. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, which is generally from one to twelve months.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 294247,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from purchases of a subscription to Duolingo Plus. Total bookings represent the amounts we receive from purchases of a subscription to Duolingo Plus, a registration for a Duolingo English Test, an in-app purchase for a virtual good and from advertising networks for advertisements served to our users. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, which is generally from one to twelve months.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -1066,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net loss excluding interest (income) expense, net, income tax provision, depreciation and amortization, Initial Public Offering (\"IPO\") and public company readiness costs, stock-based compensation expenses related to equity awards, tender offer-related costs and other expenses. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 9600000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique Duolingo users who engage with our mobile language learning application or the language learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 40500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique Duolingo users who engage with our mobile language learning application or the language learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 2500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to Duolingo Plus, including subscribers who pay for a family plan, and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208822000039/duol-20211231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 240270,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 281919,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 80046,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, transaction costs related to acquisitions and acquisition earn-out costs. Beginning in Q3 2025, we expanded our Adjusted EBITDA definition to include integration costs related to acquisitions. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry. The following table presents a reconciliation of our net income, the most directly comparable financial measure presented in accordance with GAAP, to Adjusted EBITDA.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 699713,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 821587,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods. We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 221530,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, transaction costs related to acquisitions and acquisition earn-out costs. Beginning in Q3 2025, we expanded our Adjusted EBITDA definition to include integration costs related to acquisitions. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry. The following table presents a reconciliation of our net income, the most directly comparable financial measure presented in accordance with GAAP, to Adjusted EBITDA.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 50500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended September 30, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "mau",
+    "label": "Monthly active users (MAUs)",
+    "klass": "kpi",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 135300000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Monthly active users (MAUs). MAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each month. MAUs are reported for a measurement period by taking the average of the MAUs for each calendar month in that measurement period. The measurement period for MAUs is the three months ended September 30, 2025 and the same period in the prior year where applicable, and the analysis of results is based on those periods. MAUs are a measure of the size of our global active user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "Q3 FY2025",
+    "periodType": "quarter",
+    "value": 11500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended September 30, 2025",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 268065,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended March 31, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 308484,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended March 31, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 83432,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, including employer payroll taxes related to equity transactions, and acquisition earn-out costs. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry. The following table presents a reconciliation of our net income, the most directly comparable financial measure presented in accordance with GAAP, to Adjusted EBITDA.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended March 31, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 56500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended March 31, 2026 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended March 31, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "Q1 FY2026",
+    "periodType": "quarter",
+    "value": 12500000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended March 31, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "subscription_bookings",
+    "label": "Subscription bookings",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 250316,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended June 30, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "total_bookings",
+    "label": "Total bookings",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 289054,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Subscription Bookings and Total Bookings. Subscription bookings represent the amounts we receive from a purchase of any Duolingo subscription offering. Total bookings include subscription bookings, income from advertising networks for advertisements served to our users, purchases of the Duolingo English Test, and in-app purchases of virtual goods (\"IAPs\"). We believe bookings provide an indication of trends in our operating results, including cash flows, that are not necessarily reflected in our revenues because we recognize subscription revenues ratably over the lifetime of a subscription, the majority of which are twelve months in duration.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended June 30, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "adjusted_ebitda",
+    "label": "Adjusted EBITDA",
+    "klass": "flow",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 77315,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "definition": "Adjusted EBITDA. Adjusted EBITDA is defined as net income excluding interest income, income taxes, depreciation and amortization, stock-based compensation expenses related to equity awards, including employer payroll taxes related to equity transactions, acquisition transaction and integration costs, acquisition earn-out costs, and impairment of capitalized software. Adjusted EBITDA is used by management to evaluate the financial performance of our business and we present Adjusted EBITDA because we believe it is helpful in highlighting trends in our operating results and that it is frequently used by analysts, investors and other interested parties to evaluate companies in our industry. The following table presents a reconciliation of our net income, the most directly comparable financial measure presented in accordance with GAAP, to Adjusted EBITDA.",
+    "category": "profitability",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended June 30, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Non-GAAP Financial Measures",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "dau",
+    "label": "Daily active users (DAUs)",
+    "klass": "kpi",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 58700000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Daily active users (DAUs). DAUs are defined as unique users who engage with our Duolingo App or the learning section of our website each calendar day. DAUs are reported for a measurement period by taking the average of the DAUs for each day in that measurement period. The measurement period for DAUs is the three months ended June 30, 2026 and the same period in the prior year where applicable, and the analysis of results is based on those periods. DAUs are a measure of the consistent engagement of our global user community on Duolingo.",
+    "category": "engagement",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended June 30, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "paid_subscribers",
+    "label": "Paid subscribers",
+    "klass": "kpi",
+    "period": "Q2 FY2026",
+    "periodType": "quarter",
+    "value": 12700000,
+    "units": "count",
+    "scale": 1,
+    "definition": "Paid Subscribers. Paid subscribers are defined as users who pay for access to any Duolingo subscription offering and had an active subscription as of the end of the measurement period. Each unique user account is treated as a single paid subscriber regardless of whether such user purchases multiple subscriptions, and the count of paid subscribers does not include users who are currently on a free trial or who are non-paying members of a family plan.",
+    "category": "monetization",
+    "source": {
+      "filing": "10-Q",
+      "period": "Three Months Ended June 30, 2026",
+      "statement": "Management's Discussion and Analysis of Financial Condition and Results of Operations - Key Operating Metrics",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  }
+]

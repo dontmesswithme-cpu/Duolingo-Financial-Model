@@ -1,0 +1,1057 @@
+{
+  "source": {
+    "stock": {
+      "symbol": "DUOL",
+      "provider": "stockanalysis.com",
+      "url": "https://stockanalysis.com/stocks/duol/history/",
+      "retrievedAt": "2026-09-04",
+      "description": "Monthly adjusted closing prices for Duolingo, Inc. (NASDAQ: DUOL)"
+    },
+    "benchmark": {
+      "symbol": "SP500",
+      "provider": "Federal Reserve Bank of St. Louis (FRED)",
+      "url": "https://fred.stlouisfed.org/series/SP500",
+      "retrievedAt": "2026-09-04",
+      "description": "S&P 500 Index month-end closing levels (FRED series SP500)"
+    }
+  },
+  "benchmark": "S&P 500 Index",
+  "frequency": "monthly",
+  "basis": "adjusted_close_simple_returns",
+  "windowStart": "2021-09",
+  "windowEnd": "2026-08",
+  "n": 60,
+  "pricesCount": 61,
+  "prices": [
+    {
+      "period": "2021-08",
+      "stockDate": "2021-08-31",
+      "stockClose": 129.56,
+      "stockAdjClose": 129.56,
+      "benchmarkDate": "2021-08-31",
+      "benchmarkClose": 4522.68
+    },
+    {
+      "period": "2021-09",
+      "stockDate": "2021-09-30",
+      "stockClose": 166.36,
+      "stockAdjClose": 166.36,
+      "benchmarkDate": "2021-09-30",
+      "benchmarkClose": 4307.54
+    },
+    {
+      "period": "2021-10",
+      "stockDate": "2021-10-29",
+      "stockClose": 173.69,
+      "stockAdjClose": 173.69,
+      "benchmarkDate": "2021-10-29",
+      "benchmarkClose": 4605.38
+    },
+    {
+      "period": "2021-11",
+      "stockDate": "2021-11-30",
+      "stockClose": 110.19,
+      "stockAdjClose": 110.19,
+      "benchmarkDate": "2021-11-30",
+      "benchmarkClose": 4567
+    },
+    {
+      "period": "2021-12",
+      "stockDate": "2021-12-31",
+      "stockClose": 106.11,
+      "stockAdjClose": 106.11,
+      "benchmarkDate": "2021-12-31",
+      "benchmarkClose": 4766.18
+    },
+    {
+      "period": "2022-01",
+      "stockDate": "2022-01-31",
+      "stockClose": 100.01,
+      "stockAdjClose": 100.01,
+      "benchmarkDate": "2022-01-31",
+      "benchmarkClose": 4515.55
+    },
+    {
+      "period": "2022-02",
+      "stockDate": "2022-02-28",
+      "stockClose": 86.29,
+      "stockAdjClose": 86.29,
+      "benchmarkDate": "2022-02-28",
+      "benchmarkClose": 4373.94
+    },
+    {
+      "period": "2022-03",
+      "stockDate": "2022-03-31",
+      "stockClose": 95.11,
+      "stockAdjClose": 95.11,
+      "benchmarkDate": "2022-03-31",
+      "benchmarkClose": 4530.41
+    },
+    {
+      "period": "2022-04",
+      "stockDate": "2022-04-29",
+      "stockClose": 86.47,
+      "stockAdjClose": 86.47,
+      "benchmarkDate": "2022-04-29",
+      "benchmarkClose": 4131.93
+    },
+    {
+      "period": "2022-05",
+      "stockDate": "2022-05-31",
+      "stockClose": 83.61,
+      "stockAdjClose": 83.61,
+      "benchmarkDate": "2022-05-31",
+      "benchmarkClose": 4132.15
+    },
+    {
+      "period": "2022-06",
+      "stockDate": "2022-06-30",
+      "stockClose": 87.55,
+      "stockAdjClose": 87.55,
+      "benchmarkDate": "2022-06-30",
+      "benchmarkClose": 3785.38
+    },
+    {
+      "period": "2022-07",
+      "stockDate": "2022-07-29",
+      "stockClose": 91.75,
+      "stockAdjClose": 91.75,
+      "benchmarkDate": "2022-07-29",
+      "benchmarkClose": 4130.29
+    },
+    {
+      "period": "2022-08",
+      "stockDate": "2022-08-31",
+      "stockClose": 94.02,
+      "stockAdjClose": 94.02,
+      "benchmarkDate": "2022-08-31",
+      "benchmarkClose": 3955
+    },
+    {
+      "period": "2022-09",
+      "stockDate": "2022-09-30",
+      "stockClose": 95.23,
+      "stockAdjClose": 95.23,
+      "benchmarkDate": "2022-09-30",
+      "benchmarkClose": 3585.62
+    },
+    {
+      "period": "2022-10",
+      "stockDate": "2022-10-31",
+      "stockClose": 81.84,
+      "stockAdjClose": 81.84,
+      "benchmarkDate": "2022-10-31",
+      "benchmarkClose": 3871.98
+    },
+    {
+      "period": "2022-11",
+      "stockDate": "2022-11-30",
+      "stockClose": 69.67,
+      "stockAdjClose": 69.67,
+      "benchmarkDate": "2022-11-30",
+      "benchmarkClose": 4080.11
+    },
+    {
+      "period": "2022-12",
+      "stockDate": "2022-12-30",
+      "stockClose": 71.13,
+      "stockAdjClose": 71.13,
+      "benchmarkDate": "2022-12-30",
+      "benchmarkClose": 3839.5
+    },
+    {
+      "period": "2023-01",
+      "stockDate": "2023-01-31",
+      "stockClose": 95.49,
+      "stockAdjClose": 95.49,
+      "benchmarkDate": "2023-01-31",
+      "benchmarkClose": 4076.6
+    },
+    {
+      "period": "2023-02",
+      "stockDate": "2023-02-28",
+      "stockClose": 90.79,
+      "stockAdjClose": 90.79,
+      "benchmarkDate": "2023-02-28",
+      "benchmarkClose": 3970.15
+    },
+    {
+      "period": "2023-03",
+      "stockDate": "2023-03-31",
+      "stockClose": 142.59,
+      "stockAdjClose": 142.59,
+      "benchmarkDate": "2023-03-31",
+      "benchmarkClose": 4109.31
+    },
+    {
+      "period": "2023-04",
+      "stockDate": "2023-04-28",
+      "stockClose": 136.16,
+      "stockAdjClose": 136.16,
+      "benchmarkDate": "2023-04-28",
+      "benchmarkClose": 4169.48
+    },
+    {
+      "period": "2023-05",
+      "stockDate": "2023-05-31",
+      "stockClose": 149.57,
+      "stockAdjClose": 149.57,
+      "benchmarkDate": "2023-05-31",
+      "benchmarkClose": 4179.83
+    },
+    {
+      "period": "2023-06",
+      "stockDate": "2023-06-30",
+      "stockClose": 142.94,
+      "stockAdjClose": 142.94,
+      "benchmarkDate": "2023-06-30",
+      "benchmarkClose": 4450.38
+    },
+    {
+      "period": "2023-07",
+      "stockDate": "2023-07-31",
+      "stockClose": 155.19,
+      "stockAdjClose": 155.19,
+      "benchmarkDate": "2023-07-31",
+      "benchmarkClose": 4588.96
+    },
+    {
+      "period": "2023-08",
+      "stockDate": "2023-08-31",
+      "stockClose": 147.16,
+      "stockAdjClose": 147.16,
+      "benchmarkDate": "2023-08-31",
+      "benchmarkClose": 4507.66
+    },
+    {
+      "period": "2023-09",
+      "stockDate": "2023-09-29",
+      "stockClose": 165.87,
+      "stockAdjClose": 165.87,
+      "benchmarkDate": "2023-09-29",
+      "benchmarkClose": 4288.05
+    },
+    {
+      "period": "2023-10",
+      "stockDate": "2023-10-31",
+      "stockClose": 146.05,
+      "stockAdjClose": 146.05,
+      "benchmarkDate": "2023-10-31",
+      "benchmarkClose": 4193.8
+    },
+    {
+      "period": "2023-11",
+      "stockDate": "2023-11-30",
+      "stockClose": 212.29,
+      "stockAdjClose": 212.29,
+      "benchmarkDate": "2023-11-30",
+      "benchmarkClose": 4567.8
+    },
+    {
+      "period": "2023-12",
+      "stockDate": "2023-12-29",
+      "stockClose": 226.85,
+      "stockAdjClose": 226.85,
+      "benchmarkDate": "2023-12-29",
+      "benchmarkClose": 4769.83
+    },
+    {
+      "period": "2024-01",
+      "stockDate": "2024-01-31",
+      "stockClose": 178.89,
+      "stockAdjClose": 178.89,
+      "benchmarkDate": "2024-01-31",
+      "benchmarkClose": 4845.65
+    },
+    {
+      "period": "2024-02",
+      "stockDate": "2024-02-29",
+      "stockClose": 239,
+      "stockAdjClose": 239,
+      "benchmarkDate": "2024-02-29",
+      "benchmarkClose": 5096.27
+    },
+    {
+      "period": "2024-03",
+      "stockDate": "2024-03-28",
+      "stockClose": 220.58,
+      "stockAdjClose": 220.58,
+      "benchmarkDate": "2024-03-28",
+      "benchmarkClose": 5254.35
+    },
+    {
+      "period": "2024-04",
+      "stockDate": "2024-04-30",
+      "stockClose": 225.75,
+      "stockAdjClose": 225.75,
+      "benchmarkDate": "2024-04-30",
+      "benchmarkClose": 5035.69
+    },
+    {
+      "period": "2024-05",
+      "stockDate": "2024-05-31",
+      "stockClose": 191.4,
+      "stockAdjClose": 191.4,
+      "benchmarkDate": "2024-05-31",
+      "benchmarkClose": 5277.51
+    },
+    {
+      "period": "2024-06",
+      "stockDate": "2024-06-28",
+      "stockClose": 208.67,
+      "stockAdjClose": 208.67,
+      "benchmarkDate": "2024-06-28",
+      "benchmarkClose": 5460.48
+    },
+    {
+      "period": "2024-07",
+      "stockDate": "2024-07-31",
+      "stockClose": 171.94,
+      "stockAdjClose": 171.94,
+      "benchmarkDate": "2024-07-31",
+      "benchmarkClose": 5522.3
+    },
+    {
+      "period": "2024-08",
+      "stockDate": "2024-08-30",
+      "stockClose": 212.57,
+      "stockAdjClose": 212.57,
+      "benchmarkDate": "2024-08-30",
+      "benchmarkClose": 5648.4
+    },
+    {
+      "period": "2024-09",
+      "stockDate": "2024-09-30",
+      "stockClose": 282.02,
+      "stockAdjClose": 282.02,
+      "benchmarkDate": "2024-09-30",
+      "benchmarkClose": 5762.48
+    },
+    {
+      "period": "2024-10",
+      "stockDate": "2024-10-31",
+      "stockClose": 292.97,
+      "stockAdjClose": 292.97,
+      "benchmarkDate": "2024-10-31",
+      "benchmarkClose": 5705.45
+    },
+    {
+      "period": "2024-11",
+      "stockDate": "2024-11-29",
+      "stockClose": 348.27,
+      "stockAdjClose": 348.27,
+      "benchmarkDate": "2024-11-29",
+      "benchmarkClose": 6032.38
+    },
+    {
+      "period": "2024-12",
+      "stockDate": "2024-12-31",
+      "stockClose": 324.23,
+      "stockAdjClose": 324.23,
+      "benchmarkDate": "2024-12-31",
+      "benchmarkClose": 5881.63
+    },
+    {
+      "period": "2025-01",
+      "stockDate": "2025-01-31",
+      "stockClose": 363.99,
+      "stockAdjClose": 363.99,
+      "benchmarkDate": "2025-01-31",
+      "benchmarkClose": 6040.53
+    },
+    {
+      "period": "2025-02",
+      "stockDate": "2025-02-28",
+      "stockClose": 312.07,
+      "stockAdjClose": 312.07,
+      "benchmarkDate": "2025-02-28",
+      "benchmarkClose": 5954.5
+    },
+    {
+      "period": "2025-03",
+      "stockDate": "2025-03-31",
+      "stockClose": 310.54,
+      "stockAdjClose": 310.54,
+      "benchmarkDate": "2025-03-31",
+      "benchmarkClose": 5611.85
+    },
+    {
+      "period": "2025-04",
+      "stockDate": "2025-04-30",
+      "stockClose": 389.48,
+      "stockAdjClose": 389.48,
+      "benchmarkDate": "2025-04-30",
+      "benchmarkClose": 5569.06
+    },
+    {
+      "period": "2025-05",
+      "stockDate": "2025-05-30",
+      "stockClose": 519.61,
+      "stockAdjClose": 519.61,
+      "benchmarkDate": "2025-05-30",
+      "benchmarkClose": 5911.69
+    },
+    {
+      "period": "2025-06",
+      "stockDate": "2025-06-30",
+      "stockClose": 410.02,
+      "stockAdjClose": 410.02,
+      "benchmarkDate": "2025-06-30",
+      "benchmarkClose": 6204.95
+    },
+    {
+      "period": "2025-07",
+      "stockDate": "2025-07-31",
+      "stockClose": 346.55,
+      "stockAdjClose": 346.55,
+      "benchmarkDate": "2025-07-31",
+      "benchmarkClose": 6339.39
+    },
+    {
+      "period": "2025-08",
+      "stockDate": "2025-08-29",
+      "stockClose": 297.86,
+      "stockAdjClose": 297.86,
+      "benchmarkDate": "2025-08-29",
+      "benchmarkClose": 6460.26
+    },
+    {
+      "period": "2025-09",
+      "stockDate": "2025-09-30",
+      "stockClose": 321.84,
+      "stockAdjClose": 321.84,
+      "benchmarkDate": "2025-09-30",
+      "benchmarkClose": 6688.46
+    },
+    {
+      "period": "2025-10",
+      "stockDate": "2025-10-31",
+      "stockClose": 270.64,
+      "stockAdjClose": 270.64,
+      "benchmarkDate": "2025-10-31",
+      "benchmarkClose": 6840.2
+    },
+    {
+      "period": "2025-11",
+      "stockDate": "2025-11-28",
+      "stockClose": 191.41,
+      "stockAdjClose": 191.41,
+      "benchmarkDate": "2025-11-28",
+      "benchmarkClose": 6849.09
+    },
+    {
+      "period": "2025-12",
+      "stockDate": "2025-12-31",
+      "stockClose": 175.5,
+      "stockAdjClose": 175.5,
+      "benchmarkDate": "2025-12-31",
+      "benchmarkClose": 6845.5
+    },
+    {
+      "period": "2026-01",
+      "stockDate": "2026-01-30",
+      "stockClose": 134.06,
+      "stockAdjClose": 134.06,
+      "benchmarkDate": "2026-01-30",
+      "benchmarkClose": 6939.03
+    },
+    {
+      "period": "2026-02",
+      "stockDate": "2026-02-27",
+      "stockClose": 101,
+      "stockAdjClose": 101,
+      "benchmarkDate": "2026-02-27",
+      "benchmarkClose": 6878.88
+    },
+    {
+      "period": "2026-03",
+      "stockDate": "2026-03-31",
+      "stockClose": 98.57,
+      "stockAdjClose": 98.57,
+      "benchmarkDate": "2026-03-31",
+      "benchmarkClose": 6528.52
+    },
+    {
+      "period": "2026-04",
+      "stockDate": "2026-04-30",
+      "stockClose": 110.1,
+      "stockAdjClose": 110.1,
+      "benchmarkDate": "2026-04-30",
+      "benchmarkClose": 7209.01
+    },
+    {
+      "period": "2026-05",
+      "stockDate": "2026-05-29",
+      "stockClose": 111.36,
+      "stockAdjClose": 111.36,
+      "benchmarkDate": "2026-05-29",
+      "benchmarkClose": 7580.06
+    },
+    {
+      "period": "2026-06",
+      "stockDate": "2026-06-30",
+      "stockClose": 115.02,
+      "stockAdjClose": 115.02,
+      "benchmarkDate": "2026-06-30",
+      "benchmarkClose": 7499.36
+    },
+    {
+      "period": "2026-07",
+      "stockDate": "2026-07-31",
+      "stockClose": 134.81,
+      "stockAdjClose": 134.81,
+      "benchmarkDate": "2026-07-31",
+      "benchmarkClose": 7489.72
+    },
+    {
+      "period": "2026-08",
+      "stockDate": "2026-08-31",
+      "stockClose": 148.36,
+      "stockAdjClose": 148.36,
+      "benchmarkDate": "2026-08-31",
+      "benchmarkClose": 7686.14
+    }
+  ],
+  "observations": [
+    {
+      "period": "2021-09",
+      "date": "2021-09-30",
+      "stockReturn": 0.28403828,
+      "benchmarkReturn": -0.04756914,
+      "stockClose": 166.36,
+      "stockAdjClose": 166.36,
+      "benchmarkClose": 4307.54
+    },
+    {
+      "period": "2021-10",
+      "date": "2021-10-29",
+      "stockReturn": 0.04406107,
+      "benchmarkReturn": 0.06914387,
+      "stockClose": 173.69,
+      "stockAdjClose": 173.69,
+      "benchmarkClose": 4605.38
+    },
+    {
+      "period": "2021-11",
+      "date": "2021-11-30",
+      "stockReturn": -0.36559387,
+      "benchmarkReturn": -0.00833373,
+      "stockClose": 110.19,
+      "stockAdjClose": 110.19,
+      "benchmarkClose": 4567
+    },
+    {
+      "period": "2021-12",
+      "date": "2021-12-31",
+      "stockReturn": -0.03702695,
+      "benchmarkReturn": 0.04361287,
+      "stockClose": 106.11,
+      "stockAdjClose": 106.11,
+      "benchmarkClose": 4766.18
+    },
+    {
+      "period": "2022-01",
+      "date": "2022-01-31",
+      "stockReturn": -0.05748751,
+      "benchmarkReturn": -0.05258509,
+      "stockClose": 100.01,
+      "stockAdjClose": 100.01,
+      "benchmarkClose": 4515.55
+    },
+    {
+      "period": "2022-02",
+      "date": "2022-02-28",
+      "stockReturn": -0.13718628,
+      "benchmarkReturn": -0.03136052,
+      "stockClose": 86.29,
+      "stockAdjClose": 86.29,
+      "benchmarkClose": 4373.94
+    },
+    {
+      "period": "2022-03",
+      "date": "2022-03-31",
+      "stockReturn": 0.10221347,
+      "benchmarkReturn": 0.03577324,
+      "stockClose": 95.11,
+      "stockAdjClose": 95.11,
+      "benchmarkClose": 4530.41
+    },
+    {
+      "period": "2022-04",
+      "date": "2022-04-29",
+      "stockReturn": -0.09084218,
+      "benchmarkReturn": -0.08795672,
+      "stockClose": 86.47,
+      "stockAdjClose": 86.47,
+      "benchmarkClose": 4131.93
+    },
+    {
+      "period": "2022-05",
+      "date": "2022-05-31",
+      "stockReturn": -0.03307505,
+      "benchmarkReturn": 0.00005324,
+      "stockClose": 83.61,
+      "stockAdjClose": 83.61,
+      "benchmarkClose": 4132.15
+    },
+    {
+      "period": "2022-06",
+      "date": "2022-06-30",
+      "stockReturn": 0.04712355,
+      "benchmarkReturn": -0.08391999,
+      "stockClose": 87.55,
+      "stockAdjClose": 87.55,
+      "benchmarkClose": 3785.38
+    },
+    {
+      "period": "2022-07",
+      "date": "2022-07-29",
+      "stockReturn": 0.04797259,
+      "benchmarkReturn": 0.09111635,
+      "stockClose": 91.75,
+      "stockAdjClose": 91.75,
+      "benchmarkClose": 4130.29
+    },
+    {
+      "period": "2022-08",
+      "date": "2022-08-31",
+      "stockReturn": 0.02474114,
+      "benchmarkReturn": -0.04244012,
+      "stockClose": 94.02,
+      "stockAdjClose": 94.02,
+      "benchmarkClose": 3955
+    },
+    {
+      "period": "2022-09",
+      "date": "2022-09-30",
+      "stockReturn": 0.0128696,
+      "benchmarkReturn": -0.0933957,
+      "stockClose": 95.23,
+      "stockAdjClose": 95.23,
+      "benchmarkClose": 3585.62
+    },
+    {
+      "period": "2022-10",
+      "date": "2022-10-31",
+      "stockReturn": -0.14060695,
+      "benchmarkReturn": 0.07986345,
+      "stockClose": 81.84,
+      "stockAdjClose": 81.84,
+      "benchmarkClose": 3871.98
+    },
+    {
+      "period": "2022-11",
+      "date": "2022-11-30",
+      "stockReturn": -0.14870479,
+      "benchmarkReturn": 0.05375286,
+      "stockClose": 69.67,
+      "stockAdjClose": 69.67,
+      "benchmarkClose": 4080.11
+    },
+    {
+      "period": "2022-12",
+      "date": "2022-12-30",
+      "stockReturn": 0.02095594,
+      "benchmarkReturn": -0.05897145,
+      "stockClose": 71.13,
+      "stockAdjClose": 71.13,
+      "benchmarkClose": 3839.5
+    },
+    {
+      "period": "2023-01",
+      "date": "2023-01-31",
+      "stockReturn": 0.34247153,
+      "benchmarkReturn": 0.06175283,
+      "stockClose": 95.49,
+      "stockAdjClose": 95.49,
+      "benchmarkClose": 4076.6
+    },
+    {
+      "period": "2023-02",
+      "date": "2023-02-28",
+      "stockReturn": -0.04921981,
+      "benchmarkReturn": -0.02611245,
+      "stockClose": 90.79,
+      "stockAdjClose": 90.79,
+      "benchmarkClose": 3970.15
+    },
+    {
+      "period": "2023-03",
+      "date": "2023-03-31",
+      "stockReturn": 0.57054742,
+      "benchmarkReturn": 0.03505157,
+      "stockClose": 142.59,
+      "stockAdjClose": 142.59,
+      "benchmarkClose": 4109.31
+    },
+    {
+      "period": "2023-04",
+      "date": "2023-04-28",
+      "stockReturn": -0.04509433,
+      "benchmarkReturn": 0.01464236,
+      "stockClose": 136.16,
+      "stockAdjClose": 136.16,
+      "benchmarkClose": 4169.48
+    },
+    {
+      "period": "2023-05",
+      "date": "2023-05-31",
+      "stockReturn": 0.09848707,
+      "benchmarkReturn": 0.00248232,
+      "stockClose": 149.57,
+      "stockAdjClose": 149.57,
+      "benchmarkClose": 4179.83
+    },
+    {
+      "period": "2023-06",
+      "date": "2023-06-30",
+      "stockReturn": -0.04432707,
+      "benchmarkReturn": 0.06472751,
+      "stockClose": 142.94,
+      "stockAdjClose": 142.94,
+      "benchmarkClose": 4450.38
+    },
+    {
+      "period": "2023-07",
+      "date": "2023-07-31",
+      "stockReturn": 0.08570029,
+      "benchmarkReturn": 0.03113891,
+      "stockClose": 155.19,
+      "stockAdjClose": 155.19,
+      "benchmarkClose": 4588.96
+    },
+    {
+      "period": "2023-08",
+      "date": "2023-08-31",
+      "stockReturn": -0.05174302,
+      "benchmarkReturn": -0.01771643,
+      "stockClose": 147.16,
+      "stockAdjClose": 147.16,
+      "benchmarkClose": 4507.66
+    },
+    {
+      "period": "2023-09",
+      "date": "2023-09-29",
+      "stockReturn": 0.12714053,
+      "benchmarkReturn": -0.04871929,
+      "stockClose": 165.87,
+      "stockAdjClose": 165.87,
+      "benchmarkClose": 4288.05
+    },
+    {
+      "period": "2023-10",
+      "date": "2023-10-31",
+      "stockReturn": -0.11949117,
+      "benchmarkReturn": -0.02197969,
+      "stockClose": 146.05,
+      "stockAdjClose": 146.05,
+      "benchmarkClose": 4193.8
+    },
+    {
+      "period": "2023-11",
+      "date": "2023-11-30",
+      "stockReturn": 0.45354331,
+      "benchmarkReturn": 0.08917926,
+      "stockClose": 212.29,
+      "stockAdjClose": 212.29,
+      "benchmarkClose": 4567.8
+    },
+    {
+      "period": "2023-12",
+      "date": "2023-12-29",
+      "stockReturn": 0.06858543,
+      "benchmarkReturn": 0.04422917,
+      "stockClose": 226.85,
+      "stockAdjClose": 226.85,
+      "benchmarkClose": 4769.83
+    },
+    {
+      "period": "2024-01",
+      "date": "2024-01-31",
+      "stockReturn": -0.21141724,
+      "benchmarkReturn": 0.01589574,
+      "stockClose": 178.89,
+      "stockAdjClose": 178.89,
+      "benchmarkClose": 4845.65
+    },
+    {
+      "period": "2024-02",
+      "date": "2024-02-29",
+      "stockReturn": 0.33601655,
+      "benchmarkReturn": 0.05172062,
+      "stockClose": 239,
+      "stockAdjClose": 239,
+      "benchmarkClose": 5096.27
+    },
+    {
+      "period": "2024-03",
+      "date": "2024-03-28",
+      "stockReturn": -0.07707113,
+      "benchmarkReturn": 0.03101876,
+      "stockClose": 220.58,
+      "stockAdjClose": 220.58,
+      "benchmarkClose": 5254.35
+    },
+    {
+      "period": "2024-04",
+      "date": "2024-04-30",
+      "stockReturn": 0.02343821,
+      "benchmarkReturn": -0.04161504,
+      "stockClose": 225.75,
+      "stockAdjClose": 225.75,
+      "benchmarkClose": 5035.69
+    },
+    {
+      "period": "2024-05",
+      "date": "2024-05-31",
+      "stockReturn": -0.15215947,
+      "benchmarkReturn": 0.04802122,
+      "stockClose": 191.4,
+      "stockAdjClose": 191.4,
+      "benchmarkClose": 5277.51
+    },
+    {
+      "period": "2024-06",
+      "date": "2024-06-28",
+      "stockReturn": 0.09022989,
+      "benchmarkReturn": 0.03466976,
+      "stockClose": 208.67,
+      "stockAdjClose": 208.67,
+      "benchmarkClose": 5460.48
+    },
+    {
+      "period": "2024-07",
+      "date": "2024-07-31",
+      "stockReturn": -0.17601955,
+      "benchmarkReturn": 0.01132135,
+      "stockClose": 171.94,
+      "stockAdjClose": 171.94,
+      "benchmarkClose": 5522.3
+    },
+    {
+      "period": "2024-08",
+      "date": "2024-08-30",
+      "stockReturn": 0.23630336,
+      "benchmarkReturn": 0.02283469,
+      "stockClose": 212.57,
+      "stockAdjClose": 212.57,
+      "benchmarkClose": 5648.4
+    },
+    {
+      "period": "2024-09",
+      "date": "2024-09-30",
+      "stockReturn": 0.32671591,
+      "benchmarkReturn": 0.02019687,
+      "stockClose": 282.02,
+      "stockAdjClose": 282.02,
+      "benchmarkClose": 5762.48
+    },
+    {
+      "period": "2024-10",
+      "date": "2024-10-31",
+      "stockReturn": 0.03882703,
+      "benchmarkReturn": -0.00989678,
+      "stockClose": 292.97,
+      "stockAdjClose": 292.97,
+      "benchmarkClose": 5705.45
+    },
+    {
+      "period": "2024-11",
+      "date": "2024-11-29",
+      "stockReturn": 0.18875653,
+      "benchmarkReturn": 0.05730135,
+      "stockClose": 348.27,
+      "stockAdjClose": 348.27,
+      "benchmarkClose": 6032.38
+    },
+    {
+      "period": "2024-12",
+      "date": "2024-12-31",
+      "stockReturn": -0.0690269,
+      "benchmarkReturn": -0.02499014,
+      "stockClose": 324.23,
+      "stockAdjClose": 324.23,
+      "benchmarkClose": 5881.63
+    },
+    {
+      "period": "2025-01",
+      "date": "2025-01-31",
+      "stockReturn": 0.122629,
+      "benchmarkReturn": 0.02701632,
+      "stockClose": 363.99,
+      "stockAdjClose": 363.99,
+      "benchmarkClose": 6040.53
+    },
+    {
+      "period": "2025-02",
+      "date": "2025-02-28",
+      "stockReturn": -0.14264128,
+      "benchmarkReturn": -0.01424213,
+      "stockClose": 312.07,
+      "stockAdjClose": 312.07,
+      "benchmarkClose": 5954.5
+    },
+    {
+      "period": "2025-03",
+      "date": "2025-03-31",
+      "stockReturn": -0.00490275,
+      "benchmarkReturn": -0.05754471,
+      "stockClose": 310.54,
+      "stockAdjClose": 310.54,
+      "benchmarkClose": 5611.85
+    },
+    {
+      "period": "2025-04",
+      "date": "2025-04-30",
+      "stockReturn": 0.25420236,
+      "benchmarkReturn": -0.00762494,
+      "stockClose": 389.48,
+      "stockAdjClose": 389.48,
+      "benchmarkClose": 5569.06
+    },
+    {
+      "period": "2025-05",
+      "date": "2025-05-30",
+      "stockReturn": 0.33411215,
+      "benchmarkReturn": 0.06152385,
+      "stockClose": 519.61,
+      "stockAdjClose": 519.61,
+      "benchmarkClose": 5911.69
+    },
+    {
+      "period": "2025-06",
+      "date": "2025-06-30",
+      "stockReturn": -0.21090818,
+      "benchmarkReturn": 0.0496068,
+      "stockClose": 410.02,
+      "stockAdjClose": 410.02,
+      "benchmarkClose": 6204.95
+    },
+    {
+      "period": "2025-07",
+      "date": "2025-07-31",
+      "stockReturn": -0.15479733,
+      "benchmarkReturn": 0.02166657,
+      "stockClose": 346.55,
+      "stockAdjClose": 346.55,
+      "benchmarkClose": 6339.39
+    },
+    {
+      "period": "2025-08",
+      "date": "2025-08-29",
+      "stockReturn": -0.14049921,
+      "benchmarkReturn": 0.0190665,
+      "stockClose": 297.86,
+      "stockAdjClose": 297.86,
+      "benchmarkClose": 6460.26
+    },
+    {
+      "period": "2025-09",
+      "date": "2025-09-30",
+      "stockReturn": 0.08050762,
+      "benchmarkReturn": 0.03532366,
+      "stockClose": 321.84,
+      "stockAdjClose": 321.84,
+      "benchmarkClose": 6688.46
+    },
+    {
+      "period": "2025-10",
+      "date": "2025-10-31",
+      "stockReturn": -0.15908526,
+      "benchmarkReturn": 0.02268684,
+      "stockClose": 270.64,
+      "stockAdjClose": 270.64,
+      "benchmarkClose": 6840.2
+    },
+    {
+      "period": "2025-11",
+      "date": "2025-11-28",
+      "stockReturn": -0.29275052,
+      "benchmarkReturn": 0.00129967,
+      "stockClose": 191.41,
+      "stockAdjClose": 191.41,
+      "benchmarkClose": 6849.09
+    },
+    {
+      "period": "2025-12",
+      "date": "2025-12-31",
+      "stockReturn": -0.08312,
+      "benchmarkReturn": -0.00052416,
+      "stockClose": 175.5,
+      "stockAdjClose": 175.5,
+      "benchmarkClose": 6845.5
+    },
+    {
+      "period": "2026-01",
+      "date": "2026-01-30",
+      "stockReturn": -0.23612536,
+      "benchmarkReturn": 0.01366299,
+      "stockClose": 134.06,
+      "stockAdjClose": 134.06,
+      "benchmarkClose": 6939.03
+    },
+    {
+      "period": "2026-02",
+      "date": "2026-02-27",
+      "stockReturn": -0.246606,
+      "benchmarkReturn": -0.00866836,
+      "stockClose": 101,
+      "stockAdjClose": 101,
+      "benchmarkClose": 6878.88
+    },
+    {
+      "period": "2026-03",
+      "date": "2026-03-31",
+      "stockReturn": -0.02405941,
+      "benchmarkReturn": -0.05093271,
+      "stockClose": 98.57,
+      "stockAdjClose": 98.57,
+      "benchmarkClose": 6528.52
+    },
+    {
+      "period": "2026-04",
+      "date": "2026-04-30",
+      "stockReturn": 0.11697271,
+      "benchmarkReturn": 0.10423343,
+      "stockClose": 110.1,
+      "stockAdjClose": 110.1,
+      "benchmarkClose": 7209.01
+    },
+    {
+      "period": "2026-05",
+      "date": "2026-05-29",
+      "stockReturn": 0.01144414,
+      "benchmarkReturn": 0.05147031,
+      "stockClose": 111.36,
+      "stockAdjClose": 111.36,
+      "benchmarkClose": 7580.06
+    },
+    {
+      "period": "2026-06",
+      "date": "2026-06-30",
+      "stockReturn": 0.03286638,
+      "benchmarkReturn": -0.01064635,
+      "stockClose": 115.02,
+      "stockAdjClose": 115.02,
+      "benchmarkClose": 7499.36
+    },
+    {
+      "period": "2026-07",
+      "date": "2026-07-31",
+      "stockReturn": 0.17205703,
+      "benchmarkReturn": -0.00128544,
+      "stockClose": 134.81,
+      "stockAdjClose": 134.81,
+      "benchmarkClose": 7489.72
+    },
+    {
+      "period": "2026-08",
+      "date": "2026-08-31",
+      "stockReturn": 0.10051183,
+      "benchmarkReturn": 0.02622528,
+      "stockClose": 148.36,
+      "stockAdjClose": 148.36,
+      "benchmarkClose": 7686.14
+    }
+  ]
+}

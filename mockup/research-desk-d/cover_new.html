@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUOL &bull; RESEARCH DESK D &bull; VALUATION MODEL &mdash; MOCKUP</title>
+<style>
+:root{
+  --bg:#0a0d10; --panel:#0e1216; --panel2:#141a21; --panel3:#182029;
+  --line:#1e2630; --line2:#2b3644;
+  --txt:#c9d4e2; --dim:#7e8ca0; --faint:#526072;
+  --green:#4fc90b; --red:#e5484d; --amber:#f2a71b; --cyan:#3fc2ff;
+  --mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,"Courier New",monospace;
+  --sans:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important;}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13px;line-height:1.5;}
+/* CRT scanline overlay */
+body::after{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);pointer-events:none;z-index:999;}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+a{color:var(--cyan);text-decoration:none;}
+img{display:inline-block;vertical-align:middle;}
+.kbd{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--line2);background:var(--panel2);padding:1px 6px;white-space:nowrap;}
+.dot{display:inline-block;width:7px;height:7px;background:var(--green);animation:blink 1.2s steps(1) infinite;}
+.cur{display:inline-block;width:8px;height:15px;background:var(--green);animation:blink 1s steps(1) infinite;vertical-align:-3px;}
+@keyframes blink{0%,64%{opacity:1;}65%,100%{opacity:.08;}}
+
+/* ===== LEFT ICON RAIL ===== */
+.rail{position:fixed;left:0;top:0;bottom:0;width:54px;background:var(--panel);border-right:1px solid var(--line2);display:flex;flex-direction:column;z-index:60;}
+.rail .rlogo{padding:12px 0 10px;text-align:center;border-bottom:1px solid var(--line);}
+.rail .rlogo img{width:26px;height:26px;}
+.rail nav{flex:1;display:flex;flex-direction:column;}
+.rail nav a{display:block;text-align:center;padding:9px 0 8px;border-bottom:1px solid var(--line);color:var(--faint);font-family:var(--mono);font-size:8px;letter-spacing:.08em;line-height:1.35;}
+.rail nav a b{display:block;font-size:10px;color:var(--dim);font-weight:600;}
+.rail nav a:hover{background:var(--panel3);color:var(--green);box-shadow:inset 3px 0 0 var(--green);text-decoration:none;}
+.rail nav a:hover b{color:#fff;}
+.rail .rfoot{padding:10px 0;text-align:center;border-top:1px solid var(--line);font-family:var(--mono);font-size:8px;color:var(--faint);}
+.rail .rfoot .v{display:block;margin-top:6px;color:var(--dim);}
+
+.page{margin-left:54px;}
+
+/* ===== BANDS (full-width panels) ===== */
+.band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.inner{max-width:900px;margin:0 auto;padding:0 20px;}
+.bandhead{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
+.bandhead .sec{font-family:var(--mono);font-size:10px;color:var(--bg);background:var(--green);padding:2px 7px;font-weight:700;letter-spacing:.1em;}
+.bandhead h2{font-size:12px;letter-spacing:.22em;color:#fff;font-weight:700;text-transform:uppercase;}
+.bandhead .aux{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.06em;display:flex;align-items:center;gap:7px;}
+.bandhead .aux img{width:13px;height:13px;}
+.bandbody{padding:18px 0;}
+.band:target > .inner > .bandhead{background:linear-gradient(90deg,rgba(79,201,11,.09),transparent 55%);}
+
+/* ===== COMMAND BAR ===== */
+.cmd{background:var(--panel);border-bottom:1px solid var(--line2);}
+.cmd .inner{display:flex;align-items:center;gap:12px;padding-top:8px;padding-bottom:8px;flex-wrap:wrap;}
+.cmd .prompt{font-family:var(--mono);font-size:11.5px;color:var(--dim);white-space:nowrap;}
+.cmd .prompt b{color:var(--green);font-weight:600;}
+.cmd .prompt .u{color:var(--cyan);}
+.cmd .mocktag{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--amber);border:1px solid var(--amber);padding:3px 9px;white-space:nowrap;}
+.cmd .clock{font-family:var(--mono);font-size:10px;color:var(--faint);white-space:nowrap;}
+
+/* ===== TICKER STRIP (static, terminal tape) ===== */
+.tape{background:#07090b;border-bottom:1px solid var(--line2);overflow:hidden;white-space:nowrap;}
+.tape .tset{display:inline-flex;align-items:center;max-width:100%;}
+.tape span{font-family:var(--mono);font-size:11px;color:var(--dim);padding:6px 14px;border-right:1px solid var(--line);flex:0 0 auto;}
+.tape span b{color:var(--txt);font-weight:600;}
+.tape .up{color:var(--green);} .tape .dn{color:var(--red);}
+.tape .feed{color:var(--green);display:inline-flex;align-items:center;gap:7px;}
+.tape .cursor{border-right:0;}
+
+/* ===== 01 MASTHEAD ===== */
+.mast{background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 90%);}
+.mast .inner{padding-top:26px;padding-bottom:26px;}
+.mastgrid{display:grid;grid-template-columns:1.5fr 1fr;gap:26px;align-items:start;}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--green);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:9px;}
+.eyebrow img{width:22px;height:22px;}
+h1{font-family:var(--serif);font-size:36px;line-height:1.05;color:#fff;font-weight:400;letter-spacing:-.01em;}
+h1 b{font-weight:700;}
+.standfirst{margin-top:12px;font-size:13.5px;color:var(--dim);max-width:40em;}
+.metaline{margin-top:16px;display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.05em;}
+.metaline img{width:12px;height:12px;}
+.metaline .sep{color:var(--line2);}
+/* quote pane */
+.quote{border:1px solid var(--line2);background:var(--panel);}
+.quote .qhead{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-bottom:1px solid var(--line2);font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);background:var(--panel2);}
+.quote .qhead .live{color:var(--green);display:inline-flex;align-items:center;gap:6px;}
+.quote .qrow{display:flex;justify-content:space-between;align-items:baseline;padding:8px 11px;border-bottom:1px solid var(--line);}
+.quote .qrow:last-child{border-bottom:0;}
+.quote .qrow:hover{background:var(--panel2);}
+.quote .ql{font-size:9px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;}
+.quote .qv{font-family:var(--mono);font-size:15px;color:#fff;}
+.quote .qv.up{color:var(--green);}
+.quote .qv.dimv{font-size:12.5px;color:var(--dim);}
+
+/* ===== 02 RECOMMENDATION ===== */
+.recband{background:var(--panel);}
+.rec{display:flex;align-items:stretch;flex-wrap:wrap;}
+.rec .stamp{background:var(--green);color:#03150a;font-family:var(--sans);font-weight:800;font-size:14px;letter-spacing:.22em;padding:12px 20px;text-transform:uppercase;display:flex;align-items:center;}
+.rec .core{padding:9px 20px;border-left:1px solid var(--line);display:flex;align-items:baseline;gap:14px;}
+.rec .core .u1{font-size:13px;letter-spacing:.14em;color:var(--txt);font-weight:700;text-transform:uppercase;}
+.rec .core .pct{font-family:var(--mono);font-size:28px;color:var(--green);font-weight:700;}
+.rec .aux{margin-left:auto;padding:9px 20px;border-left:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--faint);line-height:1.7;}
+.rec .aux b{color:var(--txt);font-weight:600;}
+
+/* ===== 03 THESIS ===== */
+.thesis{font-size:16.5px;line-height:1.65;color:var(--txt);max-width:46em;}
+.thesis b{color:#fff;}
+.thesis .mono{font-size:15px;}
+.confirm{display:inline-flex;align-items:center;gap:9px;margin-top:14px;border:1px solid var(--line2);background:var(--panel);padding:7px 12px;font-family:var(--mono);font-size:10.5px;color:var(--dim);letter-spacing:.05em;}
+.confirm img{width:14px;height:14px;}
+.confirm b{color:var(--green);}
+
+/* ===== TABLES ===== */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);}
+table{border-collapse:collapse;width:100%;font-size:12px;}
+th{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);text-align:left;padding:8px 11px;background:var(--panel2);border-bottom:1px solid var(--line2);border-right:1px solid var(--line);white-space:nowrap;font-weight:600;}
+td{padding:7px 11px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;}
+tbody tr:nth-child(even) td{background:rgba(255,255,255,.016);}
+tbody tr:hover td{background:var(--panel3);}
+td.r,th.r{text-align:right;}
+td .m{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.up{color:var(--green);} .dn{color:var(--red);}
+tr.tot td{background:var(--panel2) !important;border-top:2px solid var(--green);color:#fff;font-weight:700;}
+td .meth{color:#fff;font-weight:600;}
+td .why{display:block;color:var(--faint);font-size:10.5px;margin-top:2px;}
+td .sh{font-family:var(--mono);font-size:10.5px;color:var(--cyan);}
+
+/* ===== 05 VALUATION LAYOUT ===== */
+.valgrid{display:grid;grid-template-columns:1.55fr 1fr;border:1px solid var(--line);}
+.valgrid .vleft{border-right:1px solid var(--line);min-width:0;}
+.vpane .phead{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);background:var(--panel2);text-transform:uppercase;}
+.vpane .phead .gr{color:var(--green);}
+.vpane svg{display:block;width:100%;height:auto;background:var(--panel);}
+.vpane+.vpane{border-top:1px solid var(--line);}
+
+/* ===== 06 GUESSES ===== */
+.guess{display:flex;flex-wrap:wrap;border:1px solid var(--line);background:var(--panel);}
+.guess .g{flex:1 1 118px;padding:10px 13px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+.guess .g:hover{background:var(--panel2);}
+.guess i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;}
+.guess b{display:block;font-family:var(--mono);font-size:17px;color:#fff;margin:3px 0 2px;font-weight:600;}
+.guess em{display:block;font-style:normal;font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.03em;}
+.guess em .hl{color:var(--amber);}
+
+/* ===== 07 RISKS ===== */
+.risk{display:grid;grid-template-columns:1fr 250px;gap:0;border-bottom:1px solid var(--line);}
+.risk:last-child{border-bottom:0;}
+.risk .rtxt{padding:15px 18px 15px 0;}
+.risk h4{font-size:12.5px;color:#fff;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:9px;}
+.risk h4 img{width:15px;height:15px;}
+.risk p{margin-top:6px;font-size:12px;color:var(--dim);max-width:46em;}
+.risk p b{color:var(--cyan);font-weight:600;font-family:var(--mono);font-size:11.5px;}
+.risk p .m{font-family:var(--mono);color:var(--txt);font-size:11.5px;}
+.slider{border-left:1px solid var(--line);background:var(--panel);padding:13px 14px;display:flex;flex-direction:column;justify-content:center;}
+.slider .sname{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;color:var(--faint);margin-bottom:11px;letter-spacing:.05em;}
+.slider .sname b{color:var(--txt);font-weight:600;}
+.slider .sname .set{color:var(--green);}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--line2);outline:none;cursor:ew-resize;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:var(--green);border:0;cursor:ew-resize;}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;background:var(--green);border:0;cursor:ew-resize;}
+input[type=range]::-moz-range-track{height:3px;background:var(--line2);}
+input[type=range]:focus-visible{outline:1px dashed var(--green);outline-offset:4px;}
+.slider .ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--faint);margin-top:8px;}
+
+/* ===== 08 DIRECTORY ===== */
+.dir a{display:grid;grid-template-columns:26px 96px 1fr auto;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);}
+.dir a:last-child{border-bottom:0;}
+.dir a:hover{background:var(--panel2);text-decoration:none;box-shadow:inset 3px 0 0 var(--cyan);}
+.dir img{width:13px;height:13px;opacity:.75;}
+.dir .sh{font-family:var(--mono);font-size:12.5px;color:#fff;font-weight:600;}
+.dir a:hover .sh{color:var(--cyan);}
+.dir .desc{font-size:11.5px;color:var(--faint);}
+.dir .tail{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.1em;white-space:nowrap;}
+
+/* ===== FOOTER ===== */
+.status{border-top:1px solid var(--line2);background:#07090b;}
+.status .inner{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:space-between;padding-top:9px;padding-bottom:9px;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.04em;}
+.status .live{color:var(--green);display:inline-flex;align-items:center;gap:6px;}
+.status kbd{border:1px solid var(--line2);padding:0 5px;color:var(--dim);background:var(--panel2);}
+.fbar{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:flex-start;padding-top:20px;padding-bottom:24px;}
+.notadvice{font-size:14px;font-weight:800;letter-spacing:.24em;color:var(--red);text-transform:uppercase;border:1px solid var(--red);display:inline-block;padding:6px 12px;}
+.fbar p{margin-top:10px;font-size:10.5px;color:var(--faint);line-height:1.65;max-width:54em;}
+.fbar .sys{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:right;line-height:1.9;}
+.fbar .sys b{color:var(--green);}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:700px){
+  .rail{display:none;}
+  .page{margin-left:0;}
+}
+@media(max-width:680px){
+  .valgrid{grid-template-columns:1fr;}
+  .valgrid .vleft{border-right:0;border-bottom:1px solid var(--line);}
+}
+@media(max-width:640px){
+  .mastgrid{grid-template-columns:1fr;}
+  .risk{grid-template-columns:1fr;}
+  .slider{border-left:0;border-top:1px solid var(--line);}
+  .dir a{grid-template-columns:26px 86px 1fr;}
+  .dir .tail{display:none;}
+  h1{font-size:28px;}
+  .inner{padding:0 14px;}
+  .rec .core{width:100%;border-left:0;border-top:1px solid var(--line);}
+  .rec .aux{margin-left:0;border-left:0;width:100%;}
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT ICON RAIL -->
+<div class="rail">
+  <a class="rlogo" href="#s1" title="cover"><img src="../../assets/branding/duolingo-owl.svg" alt="Duolingo owl"></a>
+  <nav>
+    <a href="#s1"><b>01</b>CVR</a>
+    <a href="#s2"><b>02</b>CALL</a>
+    <a href="#s3"><b>03</b>THS</a>
+    <a href="#s4"><b>04</b>SNAP</a>
+    <a href="#s5"><b>05</b>VAL</a>
+    <a href="#s6"><b>06</b>KEYS</a>
+    <a href="#s7"><b>07</b>RISK</a>
+    <a href="#s8"><b>08</b>MODEL</a>
+  </nav>
+  <div class="rfoot"><span class="dot" title="mock feed"></span><span class="v">v#.##</span></div>
+</div>
+
+<div class="page">
+
+  <!-- COMMAND BAR -->
+  <div class="cmd">
+    <div class="inner">
+      <span class="prompt mono"><b>research@desk-d</b>:~$ <span class="u">open DUOL.model --mock --six-methods</span> <span class="cur" aria-hidden="true"></span></span>
+      <span class="clock">SESSION 12 SEP 2026 &middot; ##:##:## UTC</span>
+      <span class="mocktag">MOCKUP &mdash; DUMMY DATA</span>
+    </div>
+  </div>
+
+  <!-- TICKER STRIP -->
+  <div class="tape" aria-hidden="true">
+    <div class="tset mono">
+      <span class="feed"><span class="dot"></span>MOCK FEED</span>
+      <span>DUOL <b>$###.##</b> <i class="up">&#9650; ##%</i></span>
+      <span>TGT 12M <b>$###.##</b></span>
+      <span>EDTECH BASKET <b>$###.##</b> <i class="dn">&#9660; #%</i></span>
+      <span>PEER 1 <b>$###.##</b> <i class="up">&#9650; ##%</i></span>
+      <span>PEER 2 <b>$###.##</b> <i class="dn">&#9660; ##%</i></span>
+      <span>VOL <b>##.#M</b></span>
+      <span class="cursor"><span class="cur"></span></span>
+    </div>
+  </div>
+
+  <!-- 01 &middot; MASTHEAD -->
+  <header class="band mast" id="s1">
+    <div class="inner">
+      <div class="mastgrid">
+        <div>
+          <div class="eyebrow"><img src="../../assets/branding/duolingo-owl.svg" alt="">EQUITY RESEARCH MODEL &middot; CONSUMER SOFTWARE / EDTECH</div>
+          <h1><b>Duolingo, Inc.</b><br>The streak is the asset.</h1>
+          <p class="standfirst">A dense, six-method valuation terminal for the freemium language franchise &mdash; what the daily-habit engine is worth if the loop keeps compounding, and which slider kills it when it doesn&rsquo;t.</p>
+          <div class="metaline mono">
+            <span>NASDAQ: DUOL</span><span class="sep">|</span>
+            <span>USD</span><span class="sep">|</span>
+            <span>MODEL DATE 12 SEP 2026</span><span class="sep">|</span>
+            <span>DESK-D BUILD ####</span><span class="sep">|</span>
+            <span><img src="../../assets/icons/ui/info-circle.svg" alt="" title="All values are dummy placeholders"> ALL FIGURES DUMMY</span>
+          </div>
+        </div>
+        <div class="quote">
+          <div class="qhead"><span>QUOTE &middot; NASDAQ: DUOL</span><span class="live"><span class="dot"></span>MOCK</span></div>
+          <div class="qrow"><span class="ql">Market price</span><span class="qv mono">$###.##</span></div>
+          <div class="qrow"><span class="ql">12-mo target</span><span class="qv mono up">$###.##</span></div>
+          <div class="qrow"><span class="ql">Upside</span><span class="qv mono up">+##.#%</span></div>
+          <div class="qrow"><span class="ql">Market cap</span><span class="qv mono dimv">$##.#B</span></div>
+          <div class="qrow"><span class="ql">52-wk range</span><span class="qv mono dimv">$###.##&ndash;$###.##</span></div>
+          <div class="qrow"><span class="ql">Avg vol (mock)</span><span class="qv mono dimv">##.#M</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 02 &middot; RECOMMENDATION -->
+  <section class="band recband" id="s2">
+    <div class="inner">
+      <div class="rec">
+        <div class="stamp">Overweight</div>
+        <div class="core">
+          <span class="u1">Undervalued</span>
+          <span class="pct mono">+##.#%</span>
+        </div>
+        <div class="aux mono">
+          TO 12-MO TARGET <b>$###.##</b> &middot; VS CURRENT <b>$###.##</b><br>
+          <b>##</b> OF <b>#</b> METHODS ABOVE MARKET &middot; CONVICTION: DUMMY
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 &middot; THESIS -->
+  <section class="band" id="s3">
+    <div class="inner">
+      <div class="bandhead"><span class="sec">&sect;03</span><h2>Thesis</h2><span class="aux"><img src="../../assets/icons/ui/info-circle.svg" alt="">EXACTLY THREE SENTENCES</span></div>
+      <div class="bandbody">
+        <p class="thesis">Duolingo&rsquo;s streak mechanics convert free installs into a daily habit at near-zero marginal acquisition cost, holding DAU/MAU stickiness at <b class="mono">##%</b> while sales spend trends flat. Paid penetration of <b class="mono">##%</b> of MAU and a largely un-raised premium tier leave a long monetization runway that the model drives through <b class="mono">03_drivers</b>. Six methods triangulate to a blended <b class="mono">$###.##</b>, implying the mock tape discounts roughly <b class="mono">##%</b> of the option value sitting in adjacent subjects and assessments.</p>
+        <div class="confirm"><img src="../../assets/icons/ui/check-circle.svg" alt=""><span>THESIS LOCKED &middot; <b>3</b> SENTENCES &middot; EVERY FIGURE ON THIS PAGE IS A PLACEHOLDER</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 &middot; BUSINESS SNAPSHOT -->
+  <section class="band" id="s4">
+    <div class="inner">
+      <div class="bandhead"><span class="sec">&sect;04</span><h2>Business Snapshot</h2><span class="aux">TRAILING DUMMY PERIOD &middot; SRC 03_drivers</span></div>
+      <div class="bandbody">
+        <div class="scroll">
+        <table style="min-width:640px;">
+          <thead><tr><th>Operating metric</th><th class="r">Current (dummy)</th><th class="r">QoQ</th><th class="r">YoY</th><th>Model driver</th><th>Sheet</th></tr></thead>
+          <tbody>
+            <tr><td><span class="meth">DAU</span><span class="why">daily active learners</span></td><td class="r m">##.#M</td><td class="r m"><span class="up">+##%</span></td><td class="r m"><span class="up">+##%</span></td><td>habit engine &middot; feeds slider 01</td><td class="sh">03_drivers</td></tr>
+            <tr><td><span class="meth">MAU</span><span class="why">monthly active learners</span></td><td class="r m">##.#M</td><td class="r m"><span class="up">+##%</span></td><td class="r m"><span class="up">+##%</span></td><td>funnel breadth</td><td class="sh">03_drivers</td></tr>
+            <tr><td><span class="meth">DAU / MAU</span><span class="why">stickiness ratio</span></td><td class="r m">##%</td><td class="r m"><span class="up">+##bp</span></td><td class="r m"><span class="dn">&ndash;##bp</span></td><td>cohort retention check</td><td class="sh">04_scenarios</td></tr>
+            <tr><td><span class="meth">Paid subscribers</span><span class="why">Super + Max mix</span></td><td class="r m">##.#M</td><td class="r m"><span class="up">+##%</span></td><td class="r m"><span class="up">+##%</span></td><td>paid penetration &middot; feeds slider 02</td><td class="sh">03_drivers</td></tr>
+            <tr class="tot"><td>Revenue</td><td class="r m">$###.#M</td><td class="r m">+##%</td><td class="r m">+##%</td><td>blended ARPU &times; subs</td><td class="sh">01_dcf</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 &middot; VALUATION -->
+  <section class="band" id="s5">
+    <div class="inner">
+      <div class="bandhead"><span class="sec">&sect;05</span><h2>Valuation &mdash; Six Methods</h2><span class="aux">BLENDED <span class="gr">$###.##</span> &middot; ALL DUMMY</span></div>
+      <div class="bandbody">
+        <div class="valgrid">
+          <div class="vleft">
+            <div class="scroll" style="border:0;">
+            <table style="min-width:520px;">
+              <thead><tr><th>Method</th><th class="r">Value / sh</th><th class="r">Weight</th><th class="r">Impl. EV</th><th class="r">vs mkt</th></tr></thead>
+              <tbody>
+                <tr><td><span class="meth">FCFF DCF</span><span class="why">01_dcf &middot; #-yr explicit + terminal</span></td><td class="r m">$###.##</td><td class="r m">##%</td><td class="r m">$##.#B</td><td class="r m"><span class="up">+##%</span></td></tr>
+                <tr><td><span class="meth">Comparables</span><span class="why">02_comps &middot; EV/Rev, consumer-sub peers</span></td><td class="r m">$###.##</td><td class="r m">##%</td><td class="r m">$##.#B</td><td class="r m"><span class="up">+##%</span></td></tr>
+                <tr><td><span class="meth">EV/EBITDAR</span><span class="why">02_comps &middot; content-royalty adjusted</span></td><td class="r m">$###.##</td><td class="r m">##%</td><td class="r m">$##.#B</td><td class="r m"><span class="dn">&ndash;#%</span></td></tr>
+                <tr><td><span class="meth">P/FCF</span><span class="why">01_dcf &middot; forward FCF yield basis</span></td><td class="r m">$###.##</td><td class="r m">##%</td><td class="r m">$##.#B</td><td class="r m"><span class="up">+##%</span></td></tr>
+                <tr><td><span class="meth">Sum-of-the-parts</span><span class="why">03_drivers &middot; subs + ads + assessments</span></td><td class="r m">$###.##</td><td class="r m">##%</td><td class="r m">$##.#B</td><td class="r m"><span class="up">+##%</span></td></tr>
+                <tr><td><span class="meth">Per-user</span><span class="why">03_drivers &middot; MAU-multiple sanity floor</span></td><td class="r m">$###.##</td><td class="r m">##%</td><td class="r m">$##.#B</td><td class="r m"><span class="dn">&ndash;#%</span></td></tr>
+                <tr class="tot"><td>BLENDED TARGET</td><td class="r m">$###.##</td><td class="r m">100%</td><td class="r m">$##.#B</td><td class="r m">+##.#%</td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+          <div class="vright">
+            <div class="vpane">
+              <div class="phead"><span>Scenario / share</span><span class="gr">$###.## BASE</span></div>
+              <svg viewBox="0 0 360 168" role="img" aria-label="Bear base bull horizontal bar chart with dummy values">
+                <line x1="110" y1="14" x2="110" y2="150" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <line x1="170" y1="14" x2="170" y2="150" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <line x1="230" y1="14" x2="230" y2="150" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <line x1="290" y1="14" x2="290" y2="150" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <line x1="252" y1="14" x2="252" y2="150" stroke="#f2a71b" stroke-dasharray="5 4" stroke-width="1.5"/>
+                <text x="252" y="10" text-anchor="middle" font-size="8" font-family="monospace" fill="#f2a71b">MKT $###.##</text>
+                <rect x="50" y="20" width="105" height="22" fill="#e5484d"/>
+                <rect x="50" y="66" width="190" height="22" fill="#3fc2ff"/>
+                <rect x="50" y="112" width="250" height="22" fill="#4fc90b"/>
+                <text x="6" y="35" font-size="9" font-family="monospace" fill="#526072" letter-spacing="1">BEAR</text>
+                <text x="6" y="81" font-size="9" font-family="monospace" fill="#526072" letter-spacing="1">BASE</text>
+                <text x="6" y="127" font-size="9" font-family="monospace" fill="#526072" letter-spacing="1">BULL</text>
+                <text x="163" y="35" font-size="11" font-family="monospace" fill="#e5484d">$###.##</text>
+                <text x="248" y="81" font-size="11" font-family="monospace" fill="#3fc2ff">$###.##</text>
+                <text x="308" y="127" font-size="11" font-family="monospace" fill="#4fc90b">$###.##</text>
+                <line x1="50" y1="150" x2="350" y2="150" stroke="#2b3644"/>
+                <text x="50" y="163" font-size="8" font-family="monospace" fill="#526072">LO $###.##</text>
+                <text x="350" y="163" text-anchor="end" font-size="8" font-family="monospace" fill="#526072">HI $###.##</text>
+              </svg>
+            </div>
+            <div class="vpane">
+              <div class="phead"><span>DAU &middot; trailing 12M</span><span class="gr">##.#M LATEST</span></div>
+              <svg viewBox="0 0 360 124" role="img" aria-label="Twelve month DAU sparkline with dummy data">
+                <line x1="8" y1="30" x2="352" y2="30" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <line x1="8" y1="60" x2="352" y2="60" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <line x1="8" y1="90" x2="352" y2="90" stroke="#1e2630" stroke-dasharray="3 4"/>
+                <polygon fill="#4fc90b" fill-opacity=".1" points="12,96 40,88 68,92 97,78 125,70 153,74 181,58 209,50 237,54 265,38 293,28 321,22 348,18 348,112 12,112"/>
+                <polyline fill="none" stroke="#4fc90b" stroke-width="2" points="12,96 40,88 68,92 97,78 125,70 153,74 181,58 209,50 237,54 265,38 293,28 321,22 348,18"/>
+                <circle cx="348" cy="18" r="3" fill="#4fc90b"/>
+                <text x="342" y="12" text-anchor="end" font-size="10" font-family="monospace" fill="#4fc90b">##.#M</text>
+                <text x="12" y="120" font-size="7" font-family="monospace" fill="#526072">J</text>
+                <text x="40" y="120" font-size="7" font-family="monospace" fill="#526072">F</text>
+                <text x="68" y="120" font-size="7" font-family="monospace" fill="#526072">M</text>
+                <text x="97" y="120" font-size="7" font-family="monospace" fill="#526072">A</text>
+                <text x="125" y="120" font-size="7" font-family="monospace" fill="#526072">M</text>
+                <text x="153" y="120" font-size="7" font-family="monospace" fill="#526072">J</text>
+                <text x="181" y="120" font-size="7" font-family="monospace" fill="#526072">J</text>
+                <text x="209" y="120" font-size="7" font-family="monospace" fill="#526072">A</text>
+                <text x="237" y="120" font-size="7" font-family="monospace" fill="#526072">S</text>
+                <text x="265" y="120" font-size="7" font-family="monospace" fill="#526072">O</text>
+                <text x="293" y="120" font-size="7" font-family="monospace" fill="#526072">N</text>
+                <text x="321" y="120" font-size="7" font-family="monospace" fill="#526072">D</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 &middot; KEY GUESSES -->
+  <section class="band" id="s6">
+    <div class="inner">
+      <div class="bandhead"><span class="sec">&sect;06</span><h2>Key Guesses</h2><span class="aux"><img src="../../assets/icons/ui/info-circle.svg" alt="">DCF INPUT LINE &middot; ALL DUMMY</span></div>
+      <div class="bandbody">
+        <div class="guess">
+          <div class="g"><i>WACC</i><b>##.#%</b><em>grid &rarr; 05_sensitivity</em></div>
+          <div class="g"><i>Terminal g</i><b>#.#%</b><em>perpetuity check 01_dcf</em></div>
+          <div class="g"><i>Rev CAGR</i><b>##%</b><em>FY##&ndash;FY## &middot; 03_drivers</em></div>
+          <div class="g"><i>Op margin</i><b>##%</b><em><span class="hl">&plusmn;###bp</span> &harr; slider 03</em></div>
+          <div class="g"><i>Tax rate</i><b>##%</b><em>post-NOL dummy</em></div>
+          <div class="g"><i>Diluted shares</i><b>##.#M</b><em>SBC-adjusted, dummy</em></div>
+          <div class="g"><i>Net debt</i><b>$###.#M</b><em>cash &gt; debt, dummy</em></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 &middot; RISKS &times; SLIDERS -->
+  <section class="band" id="s7">
+    <div class="inner">
+      <div class="bandhead"><span class="sec">&sect;07</span><h2>Key Risks &times; Model Sliders</h2><span class="aux">DRAG TO STRESS &middot; DUMMY WIRING</span></div>
+      <div class="bandbody" style="padding-top:0;padding-bottom:0;">
+
+        <div class="risk">
+          <div class="rtxt">
+            <h4><img src="../../assets/icons/ui/alert-triangle.svg" alt="">Habit engine decays</h4>
+            <p>Streak novelty fades and DAU growth rolls toward zero, unwinding the per-user floor first, then the DCF tail &mdash; propagation path <span class="m">&rarr; 03_drivers (per-user floor) &rarr; 01_dcf</span>. Wired to the <b>DAU CAGR</b> slider in <b>03_drivers</b>.</p>
+          </div>
+          <div class="slider">
+            <div class="sname"><span>SLIDER 01 &middot; <b>03_drivers!DAU_CAGR</b></span><span class="set">SET ##%</span></div>
+            <input type="range" min="0" max="100" value="55" aria-label="DAU CAGR slider, dummy">
+            <div class="ends"><span>&ndash;##%</span><span>+##%</span></div>
+          </div>
+        </div>
+
+        <div class="risk">
+          <div class="rtxt">
+            <h4><img src="../../assets/icons/ui/alert-triangle.svg" alt="">Conversion ceiling</h4>
+            <p>Paid penetration plateaus at <span class="m">##%</span> of MAU and the Max tier proves price-elastic, compressing comps and the SOTP revenue blocks &mdash; path <span class="m">&rarr; 03_drivers &rarr; 02_comps &rarr; SOTP</span>. Wired to the <b>PAID MIX</b> slider.</p>
+          </div>
+          <div class="slider">
+            <div class="sname"><span>SLIDER 02 &middot; <b>03_drivers!PAID_MIX</b></span><span class="set">SET ##%</span></div>
+            <input type="range" min="0" max="100" value="38" aria-label="Paid mix slider, dummy">
+            <div class="ends"><span>&ndash;##bp</span><span>+##bp</span></div>
+          </div>
+        </div>
+
+        <div class="risk">
+          <div class="rtxt">
+            <h4><img src="../../assets/icons/ui/alert-triangle.svg" alt="">AI cost spike</h4>
+            <p>Inference and content-royalty costs scale with engagement faster than price, ripping through the FCFF build, EBITDAR and P/FCF rows together &mdash; path <span class="m">&rarr; 01_dcf &rarr; EV/EBITDAR &rarr; P/FCF</span>. Wired to the <b>OP MARGIN</b> slider.</p>
+          </div>
+          <div class="slider">
+            <div class="sname"><span>SLIDER 03 &middot; <b>01_dcf!OP_MARGIN</b></span><span class="set">SET ##%</span></div>
+            <input type="range" min="0" max="100" value="64" aria-label="Operating margin slider, dummy">
+            <div class="ends"><span>&ndash;###bp</span><span>+###bp</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 &middot; INSIDE THIS MODEL -->
+  <section class="band" id="s8">
+    <div class="inner">
+      <div class="bandhead"><span class="sec">&sect;08</span><h2>Inside This Model</h2><span class="aux">5 SHEETS &middot; DUMMY LINKS</span></div>
+      <div class="bandbody dir">
+        <a href="#">
+          <img src="../../assets/icons/ui/external-link.svg" alt="">
+          <span class="sh">01_dcf</span>
+          <span class="desc">FCFF build &middot; WACC bridge &middot; terminal value &middot; guess table</span>
+          <span class="tail mono">OPEN &rarr;</span>
+        </a>
+        <a href="#">
+          <img src="../../assets/icons/ui/external-link.svg" alt="">
+          <span class="sh">02_comps</span>
+          <span class="desc">Consumer-sub &amp; gaming peer set &middot; EV/Rev &middot; EV/EBITDAR</span>
+          <span class="tail mono">OPEN &rarr;</span>
+        </a>
+        <a href="#">
+          <img src="../../assets/icons/ui/external-link.svg" alt="">
+          <span class="sh">03_drivers</span>
+          <span class="desc">DAU engine &middot; paid mix &middot; tier ARPU &middot; SOTP blocks &middot; per-user floor</span>
+          <span class="tail mono">OPEN &rarr;</span>
+        </a>
+        <a href="#">
+          <img src="../../assets/icons/ui/external-link.svg" alt="">
+          <span class="sh">04_scenarios</span>
+          <span class="desc">Bear / Base / Bull &middot; slider wiring &middot; propagation map</span>
+          <span class="tail mono">OPEN &rarr;</span>
+        </a>
+        <a href="#">
+          <img src="../../assets/icons/ui/external-link.svg" alt="">
+          <span class="sh">05_sensitivity</span>
+          <span class="desc">WACC &times; terminal-growth grid &middot; DAU &times; paid-mix grid</span>
+          <span class="tail mono">OPEN &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS + FOOTER -->
+  <footer>
+    <div class="status">
+      <div class="inner">
+        <span>DUOL.RESEARCH &middot; DESK-D &middot; BUILD #### &middot; SESSION 12 SEP 2026 ##:##:## UTC</span>
+        <span>KEYS <kbd>1</kbd>&ndash;<kbd>8</kbd> SECTIONS &middot; <kbd>K</kbd> GUESSES &middot; <kbd>R</kbd> RISKS &middot; <kbd>?</kbd> HELP</span>
+        <span class="live"><span class="dot"></span>MOCK FEED &mdash; NO DATA</span>
+      </div>
+    </div>
+    <div class="inner fbar">
+      <div>
+        <span class="notadvice">Not Investment Advice</span>
+        <p>Design mockup of an equity research model. Every figure is a dummy placeholder ($###.##, ##%, ##.#M, ###bp) &mdash; no real numbers, estimates, guidance, or market data for Duolingo, Inc. (NASDAQ: DUOL). Nothing on this page is investment advice, a recommendation, or an offer to buy or sell any security. Brand assets remain the property of Duolingo, Inc.</p>
+      </div>
+      <div class="sys mono">MOCKUP &mdash; DUMMY DATA<br>DESK-D &middot; v#.## &middot; BUILD ####<br><b>STATUS: ALL FIGURES PLACEHOLDER</b></div>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

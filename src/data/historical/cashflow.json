@@ -1,0 +1,4628 @@
+[
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 414065,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_deferred_income_taxes",
+    "label": "Deferred income taxes",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -225185,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 137437,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 14391,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -1851,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 123321,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -33904,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -22501,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -15791,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 1617,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 255,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -4031,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 387823,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -162926,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 115747,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -9303,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -18096,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "acquisitions_net_of_cash_acquired",
+    "label": "Acquisitions of companies, net of cash acquired",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -33100,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "payment_of_acquisition_earn_out",
+    "label": "Payment of earn-out related to a previous acquisition",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -500,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -107678,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 12570,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "taxes_paid_net_share_settlement",
+    "label": "Taxes paid related to net-share settlement of share-based awards",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -41617,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": -29547,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 250598,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 788526,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "FY2025",
+    "periodType": "fiscal_year",
+    "value": 1039124,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2025",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 88574,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 110477,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 10854,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -551,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_other_noncash",
+    "label": "Other non-cash items",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 238,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 123692,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -39917,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -26231,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -7570,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 3934,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 16850,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 5163,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 285513,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -193300,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 3705,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -9024,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -12116,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "acquisitions_net_of_cash_acquired",
+    "label": "Acquisitions of companies, net of cash acquired",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -6595,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -217330,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 19356,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "taxes_paid_net_share_settlement",
+    "label": "Taxes paid related to net-share settlement of share-based awards",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -49358,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": -30002,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 38181,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 750345,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "FY2024",
+    "periodType": "fiscal_year",
+    "value": 788526,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2024",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 16067,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 95221,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 7095,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_other_noncash",
+    "label": "Other non-cash items",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 333,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 91642,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -42247,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -18890,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -48,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 1261,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 3444,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -264,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 153614,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -10493,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -3191,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_sale_of_capitalized_software",
+    "label": "Proceeds from sale of capitalized software",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 100,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -13584,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 13617,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "taxes_paid_net_share_settlement",
+    "label": "Taxes paid related to net-share settlement of share-based awards",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": -11482,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 2135,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 142165,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 608180,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "FY2023",
+    "periodType": "fiscal_year",
+    "value": 750345,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2023",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -59574,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 73820,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 4870,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 59283,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -13565,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -10822,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -1415,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -6655,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 8720,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -1006,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 53656,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -4562,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -5562,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "acquisitions_net_of_cash_acquired",
+    "label": "Acquisitions of companies, net of cash acquired",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -4050,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": -14174,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 14776,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 14776,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 54258,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 553922,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "FY2022",
+    "periodType": "fiscal_year",
+    "value": 608180,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2022",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -60135,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 40804,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 2726,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 43475,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -12713,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -10634,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -4048,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 5622,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 3708,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 365,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 9170,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -2620,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -3586,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -6206,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "issuance_of_common_stock_ipo",
+    "label": "Issuance of common stock in connection with IPO, net",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 426191,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 12480,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "repurchases_of_stock_options",
+    "label": "Repurchases of stock options",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -7335,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "repurchase_of_common_stock",
+    "label": "Repurchase of common stock",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": -868,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 430468,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 433432,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 120490,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "FY2021",
+    "periodType": "fiscal_year",
+    "value": 553922,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-K",
+      "period": "Fiscal Year 2021",
+      "statement": "Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000156208824000050/duol-20231231.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 372111,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_deferred_income_taxes",
+    "label": "Deferred income taxes",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -239486,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 101175,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 10583,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -1458,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 68844,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 4434,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -14408,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -11734,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -2813,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -5190,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -1513,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 280545,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -99120,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 82077,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -6484,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -7369,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "acquisitions_net_of_cash_acquired",
+    "label": "Acquisitions of companies, net of cash acquired",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -33100,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "payment_of_acquisition_earn_out",
+    "label": "Payment of earn-out related to a previous acquisition",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -500,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": -64496,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 9702,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 9702,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 225751,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 788526,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "9M FY2025",
+    "periodType": "ytd",
+    "value": 1014277,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 74667,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 80690,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 7193,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -12,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 61411,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -5209,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -13398,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -8842,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 522,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 1351,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 3796,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 202169,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -81670,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -8545,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -10155,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "acquisitions_net_of_cash_acquired",
+    "label": "Acquisitions of companies, net of cash acquired",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -6595,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": -106965,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 11595,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 11595,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 106799,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 750345,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "9M FY2024",
+    "periodType": "ytd",
+    "value": 857144,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Nine months ended September 30, 2024",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828025049743/duol-20250930.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 43460,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_deferred_income_taxes",
+    "label": "Deferred income taxes",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 9496,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 34647,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 4191,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -321,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 17051,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 37741,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -1850,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 5899,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -2405,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 5964,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -3102,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 150771,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -56155,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 42391,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -2853,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -132,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -16749,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 1922,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "repurchase_of_common_stock",
+    "label": "Repurchase of common stock",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -24331,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "taxes_paid_net_share_settlement",
+    "label": "Taxes paid related to net-share settlement of share-based awards",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -9441,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": -31850,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 102172,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 1039124,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "3M FY2026",
+    "periodType": "ytd",
+    "value": 1141296,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 35135,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 31018,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 3590,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -550,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 42139,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 14740,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -9402,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -1772,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -3843,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -6204,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 780,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 105631,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -26606,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 18676,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -1310,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -1309,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": -10549,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 3123,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 3123,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 98205,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 788526,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "3M FY2025",
+    "periodType": "ytd",
+    "value": 886731,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Three months ended March 31, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 76618,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_deferred_income_taxes",
+    "label": "Deferred income taxes",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 21293,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 72857,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 8438,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -642,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_impairment_capitalized_software",
+    "label": "Impairment of capitalized software",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 578,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 8897,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 31848,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -26,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 7069,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 6188,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 7159,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -1246,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 239031,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -75438,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 79584,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -5587,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -7028,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -8469,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 2338,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "repurchase_of_common_stock",
+    "label": "Repurchase of common stock",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -69603,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "taxes_paid_net_share_settlement",
+    "label": "Taxes paid related to net-share settlement of share-based awards",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -18799,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": -86064,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 144498,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 1039124,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "6M FY2026",
+    "periodType": "ytd",
+    "value": 1183622,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2026",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_net_income",
+    "label": "Net income (loss)",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 79916,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_stock_based_compensation",
+    "label": "Stock-based compensation expense",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 65610,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_depreciation_and_amortization",
+    "label": "Depreciation and amortization",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 7030,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_accretion_on_marketable_securities",
+    "label": "Accretion on marketable securities, net",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -1017,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_revenue",
+    "label": "Deferred revenue",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 58293,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_receivable",
+    "label": "Accounts receivable",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 16004,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_deferred_cost_of_revenues",
+    "label": "Deferred cost of revenues",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -13632,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_prepaid_expenses_and_other_assets",
+    "label": "Prepaid expenses and other current assets",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -4536,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accounts_payable",
+    "label": "Accounts payable",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 593,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_accrued_expenses",
+    "label": "Accrued expenses and other current liabilities",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -10350,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cf_change_noncurrent_assets_and_liabilities",
+    "label": "Noncurrent assets and liabilities",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -1605,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_operating_activities",
+    "label": "Net cash provided by operating activities",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 196306,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchases_of_investments",
+    "label": "Purchases of investments",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -48321,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "maturities_and_paydowns_of_investments",
+    "label": "Maturities and paydowns of investments",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 42470,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "capitalized_software_and_intangibles",
+    "label": "Capitalized software expense and purchases of intangible assets",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -4463,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "purchase_of_property_and_equipment",
+    "label": "Purchase of property and equipment",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -2507,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_investing_activities",
+    "label": "Net cash used for investing activities",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": -12821,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "proceeds_from_stock_options_exercise",
+    "label": "Proceeds from exercise of stock options",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 6955,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_from_financing_activities",
+    "label": "Net cash provided by (used for) financing activities",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 6955,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "net_change_in_cash",
+    "label": "Net increase in cash, cash equivalents and restricted cash",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 190440,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_beginning_of_period",
+    "label": "Cash, cash equivalents and restricted cash - Beginning of period",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 788526,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  },
+  {
+    "metric": "cash_end_of_period",
+    "label": "Cash, cash equivalents and restricted cash - End of period",
+    "klass": "flow",
+    "period": "6M FY2025",
+    "periodType": "ytd",
+    "value": 978966,
+    "units": "thousands_usd",
+    "scale": 1000,
+    "source": {
+      "filing": "10-Q",
+      "period": "Six months ended June 30, 2025",
+      "statement": "Unaudited Condensed Consolidated Statements of Cash Flows",
+      "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm",
+      "accessedAt": "2026-09-01"
+    },
+    "isEstimate": false
+  }
+]

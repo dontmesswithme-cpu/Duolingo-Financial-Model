@@ -1,0 +1,89 @@
+name: Deploy Duolingo Financial Model
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  test-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Full history + tags: the frozen-engine scope gates diff the working
+          # tree against the baseline tags (v1.0, v1.0-P8, v1.0-P6R3-base, ...)
+          # and fail closed when a baseline is missing. The default shallow
+          # checkout carries no tags, which used to be masked by a catch-all
+          # that degraded to an empty change set -- a silent pass.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Test Suite (Offline Quality Gate)
+        run: npm test
+
+      # P10.8 — Reproducible Release Candidate gates (read-only, fail closed).
+      - name: Verify JS syntax (read-only)
+        run: npm run verify:js
+
+      - name: Validate pins (read-only --check)
+        run: node tools/regen_pins.mjs --check
+
+      - name: Real Chromium suite
+        run: npx playwright test --config=playwright.config.mjs tests/browser
+
+      - name: Dependency audit (zero vulnerabilities)
+        run: npm audit
+
+      - name: Clean-tree validation (no post-test mutations)
+        run: |
+          git diff --check
+          git diff --exit-code
+          git status --porcelain
+
+      # P10.6 Deployment. The Pages upload used `path: '.'`, which published the
+      # ENTIRE repository: .git, .env, tests/, tools/, docs/logs/, node_modules and
+      # all source-control metadata. The contract requires "a minimal allowlisted
+      # static artifact" and that "neither deployment contains .git, .env, tests,
+      # tools, logs, or source-control metadata". The build step below copies only
+      # the allowlisted static surface into _pages/, and the assertion step fails
+      # the job closed if any forbidden path is present.
+      - name: Build allowlisted Pages artifact
+        run: node tools/build_pages_artifact.mjs
+
+      - name: Assert artifact allowlist (fail closed)
+        run: node tools/build_pages_artifact.mjs --check
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_pages'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
