@@ -370,7 +370,7 @@ export function renderSensitivity({
           </table>
           </div>
           <div class="callout-warning sensitivity-invariance-callout">
-            <strong>Hybrid FY2026 Invariance Invariant:</strong> In accordance with audit standards, <strong>H1 FY2026 Actuals</strong> (Total Revenue: $590,421 / Operating Income: $78,472 / Operating Cash Flow: $239,031) are transcribed directly from SEC Form 10-Q filings and remain <strong>byte-identical and invariant across all Downside, Base, and Upside scenarios</strong>, while H2 estimates respond dynamically to driver inputs.
+            <span class="soft-em">Hybrid FY2026 Invariance Invariant:</span> In accordance with audit standards, <span class="soft-em">H1 FY2026 Actuals</span> (Total Revenue: $590,421 / Operating Income: $78,472 / Operating Cash Flow: $239,031) are transcribed directly from SEC Form 10-Q filings and remain <span class="soft-em">byte-identical and invariant across all Downside, Base, and Upside scenarios</span>, while H2 estimates respond dynamically to driver inputs.
           </div>
         </div>
       </div>

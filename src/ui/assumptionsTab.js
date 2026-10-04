@@ -784,7 +784,7 @@ function renderForecastMatrixTable(assumptions, context = {}) {
       if (r.isSubhead) {
         return `
           <tr class="matrix-subhead-row" data-category="${sec.category}">
-            <td class="matrix-label-td"><em>${r.label}</em></td>
+            <td class="matrix-label-td">${r.label}</td>
             ${years.map(() => '<td class="tabular-nums"></td>').join('')}
           </tr>
         `;

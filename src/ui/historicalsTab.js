@@ -2082,7 +2082,7 @@ export function renderHistoricals({
           <div class="sec-banner-left">
             <span class="sec-info-icon" aria-hidden="true">&bull;</span>
             <span class="sec-banner-text">
-              <strong>6 SEC filings integrated</strong> | Quarterly continuity preserved | Latest filing: Q2 FY2026 (10-Q)
+              <span class="soft-em">6 SEC filings integrated</span> | Quarterly continuity preserved | Latest filing: Q2 FY2026 (10-Q)
             </span>
           </div>
           <button type="button" class="btn-jump-audit" id="btn-jump-audit">View Audit Citations &rarr;</button>

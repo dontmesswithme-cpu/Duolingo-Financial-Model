@@ -12,14 +12,14 @@
       --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
       /* Typography Scale (Max 20px) */
-      --text-xs: 11px;   /* captions, pills, eyebrows, table sub-labels (replaces 10/10.5/11.5) */
-      --text-sm: 12px;   /* secondary UI, tab labels, callout body (replaces 12.5) */
-      --text-base: 13px; /* body / table cells / prose */
-      --text-md: 14px;   /* driver labels, gate periods, emphasis rows */
-      --text-lg: 15px;   /* card titles (.cover-card-title, .statement-card-header, audit titles) */
-      --text-xl: 16px;   /* workspace/method/drawer titles */
-      --text-2xl: 18px;  /* rec-headline, kpi-box-value */
-      --text-hero: 20px; /* hard cap — app-title, bridge-kpi-value, all former 22–32px */
+      --text-xs: 11px;   /* micro: captions, pills, eyebrows, table sub-labels */
+      --text-sm: 12px;   /* secondary UI, tab labels, callout body */
+      --text-base: 13px; /* body / table cells / prose / driver labels (absorbs former md) */
+      /* --text-md retired (TYPE scale: merged into --text-base) */
+      --text-lg: 16px;   /* titles: card/workspace/method/drawer/section (absorbs former xl) */
+      /* --text-xl retired (TYPE scale: merged into --text-lg) */
+      /* --text-2xl retired (TYPE scale: merged into --text-hero) */
+      --text-hero: 20px; /* display: headlines, KPI values, app title (hard cap) */
       --leading-tight: 1.2;
       --leading-snug: 1.4;
       --leading-base: 1.5;
@@ -63,7 +63,7 @@
       background: var(--color-page-bg);
       color: var(--color-text-primary);
       font-family: var(--font-sans);
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       line-height: var(--leading-base);
     }
 
@@ -247,7 +247,7 @@
     .ticker-pill {
       font-family: var(--font-mono);
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       padding: 2px 6px;
       border-radius: 4px;
       background: rgba(255, 255, 255, 0.15);
@@ -352,7 +352,7 @@
     .tab-num {
       font-family: var(--font-mono);
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       color: var(--color-text-muted);
       line-height: var(--leading-tight);
       margin-bottom: 2px;
@@ -375,7 +375,7 @@
 
     .tab-link[data-active] .tab-label {
       color: var(--color-text-primary);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     /* F-UI-4: mobile nav readability. Desktop keeps equal-width flex tabs.
@@ -450,7 +450,7 @@
     .tab-pane[hidden] { display: none !important; }
 
     .tab-pane h2 {
-      font-size: var(--text-2xl);
+      font-size: var(--text-hero);
       margin: 0 0 16px;
       color: var(--color-text-primary);
     }
@@ -802,8 +802,8 @@
       appearance: none;
       background: transparent;
       border: none;
-      font-size: var(--text-xl);
-      font-weight: 700;
+      font-size: var(--text-lg);
+      font-weight: 600;
       color: var(--color-accent-blue);
       cursor: pointer;
       padding: 2px 6px;
@@ -1135,7 +1135,7 @@
 
     .driver-label-row {
       font-weight: 600;
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       display: flex;
       align-items: center;
       flex-wrap: wrap;
@@ -1235,6 +1235,11 @@
       font-size: var(--text-sm);
       color: var(--color-muted);
       min-width: 40px;
+    }
+
+    /* Soft emphasis for demoted lead-ins/labels (TYPE strict 3-job bold rule) */
+    .soft-em {
+      font-weight: 600;
     }
 
     /* All View Layouts; one content width everywhere (matches cover + companions) */
@@ -1497,7 +1502,7 @@
     }
 
     .check-period {
-      font-weight: 700;
+      font-weight: 600;
       font-size: var(--text-base);
     }
 
@@ -1643,11 +1648,11 @@
     }
 
     .financial-summary-table .font-large {
-      font-size: var(--text-md);
+      font-size: var(--text-base);
     }
 
     .financial-summary-table .font-huge {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       color: var(--color-accent);
     }
 
@@ -1673,7 +1678,7 @@
 
     .card-subheading {
       margin: 12px 0 8px 0;
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       font-weight: 600;
       color: var(--color-text);
     }
@@ -1783,7 +1788,7 @@
     .projection-kpi-label {
       color: var(--color-text-secondary);
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -1808,7 +1813,7 @@
 
     .projection-kpi-benchmark {
       color: var(--color-accent-blue);
-      font-weight: 700;
+      font-weight: 600;
       white-space: nowrap;
     }
 
@@ -1832,7 +1837,7 @@
     .statement-workspace-title {
       margin: 0 0 3px;
       color: var(--color-text-primary);
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       font-weight: 700;
     }
 
@@ -1958,14 +1963,14 @@
 
     .rec-section-tag {
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: var(--color-muted);
     }
 
     .rec-headline {
-      font-size: var(--text-2xl);
+      font-size: var(--text-hero);
       font-weight: 700;
       margin: 4px 0 0;
       color: var(--color-text);
@@ -2164,7 +2169,7 @@
       background: var(--color-accent-blue-soft);
       color: var(--color-accent-blue);
       font-size: var(--text-sm);
-      font-weight: 700;
+      font-weight: 600;
       flex-shrink: 0;
     }
 
@@ -2191,7 +2196,7 @@
     }
 
     .health-icon {
-      font-weight: 700;
+      font-weight: 600;
       width: 18px;
       flex-shrink: 0;
       text-align: center;
@@ -2230,7 +2235,7 @@
 
     .health-status {
       font-size: var(--text-sm);
-      font-weight: 700;
+      font-weight: 600;
       white-space: nowrap;
     }
 
@@ -2344,7 +2349,7 @@
     }
 
     .matrix-active-row .matrix-wacc-label {
-      font-weight: 700;
+      font-weight: 600;
       color: var(--color-accent-blue);
     }
 
@@ -2374,7 +2379,7 @@
     .sensitivity-matrix-table .heatmap-cell.active-cell {
       background: #1A56DB;
       color: #FFFFFF;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .matrix-axis-note {
@@ -2494,7 +2499,7 @@
     }
 
     .kpi-box-value {
-      font-size: var(--text-2xl);
+      font-size: var(--text-hero);
       font-weight: 700;
       color: var(--color-text);
       margin-bottom: 2px;
@@ -2530,7 +2535,7 @@
     .cell-highlight-base {
       background: #dbeafe;
       color: #1e40af;
-      font-weight: 700;
+      font-weight: 600;
       border-radius: 3px;
       padding: 2px 4px;
       display: inline-block;
@@ -2688,7 +2693,7 @@
       border-radius: 3px;
       background: var(--color-accent-soft);
       color: var(--color-accent);
-      font-weight: 700;
+      font-weight: 600;
       transition: transform 0.2s ease;
     }
 
@@ -2883,7 +2888,7 @@
 
     .dcf-runtime-list dd {
       font-size: var(--text-sm);
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
       text-align: right;
     }
@@ -2935,7 +2940,7 @@
     }
 
     .method-detail-title {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       font-weight: 700;
       margin: 0;
     }
@@ -2953,7 +2958,7 @@
 
     .method-detail-metric-label {
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--color-muted);
@@ -3043,13 +3048,13 @@
     }
 
     .field-error-label {
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
     .field-error-field {
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .field-error-message {
@@ -3202,7 +3207,7 @@
       padding: 4px 12px;
       font-family: var(--font-sans);
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       color: var(--color-text-secondary);
       cursor: pointer;
       transition: all 0.15s ease;
@@ -3621,7 +3626,7 @@
     }
 
     .sec-banner-text strong {
-      font-weight: 700;
+      font-weight: 600;
       color: var(--color-accent-blue);
     }
 
@@ -3725,7 +3730,7 @@
     }
 
     .statement-title-block h3 {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       font-weight: 700;
       color: var(--color-text-primary);
       margin: 0 0 2px;
@@ -3780,8 +3785,8 @@
     }
 
     .active-statement-label {
-      font-size: var(--text-md);
-      font-weight: 700;
+      font-size: var(--text-base);
+      font-weight: 600;
       color: var(--color-text-primary);
     }
 
@@ -4029,7 +4034,7 @@
     }
 
     .drawer-metric-title {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       font-weight: 700;
       margin: 0;
       color: var(--color-text-primary);
@@ -4091,7 +4096,7 @@
     }
 
     .drawer-stat-val {
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       font-weight: 700;
       color: var(--color-text-primary);
       font-variant-numeric: tabular-nums;
@@ -4356,7 +4361,7 @@
 
     .badge-filing-form {
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       padding: 2px 7px;
       border-radius: 4px;
       letter-spacing: 0.5px;
@@ -4391,7 +4396,7 @@
     }
 
     .filing-chevron {
-      font-size: var(--text-xl);
+      font-size: var(--text-lg);
       color: var(--color-text-muted);
       transition: transform 0.2s ease;
     }
@@ -4832,7 +4837,7 @@
 
     .units-toggle-label {
       font-size: var(--text-xs);
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: 0.05em;
       color: var(--color-text-muted);
       text-transform: uppercase;
@@ -4933,8 +4938,8 @@
     }
 
     .gate-card-period {
-      font-size: var(--text-md);
-      font-weight: 700;
+      font-size: var(--text-base);
+      font-weight: 600;
       color: var(--color-text-primary);
     }
 

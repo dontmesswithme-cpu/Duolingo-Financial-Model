@@ -73,7 +73,7 @@ function renderMethodRows(methodsList, marketPrice) {
     const badgeHtml = `<span class="badge badge-${verdict}">${verdict.toUpperCase()}</span>`;
     return `
       <tr>
-        <td><strong>${label}</strong></td>
+        <td><span class="soft-em">${label}</span></td>
         <td class="tabular-nums font-mono">${priceFormatted}</td>
         <td class="tabular-nums font-mono">${upsideFormatted}</td>
         <td>${badgeHtml}</td>

@@ -384,14 +384,14 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Data Source</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Model Parameter:</strong> <span class="font-mono">${percent(rf, { decimals: 2 })}</span>
+              <span class="soft-em">Model Parameter:</span> <span class="font-mono">${percent(rf, { decimals: 2 })}</span>
               ${mktBadge({ asOf: rfAsOf, provider: rfProv, url: rfUrl })}
             </div>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
-              <strong>Why the 10-Year Treasury:</strong> the risk-free asset must match the investment's time horizon, this model discounts cash flows 5 years out plus a perpetuity, and the 10-year is the longest liquid, default-free benchmark that spans that horizon without term-premium speculation. <strong>Why this specific observation:</strong> FRED series DGS10 is the Federal Reserve's official daily H.15 posted yield, the canonical source, not a broker quote. Scenario deltas shift the discount rate inversely to macro equity risk appetite (downside = higher required return; upside = lower hurdle).
+              <span class="soft-em">Why the 10-Year Treasury:</span> the risk-free asset must match the investment's time horizon, this model discounts cash flows 5 years out plus a perpetuity, and the 10-year is the longest liquid, default-free benchmark that spans that horizon without term-premium speculation. <span class="soft-em">Why this specific observation:</span> FRED series DGS10 is the Federal Reserve's official daily H.15 posted yield, the canonical source, not a broker quote. Scenario deltas shift the discount rate inversely to macro equity risk appetite (downside = higher required return; upside = lower hurdle).
             </p>
           </div>
           <div class="defense-block">
@@ -407,19 +407,19 @@ export function renderValuation({
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Parity (perShare == $${benchmarkPrice.toFixed(2)})</span></td>
                   <td>${percent(flip.rf.parityVal, { decimals: 2 })}</td>
                   <td>${flip.rf.parityBps >= 0 ? '+' : ''}${flip.rf.parityBps.toFixed(2)} bps</td>
                   <td>Intrinsic fair value equals market benchmark</td>
                 </tr>
                 <tr>
-                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</span></td>
                   <td>&gt; ${percent(flip.rf.ovrVal, { decimals: 2 })}</td>
                   <td>${flip.rf.ovrBps >= 0 ? '+' : ''}${flip.rf.ovrBps.toFixed(2)} bps</td>
                   <td>Base verdict flips to OVERVALUED</td>
                 </tr>
                 <tr>
-                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</span></td>
                   <td>&lt; ${percent(flip.rf.undVal, { decimals: 2 })}</td>
                   <td>${flip.rf.undBps >= 0 ? '+' : ''}${flip.rf.undBps.toFixed(2)} bps</td>
                   <td>Base verdict flips to UNDERVALUED</td>
@@ -446,7 +446,7 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Peer Calibration</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Model Parameter:</strong> <span class="font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</span>
+              <span class="soft-em">Model Parameter:</span> <span class="font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</span>
               ${mktBadge({ asOf: betaAsOf, provider: betaProv, url: betaUrl })}
               <span class="text-muted">(Peer median: ${peerStats ? peerStats.medianRounded.toFixed(2) : '1.47'})</span>
             </div>
@@ -454,7 +454,7 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
-              <strong>Why a peer mean rather than Duolingo's own regression:</strong> Duolingo's single-stock OLS beta (${reg ? `β = ${reg.beta.toFixed(2)}, t ≈ ${(reg.beta / reg.stderr).toFixed(2)}, R² = ${(reg.r2 * 100).toFixed(2)}%` : 'n/a'}) is statistically weak: with ~60 monthly observations the estimate carries a large standard error and is dominated by idiosyncratic noise — R² = ${reg ? (reg.r2 * 100).toFixed(2) : 'n/a'}% means the market explains under 5% of Duolingo's return variance. The bottom-up alternative, take the mean unlevered asset beta across the locked pure-play peer set (Spotify, Roblox, Netflix), borrows the market's pricing of comparable systematic risk and is the standard institutional treatment for short-history stocks. The peer regressions are also materially better specified (R² = 30.4% SPOT / 28.9% NFLX / 12.9% RBLX). <strong>Why unlevered and mean:</strong> each peer's regression beta is Hamada-unlevered on its filed D/E so that capital-structure differences don't contaminate the comparison; the arithmetic mean is used rather than the median because at n = 3 the median is definitionally the middle single observation (${peerStats ? peerStats.peers.slice().sort((a, b) => a.unleveredBeta - b.unleveredBeta)[Math.floor(peerStats.peers.length / 2)].symbol : 'n/a'}, ${peerStats ? peerStats.medianRounded.toFixed(2) : 'n/a'}) and therefore quotes one peer instead of summarising the set, while dispersion is tight (span ${peerStats ? peerStats.spanRounded.toFixed(2) : '0.13'}, no outlier present) leaving a median nothing to resist; and because Duolingo is verified debt-free (Total Debt = $0), the unlevered asset beta ${peerStats ? `(${peerStats.meanRounded.toFixed(2)})` : ''} applies directly with zero relevering. The single-stock regression is still disclosed alongside for transparency, but it is derived in-model and is not an independent check of any figure here.
+              <span class="soft-em">Why a peer mean rather than Duolingo's own regression:</span> Duolingo's single-stock OLS beta (${reg ? `β = ${reg.beta.toFixed(2)}, t ≈ ${(reg.beta / reg.stderr).toFixed(2)}, R² = ${(reg.r2 * 100).toFixed(2)}%` : 'n/a'}) is statistically weak: with ~60 monthly observations the estimate carries a large standard error and is dominated by idiosyncratic noise — R² = ${reg ? (reg.r2 * 100).toFixed(2) : 'n/a'}% means the market explains under 5% of Duolingo's return variance. The bottom-up alternative, take the mean unlevered asset beta across the locked pure-play peer set (Spotify, Roblox, Netflix), borrows the market's pricing of comparable systematic risk and is the standard institutional treatment for short-history stocks. The peer regressions are also materially better specified (R² = 30.4% SPOT / 28.9% NFLX / 12.9% RBLX). <span class="soft-em">Why unlevered and mean:</span> each peer's regression beta is Hamada-unlevered on its filed D/E so that capital-structure differences don't contaminate the comparison; the arithmetic mean is used rather than the median because at n = 3 the median is definitionally the middle single observation (${peerStats ? peerStats.peers.slice().sort((a, b) => a.unleveredBeta - b.unleveredBeta)[Math.floor(peerStats.peers.length / 2)].symbol : 'n/a'}, ${peerStats ? peerStats.medianRounded.toFixed(2) : 'n/a'}) and therefore quotes one peer instead of summarising the set, while dispersion is tight (span ${peerStats ? peerStats.spanRounded.toFixed(2) : '0.13'}, no outlier present) leaving a median nothing to resist; and because Duolingo is verified debt-free (Total Debt = $0), the unlevered asset beta ${peerStats ? `(${peerStats.meanRounded.toFixed(2)})` : ''} applies directly with zero relevering. The single-stock regression is still disclosed alongside for transparency, but it is derived in-model and is not an independent check of any figure here.
             </p>
           </div>
           <div class="defense-block">
@@ -470,19 +470,19 @@ export function renderValuation({
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Parity (perShare == $${benchmarkPrice.toFixed(2)})</span></td>
                   <td>${flip.beta.parityVal.toFixed(3)}</td>
                   <td>${flip.beta.parityPts >= 0 ? '+' : ''}${flip.beta.parityPts.toFixed(3)} pts</td>
                   <td>Intrinsic fair value equals market benchmark</td>
                 </tr>
                 <tr>
-                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</span></td>
                   <td>&gt; ${flip.beta.ovrVal.toFixed(3)}</td>
                   <td>${flip.beta.ovrPts >= 0 ? '+' : ''}${flip.beta.ovrPts.toFixed(3)} pts</td>
                   <td>Base verdict flips to OVERVALUED</td>
                 </tr>
                 <tr>
-                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</span></td>
                   <td>&lt; ${flip.beta.undVal.toFixed(3)}</td>
                   <td>${flip.beta.undPts >= 0 ? '+' : ''}${flip.beta.undPts.toFixed(3)} pts</td>
                   <td>Base verdict flips to UNDERVALUED</td>
@@ -515,7 +515,7 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Source Citation</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Model Parameter:</strong> <span class="font-mono">${percent(erp, { decimals: 2 })}</span>
+              <span class="soft-em">Model Parameter:</span> <span class="font-mono">${percent(erp, { decimals: 2 })}</span>
               ${mktBadge({ asOf: erpAsOf, provider: erpProv, url: erpUrl })}
             </div>
           </div>
@@ -532,19 +532,19 @@ export function renderValuation({
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Parity (perShare == $${benchmarkPrice.toFixed(2)})</span></td>
                   <td>${percent(flip.erp.parityVal, { decimals: 2 })}</td>
                   <td>${flip.erp.parityBps >= 0 ? '+' : ''}${flip.erp.parityBps.toFixed(1)} bps</td>
                   <td>Intrinsic fair value equals market benchmark</td>
                 </tr>
                 <tr>
-                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</span></td>
                   <td>&gt; ${percent(flip.erp.ovrVal, { decimals: 2 })}</td>
                   <td>${flip.erp.ovrBps >= 0 ? '+' : ''}${flip.erp.ovrBps.toFixed(1)} bps</td>
                   <td>Base verdict flips to OVERVALUED</td>
                 </tr>
                 <tr>
-                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</span></td>
                   <td>&lt; ${percent(flip.erp.undVal, { decimals: 2 })}</td>
                   <td>${flip.erp.undBps >= 0 ? '+' : ''}${flip.erp.undBps.toFixed(1)} bps</td>
                   <td>Base verdict flips to UNDERVALUED</td>
@@ -571,13 +571,13 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
-              <strong>Why 2.50%:</strong> the terminal growth rate must satisfy three constraints at once, and 2.50% is the midpoint that clears all of them. (1) <em>It must sit meaningfully below the discount rate</em> (the ${percent(flip.wBase, { decimals: 2 })} WACC). (2) <em>It must not exceed the long-run US nominal GDP ceiling of ~4.0%</em> (~2.0% real + ~2.0% inflation), because a perpetuity cannot grow faster than the economy that hosts it, or Duolingo would eventually swallow US GDP. (3) <em>It should approximate mature-company nominal growth</em>: Duolingo today grows revenue at ~30%+, but a terminal rate is a claim about the business at mature scale, not today, and mature consumer-internet companies grow near GDP. Any rate in the admissible band [0, 4%] is defensible; below ≈3.93% the verdict stays overvalued and reaches fair only near the top of the band (see flip map below). <em>Flip-map asymmetry is the core defense: within its stated bounds [0, 4%], terminal growth cannot rescue this thesis; only the discount rate or the flows can.</em>
+              <span class="soft-em">Why 2.50%:</span> the terminal growth rate must satisfy three constraints at once, and 2.50% is the midpoint that clears all of them. (1) <em>It must sit meaningfully below the discount rate</em> (the ${percent(flip.wBase, { decimals: 2 })} WACC). (2) <em>It must not exceed the long-run US nominal GDP ceiling of ~4.0%</em> (~2.0% real + ~2.0% inflation), because a perpetuity cannot grow faster than the economy that hosts it, or Duolingo would eventually swallow US GDP. (3) <em>It should approximate mature-company nominal growth</em>: Duolingo today grows revenue at ~30%+, but a terminal rate is a claim about the business at mature scale, not today, and mature consumer-internet companies grow near GDP. Any rate in the admissible band [0, 4%] is defensible; below ≈3.93% the verdict stays overvalued and reaches fair only near the top of the band (see flip map below). <em>Flip-map asymmetry is the core defense: within its stated bounds [0, 4%], terminal growth cannot rescue this thesis; only the discount rate or the flows can.</em>
             </p>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Ceiling Reference</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Model Parameter:</strong> <span class="font-mono">${percent(gRate, { decimals: 2 })}</span>
+              <span class="soft-em">Model Parameter:</span> <span class="font-mono">${percent(gRate, { decimals: 2 })}</span>
               ${estSuffix('Perpetuity', 'EST')}
               <span class="text-muted">(Upper bound: 4.00% US nominal GDP ceiling)</span>
             </div>
@@ -595,19 +595,19 @@ export function renderValuation({
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Parity (perShare == $${benchmarkPrice.toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Parity (perShare == $${benchmarkPrice.toFixed(2)})</span></td>
                   <td>${flip.g.parityVal !== null ? percent(flip.g.parityVal, { decimals: 2 }) : ' - '}</td>
                   <td>${flip.g.parityBps !== null ? (flip.g.parityBps >= 0 ? '+' : '') + flip.g.parityBps.toFixed(1) + ' bps' : ' - '}</td>
                   <td>${flip.g.parityVal !== null ? 'Reachable within [0, 4%], outside ±100bps grid band' : 'Unreachable'}</td>
                 </tr>
                 <tr>
-                  <td><strong>Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Overvalued Flip (perShare &le; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.overvalued)).toFixed(2)})</span></td>
                   <td>&lt; ${flip.g.ovrVal !== null ? percent(flip.g.ovrVal, { decimals: 2 }) : ' - '}</td>
                   <td>${flip.g.ovrBps !== null ? (flip.g.ovrBps >= 0 ? '+' : '') + flip.g.ovrBps.toFixed(1) + ' bps' : ' - '}</td>
                   <td>Base verdict flips to OVERVALUED</td>
                 </tr>
                 <tr>
-                  <td><strong>Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</strong></td>
+                  <td><span class="soft-em">Undervalued Flip (perShare &ge; $${(benchmarkPrice * (1 + RECOMMENDATION_THRESHOLDS.undervalued)).toFixed(2)})</span></td>
                   <td colspan="2" class="text-muted font-italic">Unreachable within driver bounds [0, 4%]</td>
                   <td>Requires g &ge; 4.000% (structural GDP ceiling)</td>
                 </tr>
@@ -633,13 +633,13 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice (Normalization Rationale)</div>
             <p>
-              <strong>Why 13.42% and not some other number:</strong> the rate had to come from a year whose tax expense actually reflects a recurring operating pattern, so the selection walked the filed history year by year. FY2025 (−126.99%) is disqualified: a one-time valuation-allowance release produced a $231,655k tax <em>benefit</em> against $182,410k pretax income, an accounting event, not a tax rate. FY2021 and FY2022 are disqualified: pretax losses make the effective rate arithmetically meaningless (negative denominator). That leaves FY2023 (9.62%) and FY2024 (13.42%) as the only undistorted positive years, and the most recent one, FY2024 (tax $13,732k ÷ pretax $102,306k), is the anchor. <strong>Why it sits below the 21% statutory rate:</strong> Duolingo's foreign-tax-credit position and valuation-allowance utilization structurally reduce cash tax burden; using the statutory 21% would overstate future tax expense for a company that demonstrably pays less. The rate is a modeling judgment, not an observation, fully user-adjustable in the Assumptions tab.
+              <span class="soft-em">Why 13.42% and not some other number:</span> the rate had to come from a year whose tax expense actually reflects a recurring operating pattern, so the selection walked the filed history year by year. FY2025 (−126.99%) is disqualified: a one-time valuation-allowance release produced a $231,655k tax <em>benefit</em> against $182,410k pretax income, an accounting event, not a tax rate. FY2021 and FY2022 are disqualified: pretax losses make the effective rate arithmetically meaningless (negative denominator). That leaves FY2023 (9.62%) and FY2024 (13.42%) as the only undistorted positive years, and the most recent one, FY2024 (tax $13,732k ÷ pretax $102,306k), is the anchor. <span class="soft-em">Why it sits below the 21% statutory rate:</span> Duolingo's foreign-tax-credit position and valuation-allowance utilization structurally reduce cash tax burden; using the statutory 21% would overstate future tax expense for a company that demonstrably pays less. The rate is a modeling judgment, not an observation, fully user-adjustable in the Assumptions tab.
             </p>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Benchmark Comparison</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Model Parameter:</strong> <span class="font-mono">${percent(taxRate, { decimals: 2 })}</span>
+              <span class="soft-em">Model Parameter:</span> <span class="font-mono">${percent(taxRate, { decimals: 2 })}</span>
               ${estSuffix('Effective', 'EST')}
               <span class="text-muted">(FY2024 baseline: 13.42% | US Statutory: 21.0%)</span>
             </div>
@@ -669,7 +669,7 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Filing Citation</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Diluted Share Count:</strong> <span class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
+              <span class="soft-em">Diluted Share Count:</span> <span class="font-mono">${Number.isFinite(shares) ? (shares / 1e6).toFixed(3) + 'M' : ' - '}</span>
               ${mktBadge({ asOf: currentWacc?.sharesOutstanding?.asOf || '2026-08-06', provider: 'SEC 10-Q' })}
               <span class="text-muted">(Basic period-end: 46.724M + options/RSUs/awards 3.337M = 50.061M fully diluted at 2026-06-30; the Q2 weighted-average count of 50.031M is an EPS diagnostic only)</span>
             </div>
@@ -693,13 +693,13 @@ export function renderValuation({
           <div class="defense-block">
             <div class="defense-section-label">Why This Choice</div>
             <p>
-              <strong>Why Spotify, Roblox, and Netflix:</strong> a peer set is only defensible if each member shares the risk profile the multiple is meant to transfer, subscription consumer-internet economics, engagement-driven monetization, and globally-scaled digital delivery. <strong>Spotify</strong> matches Duolingo's core mechanic most closely: freemium conversion to a recurring monthly subscription with an ad-supported free tier and reported MAU/ARPU, the same funnel Duolingo runs. <strong>Roblox</strong> matches the engagement-intensity dimension: DAU-scale daily-habit consumer platforms with bookings-per-user monetization, and like Duolingo it skews younger demographics. <strong>Netflix</strong> matches the paid-subscriber scale dimension: the mature, debt-carrying, pure-subscription incumbent, it supplies the "what does a fully-monetized subscriber base look like" anchor. Together the three triangulate the three monetization bases Duolingo actually uses (subscription funnel, daily engagement, paid subscribers), which is exactly why each is consumed natively in the Per-User method rather than blended. The set is small by design: three names is the minimum that yields a meaningful median with visible min - max dispersion (never hidden), and a larger set would dilute model match with weaker comparables. The compensation peer group disclosed in the Definitive Proxy Statement (Form DEF 14A) is not used here because that group benchmarks executive pay, not valuation risk transfer.
+              <span class="soft-em">Why Spotify, Roblox, and Netflix:</span> a peer set is only defensible if each member shares the risk profile the multiple is meant to transfer, subscription consumer-internet economics, engagement-driven monetization, and globally-scaled digital delivery. <span class="soft-em">Spotify</span> matches Duolingo's core mechanic most closely: freemium conversion to a recurring monthly subscription with an ad-supported free tier and reported MAU/ARPU, the same funnel Duolingo runs. <span class="soft-em">Roblox</span> matches the engagement-intensity dimension: DAU-scale daily-habit consumer platforms with bookings-per-user monetization, and like Duolingo it skews younger demographics. <span class="soft-em">Netflix</span> matches the paid-subscriber scale dimension: the mature, debt-carrying, pure-subscription incumbent, it supplies the "what does a fully-monetized subscriber base look like" anchor. Together the three triangulate the three monetization bases Duolingo actually uses (subscription funnel, daily engagement, paid subscribers), which is exactly why each is consumed natively in the Per-User method rather than blended. The set is small by design: three names is the minimum that yields a meaningful median with visible min - max dispersion (never hidden), and a larger set would dilute model match with weaker comparables. The compensation peer group disclosed in the Definitive Proxy Statement (Form DEF 14A) is not used here because that group benchmarks executive pay, not valuation risk transfer.
             </p>
           </div>
           <div class="defense-block">
             <div class="defense-section-label">Runtime Value &amp; Peer Lock</div>
             <div class="defense-runtime-bar audit-stat-grid">
-              <strong>Locked Peer Set:</strong> <span class="font-mono">SPOT · RBLX · NFLX</span>
+              <span class="soft-em">Locked Peer Set:</span> <span class="font-mono">SPOT · RBLX · NFLX</span>
               ${estSuffix('Peer Set', 'ACT')}
             </div>
           </div>
@@ -764,7 +764,7 @@ export function renderValuation({
                 `).join('') : ''}
                 <!-- Compliant dead-path defense: peerStats is engine-derived at render via computePeerBetaStats(); dash fallback displays if dataset is unmounted -->
                 <tr class="table-row-highlight">
-                  <td><strong>3-Name Median</strong></td>
+                  <td><span class="soft-em">3-Name Median</span></td>
                   <td class="align-right font-bold">${peerStats ? peerStats.medianRounded.toFixed(2) : '—'}</td>
                   <td class="text-muted">Span ${peerStats ? peerStats.spanRounded.toFixed(2) : '—'}</td>
                   <td></td>
@@ -843,61 +843,61 @@ export function renderValuation({
             </thead>
             <tbody>
               <tr>
-                <td><strong>Risk-Free Rate (rf)</strong> <a href="#defense-lever-1" class="citation-sup defense-link" title="Jump to Lever 1: Risk-Free Rate defense">[D1]</a></td>
+                <td><span class="soft-em">Risk-Free Rate (rf)</span> <a href="#defense-lever-1" class="citation-sup defense-link" title="Jump to Lever 1: Risk-Free Rate defense">[D1]</a></td>
                 <td class="align-right font-mono">${percent(rf, { decimals: 2 })}</td>
                 <td>${mktBadge({ asOf: rfAsOf, provider: rfProv, url: rfUrl })}</td>
                 <td>10-Year US Treasury Yield benchmark (FRED DGS10)</td>
               </tr>
               <tr>
-                <td><strong>Equity Beta (β)</strong> <a href="#defense-lever-2" class="citation-sup defense-link" title="Jump to Lever 2: Equity Beta defense">[D2]</a></td>
+                <td><span class="soft-em">Equity Beta (β)</span> <a href="#defense-lever-2" class="citation-sup defense-link" title="Jump to Lever 2: Equity Beta defense">[D2]</a></td>
                 <td class="align-right font-mono">${Number.isFinite(beta) ? beta.toFixed(2) : ' - '}</td>
                 <td>${mktBadge({ asOf: betaAsOf, provider: betaProv, url: betaUrl })}</td>
                 <td>Adjusted equity beta (${betaProv || 'stockanalysis.com'}, as cited)</td>
               </tr>
               <tr>
-                <td><strong>Equity Risk Premium (ERP)</strong> <a href="#defense-lever-3" class="citation-sup defense-link" title="Jump to Lever 3: Equity Risk Premium defense">[D3]</a></td>
+                <td><span class="soft-em">Equity Risk Premium (ERP)</span> <a href="#defense-lever-3" class="citation-sup defense-link" title="Jump to Lever 3: Equity Risk Premium defense">[D3]</a></td>
                 <td class="align-right font-mono">${percent(erp, { decimals: 2 })}</td>
                 <td>${mktBadge({ asOf: erpAsOf, provider: erpProv, url: erpUrl })}</td>
                 <td>Damodaran US implied equity risk premium estimate</td>
               </tr>
               <tr class="table-row-highlight">
-                <td><strong>Cost of Equity (Re)</strong></td>
+                <td><span class="soft-em">Cost of Equity (Re)</span></td>
                 <td class="align-right font-mono font-bold">${percent(costOfEquity, { decimals: 4 })}</td>
                 <td>${estSuffix('CAPM', 'EST')}</td>
                 <td><code>Re = rf + (β; ERP)</code></td>
               </tr>
               <tr>
-                <td><strong>Pre-Tax Cost of Debt (Rd)</strong></td>
+                <td><span class="soft-em">Pre-Tax Cost of Debt (Rd)</span></td>
                 <td class="align-right font-mono">${costOfDebt === null || costOfDebt === undefined ? ' - ' : percent(costOfDebt, { decimals: 2 })}</td>
                 <td>${estSuffix('Debt-Free', 'ACT')}</td>
                 <td>No funded debt, credit facility borrowings, or notes payable</td>
               </tr>
               <tr>
-                <td><strong>Marginal Corporate Tax Rate (t)</strong> <a href="#defense-lever-5" class="citation-sup defense-link" title="Jump to Lever 5: Marginal Corporate Tax Rate defense">[D5]</a></td>
+                <td><span class="soft-em">Marginal Corporate Tax Rate (t)</span> <a href="#defense-lever-5" class="citation-sup defense-link" title="Jump to Lever 5: Marginal Corporate Tax Rate defense">[D5]</a></td>
                 <td class="align-right font-mono">${percent(taxRate, { decimals: 2 })}</td>
                 <td>${estSuffix('Effective', 'EST')}</td>
                 <td>Normalized effective corporate income tax rate (${percent(taxRate, { decimals: 2 })}, per engine wacc.taxRate)</td>
               </tr>
               <tr>
-                <td><strong>Market Value of Equity (E)</strong></td>
+                <td><span class="soft-em">Market Value of Equity (E)</span></td>
                 <td class="align-right font-mono">${usd(marketCap, { decimals: 0 })}</td>
                 <td>${estSuffix('Market Cap', 'MKT')}</td>
                 <td><code>Share Price; Diluted Shares Outstanding</code></td>
               </tr>
               <tr>
-                <td><strong>Total Funded Debt (D)</strong></td>
+                <td><span class="soft-em">Total Funded Debt (D)</span></td>
                 <td class="align-right font-mono">$0</td>
                 <td>${estSuffix('Verified', 'ACT')}</td>
                 <td>SEC 10-K/10-Q audited balance sheet verification</td>
               </tr>
               <tr>
-                <td><strong>Capital Structure Weights (E/V | D/V)</strong></td>
+                <td><span class="soft-em">Capital Structure Weights (E/V | D/V)</span></td>
                 <td class="align-right font-mono">${percent(equityWeight, { decimals: 1 })} / ${percent(debtWeight, { decimals: 1 })}</td>
                 <td>${estSuffix('100% Equity', 'EST')}</td>
                 <td>Pure 100.0% equity capital structure weighting</td>
               </tr>
               <tr class="table-row-total">
-                <td><strong>Blended Cost of Capital (WACC)</strong></td>
+                <td><span class="soft-em">Blended Cost of Capital (WACC)</span></td>
                 <td class="align-right font-mono font-bold font-large">${percent(waccVal, { decimals: 4 })}</td>
                 <td>${estSuffix('Discount Rate', 'EST')}</td>
                 <td><code>WACC = (E/V)Re + (D/V) Rd × (1 − t) = ${percent(waccVal, { decimals: 4 })}</code></td>
@@ -1006,19 +1006,19 @@ export function renderValuation({
               <tbody>
                 ${peerTableRowsHtml}
                 <tr class="table-row-highlight">
-                  <td><strong>Peer Mean Unlevered Beta</strong></td>
+                  <td><span class="soft-em">Peer Mean Unlevered Beta</span></td>
                   <td colspan="3" class="font-mono text-muted">Arithmetic mean across 3 peers (driver re-anchor @0.01 step)</td>
                   <td class="align-right font-mono font-bold">${peerStats.mean.toFixed(4)} → <strong>${peerStats.meanRounded.toFixed(2)}</strong></td>
                   <td>${estSuffix('Mean', 'EST')} Baseline Active Model Anchor</td>
                 </tr>
                 <tr>
-                  <td><strong>Peer Median Unlevered Beta</strong></td>
+                  <td><span class="soft-em">Peer Median Unlevered Beta</span></td>
                   <td colspan="3" class="font-mono text-muted">Context readout only — at n = 3 the median is the middle observation (${peerStats.peers.slice().sort((a,b)=>a.unleveredBeta-b.unleveredBeta)[Math.floor(peerStats.peers.length/2)].symbol}), not a summary</td>
                   <td class="align-right font-mono">${peerStats.median.toFixed(4)} → ${peerStats.medianRounded.toFixed(2)}</td>
                   <td>${estSuffix('Median', 'EST')} Not the anchor</td>
                 </tr>
                 <tr>
-                  <td><strong>Peer Unlevered Beta Span</strong></td>
+                  <td><span class="soft-em">Peer Unlevered Beta Span</span></td>
                   <td colspan="3" class="font-mono text-muted">Dispersion width: max (SPOT ${peerStats.peers.find(x => x.symbol==='SPOT')?.unleveredBeta.toFixed(2)}) − min (RBLX ${peerStats.peers.find(x => x.symbol==='RBLX')?.unleveredBeta.toFixed(2)})</td>
                   <td class="align-right font-mono">${peerStats.span.toFixed(4)} → ${peerStats.spanRounded.toFixed(2)}</td>
                   <td>${estSuffix('Dispersion', 'EST')} Visible spread</td>
@@ -1037,7 +1037,7 @@ export function renderValuation({
         <div class="valuation-card-body">
           <p class="valuation-section-desc">
             Duolingo is debt-free (D = $0), meaning the peer mean unlevered asset beta applies directly without Hamada relevering (no Hamada adjustment required).
-            Beta is re-anchored to the <strong>bottom-up mean unlevered beta (${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'})</strong> over the locked peer set (Spotify, Roblox, Netflix).
+            Beta is re-anchored to the <span class="soft-em">bottom-up mean unlevered beta (${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'})</span> over the locked peer set (Spotify, Roblox, Netflix).
             The mean is the basis rather than the median because at n = 3 the median is definitionally the middle observation — it quotes one peer instead of summarising the set — and dispersion is tight (span ${peerStats ? peerStats.spanRounded.toFixed(2) : '0.13'}), leaving no outlier for a median to resist.
             Each peer beta is computed at runtime via <code>beta.regress</code> from verified 60-observation monthly price series (${reg.windowStart} to ${reg.windowEnd}) against the S&amp;P 500 Index.
             The model parameter remains fully user-adjustable in the Assumptions tab (active driver: <strong>${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : ' - '}</strong>).
@@ -1060,55 +1060,55 @@ export function renderValuation({
             </thead>
             <tbody>
               <tr>
-                <td><strong>Observation Sample (n)</strong></td>
+                <td><span class="soft-em">Observation Sample (n)</span></td>
                 <td class="align-right font-mono">${reg.n} months</td>
                 <td>Monthly simple returns</td>
                 <td>First full month post-IPO (${reg.windowStart}) through latest completed month (${reg.windowEnd})</td>
               </tr>
               <tr>
-                <td><strong>Regression Window</strong></td>
+                <td><span class="soft-em">Regression Window</span></td>
                 <td class="align-right font-mono">${reg.windowStart}; ${reg.windowEnd}</td>
                 <td>5-Year trailing window</td>
                 <td>${reg.n} monthly return pairs (target n = 60 achieved)</td>
               </tr>
               <tr>
-                <td><strong>Market Portfolio Benchmark</strong></td>
+                <td><span class="soft-em">Market Portfolio Benchmark</span></td>
                 <td class="align-right font-mono">${reg.benchmark}</td>
                 <td>${mktBadge({ asOf: betaAsOf, provider: 'FRED', url: sp500Url })}</td>
                 <td>S&amp;P 500 Index month-end adjusted closing levels (FRED series SP500)</td>
               </tr>
               <tr class="table-row-highlight">
-                <td><strong>OLS Slope (Computed Beta, β)</strong></td>
+                <td><span class="soft-em">OLS Slope (Computed Beta, β)</span></td>
                 <td class="align-right font-mono font-bold">${reg.beta.toFixed(4)}</td>
                 <td>${estSuffix('Computed @0.01 step → ' + reg.beta.toFixed(2), 'EST')}</td>
                 <td><code>Cov(r_DUOL, r_SPX) / Var(r_SPX)</code> (debt-free: raw beta = asset beta)</td>
               </tr>
               <tr>
-                <td><strong>Active Model Driver Beta</strong></td>
+                <td><span class="soft-em">Active Model Driver Beta</span></td>
                 <td class="align-right font-mono font-bold">${Number.isFinite(currentBeta) ? currentBeta.toFixed(2) : ' - '}</td>
                 <td>${mktBadge({ asOf: betaAsOf, provider: 'stockanalysis.com', url: betaUrl })}</td>
                 <td>Parameter in active scenario / user override (re-anchored to peer mean ${peerStats ? peerStats.meanRounded.toFixed(2) : '1.49'})</td>
               </tr>
               <tr>
-                <td><strong>Monthly Alpha (α)</strong></td>
+                <td><span class="soft-em">Monthly Alpha (α)</span></td>
                 <td class="align-right font-mono">${(reg.alphaMonthly * 100).toFixed(2)}% (${reg.alphaMonthly.toFixed(4)})</td>
                 <td>Monthly intercept</td>
                 <td>Annualized excess return: ~${(reg.alphaMonthly * 12 * 100).toFixed(2)}% p.a.</td>
               </tr>
               <tr>
-                <td><strong>Coefficient of Determination (R²)</strong></td>
+                <td><span class="soft-em">Coefficient of Determination (R²)</span></td>
                 <td class="align-right font-mono">${(reg.r2 * 100).toFixed(2)}%</td>
                 <td>Goodness of fit</td>
                 <td>Proportion of return variance explained by systematic market factor</td>
               </tr>
               <tr>
-                <td><strong>Standard Error of Beta (SE)</strong></td>
+                <td><span class="soft-em">Standard Error of Beta (SE)</span></td>
                 <td class="align-right font-mono">${reg.stderr.toFixed(4)}</td>
                 <td>Sampling dispersion</td>
                 <td>Standard error of estimated OLS slope coefficient (t ≈ ${(reg.beta / reg.stderr).toFixed(2)})</td>
               </tr>
               <tr>
-                <td><strong>Own-Regression Beta (Disclosed, Not Used)</strong></td>
+                <td><span class="soft-em">Own-Regression Beta (Disclosed, Not Used)</span></td>
                 <td class="align-right font-mono">${reg.beta.toFixed(4)}</td>
                 <td>Derived live by <code>beta.regress</code> from the verified price series</td>
                 <td>
@@ -1310,7 +1310,7 @@ export function renderValuation({
       const recommendable = o.mayRecommend === true;
       return `
         <tr${recommendable ? ' class="table-row-grand-total"' : ''}>
-          <td>${label}${recommendable ? ' <strong>(CANONICAL — drives the verdict)</strong>' : ''}</td>
+          <td>${label}${recommendable ? ' <span class="soft-em">(CANONICAL — drives the verdict)</span>' : ''}</td>
           <td class="align-right font-mono">${usd(o.perShare, { decimals: 2 })}</td>
           <td>${Number.isFinite(o.shares) ? `${usd(o.shares, { decimals: 0 })} shares` : ' — '}${note ? `<!-- ${note} -->` : ''}</td>
         </tr>`;
@@ -1355,7 +1355,7 @@ export function renderValuation({
             <div class="dcf-primary-section-label">DCF Component</div>
             <table class="financial-summary-table">
               <thead><tr><th>Component</th><th class="align-right">Value ($ thousands)</th><th>Derivation</th></tr></thead>
-              <tbody>${componentRows}<tr class="table-row-grand-total"><td><strong>Implied Per Share</strong></td><td class="align-right font-mono"><strong>${usd(perShare, { decimals: 2 })}</strong></td><td><!-- the recommendation figure --></td></tr>
+              <tbody>${componentRows}<tr class="table-row-grand-total"><td><span class="soft-em">Implied Per Share</span></td><td class="align-right font-mono"><span class="soft-em">${usd(perShare, { decimals: 2 })}</span></td><td><!-- the recommendation figure --></td></tr>
               </tbody>
             </table>
             ${threeOutputRows ? `
@@ -1421,7 +1421,7 @@ export function renderValuation({
     return `
       <div class="callout-info valuation-lease-disclosure">
         <div class="callout-icon" aria-hidden="true">i</div>
-        <div><strong>Lease Convention (Cross-Method Disclosure)</strong><br>DCF reflects lease expenses directly within operating cash flows, while relative valuation methods capitalize operating lease liabilities into enterprise value and add back rent to EBITDAR.</div>
+        <div><span class="soft-em">Lease Convention (Cross-Method Disclosure)</span><br>DCF reflects lease expenses directly within operating cash flows, while relative valuation methods capitalize operating lease liabilities into enterprise value and add back rent to EBITDAR.</div>
       </div>
     `;
   }
@@ -1830,7 +1830,7 @@ export function renderValuation({
                 <div class="defense-block">
                   <div class="defense-section-label">Ordering Gate &amp; Driver Monotonicity</div>
                   <div class="defense-runtime-bar fade-stat-grid">
-                    <strong>Ordering Gate:</strong> <span class="font-mono">${subsGrowthText} &gt; ${fadeFloorText} &gt; ${gRateText}</span>
+                    <span class="soft-em">Ordering Gate:</span> <span class="font-mono">${subsGrowthText} &gt; ${fadeFloorText} &gt; ${gRateText}</span>
                     ${isOrdered ? estSuffix('Ordering Validated', 'ACT') : estSuffix('Gate Check', 'EST')}
                     <span class="text-muted">(${isOrdered ? 'Monotonicity strictly satisfied: explicit growth > fade floor > perpetuity growth' : 'Ordering condition pending or unverified'})</span>
                   </div>
@@ -1880,9 +1880,9 @@ export function renderValuation({
                 <div class="defense-block">
                   <div class="defense-section-label">Terminal Capitalization Parameters</div>
                   <div class="defense-runtime-bar fade-stat-grid">
-                    <strong>Terminal Year:</strong> <span class="font-mono">${terminalYear}</span>
-                    <strong>Perpetuity Growth (g):</strong> <span class="font-mono">${gRateText}</span>
-                    <strong>WACC:</strong> <span class="font-mono">${typeof waccRate === 'number' ? percent(waccRate, { decimals: 4 }) : ' — '}</span>
+                    <span class="soft-em">Terminal Year:</span> <span class="font-mono">${terminalYear}</span>
+                    <span class="soft-em">Perpetuity Growth (g):</span> <span class="font-mono">${gRateText}</span>
+                    <span class="soft-em">WACC:</span> <span class="font-mono">${typeof waccRate === 'number' ? percent(waccRate, { decimals: 4 }) : ' — '}</span>
                   </div>
                   <table class="defense-table font-mono">
                     <thead>
@@ -1951,7 +1951,7 @@ export function renderValuation({
                     </tbody>
                   </table>
                   <p class="text-muted font-italic">
-                    Recommendation label stability: <strong>${isStable ? 'Unanimously ' + (headlineLabel !== ' — ' ? headlineLabel.toUpperCase() : 'STABLE') : (isStable === false ? 'Non-unanimous' : ' — ')}</strong> across all ${treatments.length} treatments.
+                    Recommendation label stability: <span class="soft-em">${isStable ? 'Unanimously ' + (headlineLabel !== ' — ' ? headlineLabel.toUpperCase() : 'STABLE') : (isStable === false ? 'Non-unanimous' : ' — ')}</span> across all ${treatments.length} treatments.
                   </p>
                 </div>
               </div>
@@ -2169,7 +2169,7 @@ export function renderValuation({
             ? `Stage 1 discounts the explicit unlevered free cash flow (${methodStages.firstPeriod}–${methodStages.explicitLastPeriod}) from the linked three-statement forecast. Stage 2 models the fade glide (${methodStages.fadeFirstPeriod}–${methodStages.terminalYear}) where subscriber growth and operating margins converge toward steady-state levels. Stage 3 normalises the terminal-year flow to steady state — the final-year working-capital inflow is replaced by its perpetuity-rate equivalent — then capitalizes into perpetuity with the Gordon formula <code>TV = FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding the net cash at the effective valuation date, then divided by diluted shares.`
             : `Stage 1 discounts the explicit unlevered free cash flow (${methodStages.firstPeriod}–${methodStages.terminalYear}) from the linked three-statement forecast. Stage 2 normalises the terminal-year flow to steady state — the final-year working-capital inflow is replaced by its perpetuity-rate equivalent — then capitalizes into perpetuity with the Gordon formula <code>TV = FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)</code>. Enterprise value is bridged to equity by adding the net cash at the effective valuation date, then divided by diluted shares. No fade stage exists at this horizon.`
           }
-          ${fadeUndisclosed ? `<br /><strong>Disclosure:</strong> ${methodStages.disclosure}` : ''}
+          ${fadeUndisclosed ? `<br /><span class="soft-em">Disclosure:</span> ${methodStages.disclosure}` : ''}
         </p>
         <table class="defense-table font-mono">
           <thead>
@@ -2184,10 +2184,10 @@ export function renderValuation({
             <tr><td>PV of Explicit Forecast (${methodStages.firstPeriod}–${methodStages.terminalYear}, ${methodStages.explicitPeriods} period(s))</td><td class="align-right">${usd(currentDcf?.pvExplicit ?? fcff.pvExplicit, { decimals: 2 })}</td><td><code>Σ FCFF<sub>t</sub> / (1 + WACC)<sup>t</sup></code></td></tr>
             <tr><td>PV of Terminal Value (Gordon)</td><td class="align-right">${usd(currentDcf?.pvTerminal ?? fcff.pvTerminal, { decimals: 2 })}</td><td><code>[FCF*<sub>${terminalYear}</sub> &times; (1 + g) / (WACC − g)] / (1 + WACC)<sup>${terminalT}</sup>, steady-state normalised</code></td></tr>
             `}
-            <tr class="table-row-highlight"><td><strong>Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>${hasFade ? 'PV Explicit + PV Fade + PV Terminal' : 'PV Explicit + PV Terminal'}</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Enterprise Value</span></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>${hasFade ? 'PV Explicit + PV Fade + PV Terminal' : 'PV Explicit + PV Terminal'}</code></td></tr>
             <tr><td>(+) Net Cash ${currentDcf?.valuationBasis === 'dated_seam' ? 'at Valuation Date' : 'Today'}</td><td class="align-right">${usd(currentDcf?.netCash ?? fcff.netCashToday, { decimals: 2 })}</td><td>Cash + STI + LTI − Funded Debt (D = $0)</td></tr>
-            <tr class="table-row-highlight"><td><strong>Equity Value</strong></td><td class="align-right font-bold">${usd(m.impliedEquityValue, { decimals: 2 })}</td><td><code>EV + Net Cash</code></td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Equity Value &times; 1000 / Diluted Shares</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Equity Value</span></td><td class="align-right font-bold">${usd(m.impliedEquityValue, { decimals: 2 })}</td><td><code>EV + Net Cash</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Implied Per Share</span></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Equity Value &times; 1000 / Diluted Shares</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -2222,7 +2222,7 @@ export function renderValuation({
       <div class="method-detail-block">
         <div class="method-detail-block-label">Methodology; ${isRev ? 'EV / Forward Revenue' : 'EV / Forward EBITDAR'} (Trading Comparables)</div>
         <p class="method-detail-note">
-          The locked 3-peer set (Spotify, Roblox, Netflix) is valued on the capitalized-lease basis: operating lease liabilities are added into each peer's enterprise value and filed rent expense is added back to EBITDAR. The <strong>3-name median</strong> multiple is applied to Duolingo's FY+1 forecast metric (engine-derived, EST-marked), and the implied enterprise value is bridged to equity with capitalized net cash (net cash minus the long-term operating lease liability).
+          The locked 3-peer set (Spotify, Roblox, Netflix) is valued on the capitalized-lease basis: operating lease liabilities are added into each peer's enterprise value and filed rent expense is added back to EBITDAR. The <span class="soft-em">3-name median</span> multiple is applied to Duolingo's FY+1 forecast metric (engine-derived, EST-marked), and the implied enterprise value is bridged to equity with capitalized net cash (net cash minus the long-term operating lease liability).
         </p>
         <table class="defense-table font-mono">
           <thead>
@@ -2231,7 +2231,7 @@ export function renderValuation({
           <tbody>
             ${peerRows}
             <tr class="table-row-highlight">
-              <td><strong>3-Name Median</strong></td>
+              <td><span class="soft-em">3-Name Median</span></td>
               <td class="align-right font-bold">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td>
               <td>Unweighted median; span [${Number.isFinite(m.multipleRange?.min) ? m.multipleRange.min.toFixed(4) : ' - '}; ${Number.isFinite(m.multipleRange?.max) ? m.multipleRange.max.toFixed(4) : ' - '}] applied for the per-share range</td>
             </tr>
@@ -2244,9 +2244,9 @@ export function renderValuation({
           <tbody>
             <tr><td>${metricLabel}</td><td class="align-right">${Number.isFinite(metricValue) ? usd(metricValue, { decimals: 2 }) : ' - '}</td><td>Engine explicit forecast (EST)</td></tr>
             <tr><td> -  Median Multiple</td><td class="align-right font-mono">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td><td>Peer median above</td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Enterprise Value</strong></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>Metric; Median</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Implied Enterprise Value</span></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>Metric; Median</code></td></tr>
             <tr><td>(+) Capitalized Net Cash</td><td class="align-right">${usd(provenance.netCashCapitalized, { decimals: 2 })}</td><td>Net cash − long-term operating lease liability</td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>(EV + Net Cash); 1000 / Diluted Shares</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Implied Per Share</span></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>(EV + Net Cash); 1000 / Diluted Shares</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -2275,7 +2275,7 @@ export function renderValuation({
           <tbody>
             ${yieldRows}
             <tr class="table-row-highlight">
-              <td><strong>3-Name Median</strong></td>
+              <td><span class="soft-em">3-Name Median</span></td>
               <td class="align-right font-bold">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td>
               <td class="align-right font-bold">${Number.isFinite(m.medianFcfYield) ? percent(m.medianFcfYield, { decimals: 2 }) : ' - '}</td>
             </tr>
@@ -2288,8 +2288,8 @@ export function renderValuation({
           <tbody>
             <tr><td>DUOL TTM Free Cash Flow</td><td class="align-right">${Number.isFinite(ttmFcf) ? usd(ttmFcf, { decimals: 2 }) : ' - '}</td><td>Corpus TTM (OCF − CapEx, filed)</td></tr>
             <tr><td> -  Median P/FCF</td><td class="align-right font-mono">${Number.isFinite(m.medianMultiple) ? m.medianMultiple.toFixed(4) + ' - ' : ' - '}</td><td>Peer median above</td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Market Cap</strong></td><td class="align-right font-bold">${usd(m.impliedMarketCap, { decimals: 2 })}</td><td><code>TTM FCF; Median P/FCF</code></td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Market Cap; 1000 / Diluted Shares</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Implied Market Cap</span></td><td class="align-right font-bold">${usd(m.impliedMarketCap, { decimals: 2 })}</td><td><code>TTM FCF; Median P/FCF</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Implied Per Share</span></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>Market Cap; 1000 / Diluted Shares</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -2315,7 +2315,7 @@ export function renderValuation({
             ${det ? `<tr><td><strong>${det.name}</strong></td><td class="align-right">${usd(det.forwardRevenue, { decimals: 2 })}</td><td class="align-right font-mono">${Number.isFinite(det.multiple) ? det.multiple.toFixed(4) + ' - ' : ' - '}</td><td class="align-right">${usd(det.enterpriseValue, { decimals: 2 })}</td><td>${det.constraintDisclosure || ''}</td></tr>` : ''}
             <tr class="table-row-highlight"><td><strong>Segment EV Sum</strong></td><td class="align-right">${usd(provenance.totalForwardRevenue, { decimals: 2 })}</td><td></td><td class="align-right font-bold">${usd(m.impliedEnterpriseValue, { decimals: 2 })}</td><td><code>Σ Segment EVs</code></td></tr>
             <tr><td>(+) Capitalized Net Cash</td><td></td><td></td><td class="align-right">${usd(provenance.netCashCapitalized, { decimals: 2 })}</td><td>Net cash − long-term operating lease liability</td></tr>
-            <tr class="table-row-highlight"><td><strong>Implied Per Share</strong></td><td></td><td></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>(Σ EVs + Net Cash); 1000 / Diluted Shares</code></td></tr>
+            <tr class="table-row-highlight"><td><span class="soft-em">Implied Per Share</span></td><td></td><td></td><td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td><td><code>(Σ EVs + Net Cash); 1000 / Diluted Shares</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -2356,7 +2356,7 @@ export function renderValuation({
           <tbody>
             ${baseRows}
             <tr class="table-row-highlight">
-              <td><strong>Method Vote (Median Basis)</strong></td>
+              <td><span class="soft-em">Method Vote (Median Basis)</span></td>
               <td></td>
               <td class="text-muted">${m.medianBasis || ''}</td>
               <td class="align-right font-bold">${usd(m.impliedPerShare, { decimals: 2 })}</td>

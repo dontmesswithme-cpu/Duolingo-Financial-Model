@@ -737,7 +737,7 @@ export function renderSchedules({
             <strong>${debtStatusTitle}</strong> ${debtBasisText}
           </p>
           <p class="footnote-line">
-            <strong>Operating Leases (ASC 842):</strong> Historical values reflect filed non-current operating lease liabilities ($k). FY2026-FY2030 lease values are <em>held at last filed Q2 FY2026 level; no lease forecast driver, see methodology</em>. Operating lease obligations do not constitute funded debt or borrowings.
+            <span class="soft-em">Operating Leases (ASC 842):</span> Historical values reflect filed non-current operating lease liabilities ($k). FY2026-FY2030 lease values are <em>held at last filed Q2 FY2026 level; no lease forecast driver, see methodology</em>. Operating lease obligations do not constitute funded debt or borrowings.
           </p>
         </div>
       </div>

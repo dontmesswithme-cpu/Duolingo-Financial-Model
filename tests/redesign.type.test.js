@@ -40,18 +40,15 @@ describe('RTYPE.2 — Canonical Typography Tokens in :root', () => {
   assert.ok(styleMatch, 'index.html must contain a <style> block');
   const css = styleMatch[1];
 
-  test('declares exactly 8 --text-* tokens, capped at 20px', () => {
+  test('declares exactly 5 --text-* tokens, capped at 20px', () => {
     const textTokens = [...css.matchAll(/(--text-[a-z0-9]+):\s*([^;]+);/g)];
-    assert.equal(textTokens.length, 8, 'must declare exactly 8 --text-* tokens');
+    assert.equal(textTokens.length, 5, 'must declare exactly 5 --text-* tokens');
 
     const expectedTokens = {
       '--text-xs': '11px',
       '--text-sm': '12px',
       '--text-base': '13px',
-      '--text-md': '14px',
-      '--text-lg': '15px',
-      '--text-xl': '16px',
-      '--text-2xl': '18px',
+      '--text-lg': '16px',
       '--text-hero': '20px',
     };
 

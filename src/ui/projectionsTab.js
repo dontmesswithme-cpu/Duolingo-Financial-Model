@@ -499,7 +499,7 @@ export function renderProjections({
         </div>
         <div class="hybrid-card-content">
           <p class="hybrid-intro">
-            FY2026 is modeled with strict hybrid provenance: <strong>H1 Actuals</strong> are transcribed directly from reported Q1 &amp; Q2 FY2026 SEC filings, while <strong>H2 Estimates</strong> reflect driver-based forecast models (ensuring <code>H1 + H2 === FY2026</code>). Furthermore, H2 is partitioned into a <strong>Pre-Valuation Stub</strong> (64 days to 2026-09-02, roll-forward) and a <strong>Post-Valuation Stub</strong> (120 days from 2026-09-02, discounted in DCF).
+            FY2026 is modeled with strict hybrid provenance: <span class="soft-em">H1 Actuals</span> are transcribed directly from reported Q1 &amp; Q2 FY2026 SEC filings, while <span class="soft-em">H2 Estimates</span> reflect driver-based forecast models (ensuring <code>H1 + H2 === FY2026</code>). Furthermore, H2 is partitioned into a <span class="soft-em">Pre-Valuation Stub</span> (64 days to 2026-09-02, roll-forward) and a <span class="soft-em">Post-Valuation Stub</span> (120 days from 2026-09-02, discounted in DCF).
           </p>
           <div class="hybrid-metrics-grid">
             <div class="hybrid-metric-box">
