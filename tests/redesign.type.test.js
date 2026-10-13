@@ -190,15 +190,35 @@ describe('RTYPE.3 — SVG Chart Typography in src/ui/charts.js', () => {
 });
 
 describe('RTYPE.3 — Scope & Git Invariants', () => {
-  test('font-family diff on index.html is exactly one line (.gate-ledger-val fix)', () => {
+  test('font-family fix (.gate-ledger-val) is present in HEAD and working tree is clean-or-exact', () => {
+    // B1 backlog fix (OP 2026-10-13, Director order "OP complete the backlogs"):
+    // the .gate-ledger-val fix was absorbed by the P12 archive commit, so a
+    // clean tree yields an empty diff. Assert HEAD content (the invariant that
+    // matters) plus a clean-tree-aware diff: either empty (committed) or the
+    // exact one-line uncommitted fix — never anything else.
+    const head = execSync('git show HEAD:index.html', { cwd: ROOT, encoding: 'utf8' });
+    assert.match(
+      head,
+      /\.gate-ledger-val\s*\{[^}]*font-family:\s*var\(--font-mono\);/,
+      'HEAD:index.html must carry the .gate-ledger-val var(--font-mono) fix'
+    );
+    assert.equal(
+      head.includes('font-family: var(--font-family-mono, monospace);'),
+      false,
+      'HEAD:index.html must not carry the pre-fix var(--font-family-mono, monospace) form'
+    );
     const diff = execSync('git diff index.html', { cwd: ROOT, encoding: 'utf8' });
     const addedFamilyLines = diff.split('\n').filter((l) => l.startsWith('+') && !l.startsWith('+++') && l.includes('font-family'));
     const removedFamilyLines = diff.split('\n').filter((l) => l.startsWith('-') && !l.startsWith('---') && l.includes('font-family'));
-
-    assert.equal(addedFamilyLines.length, 1, 'exactly 1 added font-family line');
-    assert.equal(removedFamilyLines.length, 1, 'exactly 1 removed font-family line');
-    assert.match(addedFamilyLines[0], /font-family:\s*var\(--font-mono\);/);
-    assert.match(removedFamilyLines[0], /font-family:\s*var\(--font-family-mono,\s*monospace\);/);
+    if (diff.trim() === '') {
+      assert.equal(addedFamilyLines.length, 0, 'clean tree: zero added font-family lines');
+      assert.equal(removedFamilyLines.length, 0, 'clean tree: zero removed font-family lines');
+    } else {
+      assert.equal(addedFamilyLines.length, 1, 'exactly 1 added font-family line');
+      assert.equal(removedFamilyLines.length, 1, 'exactly 1 removed font-family line');
+      assert.match(addedFamilyLines[0], /font-family:\s*var\(--font-mono\);/);
+      assert.match(removedFamilyLines[0], /font-family:\s*var\(--font-family-mono,\s*monospace\);/);
+    }
   });
 });
 
