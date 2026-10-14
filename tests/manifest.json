@@ -1,6 +1,6 @@
 {
-  "count": 83,
-  "node_count": 82,
+  "count": 84,
+  "node_count": 83,
   "browser_count": 1,
   "files": [
     "tests/app.controller.test.js",
@@ -15,6 +15,7 @@
     "tests/coherence.eig.test.js",
     "tests/comps.test.js",
     "tests/constants.test.js",
+    "tests/cover.excel_download.test.js",
     "tests/cover.shares.test.js",
     "tests/dcf.dualpath.test.js",
     "tests/dcf.valuate.test.js",

@@ -42,3 +42,6 @@ ssdesign/
 
 # Project docs (specs, phases, evidence, logs — local only per Director order)
 docs/
+
+# P14.1: Untracked P12 standalone Excel snapshot (kept on disk for audit)
+assets/excel/v1/duolingo-fm_phase10_20261006.xlsx

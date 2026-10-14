@@ -306,6 +306,7 @@ export function renderCover({
                 <span class="stat-pill-value">3-Statement DCF</span>
               </div>
             </div>
+            <a id="cover-excel-download" class="cover-download-btn" href="assets/excel/v1/duolingo_fm_faraz_shaikh_as_of_20261014.xlsx" download>Download Excel Model (as of Oct 14, 2026)</a>
           </article>
 
           <!-- 2. Valuation Snapshot Card -->

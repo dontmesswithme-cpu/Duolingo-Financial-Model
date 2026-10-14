@@ -39,6 +39,7 @@ export const MIME_TYPES = Object.freeze({
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.ico': 'image/x-icon',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 });
 
 export const ALLOWED_EXTENSIONS = Object.freeze(new Set(Object.keys(MIME_TYPES)));

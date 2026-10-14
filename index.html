@@ -576,6 +576,36 @@
       font-family: var(--font-sans);
     }
 
+    /* Cover Download Button */
+    .cover-download-btn {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--color-accent-blue);
+      color: #FFFFFF;
+      text-decoration: none;
+      text-align: left;
+      border-radius: var(--radius);
+      padding: 10px 18px;
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: var(--leading-tight);
+      margin-top: 16px;
+      cursor: pointer;
+      transition: background 0.15s ease-in-out;
+    }
+
+    .cover-download-btn:hover {
+      background: #1649B8;
+      color: #FFFFFF;
+      text-decoration: none;
+    }
+
+    .cover-download-btn:focus-visible {
+      outline: 2px solid var(--color-accent-blue);
+      outline-offset: 2px;
+    }
+
     /* 2. Valuation Snapshot Card */
     .cover-snapshot-card {
       display: flex;
@@ -5257,6 +5287,7 @@
                 <span class="stat-pill-value">3-Statement DCF</span>
               </div>
             </div>
+            <a id="cover-excel-download" class="cover-download-btn" href="assets/excel/v1/duolingo_fm_faraz_shaikh_as_of_20261014.xlsx" download>Download Excel Model (as of Oct 14, 2026)</a>
           </article>
 
           <!-- 2. Valuation Snapshot Card -->

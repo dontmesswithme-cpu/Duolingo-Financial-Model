@@ -229,6 +229,18 @@ describe('P10.1 — Live Server Security Boundaries & Static Allowlisting', () =
     assert.equal(res.status, 404);
   });
 
+  test('SERVES the Cover download workbook under /assets/ (P14.4 — the run.bat fix)', async () => {
+    const res = await request(testPort, testHost, '/assets/excel/v1/duolingo_fm_faraz_shaikh_as_of_20261014.xlsx');
+    assert.equal(res.status, 200, `Workbook must be served (got ${res.status})`);
+    assert.equal(
+      res.headers['content-type'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Workbook must carry the OOXML content-type',
+    );
+    const onDisk = fs.statSync(path.join(rootDir, 'assets/excel/v1/duolingo_fm_faraz_shaikh_as_of_20261014.xlsx'));
+    assert.equal(Number(res.headers['content-length']), onDisk.size, 'Content-Length must equal on-disk bytes');
+  });
+
   test('403 and 404 responses do NOT disclose server root filesystem paths', async () => {
     const forbidden = await request(testPort, testHost, '/.env');
     assert.ok(!forbidden.body.includes(rootDir), 'Forbidden body must not leak rootDir');
