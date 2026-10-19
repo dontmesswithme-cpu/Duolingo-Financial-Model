@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vercel Serverless Function; /api/price (Phase 6R2 Task P6R2.5; Finding G).
  *
  * Server-side proxy for live market share price retrieval from stockanalysis.com.
@@ -63,8 +63,28 @@ export function parseUpstreamDate(text) {
  * @param {string} html
  * @returns {{ price: number|null, asOf: string|null }}
  */
+function extractQuoteEmbed(html) {
+  if (typeof html !== 'string' || !html) return null;
+  const match = html.match(/"quote":\{([^}]*)\}/);
+  if (!match) return null;
+  try {
+    return JSON.parse('{' + match[1] + '}');
+  } catch {
+    return null;
+  }
+}
+
 export function parseUpstreamPriorClose(html) {
   if (typeof html !== 'string' || !html) return { price: null, asOf: null };
+
+  // P10.9: prefer the provider-embedded prior close, then the legacy markup.
+  const embed = extractQuoteEmbed(html);
+  if (embed && typeof embed.pd === 'number' && embed.pd > 0 && typeof embed.td === 'string') {
+    const asOf = parseUpstreamDate(embed.td) || (embed.td.match(/^\d{4}-\d{2}-\d{2}$/) ? embed.td : null);
+    if (asOf) return { price: embed.pd, asOf };
+  }
+
+
 
   let price = null;
   const priceMatch =
