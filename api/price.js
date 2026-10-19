@@ -65,10 +65,15 @@ export function parseUpstreamDate(text) {
  */
 function extractQuoteEmbed(html) {
   if (typeof html !== 'string' || !html) return null;
-  const match = html.match(/"quote":\{([^}]*)\}/);
+  const match = html.match(/quote\s*:\s*\{([^}]*)\}/);
   if (!match) return null;
   try {
-    return JSON.parse('{' + match[1] + '}');
+    const pm = match[1].match(/\bpd\s*:\s*([0-9]+\.[0-9]+)/);
+    const tm = match[1].match(/\btd\s*:\s*"([^"]+)"/);
+    if (!pm || !tm) return null;
+    const pd = parseFloat(pm[1]);
+    if (!Number.isFinite(pd) || pd <= 0) return null;
+    return { pd, td: tm[1] };
   } catch {
     return null;
   }
@@ -77,11 +82,12 @@ function extractQuoteEmbed(html) {
 export function parseUpstreamPriorClose(html) {
   if (typeof html !== 'string' || !html) return { price: null, asOf: null };
 
-  // P10.9: prefer the provider-embedded prior close, then the legacy markup.
+  // P10.9: prefer the provider-embedded prior close (quote.pd/quote.td),
+  // then fall back to the legacy markup.
   const embed = extractQuoteEmbed(html);
   if (embed && typeof embed.pd === 'number' && embed.pd > 0 && typeof embed.td === 'string') {
-    const asOf = parseUpstreamDate(embed.td) || (embed.td.match(/^\d{4}-\d{2}-\d{2}$/) ? embed.td : null);
-    if (asOf) return { price: embed.pd, asOf };
+    const embedAsOf = parseUpstreamDate(embed.td) || (embed.td.match(/^\d{4}-\d{2}-\d{2}$/) ? embed.td : null);
+    if (embedAsOf) return { price: embed.pd, asOf: embedAsOf };
   }
 
 
