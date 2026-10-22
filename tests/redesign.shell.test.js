@@ -192,7 +192,7 @@ describe('RP0.2 — App Shell & Duolingo Brand Header', () => {
     assert.match(html, /Model Version/i, 'metadata block must contain Model Version');
     assert.match(html, /v1\.0(?!-P4)/i, 'Model Version must match v1.0');
     assert.match(html, /Prepared By/i, 'metadata block must contain Prepared By');
-    assert.match(html, /Independent Analysis/i, 'Prepared By must state Independent Analysis');
+    assert.match(html, /Faraz Shaikh/i, 'Prepared By must state Faraz Shaikh');
   });
 });
 
