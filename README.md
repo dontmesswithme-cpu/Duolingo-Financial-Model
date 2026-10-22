@@ -54,6 +54,9 @@ Our canonical add-back DCF model indicates that Duolingo is **Overvalued** at cu
 
 ---
 
+## Repository Topics
+- financial-modeling · dcf-valuation · sec-edgar-citations · discounted-cash-flow · stock-valuation · duolingo · financial-analysis · valuation-engine · investment-banking · web-based-financial-model · open-source-financial-model · 10-k-10-q · agentic-engineering · agentic-verification · quality-verification-framework · protocol-v1.0 · zero-runtime-dependency · nodejs
+
 ## 2. Key Product Highlights & Architecture
 
 ### The Accuracy Gate  -  100% SEC-Cited Integrity

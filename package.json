@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Duolingo FM — Universal Asynchronous Multi-Agent Engineering & Quality Verification Framework (Protocol v1.0)",
+  "description": "Duolingo Financial Model & DCF valuation engine (NASDAQ: DUOL) — 100% SEC EDGAR–cited, zero-runtime-dependency, fail-closed valuation suite.",
   "scripts": {
     "test": "node --expose-gc --test --test-concurrency=1",
     "verify:js": "node tools/verify_js.mjs",
